@@ -1,44 +1,36 @@
-# Plausibility bands — Illinois (placeholder structure)
+<!--
+This file is a Chinese translation of the original by Anthropic PBC.
+Original: https://github.com/anthropics/claude-for-legal
+Licensed under Apache License 2.0
+-->
 
-**This file is a starting structure. Supervisor: fill in the typical ranges and citations before relying on `/legal-clinic:deadlines` plausibility checks for IL matters.** Until filled in, every entry the skill accepts carries `warnings: no-plausibility-band` and the check is effectively off.
+# 合理性区间 — 伊利诺伊州（占位结构）
 
-Every citation here is `[model knowledge — verify]` unless replaced with a connector-retrieved or supervisor-provided source.
+**此文件为起始结构。督导律师：在依赖 `/legal-clinic:deadlines` 进行 IL 事项的合理性检查之前，请填入典型区间和引用。** 在填写之前，该 skill 接受的每个条目都带有 `warnings: no-plausibility-band`，检查实际上处于关闭状态。
 
-## How to use
+此处所有引用均为 `[model knowledge — verify]`，除非督导律师已将其替换为通过连接器检索或用户提供的来源。
 
-- One row per deadline type the clinic sees regularly.
-- Typical range is a plausibility window, not a holding.
-- Cite the governing rule in the Notes column so the student has somewhere to recompute against.
-- Computation-of-time rules (735 ILCS 5/1-109 in Illinois; FRCP 6 federal) apply to every entry.
+## 使用方法
 
-## Illinois
+- 每行对应诊所常见的一种截止日期类型。
+- 典型区间是合理性窗口，而非法律裁决。
+- 在"备注"列中引用控制规则，以便学生有地方重新计算核验。
+- 时间计算规则（伊利诺伊州：735 ILCS 5/1-109；联邦：FRCP 6）适用于每个条目。
 
-| Deadline type | Typical range from triggering event | Notes |
+## 伊利诺伊州
+
+| 截止日期类型 | 从触发事件起的典型区间 | 备注 |
 |---|---|---|
-| IL answer to complaint | `[FILL IN — typically ~30 days after service]` | 735 ILCS 5/2-602; confirm and cite |
-| IL forcible entry & detainer (eviction) response | `[FILL IN — short, often days not weeks]` | 735 ILCS 5/9-106.1 and local rule; confirm |
-| IL 735 ILCS 5/9-209 notice (nonpayment of rent) | `[FILL IN — 5-day notice]` | Cure period, confirm against statute |
-| IL 735 ILCS 5/9-210 notice (breach of lease) | `[FILL IN — 10-day notice]` | Confirm |
-| IL RLTO (Chicago) — security-deposit return | `[FILL IN — 45 days after termination]` | Chicago RLTO § 5-12-080; city-specific |
-| IL small claims answer | `[FILL IN]` | Confirm per Illinois Supreme Court Rules |
-| IL notice of appeal (civil) | `[FILL IN — typically ~30 days after final judgment]` | IL Sup. Ct. R. 303(a); confirm |
-| IL statute of limitations — personal injury | `[FILL IN — typically ~2 years]` | 735 ILCS 5/13-202; confirm |
-| IL statute of limitations — written contract | `[FILL IN — typically ~10 years]` | 735 ILCS 5/13-206; confirm |
-| IL statute of limitations — oral contract | `[FILL IN — typically ~5 years]` | 735 ILCS 5/13-205; confirm |
-| IL Human Rights Act lawsuit after IDHR right-to-sue | `[FILL IN — short]` | 775 ILCS 5/7A-102(C-1)(2); confirm |
+| IL 答复诉状 | `[请填写——通常约为送达后 30 天]` | 735 ILCS 5/2-602；确认并引用 |
+| IL 强制进入与拘留（驱逐）答辩 | `[请填写——较短，通常为数天而非数周]` | 735 ILCS 5/9-106.1 及地方规则；确认 |
+| IL 735 ILCS 5/9-209 通知（欠租） | `[请填写——5 天通知]` | 治愈期，请核对法规 |
+| IL 诉讼时效 — 人身伤害 | `[请填写——通常 2 年]` | 735 ILCS 5/13-202；请确认 |
+| IL 诉讼时效 — 书面合同 | `[请填写——通常 10 年]` | 735 ILCS 5/13-206；请确认 |
+| IL 诉讼时效 — 口头合同 | `[请填写——通常 5 年]` | 735 ILCS 5/13-205；请确认 |
+| IL IDHR 投诉（人权） | `[请填写——通常 300 天]` | 775 ILCS 5/7A-102(A)(1)；确认 |
+| EEOC 投诉（联邦，IL） | 歧视行为后 300 天内 | 42 U.S.C. § 2000e-5(e)(1)（双重申报州）；确认 |
+| IL 上诉通知（民事） | `[请填写——通常 30 天]` | IL S. Ct. Rule 303；确认触发事件 |
 
-## Federal (always loaded alongside any state)
+## 联邦（始终加载，适用于伊利诺伊州联邦法庭案件）
 
-| Deadline type | Typical range from triggering event | Notes |
-|---|---|---|
-| Federal civil answer (Rule 12(a)) | ~21 days after service (60 / 90 if waived) | FRCP 12(a); confirm by service method |
-| Federal MTD / Rule 12 motion | Same as answer window | Filed in lieu of answer; FRCP 12(b) |
-| Notice of appeal (federal civil) | ~30 days after judgment entry | FRAP 4(a)(1)(A); 60 days if US is a party |
-| Rule 4 service of process | 90 days after complaint filed | FRCP 4(m); court may extend |
-| Asylum one-year filing rule | ~1 year from most recent entry | 8 USC § 1158(a)(2)(B); exceptions exist |
-
-## Computation-of-time reminder
-
-- **Illinois courts:** 735 ILCS 5/1-109 (computation of time), Sup. Ct. R. 12 (service-method extensions), local rules for the circuit court handling the matter.
-- **Federal courts:** FRCP 6(a), FRCP 6(d).
-- **Local rules:** Always confirm. Circuit court of Cook County has its own General Orders and local rules separate from the statewide Supreme Court Rules.
+参见 `CA.md` 中的联邦表格——联邦规则适用于所有联邦地区。

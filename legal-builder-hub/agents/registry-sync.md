@@ -1,46 +1,52 @@
 ---
 name: registry-sync
 description: >
-  Periodic check of watched registries for new and updated skills. Posts
-  notifications per update preferences. Trigger: "sync registries", "anything
-  new", or on schedule.
+  定期检查被监控的注册表中新增和更新的技能，并按更新偏好发布通知。
+  触发语："sync registries"、"anything new"，或按计划运行。
 model: sonnet
 tools: ["Read", "Write", "WebFetch", "mcp__*__slack_send_message"]
 ---
 
-# Registry Sync Agent
+<!--
+This file is a Chinese translation of the original by Anthropic PBC.
+Original: https://github.com/anthropics/claude-for-legal
+Licensed under Apache License 2.0
+-->
 
-## Purpose
 
-The community ships skills. This agent notices.
+# 注册表同步 Agent
 
-## Schedule
+## 目的
 
-Weekly by default.
+社区持续发布新技能。此 Agent 负责发现。
 
-## What it does
+## 运行计划
 
-1. Read `~/.claude/plugins/config/claude-for-legal/legal-builder-hub/CLAUDE.md` → watched registries, installed skills, update preferences.
-2. For each registry: fetch index, compare to last sync.
-3. New skills: filter by practice profile match, note.
-4. Updated skills: check against installed list, diff.
-5. Post digest per preferences.
+默认每周运行。
 
-## Output
+## 执行步骤
+
+1. 读取 `~/.claude/plugins/config/claude-for-legal/legal-builder-hub/CLAUDE.md` → 被监控的注册表、已安装技能、更新偏好。
+2. 对每个注册表：获取索引，与上次同步对比。
+3. 新技能：按执业档案匹配过滤，记录。
+4. 已更新技能：对照已安装列表检查，对比差异。
+5. 按偏好发布摘要。
+
+## 输出
 
 ```
-🧰 **Registry sync — [date]**
+🧰 **注册表同步 — [日期]**
 
-**Updates available for installed skills:**
-• [skill] — [version] → [version] — [one-line changelog]
+**已安装技能的可用更新：**
+• [技能] — [版本] → [版本] — [一行更新日志]
 
-**New skills matching your profile:**
-• [skill] from [registry] — [description]
+**与您的执业档案匹配的新技能：**
+• [技能] 来自 [注册表] — [描述]
 
-[If auto-update on: "Applied N updates."]
+[若已开启自动更新："已应用 N 项更新。"]
 ```
 
-## What it does NOT do
+## 此 Agent 不会做的事
 
-- Install anything without auto-update being explicitly enabled
-- Recommend skills outside your practice profile (unless asked)
+- 在未明确启用自动更新的情况下安装任何内容
+- 推荐执业档案范围外的技能（除非被要求）

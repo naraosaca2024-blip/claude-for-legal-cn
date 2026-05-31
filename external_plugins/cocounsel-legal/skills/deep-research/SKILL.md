@@ -2,11 +2,19 @@
 name: cocounsel-legal:deep-research
 version: 0.1.0
 description: >
-  Use this skill whenever a user specifically requests legal research or Westlaw Deep Research, asks for CoCounsel Legal or cocounsel legal support, or asks a question that requires explaining, analyzing, or synthesizing U.S. law.
+  当用户明确请求法律研究或 Westlaw Deep Research、寻求 CoCounsel Legal 或 cocounsel legal 支持，
+  或提出需要解释、分析或综合美国法律的问题时使用此 skill。
 allowed-tools:
   - mcp
   - Bash
 ---
+
+<!--
+This file is a Chinese translation of the original by Anthropic PBC.
+Original: https://github.com/anthropics/claude-for-legal
+Licensed under Apache License 2.0
+-->
+
 
 # Westlaw Deep Research
 

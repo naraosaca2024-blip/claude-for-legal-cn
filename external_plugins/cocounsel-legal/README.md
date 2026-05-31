@@ -1,46 +1,52 @@
+<!--
+This file is a Chinese translation of the original by Anthropic PBC.
+Original: https://github.com/anthropics/claude-for-legal
+Licensed under Apache License 2.0
+-->
+
 # CoCounsel Legal
 
-CoCounsel Legal brings Westlaw Deep Research into Claude for CoCounsel Legal subscribers. Run jurisdiction-specific legal research across U.S. federal and state law and receive fully cited reports with Westlaw and Practical Law source links. Deep Research reports cite case law, statutes, regulations, administrative materials, Practical Law, secondary sources, and current awareness content. Ask follow-up questions in the same conversation. The connector launches with Westlaw Deep Research and will expand to additional CoCounsel Legal capabilities over time.
+CoCounsel Legal 为 CoCounsel Legal 订阅者将 Westlaw 深度研究带入 Claude。跨美国联邦和州法律运行司法管辖区特定的法律研究，并收到带有 Westlaw 和 Practical Law 来源链接的完整引用报告。深度研究报告引用判例法、法规、条例、行政材料、Practical Law、次要来源和当前意识内容。在同一对话中提出后续问题。连接器从 Westlaw 深度研究开始，将随着时间扩展到其他 CoCounsel Legal 功能。
 
-- Use CoCounsel Legal to run Westlaw Deep Research with fully cited reports including linked citations to Westlaw and Practical Law sources.
-- Ask about legal research in up to three U.S. jurisdictions in a single research run.
-- Return to a completed CoCounsel Legal research conversation and retrieve the report later.
-- Ask follow-up questions in the same conversation without restarting research.
+- 使用 CoCounsel Legal 运行 Westlaw 深度研究，获得完整引用报告，包括指向 Westlaw 和 Practical Law 来源的链接引用。
+- 在一次研究运行中询问最多三个美国司法管辖区的法律研究。
+- 返回已完成的 CoCounsel Legal 研究对话并稍后检索报告。
+- 在同一对话中提出后续问题，无需重新开始研究。
 
-## Example use cases
+## 示例用例
 
-1. Research how California courts have treated non-compete agreements for executive employees since 2020.
-2. I asked you to research California non-competes earlier. Can you now retrieve the full report?
-3. Follow up on that research: how does Texas law differ on executive non-competes for the same period?
+1. 研究自 2020 年以来加州法院如何对待高管的非竞争协议。
+2. 我之前让你研究过加州的非竞争协议。你现在能检索完整报告吗？
+3. 跟进该研究：同一时期德克萨斯州法律在高管非竞争协议方面有何不同？
 
-## When to Use
+## 何时使用
 
-Any questions answerable from caselaw, statutes, regulations, administrative materials, secondary sources, Practical Law documents and current awareness, including JD Supra. Examples include:
+任何可从判例法、法规、条例、行政材料、次要来源、Practical Law 文档和当前意识（包括 JD Supra）回答的问题。示例包括：
 
-- How courts have ruled on an issue or what authority supports or challenges a position
-- The elements or defenses of a claim, or the governing standard for an issue in a particular jurisdiction
-- How a statute, regulation, or doctrine is being interpreted and applied
-- The arguments on both sides of an unsettled question
+- 法院如何对某个问题作出裁决，或什么权威支持或挑战某个立场
+- 索赔的元素或抗辩，或特定司法管辖区中某个问题的管辖标准
+- 如何解释和应用法规、条例或原则
+- 未解决问题双方的论点
 
-## When Not to Use
+## 何时不使用
 
-- Retrieving the full text of a specific document
-- Summarizing what a specific statute, regulation, or treatise says on its own (e.g., "what does the California Evidence Code say about hearsay?" or "what does Wright & Miller say about Rule 11?")
-- Analytics requests ("How often has Justice Scalia ruled in favor of...?")
-- Calculations ("What is the last possible filing date if...?")
-- Outcome predictions ("How likely is plaintiff to prevail on summary judgment?")
-- Identifying causes of action a client could bring (the skill researches what the law says, not whether a given set of facts states a claim)
-- Applying law to a specific fact pattern or scenario (the skill researches legal questions in the abstract, not how the law would resolve your facts)
-- Drafting legal documents, forms, or templates
-- Information about specific judges, attorneys, or parties
-- Foreign or non-U.S. law
-- Commands to execute tasks ("Send me an email about X case")
-- General legal definitions that don't require current authority
-- Comparisons across more than three jurisdictions
-- Boolean search queries (the tool expects natural language)
+- 检索特定文档的全文
+- 总结特定法规、条例或专著本身所说的内容（例如，"加州证据法典关于传闻证据说了什么？"或"Wright & Miller 关于第 11 条说了什么？"）
+- 分析请求（"Scalia 大法官有多少次裁定支持……？"）
+- 计算（"如果……，最后可能的提交日期是什么？"）
+- 结果预测（"原告在简易判决中胜诉的可能性有多大？"）
+- 识别客户可以提出的诉因（skill 研究法律怎么说，而非给定的一组事实是否陈述了索赔）
+- 将法律应用于特定事实模式或场景（skill 研究抽象的法律问题，而非法律将如何解决你的事实）
+- 起草法律文档、表单或模板
+- 关于特定法官、律师或当事人的信息
+- 外国或非美国法律
+- 执行任务的命令（"给我发送关于 X 案件的电子邮件"）
+- 不需要当前权威的一般法律定义
+- 跨三个以上司法管辖区的比较
+- 布尔搜索查询（工具期望自然语言）
 
 
-### Links
+### 链接
 
-- **Documentation:** https://legal-mcp.thomsonreuters.com/docs/connector-guide
-- **Support:** cocounselsupport@tr.com
+- **文档：** https://legal-mcp.thomsonreuters.com/docs/connector-guide
+- **支持：** cocounselsupport@tr.com

@@ -1,21 +1,26 @@
 ---
 name: draft
 description: >
-  First draft of a common clinic document — practice-area templates (asylum
-  applications, eviction answers, protective order petitions, demand letters),
-  jurisdiction-aware formatting, explicitly a starting point requiring student
-  analysis and attorney review. Use when a student needs a first draft of a
-  motion, letter, petition, declaration, or other clinic document.
-argument-hint: "[document type — e.g., 'eviction-answer', 'asylum-declaration', 'demand-letter']"
+  常见法律诊所文件的第一稿——执业领域模板（庇护申请、驱逐答复、保护令请愿书、要求信）、
+  司法管辖区感知的格式、明确是需要学生分析和律师审查的起点。当学生需要动议、信函、
+  请愿书、声明或其他诊所文件的第一稿时使用。
+argument-hint: "[文件类型——例如，'eviction-answer'、'asylum-declaration'、'demand-letter']"
 ---
+
+<!--
+This file is a Chinese translation of the original by Anthropic PBC.
+Original: https://github.com/anthropics/claude-for-legal
+Licensed under Apache License 2.0
+-->
+
 
 # /draft
 
-1. Load `~/.claude/plugins/config/claude-for-legal/legal-clinic/CLAUDE.md` → practice-area templates, jurisdiction, local rules, supervision style.
-2. Use the workflow below.
-3. Match doc type to template. Gather facts from case notes — flag missing, never guess.
-4. Apply jurisdiction formatting. Draft with `[FACT NEEDED]`, `[VERIFY]`, `[UNCERTAIN]` flags inline.
-5. Output with prominent AI-assisted label, student review checklist, supervision routing.
+1. 加载 `~/.claude/plugins/config/claude-for-legal/legal-clinic/CLAUDE.md` → 执业领域模板、司法管辖区、当地规则、监督风格。
+2. 使用以下工作流。
+3. 将文档类型与模板匹配。从案件笔记中收集事实——标记缺失，永远不要猜测。
+4. 应用司法管辖区格式。使用内联的 `[FACT NEEDED]`、`[VERIFY]`、`[UNCERTAIN]` 标记起草。
+5. 输出带有明显的 AI 辅助标签、学生审查清单、监督路由。
 
 ```
 /legal-clinic:draft eviction-answer
@@ -27,92 +32,92 @@ argument-hint: "[document type — e.g., 'eviction-answer', 'asylum-declaration'
 
 ---
 
-# Draft: First-Draft Document Generation
+# 起草：第一稿文档生成
 
-## Purpose
+## 目的
 
-Students spend enormous time on first drafts of documents where the educational value is in the analysis and strategy, not in formatting a caption or writing "Dear Judge." This skill produces the first draft from case notes and practice-area templates so the student's time goes to the thinking.
+学生在文档的第一稿上花费大量时间，而教育价值在于分析和策略，而不是格式化标题或写"尊敬的法官。"此 skill 从案件笔记和执业领域模板生成第一稿，以便学生的时间用于思考。
 
-**Every draft is explicitly a starting point.** Not final work product. The student analyzes, revises, and the professor reviews before anything goes anywhere.
+**每份草稿都明确是一个起点。** 不是最终工作产品。学生分析和修改，教授审查，然后任何文件才能发出。
 
-## Load context
+## 加载上下文
 
-`~/.claude/plugins/config/claude-for-legal/legal-clinic/CLAUDE.md` → practice areas, practice-area templates, jurisdiction (state + local court + any local rules ingested), supervision style.
+`~/.claude/plugins/config/claude-for-legal/legal-clinic/CLAUDE.md` → 执业领域、执业领域模板、司法管辖区（州 + 当地法院 + 已摄取的任何当地规则）、监督风格。
 
-Case notes or intake summary for the facts.
+案件笔记或摄取摘要用于事实。
 
-## Pedagogy check
+## 教育学检查
 
-Read the supervisor guide for this practice area at `~/.claude/plugins/config/claude-for-legal/legal-clinic/guides/<practice-area>.md`. Check the `pedagogy_posture` setting:
+阅读位于 `~/.claude/plugins/config/claude-for-legal/legal-clinic/guides/<practice-area>.md` 的该执业领域主管指南。检查 `pedagogy_posture` 设置：
 
-- **`guide` (default):** Produce the structure and the checklist. Ask the student to draft each section. Give feedback on their draft (register, reading level, required elements, what they missed). Offer to fill a section only when the student has tried once.
-- **`assist`:** Produce the work product. Flag items for student review. The student edits and learns by reviewing.
-- **`teach`:** Don't produce the work product. Ask the student to draft it. Give feedback. Ask leading questions when they're stuck. Only show a model paragraph after two attempts, and only the section they're stuck on. Track what they got right and wrong so the supervisor can see progress.
+- **`guide`（默认）：** 生成结构和清单。要求学生起草每个部分。对他们的草稿提供反馈（语域、阅读水平、所需元素、他们遗漏的内容）。只有当学生尝试过一次时才提议填写一个部分。
+- **`assist`:** 生成工作产品。标记需要学生审查的项目。学生通过审查进行编辑和学习。
+- **`teach`:** 不生成工作产品。要求学生起草它。提供反馈。当他们卡住时提出引导性问题。仅在两次尝试后显示模型段落，并且仅显示他们卡住的部分。跟踪他们做对和做错的内容，以便主管可以看到进展。
 
-If no guide exists, use `guide`. If the guide exists but doesn't set a posture, use `guide`.
+如果不存在指南，使用 `guide`。如果指南存在但没有设置姿态，使用 `guide`。
 
-Whatever the posture, the output always includes: "**Pedagogy mode: [assist/guide/teach]** — set by your supervisor's guide. This means I [description of what the student did vs what the skill did]."
+无论姿态如何，输出始终包括："**教育学模式：[assist/guide/teach]** — 由您的主管指南设置。这意味着我 [学生做什么与 skill 做什么的描述]。"
 
-**Jurisdiction assumption.** The draft assumes the state, court, and local rules set in CLAUDE.md. Caption format, service requirements, page limits, filing windows, and substantive rules vary materially across jurisdictions and even between courts in the same state. If the matter is in a different court or a different state, confirm with your supervisor before relying on any format, deadline, or argument in the draft.
+**司法管辖区假设。** 草稿假设 CLAUDE.md 中设置的州、法院和当地规则。标题格式、服务要求、页数限制、提交窗口和实质性规则在各司法管辖区之间实质不同，甚至在同一州的法院之间也不同。如果事项在不同的法院或不同的州，在依赖草稿中的任何格式、截止日期或论点之前与您的主管确认。
 
-## Workflow
+## 工作流
 
-### Step 1: Which document?
+### 步骤 1：哪个文档？
 
-Match the request to the clinic's template set (from `~/.claude/plugins/config/claude-for-legal/legal-clinic/CLAUDE.md`). Common set by practice area:
+将请求与诊所的模板集匹配（来自 `~/.claude/plugins/config/claude-for-legal/legal-clinic/CLAUDE.md`）。按执业领域的常见集：
 
-| Practice area | Documents |
+| 执业领域 | 文档 |
 |---|---|
-| **Immigration** | I-589 asylum application narrative, client declaration, motion to change venue, motion to continue, FOIA request, country conditions summary |
-| **Housing** | Eviction answer, demand letter (repairs/deposit), motion to stay execution, discovery requests |
-| **Family** | Protective order petition, custody declaration, motion to modify, financial affidavit |
-| **Consumer** | Debt validation letter, FDCPA demand letter, answer to collection complaint, motion to vacate default |
-| **General litigation** | Motion template, notice of appearance, certificate of service |
+| **移民** | I-589 庇护申请叙述、客户声明、变更地点动议、延期动议、FOIA 请求、国家条件摘要 |
+| **住房** | 驱逐答复、要求信（维修/押金）、延期执行动议、发现请求 |
+| **家庭** | 保护令请愿书、监护权声明、修改动议、财务宣誓书 |
+| **消费者** | 债务验证信、FDCPA 要求信、催收投诉答复、撤销默认判决动议 |
+| **一般诉讼** | 动议模板、出庭通知、服务证明 |
 
-If the requested document isn't in the template set: "The clinic's templates don't include [X]. I can attempt a draft from general principles, but flag this heavily — it hasn't been tuned for your practice area or jurisdiction. Better to ask [Professor] if there's an existing template."
+如果请求的文档不在模板集中："诊所的模板不包括 [X]。我可以尝试根据一般原则起草，但会严重标记——它没有针对您的执业领域或司法管辖区进行调整。最好问一下 [教授] 是否有现有模板。"
 
-### Step 2: Gather the facts
+### 步骤 2：收集事实
 
-Read the intake summary or case notes. For each fact the document needs: do we have it?
+阅读摄取摘要或案件笔记。对于文档需要的每个事实：我们有吗？
 
-| Document needs | Have? | Source |
+| 文档需要 | 有？ | 来源 |
 |---|---|---|
-| [fact] | ✓ / ✗ | [intake / client doc / need to get] |
+| [事实] | ✓ / ✗ | [摄取 / 客户文档 / 需要获取] |
 
-Missing required facts → don't guess. Mark them: `[FACT NEEDED: client's entry date — get from I-94 or ask client]`.
+缺失所需事实 → 不要猜测。标记它们：`[FACT NEEDED: 客户的入境日期——从 I-94 获取或询问客户]`。
 
-### Step 3: Apply jurisdiction
+### 步骤 3：应用司法管辖区
 
-Per `~/.claude/plugins/config/claude-for-legal/legal-clinic/CLAUDE.md` jurisdiction:
+根据 `~/.claude/plugins/config/claude-for-legal/legal-clinic/CLAUDE.md` 司法管辖区：
 
-- **Caption format:** state and local court rules. If local rules were ingested at cold-start, use them. If not, use state default and flag: `[VERIFY CAPTION: local rules not loaded — confirm format against [Court]'s current rules]`
-- **Service requirements:** who gets served, how, by when per the court's rules
-- **Local quirks:** page limits, font requirements, standing orders. Apply what's ingested; flag what isn't.
+- **标题格式：** 州和当地法院规则。如果在冷启动时摄取了当地规则，使用它们。如果没有，使用州默认值并标记：`[VERIFY CAPTION: 未加载当地规则——根据 [法院] 的当前规则确认格式]`
+- **服务要求：** 谁需要服务、如何服务、根据法院规则在何时之前服务
+- **当地特性：** 页数限制、字体要求、常规命令。应用已摄取的内容；标记未摄取的内容。
 
-### Step 4: Draft
+### 步骤 4：起草
 
-Use the practice-area template. Fill what can be filled from facts. Leave placeholders explicit — never fill with plausible-sounding invention.
+使用执业领域模板。填充可以从事实填充的内容。保持占位符明确——永远不要用听起来合理的发明填充。
 
-**Everywhere the draft makes a legal assertion:** that assertion is a hypothesis the student verifies, not a conclusion the draft guarantees. Mark accordingly.
+**草稿在每个地方做出法律断言：** 该断言是学生验证的假设，而不是草稿保证的结论。相应地标记。
 
-### Step 5: Flag uncertainty
+### 步骤 5：标记不确定性
 
-Three kinds of flags, in-line:
+三种标记，内联：
 
-- `[FACT NEEDED: ...]` — the document needs a fact the case notes don't have
-- `[VERIFY: ...]` — a legal or factual assertion that needs checking before this is filed
-- `[UNCERTAIN: ...]` — the skill is genuinely unsure and says so rather than guessing
+- `[FACT NEEDED: ...]` — 文档需要案件笔记中没有的事实
+- `[VERIFY: ...]` — 在此文件提交前需要检查的法律或事实断言
+- `[UNCERTAIN: ...]` — skill 真正不确定并这样说，而不是猜测
 
-### Step 6: Supervision routing
+### 步骤 6：监督路由
 
-Filing a document with a court or agency is a consequential action. The gate is the supervision workflow in `## Supervision style` in `~/.claude/plugins/config/claude-for-legal/legal-clinic/CLAUDE.md`, reinforced by the Part 0 role check that confirms a licensed supervising attorney owns the clinic setup. Court filings always route through supervision before filing, regardless of the supervision-style choice.
+向法院或机构提交文件是一个有后果的行动。门槛是 `~/.claude/plugins/config/claude-for-legal/legal-clinic/CLAUDE.md` 中 `## Supervision style` 中的监督工作流，由确认许可的主管律师拥有诊所设置的第 0 部分角色检查加强。法院提交始终在提交前通过监督路由，无论监督风格选择如何。
 
-Per `~/.claude/plugins/config/claude-for-legal/legal-clinic/CLAUDE.md` supervision style:
-- **Formal queue:** draft goes to queue, student sees "queued for [Professor]"
-- **Configurable flags:** if this document type is a flag trigger (court filings usually are), output includes "CHECK WITH [PROFESSOR] BEFORE FILING"
-- **Lighter-touch:** standard safeguard label, no additional gate — but court filings still go to the professor before filing per the clinic's existing supervision structure
+根据 `~/.claude/plugins/config/claude-for-legal/legal-clinic/CLAUDE.md` 监督风格：
+- **正式队列：** 草稿进入队列，学生看到"queued for [教授]"
+- **可配置标记：** 如果此文档类型是标记触发器（法院提交通常是的），输出包括"CHECK WITH [教授] BEFORE FILING"
+- **更轻触：** 标准保障标签，无额外门槛——但根据诊所的现有监督结构，法院提交仍会在提交前给教授
 
-## Output
+## 输出
 
 ```markdown
 ═══════════════════════════════════════════════════════════════════════
@@ -121,43 +126,39 @@ Per `~/.claude/plugins/config/claude-for-legal/legal-clinic/CLAUDE.md` supervisi
   Every [VERIFY] and [FACT NEEDED] flag must be resolved before filing.
 ═══════════════════════════════════════════════════════════════════════
 
-[The document — in the practice-area template format, jurisdiction-aware,
-with flags inline]
+[文档——执业领域模板格式，司法管辖区感知，
+带有内联标记]
 
 ═══════════════════════════════════════════════════════════════════════
 
-## Student review checklist
+## 学生审查清单
 
-Before showing this to [Professor]:
+在向 [教授] 展示之前：
 
-- [ ] Read the whole thing. Does it say what you want it to say?
-- [ ] Every fact: is it accurate per the client's actual documents, not just the intake notes?
-- [ ] Every [VERIFY] flag: resolved with research or struck
-- [ ] Every [FACT NEEDED] flag: filled with verified information or the section removed
-- [ ] Legal theory: is this the right argument? Are there better ones? (That's your analysis, not the draft's.)
-- [ ] Jurisdiction: caption, service, format correct per current local rules
-- [ ] [Supervision step per CLAUDE.md style]
+- [ ] 阅读整篇内容。它是否说了你想要说的？
+- [ ] 每个事实：根据客户的实际文档是否准确，而不仅仅是摄取笔记？
+- [ ] 每个 [VERIFY] 标记：通过研究解决或删除
+- [ ] 每个 [FACT NEEDED] 标记：填充验证信息或删除该部分
+- [ ] 法律理论：这是正确的论点吗？有更好的吗？（这是你的分析，而不是草稿的。）
+- [ ] 司法管辖区：标题、服务、格式符合当前当地规则
+- [ ] [根据 CLAUDE.md 风格的监督步骤]
 
-## What this draft does NOT do
+## 此草稿不做什么
 
-- It does not decide strategy. The draft follows the most common approach for
-  this document type — you decide if that's right for this client.
-- It does not verify its own legal assertions. Every legal conclusion above is
-  a hypothesis until you research it.
-- It does not file itself. [Professor] reviews, you file per clinic procedure.
+- 它不决定策略。草稿遵循此文档类型的最常见方法——你决定这对这个客户是否正确。
+- 它不验证自己的法律断言。上面的每个法律结论都是假设，直到你研究它。
+- 它不提交自己。[教授] 审查，你根据诊所程序提交。
 
 ---
 
-**Before this leaves the clinic.** This is a student draft for supervising-attorney review, not a final letter, filing, or form. Filing it with a court or agency, or sending it to a client or opposing party, has legal consequences for the client. A licensed supervising attorney reviews, edits, and signs off before it leaves the clinic. Strip the AI-assisted draft header only after that sign-off. Do not send or file this draft without supervisor approval.
+**在此文件离开诊所之前。** 这是供主管律师审查的学生草稿，而不是最终信函、提交或表格。向法院或机构提交，或发送给客户或对方当事人，对客户有法律后果。许可的主管律师在文件离开诊所之前审查、编辑并签字。只有在签字后才能删除 AI 辅助草稿标题。未经主管批准，不要发送或提交此草稿。
 
-*ABA Formal Opinion 512 (2024): generative AI use requires competence,
-supervision, and verification. This draft is designed to be supervised and
-verified — it is not designed to be trusted without that.*
+*ABA Formal Opinion 512 (2024)：生成式 AI 使用需要能力、监督和验证。此草稿旨在被监督和验证——它并非旨在在没有这些的情况下被信任。*
 ```
 
-## What this skill does NOT do
+## 此 skill 不做什么
 
-- **Produce final work product.** First draft only. Student revises, professor reviews.
-- **Guess at missing facts.** Flags them for the student to get.
-- **Decide the legal theory.** Uses the common approach; the student decides if it's the right one for this case.
-- **Replace jurisdiction-specific research.** Applies ingested local rules; flags where rules weren't ingested or might have changed.
+- **生成最终工作产品。** 仅第一稿。学生修改，教授审查。
+- **猜测缺失的事实。** 为学生获取而标记它们。
+- **决定法律理论。** 使用常见方法；学生决定它是否适合此案件。
+- **替代特定司法管辖区的研究。** 应用已摄取的当地规则；标记未摄取规则或可能已更改的地方。

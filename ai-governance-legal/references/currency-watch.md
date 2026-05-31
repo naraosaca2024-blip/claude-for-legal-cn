@@ -1,38 +1,44 @@
-# AI Governance Currency Watch
+<!--
+This file is a Chinese translation of the original by Anthropic PBC.
+Original: https://github.com/anthropics/claude-for-legal
+Licensed under Apache License 2.0
+-->
 
-**Last verified: 2026-05-10.**
+# AI 治理时效性监控
 
-> **⚠️ Staleness check.** If the last-verified date above is more than 90 days old, treat this file as stale and verify each entry before relying on it. A stale watch list is worse than no watch list — it looks current while being wrong. When a skill reads this file, check the last-verified date first. If stale, say: "The currency watch was last verified [date] — [N] months ago. I'm using it as a checklist of areas to search, not as a source of current status." When you update any entry, also update the last-verified date at the top.
+**最后验证：2026-05-10。**
 
-AI law moves faster than model training data. Before relying on an effective date, threshold, or obligation, verify it against a current source. These are the areas most likely to have moved:
+> **⚠️ 时效性检查。** 如果上方的最后验证日期超过 90 天，请将此文件视为过时，在依赖前验证每个条目。过时的监控列表比没有监控列表更糟糕——它看起来是最新的，实际上却是错误的。当 skill 读取此文件时，首先检查最后验证日期。如果过时，说："时效性监控最后验证于 [日期]——距今 [N] 个月。我将其作为需要搜索的领域的检查清单，而不是当前状态的来源。"当你更新任何条目时，也要更新顶部的最后验证日期。
 
-## US state AI laws (enacted, effective dates shifting)
+AI 法律的变化速度快于模型训练数据。在依赖生效日期、阈值或义务之前，根据当前来源进行验证。以下是最可能已经发生变化的领域：
 
-| State | Law | Status as of May 2026 | Verify |
+## 美国州 AI 法律（已颁布，生效日期变动中）
+
+| 州 | 法律 | 2026 年 5 月状态 | 验证来源 |
 |---|---|---|---|
-| Colorado | SB 24-205 (Colorado AI Act) | Effective date postponed to **June 30, 2026** (SB 25B-004). Pending ADMT Framework rewrite would push to Jan 2027. | [Colorado AG](https://coag.gov) |
-| Texas | TRAIGA | **In force Jan 1, 2026.** Texas AG exclusive enforcement, $10K–$200K/violation, 60-day cure. | [Texas AG](https://www.texasattorneygeneral.gov) |
-| Nebraska | LB 525 (Conversational AI Safety Act) | Signed April 14, 2026. Disclosure to minors + chatbot-is-not-human disclosure. | NE Legislature |
-| Maine | LD 2082 | Signed April 13, 2026. Prohibits AI-delivered therapy without licensed professional. | ME Legislature |
-| Tennessee | SB 837 | "Person" in TN Code does not include AI. | TN Legislature |
-| NYC | Local Law 144 | In force. Annual bias audit for AEDT in hiring/promotion. | NYC DCWP |
-| Illinois | AIPA (820 ILCS 42) | Video interview consent — in force since 2020. | IL General Assembly |
-| Illinois | HB 3773 (Human Rights Act AI amendment) | In force Jan 1, 2026. Employers may not use AI to discriminate in hiring, promotion, discipline, discharge. Notice required. Distinct from AIPA. | IL Dept of Human Rights |
+| 科罗拉多 | SB 24-205（科罗拉多 AI 法案） | 生效日期推迟至 **2026 年 6 月 30 日**（SB 25B-004）。待决的 ADMT 框架重写可能推至 2027 年 1 月。 | [科罗拉多 AG](https://coag.gov) |
+| 德克萨斯 | TRAIGA | **2026 年 1 月 1 日起生效。** 德克萨斯 AG 专属执法，每项违规罚款 $10K–$200K，60 天整改期。 | [德克萨斯 AG](https://www.texasattorneygeneral.gov) |
+| 内布拉斯加 | LB 525（对话式 AI 安全法案） | 2026 年 4 月 14 日签署。向未成年人披露 + 聊天机器人非人类披露。 | NE 立法机构 |
+| 缅因 | LD 2082 | 2026 年 4 月 13 日签署。禁止未经持牌专业人员的 AI 提供的心理治疗。 | ME 立法机构 |
+| 田纳西 | SB 837 | 田纳西法典中的"人"不包括 AI。 | TN 立法机构 |
+| 纽约市 | 地方法 144 | 已生效。招聘/晋升中自动化就业决策工具（AEDT）需要年度偏见审计。 | NYC DCWP |
+| 伊利诺伊 | AIPA (820 ILCS 42) | 视频面试同意——2020 年起生效。 | IL 总检察长办公室 |
+| 伊利诺伊 | HB 3773（人权法 AI 修正案） | 2026 年 1 月 1 日起生效。雇主不得使用 AI 在招聘、晋升、纪律处分、解雇中歧视。需要通知。与 AIPA 不同。 | IL 人权部 |
 
-## EU AI Act implementation
+## 欧盟 AI 法案实施
 
-- **Digital Omnibus (provisional agreement May 7, 2026):** national sandbox deadline → Aug 2, 2027; transparency grace period shortened to 3 months (new deadline Dec 2, 2026); new prohibition on AI-generated NCII/CSAM. The May 7 provisional agreement settled the high-risk deferrals; final text pending Council/Parliament formal adoption. `[verify adoption status]`
-- **Implementing acts:** check EUR-Lex for the latest Commission implementing regulations on conformity assessment, standards, and the AI Office.
-- **National transposition:** Germany, France, Netherlands, Ireland most active. Check national DPA sites.
+- **数字综合法（2026 年 5 月 7 日临时协议）：** 国家沙盒截止日期 → 2027 年 8 月 2 日；透明度宽限期缩短至 3 个月（新截止日期 2026 年 12 月 2 日）；新增禁止 AI 生成的 NCII/CSAM 条款。2026 年 5 月 7 日的临时协议解决了高风险延期问题；最终文本待理事会/议会正式通过。`[verify adoption status]`
+- **实施法令：** 在 EUR-Lex 上查看关于合格评估、标准和 AI 办公室的最新委员会实施条例。
+- **国家转化：** 德国、法国、荷兰、爱尔兰最为活跃。查看各国 DPA 网站。
 
-## Federal (US)
+## 美国联邦
 
-- EEOC AI guidance (2023) still in effect. Watch for a notice-and-comment rule.
-- FTC §5 theory expanding: *FTC v. Humor Rainbow/OkCupid* (March 2026) — undisclosed training-data sharing as a §5 violation.
-- Executive orders change with administrations. Verify current policy.
+- EEOC AI 指导（2023 年）仍然有效。关注通知和评论规则制定。
+- FTC 第 5 条理论扩展：*FTC v. Humor Rainbow/OkCupid*（2026 年 3 月）——未披露的训练数据共享作为第 5 条违规。
+- 行政令随政府更迭而变化。验证当前政策。
 
-## How to use this file
+## 如何使用此文件
 
-When a skill cites an effective date, threshold, or obligation in this space, it should note: "AI law is moving fast — this date/rule may have changed since my training. Verify at [source]. See `references/currency-watch.md` for the live list."
+当 skill 引用此领域的生效日期、阈值或义务时，应注明："AI 法律变化迅速——此日期/规则自我的训练以来可能已更改。在 [来源] 验证。参见 `references/currency-watch.md` 获取最新列表。"
 
-**This file goes stale.** It was current as of May 2026. Update it when you notice a date it lists has passed or a rule it lists has changed. A stale watch list is worse than no watch list.
+**此文件会过时。** 它于 2026 年 5 月截止。当你注意到它列出的日期已过或它列出的规则已更改时，请更新它。过时的监控列表比没有监控列表更糟糕。

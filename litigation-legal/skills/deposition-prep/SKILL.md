@@ -1,204 +1,211 @@
 ---
 name: deposition-prep
-description: Build a deposition outline for a witness — pull their documents from the eDiscovery platform, organize topics around the case theory, and surface impeachment material. Use when the user says "depo prep for [witness]", "build a depo outline", or "prepare for [name]'s deposition".
-argument-hint: "[witness name]"
+description: 为证人构建取证大纲——从电子取证平台提取其文档，按案件理论组织主题，并浮出质疑材料。当用户说"为 [证人] 准备取证"、"构建取证大纲"或"准备 [姓名] 的取证"时使用。
+argument-hint: "[证人姓名]"
 ---
+
+<!--
+This file is a Chinese translation of the original by Anthropic PBC.
+Original: https://github.com/anthropics/claude-for-legal
+Licensed under Apache License 2.0
+-->
+
 
 # /deposition-prep
 
-1. Load `~/.claude/plugins/config/claude-for-legal/litigation-legal/CLAUDE.md` → case theory, key facts.
-2. Follow the workflow and reference below.
-3. Pull docs authored by / mentioning witness from eDiscovery platform.
-4. Build outline: background, key docs, topics tied to theory, impeachment material.
+1. 加载 `~/.claude/plugins/config/claude-for-legal/litigation-legal/CLAUDE.md` → 案件理论、关键事实。
+2. 遵循以下工作流和参考。
+3. 从电子取证平台提取由证人撰写/提及的文档。
+4. 构建大纲：背景、关键文档、与理论相关的主题、质疑材料。
 
 ---
 
-# Deposition Prep
+# 取证准备
 
-## Witness statements for England & Wales — PD 57AC
+## 英格兰和威尔士的证人陈述——PD 57AC
 
-If the user's jurisdiction includes England & Wales and they're asking for a trial witness statement for the Business & Property Courts (or any CPR-governed proceeding), PD 57AC applies. The statement must be in the witness's own words, must not contain argument, must identify the documents the witness used to refresh their memory, and must carry the required confirmation of compliance and the legal representative's certificate.
+如果用户的司法管辖区包括英格兰和威尔士，并且他们正在要求商业和财产法院（或任何 CPR 管辖的诉讼）的庭审证人陈述，PD 57AC 适用。陈述必须是证人自己的话，不得包含论证，必须识别证人用来刷新记忆的文档，并必须携带所需的合规确认和法律代表证书。
 
-**Drafting a narrative "as the witness" from a chronology, document set, or your account of the case is exactly what PD 57AC was designed to prevent.** Courts are actively sanctioning AI-assisted witness statement drafting. If you ask me to do it, I won't.
+**从时间线、文档集或您的案件叙述中以证人身份起草叙述正是 PD 57AC 设计要防止的。** 法院正在积极制裁 AI 辅助的证人陈述起草。如果您要求我这样做，我不会。
 
-What I WILL do: prepare question prompts to elicit the witness's actual recollection; capture and organize what the witness says (their words, not mine); generate the list of documents they were shown; run a PD 57AC compliance checklist against a statement they've drafted; draft the solicitor's certificate of compliance. I help you get the witness's evidence into the statement. I don't write the evidence.
+我会做的：准备问题提示以引出证人的实际回忆；捕获并组织证人所说的内容（他们的话，不是我的）；生成他们被展示的文档列表；对他们已起草的陈述运行 PD 57AC 合规检查清单；起草律师的合规证书。我帮助您将证人的证据纳入陈述。我不撰写证据。
 
-For US depositions, declarations, and affidavits: different rules, but the same discipline applies. A declaration in the declarant's voice that the declarant didn't write is a credibility problem at best.
+对于美国取证、声明和宣誓书：规则不同，但同样的纪律适用。以声明人声音写成的、声明人自己没有写的声明充其量是可信度问题。
 
-## Destination check
+## 目的地检查
 
-Before producing output, check where it's going. If the user has named a destination (a channel, a distribution list, a counterparty, "everyone"), ask whether it's inside the privilege circle. Public channels, company-wide lists, counterparty/opposing counsel, vendors, and clients (for work product) waive the protection. When the destination looks outside the circle, flag it and offer (a) the privileged version for legal only, (b) a sanitized version for the broader channel, or (c) both — don't silently apply a privileged header and then help paste it somewhere the header won't protect it. See the canonical `## Shared guardrails → Destination check` in this plugin's CLAUDE.md.
+在生成输出之前，检查它要去哪里。如果用户命名了目的地（频道、分发列表、对方、"所有人"），询问它是否在特权圈内。公共频道、公司范围列表、对方/对方律师、供应商和客户（对于工作产品）会放弃保护。当目的地看起来在圈外时，标记它并提供 (a) 仅供法律使用的特权版本、(b) 更广泛频道的净化版本，或 (c) 两者——不要静默应用特权标题然后帮助粘贴到标题无法保护它的地方。见此插件 CLAUDE.md 中的规范 `## 共享护栏 → 目的地检查`。
 
-## Purpose
+## 目的
 
-A depo outline is a map: background → lock in the good facts → confront with the bad ones → box in on the theory. This skill builds the map from the documents and the case theory.
+取证大纲是地图：背景 → 锁定有利事实 → 用不利事实对抗 → 按理论框住。此 skill 从文档和案件理论构建地图。
 
-## Record fidelity — quotes and pinpoints
+## 记录保真——引用和精确定位
 
-Two rules that govern every citation and every quotation pulled from the record into this outline. Canonical statement lives in the plugin's `CLAUDE.md` shared guardrails; repeated here because an impeachment confrontation built on a misquoted prior statement or a misgrounded transcript cite collapses the impeachment.
+管辖从此大纲中提取的每个引用和引用的两条规则。规范声明在插件的 `CLAUDE.md` 共享护栏中；此处重复是因为基于错误引用的先前陈述或错误依据的转录引用的质疑对峙会使质疑崩溃。
 
-**Verbatim quotes from the record must be verbatim.** Never put quotation marks around words attributed to opposing counsel, the witness, another deponent, the court, or any record document unless you have the exact passage in front of you and can cite to it. When you want to characterize what someone said but can't find the exact words:
+**记录中的逐字引用必须逐字。** 永远不要在归因于对方律师、证人、另一位被取证人、法院或任何记录文件的文字上加引号，除非你面前有确切段落并能引用出处。当你想描述某人的表述但找不到确切用词时：
 
-- **Paraphrase without quotation marks**, attributing clearly: "Witness previously testified that X `[verify against record — Tr. p. __]`."
-- **Mark the placeholder:** `[verify exact quote — record cite pending]`
-- **Never fill the gap.** An invented prior statement destroys the impeachment the moment the witness disavows it and the transcript doesn't back you up. Every `[verify exact quote]` must be flagged in the reviewer note.
+- **不带引号释义**，清晰归因："证人先前作证说 X `[verify against record — Tr. p. __]`。"
+- **标记占位符：** `[verify exact quote — record cite pending]`
+- **永远不要填补空白。** 编造的先前陈述在证人否认它且转录不支持你时摧毁质疑。每个 `[verify exact quote]` 必须在审阅者注释中标记。
 
-**Pinpoint cites must support the whole proposition.** If an impeachment point is "the witness said X, Y, and Z on [date]," verify the pinpoint cite supports X AND Y AND Z. If it only supports Z, split the cite — "said X (Tr. p. 10), Y (Tr. p. 12), Z (Tr. p. 15)" — or narrow the proposition. A cite that supports part of an impeachment is the failure mode where opposing counsel asks the witness to read more of the surrounding transcript and your confrontation falls apart.
+**精确定位引用必须支持整个命题。** 如果质疑点是"证人在 [日期] 说了 X、Y 和 Z"，验证精确定位引用支持 X 和 Y 和 Z。如果它只支持 Z，拆分引用——"说了 X（Tr. p. 10）、Y（Tr. p. 12）、Z（Tr. p. 15）"——或缩小命题。只支持部分质疑的引用是对方律师要求证人阅读更多周围转录而你的对峙崩溃的失败模式。
 
-## Oral calibration
+## 口头校准
 
-A depo outline is read aloud in real time. That's oral advocacy, not written. It means:
+取证大纲在实时中朗读。那是口头倡导，不是书面的。这意味着：
 
-- Pick the 3-4 topics that actually matter. Don't try to cover everything — a 200-question outline on a 4-hour depo makes the lawyer skim, and skimming is how lines of questioning get lost mid-sequence.
-- Lead with your strongest confrontation. The witness is freshest at the start, and the transcript's opening pages are the ones a judge or jury is most likely to see.
-- For adverse witnesses: the tightest questions go in the tightest sequences. Everything else is scaffolding.
-- If you're preparing a rebuttal closing after the depo, the calibration is stricter still — the tribunal remembers the first two minutes and the last two.
+- 选择实际重要的 3-4 个主题。不要试图覆盖一切——在 4 小时取证中的 200 个问题大纲让律师略读，而略读是询问序列中途丢失的方式。
+- 以你最强的对峙开始。证人在开始时最清醒，转录的开头几页是法官或陪审团最可能看到的。
+- 对于不利证人：最紧凑的问题放在最紧凑的序列中。其他一切都是脚手架。
+- 如果你正在准备取证后的反驳结案陈词，校准更严格——法庭记得前两分钟和最后两分钟。
 
-"Too thorough" for oral work reads as unfocused. If the outline is long because the record is deep, say so and flag where the lawyer should collapse.
+对于口头工作来说"太彻底"读起来像是无重点。如果大纲因为记录很深而很长，说出来并标记律师应该折叠的地方。
 
-## Load context
+## 加载上下文
 
-`~/.claude/plugins/config/claude-for-legal/litigation-legal/CLAUDE.md` → case theory (theory, pivot fact, key facts for/against), eDiscovery platform.
+`~/.claude/plugins/config/claude-for-legal/litigation-legal/CLAUDE.md` → 案件理论（理论、转折事实、有利/不利的关键事实）、电子取证平台。
 
-**Conflicts gate — unbypassable.** Before building an outline, check `~/.claude/plugins/config/claude-for-legal/litigation-legal/matters/_log.yaml` for the matter slug. If the matter is not in `_log.yaml`, refuse and route:
+**冲突门槛——不可绕过。** 在构建大纲之前，检查 `~/.claude/plugins/config/claude-for-legal/litigation-legal/matters/_log.yaml` 中的事项 slug。如果事项不在 `_log.yaml` 中，拒绝并路由：
 
-> "I don't see [matter slug] in the matter log. Run `/litigation-legal:matter-intake` first so the conflicts check runs and the matter workspace is set up. I won't build a deposition outline on a matter that hasn't been intaken — the conflicts check is the gate."
+> "我在事项日志中看不到 [matter slug]。首先运行 `/litigation-legal:matter-intake`，以便冲突检查运行并设置事项工作区。我不会对未接收的事项构建取证大纲——冲突检查是门槛。"
 
-Do not proceed on an unintaken matter. Intake is what runs conflicts and writes the `_log.yaml` row this skill reads from.
+不要在未接收的事项上继续。接收是运行冲突并写入此 skill 读取的 `_log.yaml` 行的过程。
 
-## Workflow
+## 工作流
 
-### Step 1: Who is this witness?
+### 步骤 1：这位证人是谁？
 
-- Name, role, relationship to the case
-- Why are we deposing them — what do we need from this witness?
+- 姓名、角色、与案件的关系
+- 我们为什么要取证他们——我们需要从这个证人那里获得什么？
 
-The "why" connects to the theory. If the witness can establish the pivot fact, that's the centerpiece of the outline.
+"为什么"与理论相关。如果证人能确立转折事实，那是大纲的核心。
 
-### Step 1a: Witness posture — branch before drafting questions
+### 步骤 1a：证人姿态——在起草问题之前分支
 
-Prep structure differs by posture. Identify the witness posture before writing a single question:
+准备结构按姿态不同。在写任何问题之前识别证人姿态：
 
-- **Adverse / hostile** — cross-examination style: closed, leading, one fact at a time. Build the box.
-- **Friendly / your own** — direct-examination style: open questions that let the witness tell the story. Closed leading questions with your own witness are usually improper and undercut credibility with the factfinder.
-- **Neutral third-party** — mix; often open to get the story, closed to pin specifics.
-- **Corporate representative (30(b)(6) or state equivalent)** — topic designation, binding-the-entity rules, and the witness's personal-knowledge vs. corporate-knowledge distinction all have distinct rules. Research the applicable deposition rule for the forum and the 30(b)(6) / state-equivalent procedure. Confirm: what topics were designated, who was produced, scope of binding testimony.
+- **不利/敌意** — 交叉询问风格：封闭式、引导式、一次一个事实。构建框。
+- **友好/自己方** — 直接询问风格：开放性问题让证人讲故事。用己方证人的封闭式引导问题通常是不适当的，会削弱在事实认定者面前的可信度。
+- **中立第三方** — 混合；通常是开放式的获取故事，封闭式的确定具体内容。
+- **企业代表（30(b)(6) 或州等效）** — 主题指定、约束实体的规则，以及证人的个人知识 vs. 企业知识的区分都有独特的规则。研究论坛适用的取证规则和 30(b)(6) / 州等效程序。确认：指定了什么主题，产生了谁，约束证词的范围。
 
-**Research the applicable deposition rules for the forum and witness type** (FRCP 30 / state equivalent, local rules, judge's standing orders on depositions). Cite primary sources. Don't apply a one-size prep structure — the question form, the approach to documents, and the use of impeachment material all depend on posture.
+**研究论坛和证人类型的适用取证规则**（FRCP 30 / 州等效、地方法规、法官关于取证的常设命令）。引用主要来源。不要应用一刀切的准备结构——问题形式、文档处理方式和质疑材料的使用都取决于姿态。
 
-**No silent supplement.** If a research query to the configured legal research tool (Westlaw, CourtListener, Trellis, Descrybe, or firm platform) returns few or no results for the forum's deposition rules or a cite you need for impeachment, report what was found and stop. Do NOT fill the gap from web search or model knowledge without asking. Say: "The search returned [N] results from [tool]. Coverage appears thin for [rule / authority]. Options: (1) broaden the search query, (2) try a different research tool, (3) search the web — results will be tagged `[web search — verify]` and should be checked against a primary source before relying, or (4) leave the `[UNCERTAIN]` marker and stop here. Which would you like?" A lawyer decides whether to accept lower-confidence sources; the skill does not decide for them.
+**没有静默补充。** 如果对配置的法律研究工具（Westlaw、CourtListener、Trellis、Descrybe 或律所平台）的研究查询为论坛的取证规则或你需要的质疑引用返回很少或没有结果，报告发现了什么并停止。不要在未询问的情况下从网络搜索或模型知识填补差距。说："搜索从 [tool] 返回了 [N] 个结果。对于 [rule / authority]，覆盖范围似乎很薄。选项：(1) 扩大搜索查询，(2) 尝试不同的研究工具，(3) 搜索网络——结果将标记为 `[web search — verify]`，在依赖前应根据主要来源检查，或 (4) 留下 `[UNCERTAIN]` 标记并在此停止。你想要哪个？"律师决定是否接受较低可信度的来源；skill 不为他们决定。
 
-**Source attribution.** Tag every rule reference, case cite, and authority in the outline with where it came from: `[Westlaw]`, `[CourtListener]`, `[Trellis]`, `[Descrybe]`, or the MCP tool name for citations retrieved from a legal research connector; `[web search — verify]` for web-search citations; `[model knowledge — verify]` for citations recalled from training data; `[user provided]` for citations the partner or senior associate supplied. Document citations (Bates, production numbers) retain their native source. Citations tagged `verify` carry higher fabrication risk and should be checked before the deposition. Never strip or collapse the tags.
+**来源归因。** 用引用来源标记大纲中的每个规则引用、案例引用和权威：`[Westlaw]`、`[CourtListener]`、`[Trellis]`、`[Descrybe]` 或 MCP 工具名称，用于从法律研究连接器检索的引用；`[web search — verify]` 用于网络搜索引用；`[model knowledge — verify]` 用于从训练数据回忆的引用；`[user provided]` 用于合伙人或资深律师提供的引用。文档引用（Bates、制作编号）保留其原生来源。标记为 `verify` 的引用具有更高的编造风险，应在取证前检查。永远不要剥离或折叠标记。
 
-### Step 2: Pull their documents
+### 步骤 2：提取他们的文档
 
-From the eDiscovery platform (Everlaw/Relativity/DISCO if connected):
+从电子取证平台（如已连接：Everlaw/Relativity/DISCO）：
 
-- Documents authored by witness
-- Documents sent to or from witness
-- Documents mentioning witness by name
-- Calendar entries and meeting notes with witness present
+- 证人撰写的文档
+- 发送给证人或从证人收到的文档
+- 按名称提及证人的文档
+- 证人在场的日历条目和会议记录
 
-Organize by date. Flag the hot docs — the ones that matter most for the theory.
+按日期组织。标记热门文档——对理论最重要的那些。
 
-### Step 3: Build topics
+### 步骤 3：构建主题
 
-Each topic is a thing you want to establish or explore. Organize around the theory:
+每个主题是你想要确立或探索的事情。按理论组织：
 
-**Background (always first — lock in uncontroversial facts before the witness is defensive):**
-- Role, tenure, responsibilities
-- Reporting structure
-- How they interacted with the key players
+**背景（始终第一个——在证人防御之前锁定无争议事实）：**
+- 角色、任期、职责
+- 汇报结构
+- 他们如何与关键人物互动
 
-**Good facts (lock them in before confronting):**
-- Facts from `~/.claude/plugins/config/claude-for-legal/litigation-legal/CLAUDE.md` → key facts for us, that this witness can establish
-- Documents that support our theory, authored or received by this witness
+**有利事实（在对抗之前锁定它们）：**
+- 来自 `~/.claude/plugins/config/claude-for-legal/litigation-legal/CLAUDE.md` 的对我们有利的关键事实，该证人能确立的
+- 支持我们理论的文档，由该证人撰写或收到的
 
-**Bad facts (confront with documents):**
-- Facts against us that this witness will be asked about anyway — get your version first
-- Documents that hurt — know how the witness will explain them
+**不利事实（用文档对抗）：**
+- 无论如何该证人都会被问到的对我们不利的事实——先获取你的版本
+- 不利的文档——了解证人会如何解释它们
 
-**Impeachment (if hostile or if they contradict):**
-- Prior inconsistent statements (from docs, prior testimony, declarations)
-- Documents that contradict what you expect them to say
+**质疑（如果敌意或如果他们矛盾）：**
+- 先前不一致的陈述（来自文档、先前证词、声明）
+- 与你预期他们所说相矛盾的文档
 
-**The pivot fact:**
-- The sequence of questions that establishes (or undermines) the fact the case turns on
-- This is the most carefully constructed section. Question form follows witness posture from Step 1a: tight closed leading on adverse, controlled open on friendly, mixed on neutral. Don't default to one pattern.
+**转折事实：**
+- 确立（或削弱）案件所依赖的事实的问题序列
+- 这是最精心构建的部分。问题形式遵循步骤 1a 的证人姿态：不利时紧密封闭式引导，友好时受控开放，中立时混合。不要默认为一种模式。
 
-### Step 4: Write the outline
+### 步骤 4：写入大纲
 
 ```markdown
-[WORK-PRODUCT HEADER — per plugin config ## Outputs — differs by role; see `## Who's using this`]
+[工作产品标题——根据插件配置 ## Outputs——因角色而异；见 `## 谁在使用这个`]
 
-# Deposition Outline: [Witness Name]
+# 取证大纲：[证人姓名]
 
-**Date:** [depo date]
-**Witness role:** [title, relationship to case]
-**Witness posture:** [adverse / friendly / neutral / 30(b)(6) or state equivalent] — drives question form
-**Applicable deposition rules:** [FRCP 30 / state rule / local rule / standing order — with pinpoint cites] `[UNCERTAIN — verify currency]`
-**Why we're taking this depo:** [one sentence — the goal]
-**Theory connection:** [how this witness fits the case theory]
-
----
-
-## I. Background
-
-[Questions — closed, one fact each. Lock in the uncontroversial stuff.]
-
-## II. [Good fact topic]
-
-**Goal:** Establish [fact] for use at summary judgment / trial.
-
-**Documents:**
-- [Bates] — [description] — [why it matters]
-
-**Questions:**
-[The sequence. Each question closed. Build to the admission.]
-
-## III. [Bad fact topic]
-
-**Goal:** Get the witness's explanation of [bad fact] on our terms before they're prepped for trial.
-
-[Same structure]
-
-## IV. Impeachment material (use if needed)
-
-[Prior statements / documents to confront with, if the witness contradicts]
-
-## V. [Pivot fact sequence]
-
-**Goal:** [The thing the case turns on]
-
-[This is the tightest section. Every question is a yes/no. Every question establishes one fact. Build the box.]
+**日期：** [取证日期]
+**证人角色：** [头衔、与案件的关系]
+**证人姿态：** [不利 / 友好 / 中立 / 30(b)(6) 或州等效] — 驱动问题形式
+**适用取证规则：** [FRCP 30 / 州规则 / 地方法规 / 常设命令——附精确定位引用] `[UNCERTAIN — verify currency]`
+**我们为什么要取证：** [一句话——目标]
+**理论联系：** [此证人如何契合案件理论]
 
 ---
 
-## Exhibit list
+## 一、背景
 
-| # | Bates | Description | Used in section |
+[问题——封闭式，每个一个事实。锁定无争议内容。]
+
+## 二、[有利事实主题]
+
+**目标：** 确立 [事实] 用于即决判决/庭审。
+
+**文档：**
+- [Bates] — [描述] — [为什么重要]
+
+**问题：**
+[序列。每个问题封闭式。构建到承认。]
+
+## 三、[不利事实主题]
+
+**目标：** 在他们为庭审准备之前按我们的条件获取证人对 [不利事实] 的解释。
+
+[相同结构]
+
+## 四、质疑材料（需要时使用）
+
+[先前陈述 / 对抗文档，如果证人矛盾]
+
+## 五、[转折事实序列]
+
+**目标：** [案件所依赖的事情]
+
+[这是最紧密的部分。每个问题都是是/否。每个问题确立一个事实。构建框。]
+
+---
+
+## 证据清单
+
+| # | Bates | 描述 | 使用章节 |
 |---|---|---|---|
 
-## Marker discipline
+## 标记纪律
 
-Use inline while building and reviewing:
-- `[VERIFY: factual assertion]` — any fact not confirmed against the record
-- `[UNCERTAIN: legal proposition]` — any legal point (rule, deadline, scope-of-questioning limit) not confirmed against current authority
-- `[CITE NEEDED: specific cite]` — record or authority cite pending
+在构建和审查时内联使用：
+- `[VERIFY: factual assertion]` — 任何未对照记录确认的事实
+- `[UNCERTAIN: legal proposition]` — 任何未对照当前权威确认的法律观点（规则、截止日期、提问范围限制）
+- `[CITE NEEDED: specific cite]` — 记录或权威引用待定
 
-## Notes for the attorney
+## 律师注意事项
 
-- [Anything the outline doesn't capture — witness demeanor notes, strategic calls to make in the moment]
+- [大纲未捕获的任何内容——证人举止笔记、即时策略判断]
 
 ---
 
-**Privileged / work-product material.** This outline is built from case materials and work product and inherits their protection status. Keep it in the privileged-materials folder, mark it appropriately, and make any distribution decision (co-counsel, client, experts) deliberately — distribution outside the privilege circle can waive protection.
+**特权/工作产品材料。** 此大纲从案件材料和工作产品构建，继承其保护状态。将其保存在特权材料文件夹中，适当标记，并谨慎做出任何分发决定（共同律师、客户、专家）——在特权圈外分发可能放弃保护。
 
-**Cite check any authority relied on.** Rule citations (FRCP 30, state equivalents, local rules, standing orders) and any case law pulled into the outline were generated by an AI model. Verify each against Westlaw, CourtListener, or your research platform — confirm currency and scope before using at the deposition. Source tags on each citation (e.g., `[Westlaw]`, `[web search — verify]`) show where the cite came from; `verify` tags carry higher fabrication risk and should be checked first.
+**核查任何依赖的权威。** 规则引用（FRCP 30、州等效、地方法规、常设命令）以及拉入大纲的任何案例法由 AI 模型生成。根据 Westlaw、CourtListener 或您的研究平台验证每一个——在取证中使用前确认有效性和范围。每个引用上的来源标记（例如，`[Westlaw]`、`[web search — verify]`）显示引用来自哪里；`verify` 标记具有更高的编造风险，应首先检查。
 ```
 
-## What this skill does not do
+## 此 skill 不做什么
 
-- Take the deposition. The outline is a map; the attorney drives.
-- Predict what the witness will say. It prepares for likely answers, but witnesses surprise.
-- Decide what to ask on the fly. Follow-ups are the attorney's judgment in the room.
+- 进行取证。大纲是地图；律师驾驶。
+- 预测证人会说什么。它为可能的答案做准备，但证人会带来意外。
+- 决定现场要问什么。跟进是律师在房间里的判断。

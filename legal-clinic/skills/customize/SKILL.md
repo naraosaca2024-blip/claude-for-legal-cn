@@ -1,99 +1,65 @@
 ---
 name: customize
 description: >
-  Guided customization of your legal clinic profile — change one thing without
-  re-running the whole cold-start interview. Adjust clinic profile,
-  jurisdiction, supervision style, practice-area templates, semester
-  configuration, or output safeguards. Use when the user says "change my
-  [thing]", "new semester", "add a practice area", "update my config", or
-  "customize".
-argument-hint: "[section name, or describe what you want to change]"
+  引导式自定义您的法律诊所档案——更改一件事而不重新运行
+  整个冷启动访谈。调整诊所档案、司法管辖区、监督风格、
+  执业领域模板、学期配置或输出保障。当用户说"更改我的 [某事]"、
+  "新学期"、"添加执业领域"、"更新我的配置"或"自定义"时使用。
+argument-hint: "[章节名称，或描述您想要更改的内容]"
 ---
+
+<!--
+This file is a Chinese translation of the original by Anthropic PBC.
+Original: https://github.com/anthropics/claude-for-legal
+Licensed under Apache License 2.0
+-->
+
 
 # /customize
 
-## When this runs
+## 何时运行
 
-The user typed `/legal-clinic:customize`. They (usually the professor, sometimes
-a student) want to change something in the clinic profile — a jurisdiction, a
-supervision style, a practice-area template, a semester rollover — without
-re-running the whole cold-start interview and without hand-editing YAML.
+用户输入了 `/legal-clinic:customize`。他们（通常是教授，有时是学生）想要更改诊所档案中的某些内容——司法管辖区、监督风格、执业领域模板、学期更替——而不重新运行整个冷启动访谈并且不手动编辑 YAML。
 
-## What to do
+## 要做什么
 
-1. **Read the config.** Read
-   `~/.claude/plugins/config/claude-for-legal/legal-clinic/CLAUDE.md`.
-   If the plugin config does not exist or still contains `[PLACEHOLDER]`
-   values, say:
+1. **阅读配置。** 阅读
+   `~/.claude/plugins/config/claude-for-legal/legal-clinic/CLAUDE.md`。
+   如果插件配置不存在或仍包含 `[PLACEHOLDER]` 值，请说：
 
-   > You haven't run setup yet. Run `/legal-clinic:cold-start-interview`
-   > first — customize is for adjusting a profile you already have.
+   > 您尚未运行设置。首先运行 `/legal-clinic:cold-start-interview`——customize 用于调整您已经拥有的档案。
 
-2. **Show the customizable map.** List what's in the profile, grouped, with a
-   one-line summary of the current value:
+2. **显示可自定义地图。** 列出档案中的内容，分组显示，并附当前值的一行摘要：
 
-   - **Clinic profile** — clinic name, host school, faculty lead, active
-     practice areas, case type limits
-   - **Jurisdiction** — primary state, courts, agencies, local rules path
-   - **Supervision style** — informal vs. formal review queue; if formal,
-     who reviews what before it goes out
-   - **Practice-area templates** — which templates are active (immigration,
-     housing, small business, family, expungement, etc.) and any local
-     overrides
-   - **Semester** — current semester, active students, rollover rules,
-     handoff memo format
-   - **Output safeguards** — plain-language standards for client-facing
-     outputs, deadline warning rules, privilege labeling
-   - **Seed documents** — clinic handbook, jurisdiction rules, template
-     letters, sample memos, form libraries
-   - **Outputs** — supervisor guide format, client letter templates, memo
-     scaffolds
-   - **Workflow** — case directories, deadline tracker location, review
-     queue channel
-   - **Integrations** — document storage / Slack / court e-filing status,
-     fallbacks
+   - **诊所档案** — 诊所名称、主办学校、教师负责人、活跃执业领域、案件类型限制
+   - **司法管辖区** — 主要州、法院、机构、当地规则路径
+   - **监督风格** — 非正式与正式审查队列；如果是正式的，谁在输出之前审查什么
+   - **执业领域模板** — 哪些模板是活跃的（移民、住房、小企业、家庭、清除犯罪记录等）和任何本地覆盖
+   - **学期** — 当前学期、活跃学生、更替规则、交接备忘录格式
+   - **输出保障** — 客户面向输出的平实语言标准、截止期限警告规则、特权标签
+   - **种子文档** — 诊所手册、司法管辖区规则、模板信函、示例备忘录、表格库
+   - **输出** — 主管指南格式、客户信模板、备忘录支架
+   - **工作流** — 案件目录、截止期限跟踪器位置、审查队列频道
+   - **集成** — 文档存储 / Slack / 法院电子提交状态、备用方案
 
-3. **Ask what they want to change.**
+3. **询问他们想要更改什么。**
 
-   > What would you like to adjust? Pick a section, or describe the change in
-   > your own words.
+   > 您想要调整什么？选择一个章节，或用自己的话描述更改。
 
-4. **Make the change.** Show the current value, ask for the new value, explain
-   what changes downstream, confirm, write it to the config.
+4. **进行更改。** 显示当前值，询问新值，解释下游的变化，确认，写入配置。
 
-   Examples:
-   - *Adding a new practice area:* "`/client-intake` will route matters of this
-     type through the new template. `/draft`, `/memo`, and `/client-letter`
-     will use the practice-area prompts. `/research-start` will add the
-     corresponding Westlaw search terms."
-   - *Supervision style informal → formal review queue:* "`/supervisor-review-queue` becomes
-     active — student output will land there for supervisor sign-off before
-     it goes to the client."
-   - *New semester rollover:* "I'll archive the prior semester's active
-     cases, carry forward matters you flag as continuing, and prompt the
-     incoming students through `/ramp`."
+   示例：
+   - *添加新执业领域：* "`/client-intake` 将通过新模板路由此类事项。`/draft`、`/memo` 和 `/client-letter` 将使用执业领域提示。`/research-start` 将添加相应的 Westlaw 搜索词。"
+   - *监督风格非正式 → 正式审查队列：* "`/supervisor-review-queue` 变得活跃——学生输出将在发送给客户之前到达那里以供主管签字。"
+   - *新学期更替：* "我将归档上学期的活跃案件，延续您标记为继续的事项，并通过 `/ramp` 提示进入的学生。"
 
-5. **Close.**
+5. **关闭。**
 
-   > Done. Your next output will reflect the change. Anything else? You can
-   > run `/legal-clinic:customize` anytime.
+   > 完成。您的下一个输出将反映此更改。还有其他吗？您可以随时运行 `/legal-clinic:customize`。
 
-## Guardrails
+## 护栏
 
-- **Never delete a section.** If the user wants to "drop" a practice area,
-  offer to mark it `[Archived]` and explain that archiving keeps case
-  history accessible but hides the template from `/client-intake` routing.
-- **Flag internal inconsistency.** If the change would make the profile
-  inconsistent (e.g., formal review queue on + informal supervision note;
-  or practice area on + no jurisdiction rules configured), flag the
-  tension.
-- **Flag guardrail degradation.** These are load-bearing and should not be
-  removed: the "NOT final work product" framing on `/draft`, plain-language
-  standards on client-facing outputs, "does NOT decide case acceptance" on
-  `/client-intake`, "NOT substantive advice" on `/client-letter`, and the
-  scaffold-not-analysis framing on `/memo`. These exist because students
-  ship work product — if the safeguards go, the risk of student work
-  reaching a client without supervisor review goes up. Confirm the
-  trade-off with the user, and if they're a student rather than the
-  professor, suggest they discuss it with the supervisor first.
-- **One change at a time.** Don't re-ask the whole interview.
+- **永不删除章节。** 如果用户想要"删除"执业领域，提议将其标记为 `[Archived]` 并说明归档保持案件历史可访问但将模板从 `/client-intake` 路由中隐藏。
+- **标记内部不一致。** 如果更改会使档案不一致（例如，正式审查队列开启 + 非正式监督备注；或执业领域开启 + 未配置司法管辖区规则），标记紧张关系。
+- **标记护栏降级。** 这些是承重的，不应删除：`/draft` 上的"NOT final work product"框架、客户面向输出的平实语言标准、`/client-intake` 上的"does NOT decide case acceptance"、`/client-letter` 上的"NOT substantive advice"，以及 `/memo` 上的支架而非分析框架。这些存在是因为学生发送工作产品——如果保障消失，学生工作在没有主管审查的情况下到达客户的风险就会上升。与用户确认权衡，并且如果他们是学生而不是教授，建议他们首先与主管讨论。
+- **一次更改一项。** 不要重新询问整个访谈。

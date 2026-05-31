@@ -1,30 +1,36 @@
-# Adding a Connector
+<!--
+This file is a Chinese translation of the original by Anthropic PBC.
+Original: https://github.com/anthropics/claude-for-legal
+Licensed under Apache License 2.0
+-->
 
-The plugins are at their best when connected to authoritative sources. If you build or operate a legal data source, research tool, CLM, DMS, eDiscovery platform, or practice management system, we want your MCP connector in the suite.
+# 添加连接器
 
-## What makes a good legal MCP connector
+当连接到权威来源时，plugin 效果最佳。如果您构建或运营法律数据源、研究工具、CLM、DMS、电子发现平台或执业管理系统，我们希望您的 MCP 连接器加入本套件。
 
-- **Remote MCP server over HTTPS** with OAuth or API-key auth (streamable HTTP or SSE transport)
-- **Read-heavy tools** — search, fetch, list. Write tools (create, send, file) need an explicit confirmation prompt on the client side; say so in your tool descriptions.
-- **Provenance in results** — return the source, date retrieved, and a citation-ready identifier. The plugins tag every cite by source; your connector should make that possible.
-- **No instruction-like content in results** — the plugins treat retrieved content as data, not commands. If your tool results include metadata or system notes, mark them clearly so they don't look like embedded directives.
-- **Rate limits and errors that degrade gracefully** — the plugins have a fallback for when a connector isn't responding; a clean error is better than a timeout.
+## 什么是好的法律 MCP 连接器
 
-## How to submit
+- **通过 HTTPS 的远程 MCP 服务器**，使用 OAuth 或 API 密钥身份验证（可流式 HTTP 或 SSE 传输）
+- **以读取为主的工具**——搜索、获取、列出。写入工具（创建、发送、归档）需要在客户端明确确认提示；请在您的工具描述中说明。
+- **结果中的来源信息**——返回来源、检索日期和可引用的标识符。plugin 按来源标记每个引用；您的连接器应使之成为可能。
+- **结果中无类指令内容**——plugin 将检索到的内容视为数据，而非命令。如果您的工具结果包含元数据或系统说明，请清楚标记，使它们看起来不像嵌入指令。
+- **优雅降级的速率限制和错误**——当连接器无响应时 plugin 有备用方案；干净的错误比超时更好。
 
-1. Publish your MCP server and document its tools, auth flow, and data coverage.
-2. Open a PR adding your server to the relevant plugin's `.mcp.json` with the URL, auth method, and a one-line description of what it gives Claude.
-3. Include a note on which practice areas / plugins it's most useful for.
-4. We'll test against the plugin workflows and merge. Connectors that pass the retrieval-quality and injection-resistance checks go in the default `.mcp.json`; others get documented in the plugin README for users to add themselves.
+## 如何提交
 
-## Current connectors
+1. 发布您的 MCP 服务器并记录其工具、身份验证流程和数据覆盖范围。
+2. 打开 PR 把您的服务器添加到相关 plugin 的 `.mcp.json` 中，包含 URL、身份验证方法和关于它给 Claude 提供什么的单行描述。
+3. 包含关于它对哪些执业领域 / plugin 最有用的说明。
+4. 我们会针对 plugin 工作流进行测试并合并。通过检索质量和注入抗性检查的连接器会进入默认 `.mcp.json`；其他会记录在 plugin README 中供用户自行添加。
 
-Connectors shipped in the default `.mcp.json` of each plugin:
+## 当前连接器
 
-| Connector | Plugins |
+随每个 plugin 默认 `.mcp.json` 附带的连接器：
+
+| 连接器 | Plugin |
 |---|---|
-| **Slack** | all 12 |
-| **Google Drive** (`gdrive`) | all 12 |
+| **Slack** | 全部 12 个 |
+| **Google Drive** (`gdrive`) | 全部 12 个 |
 | **CourtListener** | legal-clinic, ip-legal, litigation-legal, law-student |
 | **Descrybe** | legal-clinic, ip-legal, law-student |
 | **Definely** | commercial-legal, corporate-legal |
@@ -43,24 +49,24 @@ Connectors shipped in the default `.mcp.json` of each plugin:
 | **Atlassian (Jira)** | product-legal |
 | **Asana** | product-legal |
 
-See the `.mcp.json` in each plugin directory for the authoritative list.
+请参阅每个 plugin 目录中的 `.mcp.json` 获取权威列表。
 
-## Wanted connectors
+## 待添加连接器
 
-These would make specific plugins significantly more useful. If you build or operate one, see "How to submit" above.
+这些会使特定 plugin 显著更有用。如果您构建或运营其中一个，请参阅上方"如何提交"。
 
-- **IP management systems** (Anaqua, Clarivate IPfolio, AppColl, Patrix, Alt Legal, FoundationIP) — full docket sync for `ip-legal` portfolio tracking
-- **USPTO by customer number** — full portfolio status and deadlines, not just per-application lookup
-- **USPTO TSDR / Trademark Status** — trademark status and deadlines for `ip-legal` brand management
-- **Jira / Linear / Asana for OSS requests** — `ip-legal` OSS clearance can monitor and respond to incoming tickets
-- **Thomson Reuters** (CoCounsel, Practical Law, Westlaw) — research and drafting for every plugin
-- **SS&C Intralinks / Datasite** — VDR access for `corporate-legal` diligence
-- **Relativity / Everlaw beyond read** — eDiscovery workflow for `litigation-legal`
-- **State bar CLE trackers** — `law-student` bar prep
-- **Court e-filing systems** (PACER write, state e-filing) — with a hard irreversibility gate, obviously
-- **Global AI Regulation Tracker** (techieray.com/GlobalAIRegulationTracker) — jurisdiction-tagged AI regulation tracking with structured API. Curated, verified, multi-jurisdiction. Would be a primary-source-adjacent feed for `ai-governance-legal` and `regulatory-legal`.
-- **Regulatory primary sources** — a connector to official registers (eCFR, Federal Register, EUR-Lex, legislation.gov.uk, Federal Register of Legislation AU, Singapore Statutes Online) that bypasses the agent-blockers many legislative sites use. A curated regulatory knowledge base would be a high-value addition.
+- **IP 管理系统**（Anaqua、Clarivate IPfolio、AppColl、Patrix、Alt Legal、FoundationIP）——用于 `ip-legal` 组合追踪的完整事项同步
+- **按客户编号的 USPTO**——完整组合状态和截止日，而不仅仅是单个申请查询
+- **USPTO TSDR / 商标状态**——用于 `ip-legal` 品牌管理的商标状态和截止日
+- **用于 OSS 请求的 Jira / Linear / Asana**——`ip-legal` OSS 清查可监控并响应收到的工单
+- **Thomson Reuters**（CoCounsel、Practical Law、Westlaw）——每个 plugin 的研究和起草
+- **SS&C Intralinks / Datasite**——`corporate-legal` 尽调的 VDR 访问
+- **超越读取的 Relativity / Everlaw**——`litigation-legal` 的电子发现工作流
+- **州律师协会 CLE 追踪器**——`law-student` 司法考试准备
+- **法院电子归档系统**（PACER 写入、州电子归档）——当然带有硬不可逆关卡
+- **全球 AI 监管追踪器**（techieray.com/GlobalAIRegulationTracker）——带结构化 API 的管辖区标记 AI 监管追踪。策划、核实、多管辖区。将成为 `ai-governance-legal` 和 `regulatory-legal` 的主要来源相邻提要。
+- **监管主要来源**——连接到官方登记簿（eCFR、Federal Register、EUR-Lex、legislation.gov.uk、Australian Federal Register of Legislation、Singapore Statutes Online），绕过许多立法网站使用的 agent 拦截器。一个策划的监管知识库将是高价值的补充。
 
-## Questions
+## 问题
 
-Open an issue on this repo. For partnership or integration questions, see the contact on each plugin's README.
+在本仓库中打开 issue。关于合作或集成的问题，请参阅每个 plugin README 上的联系方式。

@@ -1,174 +1,181 @@
 ---
 name: written-consent
 description: >
-  Draft a unanimous written consent of the board or a committee in house format,
-  with precedent search from the consents repository. Handles multi-resolution
-  consents, director conflict flags, state-law notice requirements, and signatory
-  tracking, with a built-in scope warning for major one-off actions. Use when
-  user says "written consent", "unanimous consent", "board consent", "consent
-  in lieu", "UWC", or describes an action needing board approval without a meeting.
+  以内部格式起草董事会或委员会的一致书面同意，
+  并从同意存储库中搜索先例。处理多决议同意、
+  董事冲突标记、州法律通知要求以及签署人跟踪，
+  并针对主要一次性行动内置范围警告。当用户说
+  "written consent"、"unanimous consent"、"board consent"、"consent
+  in lieu"、"UWC"或描述需要董事会批准且不开会的行动时使用。
 argument-hint: "[describe the action needing board approval]"
 ---
 
+<!--
+This file is a Chinese translation of the original by Anthropic PBC.
+Original: https://github.com/anthropics/claude-for-legal
+Licensed under Apache License 2.0
+-->
+
+
 # /written-consent
 
-1. Load `~/.claude/plugins/config/claude-for-legal/corporate-legal/CLAUDE.md` → Board & Secretary (consents repository, resolution language, state of incorporation, board composition).
-2. Use the workflow below.
-3. Identify the action and classify (routine / review-flag).
-4. If review-flag: show outside counsel warning and confirm before proceeding.
-5. Search consents repository for closest precedent. If no repository: use seed consents from `~/.claude/plugins/config/claude-for-legal/corporate-legal/CLAUDE.md`.
-6. Draft consent in house format using precedent as base.
-7. Output: consent draft + signatory checklist + review prompts.
+1. 加载 `~/.claude/plugins/config/claude-for-legal/corporate-legal/CLAUDE.md` → 董事会与秘书（同意存储库、决议语言、注册州、董事会组成）。
+2. 使用以下工作流。
+3. 识别行动并分类（例行 / 审查标记）。
+4. 如果是审查标记：显示外部律师警告并在继续之前确认。
+5. 从同意存储库中搜索最接近的先例。如果没有存储库：使用 `~/.claude/plugins/config/claude-for-legal/corporate-legal/CLAUDE.md` 中的种子同意。
+6. 使用先例作为基础以内部格式起草同意。
+7. 输出：同意草案 + 签署人检查清单 + 审查提示。
 
 ---
 
-## Matter context
+## 事项上下文
 
-**Matter context.** Check `## Matter workspaces` in the practice-level CLAUDE.md. If `Enabled` is `✗` (the default for in-house users), skip the rest of this paragraph — skills use practice-level context and the matter machinery is invisible. If enabled and there is no active matter, ask: "Which matter is this for? Run `/corporate-legal:matter-workspace switch <slug>` or say `practice-level`." Load the active matter's `matter.md` for matter-specific context and overrides. Write outputs to the matter folder at `~/.claude/plugins/config/claude-for-legal/corporate-legal/matters/<matter-slug>/`. Never read another matter's files unless `Cross-matter context` is `on`.
-
----
-
-## Purpose
-
-Most routine board approvals don't need a meeting. Officer appointments, equity grants, bank authorizations, contract approvals above the officer threshold, intercompany arrangements — these happen by unanimous written consent. This skill drafts them quickly in your house format, finds the prior consent that's closest to what you need, and flags the actions where you should be getting outside counsel eyes before anyone signs.
-
-## Scope warning — read before drafting
-
-> **This skill is designed for day-to-day consents with direct precedents in your repository or seed documents.** Routine actions — officer appointments, equity grants, annual authorizations, standard contract approvals — are the right use case. The skill finds a prior consent that closely matches, adapts it to the current action, and produces a clean draft.
->
-> **For major one-off actions, outside counsel review is prudent regardless of what this skill produces.** This includes: M&A transactions (asset purchases, stock purchases, mergers, investments), financing rounds, equity issuances to new investors, change-of-control provisions, dissolution or winding down, material real estate transactions, and any action that will be scrutinized in a subsequent due diligence process.
->
-> The skill will flag automatically when the action looks like a major one-off. That flag is not a block — you can proceed. It is a prompt to think about whether a clean precedent-adapted draft is sufficient for this particular action.
+**事项上下文。** 检查执业级 CLAUDE.md 中的 `## Matter workspaces`。如果 `Enabled` 为 `✗`（内部用户的默认值），跳过本段的其余部分——skills 使用执业级上下文，事项机制不可见。如果已启用且没有活跃事项，询问："这是哪个事项的？Run `/corporate-legal:matter-workspace switch <slug>` 或说 `practice-level`。"加载活跃事项的 `matter.md` 以获取事项特定上下文和覆盖。将输出写入事项文件夹 `~/.claude/plugins/config/claude-for-legal/corporate-legal/matters/<matter-slug>/`。除非 `Cross-matter context` 为 `on`，否则永远不要阅读另一个事项的文件。
 
 ---
 
-## Major action + urgency = stop
+## 目的
 
-A board consent for a major one-off action (M&A, financing, dissolution, capital structure change, director election tied to a financing or M&A) that the user wants signed TODAY — "send for DocuSign this afternoon," "meeting in an hour," "signing tonight," "we need this before market open" — goes through outside counsel review. Not because the plugin can't draft it — because a wrong consent on a major action is a one-way door, and the urgency pressure is exactly when mistakes happen.
+大多数例行董事会批准不需要开会。官员任命、股权授予、银行授权、超过官员阈值的合同批准、公司间安排——这些通过一致书面同意进行。此 skill 以你的内部格式快速起草它们，找到与你需要最接近的先例同意，并标记你应该在任何人签署前获得外部律师意见的行动。
 
-Trigger (both must be true):
+## 范围警告——起草前阅读
 
-1. The action is in the **Review flag — major one-off** category below (M&A, financing, dissolution, capital structure change, change-of-control provision, director election tied to a financing or M&A, material real estate transaction, any action that will appear in a future financing or M&A data room).
-2. The user's ask contains an irreversibility signal — "send for DocuSign," "sign today," "board is signing this afternoon/tonight," "need this before [market open / closing / the meeting at X]," any phrasing that commits the consent to signature on the same turn.
-
-When both are true, output this and stop:
-
-> ⛔ **Major action + same-day signature — I won't mark this ready to sign.**
+> **此 skill 专为在你的存储库或种子文档中有直接先例的日常同意而设计。** 例行行动——官员任命、股权授予、年度授权、标准合同批准——是正确的用例。skill 找到紧密匹配的先例同意，将其调整为当前行动，并生成干净的草案。
 >
-> This is [action type], which is a one-way door. You've asked for it to be signed today. That combination is exactly when mistakes on a board consent become hardest to unwind.
+> **对于主要一次性行动，无论此 skill 生成什么，外部律师审查都是审慎的。** 这包括：M&A 交易（资产购买、股份购买、合并、投资）、融资轮、向新投资者发行股权、变更控制权规定、解散或清算、重大房地产交易，以及任何将在未来尽职调查流程中接受审查的行动。
 >
-> I'll draft it — happily — but I won't mark it ready to sign without an outside-counsel look. If outside counsel is already engaged on this deal, hand them this draft. If not, this is the thing outside counsel is for. Your professional regulator (state bar in the US, SRA/Bar Standards Board in England & Wales, Law Society in Scotland/NI/Ireland/Canada/Australia, or your jurisdiction's equivalent) can point you to a lawyer referral service that can find one same-day if needed.
->
-> Two ways forward:
->
-> 1. **I draft, outside counsel reviews, then signatures** — the normal path for a major corporate action. Tell me to draft and I will.
-> 2. **Outside counsel is already on this deal and cleared the draft path** — tell me who reviewed and when. I'll proceed and include a note that outside counsel has the draft.
->
-> I will not draft in "ready-to-send" form under same-day pressure without one of those two. This is not a delay — it's the only way a same-day major-action consent is defensible if anyone ever looks at the file.
-
-Do not proceed to Step 1 or any drafting under this gate without an explicit response choosing path 1 or path 2. A routine consent with no major-action trigger, or a major-action consent without the same-day signature ask, follows the normal flow below — the "Outside counsel review recommended" flag on the major-one-off category still applies but does not hard-stop.
+> 当行动看起来像主要一次性行动时，skill 会自动标记。该标记不是阻碍——你可以继续。它是提示思考针对此特定行动，先例适应的草案是否足够。
 
 ---
 
-## Load context
+## 重大行动 + 紧急 = 停止
 
-- `~/.claude/plugins/config/claude-for-legal/corporate-legal/CLAUDE.md` → `## Board & Secretary`:
-  - Consents repository location
-  - House resolution language
-  - State of incorporation (for notice requirements)
-  - Board composition (for signatory list)
-  - Written consents — scope and any limits
+用户想要**今天**签署的主要一次性行动（M&A、融资、解散、资本结构变更、与融资或 M&A 相关的董事选举）的董事会同意——"send for DocuSign this afternoon"、"meeting in an hour"、"signing tonight"、"we need this before market open"——通过外部律师审查。不是因为 plugin 无法起草它——因为主要行动上的错误同意是单向门，紧迫性压力恰恰是错误发生的时候。
 
-### No-precedent hard stop
+触发条件（两者必须为真）：
 
-If (a) no consents repository is configured in `## Board & Secretary` → Consents repository, AND (b) no seed consent document has been provided to this skill (either uploaded this session or referenced in the `## Board & Secretary` → Consent format section with extracted resolution/recital/authorisation language from a specific seed), **STOP before drafting**. Do not proceed to Step 1 intake, do not draft from a generic template, do not "get started" with a filler format.
+1. 行为属于下面的 **审查标记——主要一次性** 类别（M&A、融资、解散、资本结构变更、变更控制权规定、与融资或 M&A 相关的董事选举、重大房地产交易、任何将在未来融资或 M&A 数据室中出现的行动）。
+2. 用户的请求包含不可逆性信号——"send for DocuSign"、"sign today"、"board is signing this afternoon/tonight"、"need this before [market open / closing / the meeting at X]"、任何将承诺在同一次签名中提交的措辞。
 
-Output exactly this block and wait for a response:
+当两者都为真时，输出此内容并停止：
 
-> **No precedent available — stopping before draft.**
+> ⛔ **重大行动 + 当日签署——我不会将其标记为准备签署。**
 >
-> I don't have a precedent to match. A board consent drafted without your house format will need more correction than it saves — resolution language, recital depth, authorisation boilerplate, and signature-block conventions all carry house-specific choices that the reviewer will rewrite from scratch if I start from a generic template.
+> 这是 [action type]，这是一个单向门。你要求今天签署。该组合恰恰是董事会同意的错误最难撤销的时候。
 >
-> Two ways to unblock:
+> 我会很高兴地起草它——但我不会在没有外部律师审查的情况下将其标记为准备签署。如果外部律师已经参与此交易，将此草案交给他们。如果没有，这就是外部律师的用途。你的专业监管机构（美国的州律师协会、英格兰和威尔士的 SRA/律师标准委员会、苏格兰/北爱尔兰/爱尔兰/加拿大/澳大利亚的律师协会或你司法管辖区的同等机构）可以为你找到律师推荐服务，如果需要可以当天找到一位。
 >
-> 1. **Paste or upload a prior consent** (any recent UWC from this company in any category — I extract the format, not the substance), OR
-> 2. **Tell me "draft from a generic template anyway — I'll adjust the formalities myself"** — only pick this if you know you'll rework the resolution language, recital style, and authorisation block by hand before circulation. Say it explicitly; I will not infer it.
+> 两种前进方式：
 >
-> Which do you want to do?
+> 1. **我起草，外部律师审查，然后签署**——这是主要公司行动的正常路径。告诉我起草，我会。
+> 2. **外部律师已经参与此交易并清理了草案路径**——告诉我谁审查以及何时。我会继续并注明外部律师有该草案。
+>
+> 在没有这两种情况之一的情况下，我不会在当日压力下以"准备发送"形式起草。这不是延迟——这是如果有人审查文件，当日主要行动同意可以辩护的唯一方式。
 
-Do NOT proceed without an explicit response choosing one of those two paths. Draft attempts absent a precedent are the highest-rework-to-value output this skill can produce — the hard stop is intentional.
+在没有明确响应选择路径 1 或路径 2 的情况下，不要越过此关卡进行步骤 1 或任何起草。没有主要行动触发的例行同意，或没有当日签署请求的主要行动同意，遵循下面的正常流程——主要一次性类别的"建议外部律师审查"标记仍然适用，但不会硬停止。
 
 ---
 
-## Step 1: Identify the action
+## 加载上下文
 
-Ask the user what action the board needs to approve. Gather:
+- `~/.claude/plugins/config/claude-for-legal/corporate-legal/CLAUDE.md` → `## Board & Secretary`：
+  - 同意存储库位置
+  - 内部决议语言
+  - 注册州（用于通知要求）
+  - 董事会组成（用于签署人名单）
+  - 书面同意——范围和任何限制
 
-- **What is being approved?** (One sentence.)
-- **Any supporting detail?** For example: the name of the officer being appointed, the grant amount and price for an equity grant, the counterparty and contract value for a contract approval.
-- **Effective date:** Today, or a specific date?
-- **Signatories:** Full board, or a specific committee? If the `~/.claude/plugins/config/claude-for-legal/corporate-legal/CLAUDE.md` written-consent scope says certain actions require a meeting rather than consent, flag it now.
-- **Any director conflict?** Does any director have a material interest in the action being approved? If yes: flag it. The conflicted director may still be able to sign depending on state law and the nature of the conflict, but the consent should disclose it and the user should confirm.
+### 无先例硬停止
 
-### Action classification
+如果 (a) 在 `## Board & Secretary` → 同意存储库中未配置同意存储库，并且 (b) 未向此 skill 提供种子同意文档（在此会话中上载或在 `## Board & Secretary` → 同意格式部分引用，并从特定种子中提取的决议/叙述/授权语言），**在起草前停止**。不要进入步骤 1 intake，不要从通用模板起草，不要不要用填充格式"开始"。
 
-Classify the action before searching for precedent:
+完全输出此块并等待响应：
 
-**Routine — direct precedent likely:**
-- Officer appointment or removal
-- Equity grant (option, RSU, restricted stock) to existing plan participants
-- Bank account authorization or signatory update
-- Approval of a contract below a material threshold
-- Annual authorization resolutions (tax matters, benefits plans, etc.)
-- Intercompany loan or services agreement at arm's length terms
-- Registered agent or registered office change
+> **无先例可用——起草前停止。**
+>
+> 我没有先例可以匹配。没有你的内部格式起草的董事会同意需要更多的修正而不是节省——决议语言、叙述深度、授权样板和签名块惯例都带有特定于内部的选择，如果我从通用模板开始，审阅者将从头开始重写。
+>
+> 两种解除阻塞方式：
+>
+> 1. **粘贴或上传先前的同意**（此公司在任何类别中的任何最近的 UWC——我提取格式，而不是实质），或
+> 2. **告诉我"无论如何从通用模板起草——我自己调整形式"**——仅在你知道你会手动重新编写决议语言、叙述风格和授权块后再选择这个。明确说明；我不会推断它。
+>
+> 你想做什么？
 
-**Review flag — major one-off, outside counsel prudent:**
-- M&A transaction (acquisition, merger, asset purchase, investment)
-- New financing round or debt facility
-- Equity issuance to a new investor
-- Change-of-control provision or trigger
-- Approval of an agreement that itself requires board approval under the company's charter or stockholder agreements
-- Dissolution, winding down, or bankruptcy filing
-- Material real estate transaction
-- Any action that will appear as a board approval exhibit in a future financing or M&A data room
-
-If the action is in the review-flag category, show this before drafting:
-
-> ⚠️ **Outside counsel review recommended.** This looks like [action type], which is a major corporate action where a precedent-adapted draft may not be sufficient. Consider having outside counsel review before circulation. Want me to proceed with a draft anyway?
+在没有明确响应选择这两种路径之一的情况下不要继续。没有先例的起草尝试是此 skill 可以产生的最高返工价值输出——硬停止是故意的。
 
 ---
 
-## Step 2: Search for precedent
+## 步骤 1：识别行动
 
-### If consents repository is connected
+询问用户董事会需要批准什么行动。收集：
 
-Search the repository for the closest prior consent. Search strategy:
+- **正在批准什么？**（一句话。）
+- **任何支持细节？** 例如：被任命官员的姓名、股权授予的授予金额和价格、合同批准的对手方和合同价值。
+- **生效日期：** 今天，还是特定日期？
+- **签署人：** 全体董事会，还是特定委员会？如果 `~/.claude/plugins/config/claude-for-legal/corporate-legal/CLAUDE.md` 书面同意范围说某些行动需要会议而不是同意，现在标记它。
+- **任何董事冲突？** 任何董事对正在批准的行动有实质性利益吗？如果是：标记它。冲突董事根据州法律和冲突性质可能仍能签署，但同意应披露它，用户应确认。
 
-1. Search by action type keyword (e.g., "officer appointment", "equity grant", "bank authorization")
-2. Return the most recent matching consent, or ask the user to choose if multiple close matches exist:
+### 行为分类
 
-> I found [N] prior consents that look like this:
->
-> 1. [Consent title / description] — [Date]
-> 2. [Consent title / description] — [Date]
->
-> Which one is closest to what you need? Or should I use the most recent?
+在搜索先例之前分类行动：
 
-3. Read the selected consent. Extract: resolution language, recital structure, authorization language, any specific conditions or carve-outs.
-4. Note any differences between the prior action and the current one that will need to be updated in the draft.
+**例行——可能有直接先例：**
+- 官员任命或罢免
+- 向现有计划参与者授予股权（期权、RSU、限制股）
+- 银行账户授权或签署人更新
+- 低于重要性阈值的合同批准
+- 年度授权决议（税务事项、福利计划等）
+- 按公允条款的公司间贷款或服务协议
+- 注册代理人或注册办公室变更
 
-### If no repository (seed documents only)
+**审查标记——主要一次性，建议外部律师审查：**
+- M&A 交易（收购、合并、资产购买、投资）
+- 新融资轮或债务融资
+- 向新投资者发行股权
+- 变更控制权规定或触发条件
+- 批准公司章程或股东协议本身要求董事会批准的协议
+- 解散、清算或破产申请
+- 重大房地产交易
+- 任何将在未来融资或 M&A 数据室中作为董事会批准附件出现的行动
 
-Extract the format from the seed consents in `~/.claude/plugins/config/claude-for-legal/corporate-legal/CLAUDE.md`. Note that no precedent search is available — the draft will follow house format but without substantive precedent matching. Flag this to the user:
+如果行动属于审查标记类别，在起草前显示此内容：
 
-> No consents repository is connected, so I'm working from your seed documents for format. For this action type specifically, you may want to check whether you have a prior consent to use as a substantive starting point.
+> ⚠️ **建议外部律师审查。** 这看起来像 [action type]，这是一项主要公司行动，先例适应草案可能不够。考虑在分发前让外部律师审查。你想让我继续起草吗？
 
 ---
 
-## Step 3: Draft the consent
+## 步骤 2：搜索先例
 
-Use the house format. The structure below is the standard — adapt to match the precedent or seed format exactly.
+### 如果连接了同意存储库
+
+为最接近的先前同意搜索存储库。搜索策略：
+
+1. 按行动类型关键词搜索（例如，"officer appointment"、"equity grant"、"bank authorization"）
+2. 返回最近匹配的同意，或如果存在多个接近匹配则要求用户选择：
+
+> 我发现 [N] 个看起来像这样的先前同意：
+>
+> 1. [同意标题 / 描述] — [日期]
+> 2. [同意标题 / 描述] — [日期]
+>
+> 哪一个最接近你的需要？还是我应该使用最近的？
+
+3. 阅读选定的同意。提取：决议语言、叙述结构、授权语言、任何特定条件或例外。
+4. 注意先前行动与当前行动之间需要在草案中更新的任何差异。
+
+### 如果没有存储库（仅种子文档）
+
+从 `~/.claude/plugins/config/claude-for-legal/corporate-legal/CLAUDE.md` 中的种子同意中提取格式。注意无法进行先例搜索——草案将遵循内部格式但没有实质性先例匹配。向用户标记此内容：
+
+> 未连接同意存储库，所以我从你的种子文档中处理格式。对于此特定行动类型，你可能想检查是否有先例同意作为实质性起点。
+
+---
+
+## 步骤 3：起草同意
+
+使用内部格式。下面的结构是标准的——调整以完全匹配先例或种子格式。
 
 ```
 UNANIMOUS WRITTEN CONSENT
@@ -183,7 +190,7 @@ limited liability company] (the "Company"), hereby adopt the following
 resolutions by written consent pursuant to [Section X of the [State] General
 Corporation Law / applicable operating agreement], in lieu of a meeting:
 
-[AGENDA ITEM / ACTION HEADING — if multiple resolutions]
+[AGENDA ITEM / ACTION HEADING — if multi-resolution consent]
 
 WHEREAS, [background recital — one or two sentences stating the relevant facts
 and why the board is being asked to act]; and
@@ -224,60 +231,60 @@ Date: _______________
 [Repeat for each director / committee member]
 ```
 
-### Resolution drafting notes
+### 决议起草注释
 
-- **Be precise.** Vague resolutions create problems in due diligence. "Approved the transaction" is not useful. "Approved the Asset Purchase Agreement dated [date] between [Buyer] and [Company], substantially in the form attached hereto as Exhibit A" is.
-- **Name the authorized signatories.** Don't just say "officers" if a specific officer needs authority for a specific thing. Name them.
-- **Reference exhibits.** If a document is being approved, attach it as an exhibit and reference it in the resolution. The consent is only as useful as its specificity.
-- **Match the house language exactly.** "RESOLVED, THAT" vs. "BE IT RESOLVED" vs. "RESOLVED" — use whatever is in the precedent or seed documents. Do not switch formats within a consent.
-
----
-
-## Step 4: Confirm the consent rules for the state of incorporation
-
-Check the state of incorporation in `~/.claude/plugins/config/claude-for-legal/corporate-legal/CLAUDE.md`. Research the written-consent requirements for that state before drafting:
-
-- Is unanimity required for a board written consent, or is a lower threshold permitted?
-- Is notice to non-signatory directors required? On what timing?
-- Is notice to non-signatory stockholders required (for stockholder consents)? On what timing?
-- What form of signature is valid (wet ink, electronic, counterparts)?
-- Does the charter or bylaws override any default rule — e.g., a higher signature threshold, a different notice window, a restriction on which actions can be taken by consent?
-
-Cite the controlling statute section and any charter/bylaw provisions relied on. Verify currency — state corporate codes are amended regularly. Flag uncertainty for attorney verification rather than stating a rule you haven't confirmed.
-
-If `~/.claude/plugins/config/claude-for-legal/corporate-legal/CLAUDE.md` records a house position on any of these questions, apply it and note the legal backstop being relied on. Add a short "State-law notice" block to the output summarizing what you confirmed (or flagged) so the user isn't left wondering.
+- **要精确。** 模糊的决议在尽职调查中会产生问题。"Approved the transaction"没有用处。"批准于 [日期] 在 [买方] 和 [公司] 之间的资产购买协议，其形式基本作为附件 A 附于此"是有用的。
+- **命名授权签署人。** 如果特定官员需要特定事物的授权，不要只说"officers"。命名他们。
+- **引用附件。** 如果正在批准文档，将其作为附件附加并在决议中引用。同意只有在其特异性时才有用。
+- **完全匹配内部语言。** "RESOLVED, THAT" 与 "BE IT RESOLVED" 与 "RESOLVED"——使用先例或种子文档中的任何内容。不要在同意内切换格式。
 
 ---
 
-## Step 4.5: Consequential-action gate (execute consent)
+## 步骤 4：确认注册州的同意规则
 
-**Before proceeding to output:** Read `## Who's using this` in `~/.claude/plugins/config/claude-for-legal/corporate-legal/CLAUDE.md`. If the Role is **Non-lawyer**:
+检查 `~/.claude/plugins/config/claude-for-legal/corporate-legal/CLAUDE.md` 中的注册州。在起草之前研究该州的书面同意要求：
 
-> Executing a written consent has legal consequences — it binds the entity and becomes a corporate record. Have you reviewed this with an attorney? If yes, proceed. If no, here's a brief to bring to them:
+- 董事会书面同意是否需要一致，还是允许较低门槛？
+- 是否需要向非签署董事发出通知？在什么时间？
+- 是否需要向非签署股东发出通知（对于股东同意）？在什么时间？
+- 什么形式的签名有效（湿墨、电子、副本）？
+- 章程或细则是否覆盖任何默认规则——例如，更高的签名门槛、不同的通知窗口、限制可通过同意采取的行动？
+
+引用控制的法规章节以及依赖的任何章程/细则条款。验证时效性——州公司法定期修订。标记不确定性以供律师验证，而不是陈述你未确认的规则。
+
+如果 `~/.claude/plugins/config/claude-for-legal/corporate-legal/CLAUDE.md` 在这些问题上记录了内部立场，应用它并记录依赖的法律支持。向输出添加简短的"州法律通知"块，总结你确认（或标记）的内容，以便用户不留下疑问。
+
+---
+
+## 步骤 4.5：后果行动关卡（执行同意）
+
+**在继续输出之前：** 阅读 `~/.claude/plugins/config/claude-for-legal/corporate-legal/CLAUDE.md` 中的 `## Who's using this`。如果角色是**非律师**：
+
+> 执行书面同意有法律后果——它约束实体并成为公司记录。你是否已与律师审查此内容？如果是，继续。如果不是，这是带给他们的简报：
 >
-> - What the action is (the resolution)
-> - What the analysis found (state-law notice, signature threshold, any flagged conflicts)
-> - Open questions (anything flagged for attorney verification above)
-> - What could go wrong (invalid consent, breach of fiduciary duty, signature defect, conflict not properly handled)
-> - What to ask the attorney (is this the right vehicle; are there missing recitals; does the charter/bylaws permit consent for this action)
+> - 行为是什么（决议）
+> - 分析发现的内容（州法律通知、签名门槛、任何标记的冲突）
+> - 未决问题（上面标记为需要律师验证的任何内容）
+> - 可能出什么问题（无效同意、违反信托义务、签名缺陷、冲突未正确处理）
+> - 要问律师什么（这是否正确的载体；是否有遗漏的叙述；章程/细则是否允许对此行动进行同意）
 >
-> If you need to find an attorney, solicitor, barrister, or other authorised legal professional: contact your professional regulator (state bar in the US, SRA/Bar Standards Board in England & Wales, Law Society in Scotland/NI/Ireland/Canada/Australia, or your jurisdiction's equivalent) for a referral service.
+> 如果你需要找到律师、事务律师、大律师或其他授权法律专业人士：联系你的专业监管机构（美国的州律师协会、英格兰和威尔士的 SRA/律师标准委员会、苏格兰/北爱尔兰/爱尔兰/加拿大/澳大利亚的律师协会或你司法管辖区的同等机构）以获取推荐服务。
 
-Do not produce the final signatory-ready draft past this gate without an explicit yes. Research, format extraction, and a marked-DRAFT for attorney review are fine.
+在没有明确是的情况下，不要越过此关卡产生最终签署就绪的草案。研究、格式提取和标记为供律师审查的草案都可以。
 
 ---
 
-## Step 5: Output
+## 步骤 5：输出
 
-Produce:
+生成：
 
-1. **The consent draft** — complete, ready to review and circulate. The executed written consent itself is a corporate record, not privileged; do not apply the work-product header to the consent as circulated. The drafting notes, signatory tracker, and analysis below are work product — prepend the work-product header from `~/.claude/plugins/config/claude-for-legal/corporate-legal/CLAUDE.md` `## Outputs` (it differs by user role — see `## Who's using this`):
+1. **同意草案**——完整、准备审查和分发。执行的书面同意本身是公司记录，不是特权；不要将工作产品标题应用于分发的同意。下面的起草注释、签署人跟踪器和分析是工作产品——根据 `~/.claude/plugins/config/claude-for-legal/corporate-legal/CLAUDE.md` `## Outputs` 在其前面添加工作产品标题（根据用户角色而不同——见 `## Who's using this`）：
 
    ```
    [WORK-PRODUCT HEADER — per plugin config ## Outputs — differs by role; see `## Who's using this`]
    ```
 
-2. **Signatory checklist:**
+2. **签署人检查清单：**
 ```
 [WORK-PRODUCT HEADER — per plugin config ## Outputs — differs by role; see `## Who's using this`]
 
@@ -295,7 +302,7 @@ Conflict disclosures:
 State law notice: [confirmed-rule-for-state-of-incorporation / confirm]
 ```
 
-3. **Review prompts:**
+3. **审查提示：**
 ```
 [WORK-PRODUCT HEADER — per plugin config ## Outputs — differs by role; see `## Who's using this`]
 
@@ -308,16 +315,16 @@ BEFORE CIRCULATING — check:
 □ For major actions: outside counsel has reviewed
 ```
 
-4. **Final note on the draft — add before circulation.** Prepend to the consent draft as a separate pre-execution note, then strip before the consent is signed:
+4. **草案上的最终注释——在分发前添加。** 作为单独的执行前注释附加到同意草案之前，然后在同意签署前剥离：
 
-> This is a draft for attorney review, not an executed consent. Executing it binds the entity and becomes a corporate record — a licensed attorney reviews, edits as needed, and takes professional responsibility before it goes out. Do not circulate for signature unreviewed.
+> 这是供律师审查的草案，而不是已执行的同意。执行它约束实体并成为公司记录——执业律师审查、根据需要进行编辑并在其发出时承担专业责任。不要未经审查分发以供签名。
 
 ---
 
-## What this skill does not do
+## 此 skill 不做什么
 
-- It does not determine whether an action legally requires board approval — that judgment belongs to the attorney.
-- It does not advise on director fiduciary duties or conflict of interest resolution — it flags conflicts, the attorney handles them.
-- It does not replace outside counsel review for major transactions — the scope warning is genuine, not boilerplate.
-- It does not circulate the consent — output is for the attorney to review and send via their own process.
-- It does not track returned signatures — the signatory checklist is a starting point; signature tracking is manual or handled by your document management process.
+- 它不确定行动在法律上是否需要董事会批准——该判断属于律师。
+- 它不建议董事信托义务或利益冲突解决——它标记冲突，律师处理它们。
+- 它不替代主要交易的外部律师审查——范围警告是真实的，而不是样板。
+- 它不分发同意——输出供律师审查并通过自己的流程发送。
+- 它不跟踪返回的签名——签署人检查清单是起点；签名跟踪是手动的，或由你的文档管理流程处理。

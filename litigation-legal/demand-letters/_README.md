@@ -1,27 +1,33 @@
-# demand-letters/ — pre-litigation demand work
+<!--
+This file is a Chinese translation of the original by Anthropic PBC.
+Original: https://github.com/anthropics/claude-for-legal
+Licensed under Apache License 2.0
+-->
 
-This folder holds the work product for every demand letter the counsel sends: payment demands, breach/cure notices, cease-and-desist, employment separation demands, preservation demands.
+# demand-letters/ — 诉前催款函工作
 
-Separate from `matters/` because:
+此文件夹存放律师发出的每封催款函的工作产品：付款催告函、违约/补救通知、停止侵权函、劳动关系离职催告函、证据保全要求函。
 
-- Not every demand letter rises to a tracked matter. Small-dollar payment demands and routine collections don't need a log row.
-- Every demand letter has the same workflow shape (intake → draft → send → checklist), regardless of whether it later becomes a matter.
-- When a demand letter does become a matter, the matter's `matter.md` cross-links back here — the drafting history stays with the letter.
+与 `matters/` 分开，原因如下：
 
-## Layout
+- 并非每封催款函都会升级为追踪中的事项。小额付款催告函和例行催收不需要台账行。
+- 每封催款函都有相同的工作流形态（intake → 起草 → 发送 → 检查清单），无论其是否后续成为事项。
+- 当催款函确实成为事项时，事项的 `matter.md` 反向链接到此处——起草历史保留在信函中。
+
+## 目录结构
 
 ```
 demand-letters/
-├── _README.md                     # this file
+├── _README.md                     # 本文件
 └── [slug]/
-    ├── intake.md                  # context gathering, strategy, leverage, privilege filters
-    ├── draft-v1.docx              # the letter (v2, v3 as iterated)
-    └── checklist.md               # post-send checklist — delivery, copies, calendared deadlines, follow-up
+    ├── intake.md                  # 背景收集、策略、杠杆、特权过滤器
+    ├── draft-v1.docx              # 信函（v2、v3 随迭代）
+    └── checklist.md               # 发送后检查清单——投递、副本、已入日历的截止日期、跟进
 ```
 
-## Slug conventions
+## Slug 惯例
 
-`[type]-[counterparty]-[yyyy-mm]`. Examples:
+`[类型]-[对手方]-[yyyy-mm]`。示例：
 
 - `payment-acme-2026-04`
 - `ceasedesist-competitor-x-2026-04`
@@ -29,17 +35,17 @@ demand-letters/
 - `separation-smith-2026-04`
 - `preservation-vendor-2026-04`
 
-## Workflow
+## 工作流
 
-1. `/litigation-legal:demand-intake [title]` → runs adaptive intake, writes `intake.md`
-2. `/litigation-legal:demand-draft [slug]` → runs FRE 408 / privilege / waiver checklist, drafts `.docx`, writes `checklist.md`, offers to create a matter
+1. `/litigation-legal:demand-intake [标题]` → 运行自适应 intake，写入 `intake.md`
+2. `/litigation-legal:demand-draft [slug]` → 运行 FRE 408 / 特权 / 放弃检查清单，起草 `.docx`，写入 `checklist.md`，提议创建事项
 
-## Relationship to matters
+## 与事项的关系
 
-After a demand letter is drafted, `demand-draft` assesses materiality (heuristic from house `~/.claude/plugins/config/claude-for-legal/litigation-legal/CLAUDE.md`) and offers to create a matter. If yes, a matter row goes into `matters/_log.yaml` with `source: demand-letter`, and `matters/[matter-slug]/matter.md` links back to this demand-letter's folder.
+起草催款函后，`demand-draft` 根据内部 `~/.claude/plugins/config/claude-for-legal/litigation-legal/CLAUDE.md` 中的重大性启发式评估重大性，并提议创建事项。如果是，一个事项行进入 `matters/_log.yaml`，其中 `source: demand-letter`，`matters/[matter-slug]/matter.md` 反向链接到此催款函文件夹。
 
-Immaterial demands stay here only. They're still a work-product record — just not portfolio-tracked.
+非重大催款函仅保留在此处。它们仍然是工作产品记录——只是不在组合中追踪。
 
-## Corrections and versions
+## 更正和版本控制
 
-Never overwrite a sent draft. If a letter was sent and needs revision (e.g., a supplemental demand), start `draft-v2.docx`. The history of versions is itself useful record.
+绝不覆盖已发送的草稿。如果信函已发送且需要修订（例如，补充催款），开始 `draft-v2.docx`。版本历史本身就是有用的记录。

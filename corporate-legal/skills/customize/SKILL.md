@@ -1,102 +1,72 @@
 ---
 name: customize
 description: >
-  Guided customization of your corporate practice profile — change one thing
-  without re-running the whole cold-start interview. Adjust risk posture,
-  escalation contacts, active modules (M&A / Board / Public Company / Entity
-  Management), materiality thresholds, disclosure schedule format, consent
-  precedents, or matter workspace paths. Use when the user says "change my
-  [thing]", "update my profile", "edit my config", or "customize".
-argument-hint: "[section name, or describe what you want to change]"
+  引导式自定义公司执业档案——只改一项，无需重跑整个冷启动访谈。
+  调整风险姿态、升级联系人、活跃模块（M&A / 董事会 / 上市公司 / 实体管理）、
+  重要性阈值、披露日程格式、同意先例、或事项工作区路径。
+  当用户说"修改我的[某项]"、"更新我的档案"、"编辑我的配置"或"自定义"时使用。
+argument-hint: "[章节名称，或描述你想修改的内容]"
 ---
+
+<!--
+This file is a Chinese translation of the original by Anthropic PBC.
+Original: https://github.com/anthropics/claude-for-legal
+Licensed under Apache License 2.0
+-->
+
 
 # /customize
 
-## When this runs
+## 何时运行
 
-The user typed `/corporate-legal:customize`. They want to change something
-in their practice profile — a risk posture, an escalation contact, a module
-toggle, an output format — without re-running the whole cold-start interview
-and without hand-editing YAML.
+用户输入了 `/corporate-legal:customize`。他们想要更改执业档案中的某些内容——风险姿态、升级联系人、模块开关、输出格式——而无需重新运行整个冷启动访谈，也无需手动编辑 YAML。
 
-## What to do
+## 操作步骤
 
-1. **Read the config.** Read
+1. **读取配置。** 读取
    `~/.claude/plugins/config/claude-for-legal/corporate-legal/CLAUDE.md`
-   (and `~/.claude/plugins/config/claude-for-legal/company-profile.md` one
-   level up). If the plugin config does not exist or still contains
-   `[PLACEHOLDER]` values, say:
+   （以及上一级的 `~/.claude/plugins/config/claude-for-legal/company-profile.md`）。
+   如果插件配置不存在或仍包含 `[PLACEHOLDER]` 值，说：
 
-   > You haven't run setup yet. Run `/corporate-legal:cold-start-interview`
-   > first — customize is for adjusting a profile you already have.
+   > 你还没有运行过设置。请先运行 `/corporate-legal:cold-start-interview`——
+   > customize 是用来调整已有档案的。
 
-2. **Show the customizable map.** List what's in the profile, grouped, with a
-   one-line summary of the current value:
+2. **展示可自定义项清单。** 列出档案中的内容，按组分类，附带当前值的单行摘要：
 
-   - **Company / who you are** — name, industry, jurisdictions, stage, public
-     vs. private, practice setting *(shared across all 12 plugins — changes
-     flow through `company-profile.md`)*
-   - **Active modules** — which of M&A, Board & Secretary, Public Company,
-     Entity Management are on. Turning a module on/off changes which skills
-     prompt for setup.
-   - **Risk posture** — conservative / middle / aggressive, what each means
-     for diligence materiality and disclosure schedule scope
-   - **People** — deal team, board secretary, entity management owner,
-     escalation chain
-   - **M&A module** — materiality thresholds (contract value, headcount,
-     revenue), data room platforms trusted, AI bulk-review trust level
-     (Luminance / Kira), deal-team briefing cadence
-   - **Board & Secretary module** — house consent format, signatory
-     preferences, committee structure
-   - **Public Company module** — reporting calendar, disclosure controls,
-     10-K/10-Q review timing
-   - **Entity Management module** — entity table, registered agent, filing
-     jurisdictions, annual report calendar
-   - **Workflow** — matter workspaces (deal rooms), closing checklist
-     location, VDR watcher cadence
-   - **Integrations** — Box / Intralinks / Datasite / CT Corp / Slack status,
-     fallbacks
+   - **公司/你是谁** — 名称、行业、司法管辖区、阶段、上市与私营、执业环境 *(所有 12 个插件共享——修改会同步到 `company-profile.md`)*
+   - **活跃模块** — M&A、董事会和秘书、上市公司、实体管理中哪些已开启。打开/关闭模块会改变哪些 skills 会提示设置。
+   - **风险姿态** — 保守/中性/激进，每种对尽调重要性和披露日程范围的影响
+   - **人员** — 交易团队、董事会秘书、实体管理负责人、升级链
+   - **M&A 模块** — 重要性阈值（合同价值、员工数、收入）、可信数据室平台、AI 批量审查信任级别（Luminance / Kira）、交易团队简报节奏
+   - **董事会和秘书模块** — 内部同意格式、签名偏好、委员会结构
+   - **上市公司模块** — 申报日历、披露控制、10-K/10-Q 审查时机
+   - **实体管理模块** — 实体表、注册代理人、申报司法管辖区、年度报告日历
+   - **工作流** — 事项工作区（交易室）、关闭检查清单位置、VDR 监控节奏
+   - **集成** — Box / Intralinks / Datasite / CT Corp / Slack 状态及备用方案
 
-3. **Ask what they want to change.**
+3. **询问想修改什么。**
 
-   > What would you like to adjust? Pick a section, or describe the change in
-   > your own words.
+   > 你想调整什么？选择一个章节，或用自己的话描述修改内容。
 
-4. **Make the change.** Show the current value, ask for the new value, explain
-   what changes downstream, confirm, write it to the config.
+4. **执行修改。** 展示当前值，询问新值，说明下游影响，确认后写入配置。
 
-   Examples:
-   - *Materiality threshold $250K → $500K:* "`/diligence-issue-extraction`
-     and `/material-contract-schedule` will now treat $500K as the cutoff.
-     Existing findings stay as logged; re-run if you want the new threshold
-     applied retroactively."
-   - *Turning on the Public Company module:* "I'll prompt you for reporting
-     calendar and disclosure controls next time you run anything in that
-     area."
-   - *AI bulk-review trust "check every row" → "spot-check 10%":* "`/ai-tool-
-     handoff` will QA a 10% sample rather than every extraction."
+   示例：
+   - *重要性阈值 $250K 改为 $500K：* "`/diligence-issue-extraction` 和 `/material-contract-schedule` 现在会将 $500K 视为截止点。已有发现保持记录状态；如果希望新阈值追溯适用，请重新运行。"
+   - *打开上市公司模块：* "下次你在该领域运行任何内容时，我会提示你提供申报日历和披露控制信息。"
+   - *AI 批量审查信任"逐行检查"改为"抽查 10%"：* "`/ai-tool-handoff` 将 QA 10% 样本，而非每次提取。"
 
-5. **For shared-profile changes** (company name, industry, jurisdictions,
-   practice setting, stage): write to
-   `~/.claude/plugins/config/claude-for-legal/company-profile.md` and note:
+5. **共享档案的修改**（公司名称、行业、司法管辖区、执业环境、阶段）：写入
+   `~/.claude/plugins/config/claude-for-legal/company-profile.md` 并说明：
 
-   > This change affects all 12 plugins — any plugin that reads your
-   > jurisdiction footprint now sees [new value].
+   > 此修改会影响所有 12 个插件——任何读取你司法管辖区范围的插件现在都会看到 [新值]。
 
-6. **Close.**
+6. **结束。**
 
-   > Done. Your next output will reflect the change. Anything else? You can
-   > run `/corporate-legal:customize` anytime.
+   > 完成。你下次的输出将反映此修改。还有其他需要调整的吗？你可以随时运行 `/corporate-legal:customize`。
 
-## Guardrails
+## 护栏
 
-- **Never delete a section.** If the user wants to "remove" something, set it
-  to `[Not configured]` and explain what that means for the plugin's behavior.
-- **Flag internal inconsistency.** If the change would make the profile
-  inconsistent (e.g., Public Company module off + "SEC counsel" in
-  escalation; or aggressive risk posture + $25K materiality threshold), flag
-  the tension.
-- **Flag guardrail degradation.** The `[review]` flag, source attribution
-  tags on retrieved documents, and `[verify]` tags on cited authorities are
-  load-bearing — explain the trade-off before removing.
-- **One change at a time.** Don't re-ask the whole interview.
+- **永远不要删除章节。** 如果用户想"移除"某项内容，将其设为 `[Not configured]` 并说明这对插件行为意味着什么。
+- **标记内部矛盾。** 如果修改会导致档案不一致（例如，上市公司模块关闭 + 升级中的"SEC 律师"；或激进风险姿态 + $25K 重要性阈值），标记矛盾。
+- **标记护栏降级。** `[review]` 标记、检索文档上的来源归因标签和引用权威上的 `[verify]` 标记是承重的——在移除之前说明权衡。
+- **一次只改一项。** 不要重新询问整个访谈。

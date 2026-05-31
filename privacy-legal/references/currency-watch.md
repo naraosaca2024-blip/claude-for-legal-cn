@@ -1,39 +1,45 @@
-# Privacy Currency Watch
+<!--
+This file is a Chinese translation of the original by Anthropic PBC.
+Original: https://github.com/anthropics/claude-for-legal
+Licensed under Apache License 2.0
+-->
 
-**Last verified: 2026-05-10.**
+# 隐私法时效性监控
 
-> **⚠️ Staleness check.** If the last-verified date above is more than 90 days old, treat this file as stale and verify each entry before relying on it. A stale watch list is worse than no watch list — it looks current while being wrong. When a skill reads this file, check the last-verified date first. If stale, say: "The currency watch was last verified [date] — [N] months ago. I'm using it as a checklist of areas to search, not as a source of current status." When you update any entry, also update the last-verified date at the top.
+**最后验证：2026-05-10。**
 
-Privacy law moves. Before relying on an effective date, threshold, or obligation, verify it. These are the areas most likely to have moved since model training:
+> **⚠️ 时效性检查。** 如果上方的最后验证日期超过 90 天，请将此文件视为过时，并在依赖任何条目前进行验证。过时的监控列表比没有监控列表更糟糕——它看起来是最新的，实际上却是错误的。当 skill 读取此文件时，应先检查最后验证日期。如果过时，请说："时效性监控最后验证于 [日期]——[N] 个月前。我将其用作需要搜索的领域清单，而非当前状态的来源。"当你更新任何条目时，也要更新顶部的最后验证日期。
 
-## COPPA (16 CFR Part 312)
+隐私法在不断变动。在依赖生效日期、阈值或义务之前，请进行验证。以下是自模型训练以来最可能已发生变化的领域：
 
-- **2025 Amendments — compliance deadline April 22, 2026.** Major changes: biometric identifiers and government IDs are now "personal information"; separate verifiable parental consent required for third-party disclosure tied to targeted advertising; written information security program mandatory; indefinite retention prohibited.
-- A plugin that knows pre-2025 COPPA looks competent while being stale. Verify at [FTC COPPA page](https://www.ftc.gov/legal-library/browse/rules/childrens-online-privacy-protection-rule-coppa).
+## COPPA（16 CFR Part 312）
 
-## State privacy laws (comprehensive)
+- **2025 年修正案——合规截止日期 2026 年 4 月 22 日。** 重大变化：生物特征标识符和政府颁发的身份证件现在是"个人信息"；针对定向广告的第三方披露需要单独的可验证父母同意；强制要求书面信息安全计划；禁止无限期保留。
+- 了解 2025 年前 COPPA 的 plugin 看起来很称职，实际上却已过时。请在 [FTC COPPA 页面](https://www.ftc.gov/legal-library/browse/rules/childrens-online-privacy-protection-rule-coppa) 进行验证。
 
-The map grows every year. As of May 2026, comprehensive privacy laws in force or imminent: CA (CCPA/CPRA), VA, CO, CT, UT, IA, IN, TN, MT, OR, TX, FL, DE, NH, NJ, KY, MD, MN, NE, RI. Check the IAPP state law tracker for current effective dates and the most recent additions.
+## 州隐私法（综合性）
 
-## Cross-border transfers
+地图每年都在扩大。截至 2026 年 5 月，已生效或即将生效的综合隐私法所在州：CA（CCPA/CPRA）、VA、CO、CT、UT、IA、IN、TN、MT、OR、TX、FL、DE、NH、NJ、KY、MD、MN、NE、RI。请查看 IAPP 州法律追踪器了解当前生效日期和最新增补。
 
-- **EU-US DPF** in force since July 2023. Subject to Schrems III litigation — verify it's still valid before relying.
-- **UK-US Data Bridge** in force since October 2023.
-- **Swiss-US DPF** in force since September 2024.
-- For any transfer that relies on an adequacy decision, check the EU Commission's current adequacy list.
+## 跨境数据传输
 
-## FTC enforcement trends
+- **EU-US DPF** 自 2023 年 7 月起生效。面临 Schrems III 诉讼——在依赖之前请验证其仍然有效。
+- **UK-US Data Bridge** 自 2023 年 10 月起生效。
+- **Swiss-US DPF** 自 2024 年 9 月起生效。
+- 对于任何依赖充分性决定的传输，请查看欧盟委员会当前的充分性决定列表。
 
-- **FTC v. Humor Rainbow/OkCupid (March 2026):** Undisclosed sharing of user data with a third party for AI training as a §5 violation. Flag for any DPA or privacy policy review involving AI training pathways.
-- Health data: FTC's expansive reading of the Health Breach Notification Rule (GoodRx, BetterHelp, Premom settlements). Verify current scope.
-- Dark patterns: FTC's pattern of treating confusing consent flows as deceptive. Verify current enforcement posture.
+## FTC 执法趋势
 
-## DSAR response timelines
+- **FTC 诉 Humor Rainbow/OkCupid（2026 年 3 月）：** 未披露将用户数据共享给第三方用于 AI 训练属于 § 5 违规。在任何涉及 AI 训练路径的 DPA 或隐私政策审查中需要标记。
+- 健康数据：FTC 对健康违规通知规则的扩张性解读（GoodRx、BetterHelp、Premom 和解案）。请验证当前范围。
+- 暗模式：FTC 将令人困惑的同意流程视为欺骗性行为的模式。请验证当前执法立场。
 
-CCPA: 45 days + 45-day extension with notice. GDPR: 1 month + 2-month extension. Other states vary — verify the specific state's window. The plugin defaults may be out of date for the newest states.
+## DSAR 响应时限
 
-## How to use this file
+CCPA：45 天 + 经通知后 45 天延期。GDPR：1 个月 + 2 个月延期。其他州各有不同——请验证特定州的时间窗口。该 plugin 的默认值对于最新的州可能已过时。
 
-When a skill cites a privacy rule, effective date, or threshold, it should note: "Privacy law is moving — this may have changed since my training. Verify at [source]. See `references/currency-watch.md`."
+## 如何使用此文件
 
-**This file goes stale.** Current as of May 2026. Update when you notice drift.
+当 skill 引用隐私规则、生效日期或阈值时，应注明："隐私法在不断变动——自我训练以来可能已有变化。请在 [来源] 处验证。参见 `references/currency-watch.md`。"
+
+**此文件会过时。** 截至 2026 年 5 月当前有效。发现偏差时请更新。

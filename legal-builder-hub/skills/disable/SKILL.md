@@ -1,38 +1,35 @@
 ---
 name: disable
 description: >
-  Disable a community skill installed through the hub without removing its
-  files. Use when the user wants to temporarily quiet a community skill
-  ("disable [skill]"), stop its hooks from firing while keeping its config,
-  or re-enable a previously disabled skill.
+  禁用通过中心安装的社区 skill 而不删除其文件。
+  当用户想要暂时安静社区 skill（"disable [skill]"）、
+  在保留其配置的同时停止其 hooks 触发，或重新启用之前禁用的 skill 时使用。
 argument-hint: "[skill name]"
 ---
 
+<!--
+This file is a Chinese translation of the original by Anthropic PBC.
+Original: https://github.com/anthropics/claude-for-legal
+Licensed under Apache License 2.0
+-->
+
+
 # /disable
 
-Run the `disable` workflow from the skill-manager reference skill against the
-named skill.
+从 skill-manager 参考 skill 对命名 skill 运行 `disable` 工作流。
 
-What disable does:
+禁用的作用：
 
-- Renames the skill's `SKILL.md` to `SKILL.md.disabled` so Claude no longer
-  discovers it as an active skill. Files, references, templates, and config
-  stay in place.
-- If the skill ships hooks in `hooks/hooks.json`, also rename that file to
-  `hooks.json.disabled` so no automatic triggers fire while the skill is
-  disabled.
-- Logs the action to
-  `~/.claude/plugins/config/claude-for-legal/legal-builder-hub/install-log.yaml`.
+- 将 skill 的 `SKILL.md` 重命名为 `SKILL.md.disabled`，以便 Claude 不再将其发现为活跃 skill。文件、引用、模板和配置保持不变。
+- 如果 skill 在 `hooks/hooks.json` 中提供 hooks，也将该文件重命名为 `hooks/hooks.json.disabled`，以便在 skill 禁用时不会触发自动触发器。
+- 将操作记录到 `~/.claude/plugins/config/claude-for-legal/legal-builder-hub/install-log.yaml`。
 
-Safety rules:
+安全规则：
 
-1. **Only disable community skills installed through this hub.** Same check
-   as uninstall — consult the install log and CLAUDE.md installed table.
-2. **Never disable a first-party plugin's skill.** Off-limits.
-3. **Confirm before renaming.** Show the paths, get explicit `yes`.
+1. **仅禁用通过此中心安装的社区 skills。** 与卸载相同的检查——咨询安装日志和 CLAUDE.md 安装表。
+2. **永不禁用第一方插件 skill。** 禁区。
+3. **重命名之前确认。** 显示路径，获得明确的 `yes`。
 
-Re-enable by running the command again with the same skill name — the
-skill-manager workflow recognizes a disabled skill and flips the rename back.
+通过使用相同的 skill 名称再次运行命令来重新启用——skill-manager 工作流识别禁用的 skill 并将重命名翻转回来。
 
-> Detailed uninstall, disable, and re-enable workflows live in the
-> `skill-manager` reference skill — load it before doing substantive work.
+> 详细的卸载、禁用和重新启用工作流程位于 `skill-manager` 参考 skill 中——在进行实质性工作之前加载它。

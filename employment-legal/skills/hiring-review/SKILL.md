@@ -1,213 +1,180 @@
 ---
 name: hiring-review
 description: >
-  Review an offer letter and any restrictive covenants — jurisdiction check
-  included. Substantive rules (covenant enforceability, pay-transparency,
-  salary-history limits, exemption criteria) are researched per hire, not
-  stored. Use when the user says "review this offer", "can we use a
-  non-compete here", "check this offer letter", "hiring in [state]", or
-  attaches an offer.
-argument-hint: "[offer letter file, or describe the hire]"
+  审查录用函及任何限制性契约——含司法管辖区检查。实质性规则（契约可执行性、薪酬透明度、薪资历史限制、豁免标准）在每次招聘时研究，不存储。当用户说"审查这个录用函"、"这里可以用非竞争吗"、"检查这封录用函"、"在[州]招聘"或附加录用函时使用。
+argument-hint: "[录用函文件，或描述招聘]"
 ---
+
+<!--
+This file is a Chinese translation of the original by Anthropic PBC.
+Original: https://github.com/anthropics/claude-for-legal
+Licensed under Apache License 2.0
+-->
+
 
 # /hiring-review
 
-1. Load `~/.claude/plugins/config/claude-for-legal/employment-legal/CLAUDE.md` → jurisdictional footprint, hiring review triggers, restrictive covenant policy.
-2. Use the workflow below.
-3. Check: jurisdiction, classification, restrictive covenants, background check compliance.
-4. Flag anything that hits the jurisdiction-specific escalation table.
+1. 加载 `~/.claude/plugins/config/claude-for-legal/employment-legal/CLAUDE.md` → 司法管辖区足迹、招聘审查触发器、限制性契约政策。
+2. 使用以下工作流。
+3. 检查：司法管辖区、分类、限制性契约、背景调查合规性。
+4. 标记任何触及司法管辖区特定升级表的项目。
 
 ---
 
-## Matter context
+## 事项上下文
 
-**Matter context.** Check `## Matter workspaces` in the practice-level CLAUDE.md. If `Enabled` is `✗` (the default for in-house users), skip the rest of this paragraph — skills use practice-level context and the matter machinery is invisible. If enabled and there is no active matter, ask: "Which matter is this for? Run `/employment-legal:matter-workspace switch <slug>` or say `practice-level`." Load the active matter's `matter.md` for matter-specific context and overrides. Write outputs to the matter folder at `~/.claude/plugins/config/claude-for-legal/employment-legal/matters/<matter-slug>/`. Never read another matter's files unless `Cross-matter context` is `on`.
+**事项上下文。** 检查执业级 CLAUDE.md 中的 `## Matter workspaces`。如果 `Enabled` 为 `✗`（内部用户的默认值），跳过本段的其余部分——skills 使用执业级上下文，事项机制不可见。如果已启用且没有活跃事项，询问："这是哪个事项的？Run `/employment-legal:matter-workspace switch <slug>` 或说 `practice-level`。"加载活跃事项的 `matter.md` 以获取事项特定上下文和覆盖。将输出写入事项文件夹 `~/.claude/plugins/config/claude-for-legal/employment-legal/matters/<matter-slug>/`。除非 `Cross-matter context` 为 `on`，否则永远不要阅读另一个事项的文件。
 
 ---
 
-## Purpose
+## 目的
 
-Offer letters are mostly boilerplate until they're not. The jurisdiction check
-and the restrictive-covenant check are where this skill earns its keep. The
-skill does not state the law — every jurisdiction-specific rule is researched
-and cited at the time of review.
+录用函大多是样板，直到不是为止。司法管辖区检查和限制性契约检查是此 skill 有价值的地方。Skill 不陈述法律——每个司法管辖区特定的规则在审查时研究并引用。
 
-## Load context
+## 加载上下文
 
-`~/.claude/plugins/config/claude-for-legal/employment-legal/CLAUDE.md` → jurisdictional footprint, hiring review triggers, restrictive
-covenant policy, offer letter template location.
+`~/.claude/plugins/config/claude-for-legal/employment-legal/CLAUDE.md` → 司法管辖区足迹、招聘审查触发器、限制性契约政策、录用函模板位置。
 
-## Output header
+## 输出标题
 
-Prepend the work-product header from `~/.claude/plugins/config/claude-for-legal/employment-legal/CLAUDE.md` → `## Outputs` (it differs by user role — see `## Who's using this`).
+在前面加上来自 `~/.claude/plugins/config/claude-for-legal/employment-legal/CLAUDE.md` → `## Outputs` 的工作产品标题（根据用户角色而异——见 `## Who's using this`）。
 
-## Workflow
+## 工作流
 
-### Step 1: Jurisdiction
+### 步骤 1：司法管辖区
 
-Where will this person work? Not where HQ is — where *they* are.
+此人在哪里工作？不是总部在哪里——是*他们*在哪里。
 
-If remote: their home state/country governs. If hybrid: usually their home
-state, but check the offer letter's choice-of-law clause (may or may not hold
-up).
+如果是远程：他们的家乡州/国家管辖。如果是混合：通常是他们的家乡州，但检查录用函的选择法律条款（可能或可能不成立）。
 
-Check the jurisdiction table in `~/.claude/plugins/config/claude-for-legal/employment-legal/CLAUDE.md` for this state/country. If it's
-not in the table — new jurisdiction — flag that: "First hire in [state]. The
-jurisdiction table doesn't cover this. Research needed before offer goes out."
+检查 `~/.claude/plugins/config/claude-for-legal/employment-legal/CLAUDE.md` 中此州/国家的司法管辖区表。如果不在表中——新司法管辖区——标记："First hire in [state]。司法管辖区表不涵盖此。录用函发出前需要研究。"
 
-### Step 2: Classification
+### 步骤 2：分类
 
-Exempt or non-exempt? The offer should say, and the role should support it.
+豁免还是非豁免？录用函应该说明，角色应该支持它。
 
-| Test | Check |
+| 测试 | 检查 |
 |---|---|
-| Salary basis | Paid a fixed salary regardless of hours? |
-| Salary level | Above the applicable federal and state thresholds? |
-| Duties test | Does the role actually involve the exempt duties? |
+| 薪资基础 | 无论工时如何支付固定薪水？ |
+| 薪资水平 | 高于适用的联邦和州阈值？ |
+| 职责测试 | 角色是否实际涉及豁免职责？ |
 
-> **Research before calling exemption.** Identify the currently operative
-> salary thresholds (federal and state — several states index annually and
-> several have tiered thresholds by employer size) and the applicable duties
-> test(s) for the role. Cite primary sources. Verify currency.
+> **在决定豁免之前研究。** 识别当前有效的薪资阈值（联邦和州——几个州每年指数化，几个根据雇主大小有分层阈值）和角色的适用职责测试。引用主要来源。验证货币性。
 
-If the offer says exempt but the role description does not support the
-exempt duties — flag it. Misclassification is expensive.
+如果录用函说豁免但角色描述不支持豁免职责——标记它。错误分类代价高昂。
 
-### Step 3: Restrictive covenants
+### 步骤 3：限制性契约
 
-If the offer includes a non-compete, customer non-solicit, employee
-non-solicit, or confidentiality/IP assignment:
+如果录用函包括非竞争、客户不招揽、员工不招揽或保密/IP 转让：
 
-> **Research enforceability before advising.** For the employee's jurisdiction,
-> identify the currently operative rules on each restrictive covenant in the
-> offer. Non-compete enforceability in particular has shifted in multiple
-> states in recent years through legislation, agency action, and litigation —
-> do not rely on prior memory of which states permit non-competes. Note:
-> - The specific type of covenant (non-compete, customer non-solicit, employee
->   non-solicit, confidentiality/trade-secret, IP assignment) — each has its
->   own rules.
-> - Any salary or income threshold that conditions enforceability.
-> - Any notice, consideration, or garden-leave requirements.
-> - Any industry-specific carve-outs (e.g., healthcare, broadcasting).
-> - Duration and geographic-scope reasonableness tests.
-> - Choice-of-law and choice-of-forum enforceability for out-of-state covenants.
-> Cite primary sources. Verify currency.
+> **在建议之前研究可执行性。** 对于员工的司法管辖区，识别录用中每个限制性契约的当前有效规则。非竞争可执行性近年来在多个州通过立法、机构行动和诉讼发生了变化——不要依赖先前对哪些州允许非竞争的记忆。注意：
+> - 契约的具体类型（非竞争、客户不招揽、员工不招揽、保密/商业秘密、IP 转让）——每个都有自己的规则。
+> - 任何以薪资或收入为条件的可执行性阈值。
+> - 任何通知、对价或 garden leave 要求。
+> - 任何行业特定例外（例如，医疗保健、广播）。
+> - 期限和地理范围合理性测试。
+> - 州外契约的选择法律和选择法院可执行性。
+> 引用主要来源。验证货币性。
 
-Per `~/.claude/plugins/config/claude-for-legal/employment-legal/CLAUDE.md` restrictive covenant policy: does this hire even get one?
-Some companies use them selectively. Apply the house policy first, then
-research overlays from the jurisdiction.
+按照 `~/.claude/plugins/config/claude-for-legal/employment-legal/CLAUDE.md` 限制性契约政策：此招聘是否甚至获得一个？有些公司选择性使用它们。首先应用内部政策，然后研究司法管辖区的覆盖。
 
-> **No silent supplement.** If a research query to the configured legal research tool returns few or no results for the jurisdiction's exemption thresholds, restrictive-covenant rules, pay-transparency law, or any other item you're researching, report what was found and stop. Do NOT fill the gap from web search or model knowledge without asking. Say: "The search returned [N] results from [tool]. Coverage appears thin for [jurisdiction / topic]. Options: (1) broaden the search query, (2) try a different research tool, (3) search the web — results will be tagged `[web search — verify]` and should be checked against a primary source before relying, or (4) flag as unverified and stop. Which would you like?" A lawyer decides whether to accept lower-confidence sources.
+> **没有静默补充。** 如果对配置的法律研究工具的研究查询对于司法管辖区的豁免阈值、限制性契约规则、薪酬透明度法律或你正在研究的任何其他项目返回很少或没有结果，报告发现的内容并停止。不要未经询问就从网络搜索或模型知识填充空白。说："搜索从 [工具] 返回了 [N] 个结果。对于 [司法管辖区/主题] 的覆盖范围似乎很薄。选项：(1)扩大搜索查询，(2)尝试不同的研究工具，(3)搜索网络——结果将标记为 `[web search — verify]`，在依赖之前应根据主要来源进行检查，或(4)标记为未验证并停止。你想要哪一个？"律师决定是否接受较低置信度的来源。
 >
-> **Source attribution.** Tag every citation in the review with where it came from: `[Westlaw]`, `[CourtListener]`, or the MCP tool name for citations retrieved from a legal research connector; `[web search — verify]` for web-search citations; `[model knowledge — verify]` for citations recalled from training data; `[user provided]` for citations the user supplied. Citations tagged `verify` carry higher fabrication risk and should be checked first. Never strip or collapse the tags.
+> **来源归因。** 用其来源标记审查中的每个引用：对于从法律研究连接器检索的引用，使用 `[Westlaw]`、`[CourtListener]` 或 MCP 工具名称；对于网络搜索引用使用 `[web search — verify]`；对于从训练数据回忆的引用使用 `[model knowledge — verify]`；对于用户提供的引用使用 `[user provided]`。标记为 `verify` 的引用携带更高的捏造风险，应首先检查。永远不要剥离或折叠标记。
 
-### Step 4: Jurisdiction-specific requirements
+### 步骤 4：司法管辖区特定要求
 
-Check the `~/.claude/plugins/config/claude-for-legal/employment-legal/CLAUDE.md` table for this jurisdiction. Common categories to
-research for each hire:
+检查此司法管辖区在 `~/.claude/plugins/config/claude-for-legal/employment-legal/CLAUDE.md` 中的表。每次招聘要研究的常见类别：
 
-- **Pay transparency** — does the jurisdiction require a salary range in the
-  posting? If so, is this offer within the posted range? Research the current
-  rule (including any recent amendments or new enforcement guidance).
-- **Ban-the-box** — does the jurisdiction or locality restrict the timing or
-  scope of criminal-history inquiries?
-- **Salary-history limits** — is the jurisdiction one that restricts asking
-  about or relying on prior salary? Research current rules and recent
-  amendments.
-- **Required offer-letter or onboarding notices** — some jurisdictions require
-  specific notices at offer or hire (wage-notice statutes, sick-leave notices,
-  etc.). Research what is currently required and whether a template exists.
+- **薪酬透明度**——司法管辖区是否要求在发布中包含薪资范围？如果是，此录用是否在发布范围内？研究当前规则（包括任何最近的修正案或新的执法指导）。
+- **取消犯罪记录调查限制**——司法管辖区或地区是否限制犯罪历史调查的时机或范围？
+- **薪资历史限制**——司法管辖区是否限制询问或依赖先前薪资？研究当前规则和最近修正案。
+- **要求的录用函或入职通知**——一些司法管辖区要求在录用或雇佣时的具体通知（工资通知法规、病假通知等）。研究当前要求的内容以及是否存在模板。
 
-Cite primary sources. Verify currency.
+引用主要来源。验证货币性。
 
-### Step 5: Offer letter content
+### 步骤 5：录用函内容
 
-Read the letter. Check:
+阅读信函。检查：
 
-**Employment-at-will is US-only.** "At-will" means either party can terminate without cause or notice (subject to statutory exceptions). This concept does not exist outside the US:
+**随意雇佣仅限美国。** "At-will" 意味着任一方可以在无因或无通知的情况下终止（受法规例外限制）。此概念在美国以外不存在：
 
-- **US (most states):** At-will is the default. Offer letters often include "at-will" language to defeat implied-contract arguments. Check that it's present if US.
-- **Montana:** Not at-will — Wrongful Discharge from Employment Act requires cause after probation.
-- **UK:** No at-will. Employees have statutory protections from day 1 (unfair dismissal after 2 years of service, automatic unfair dismissal for protected reasons from day 1). The offer letter must contain the written statement of particulars (ERA 1996 s.1): pay, hours, notice period, holidays, pension, disciplinary/grievance procedures.
-- **EU:** No at-will. Termination requires cause, notice, and often works council consultation or collective redundancy procedures. The offer letter requirements vary by member state but notice periods and written particulars are standard.
-- **Australia:** No at-will. Fair Work Act minimum notice periods, unfair dismissal protections, NES.
-- **Canada:** No at-will. Common law reasonable notice (can be months), ESA minimums, wrongful dismissal exposure.
-- **Singapore, other APAC:** No at-will. Employment Act and contract-based protections.
+- **美国（大多数州）：** 随意是默认值。录用函通常包括"at-will"语言以击败默示合同论点。如果是美国，检查是否存在。
+- **蒙大拿州：** 不随意——Wrongful Discharge from Employment Act 要求试用期后的原因。
+- **英国：** 不随意。员工从第 1 天起就有法定保护（2 年服务后的不公平解雇，从第 1 天起受保护理由的自动不公平解雇）。录用函必须包含书面 particulars（ERA 1996 s.1）：薪酬、工时、通知期、假期、养老金、纪律/申诉程序。
+- **欧盟：** 不随意。终止需要原因、通知，通常需要工会委员会咨询或集体裁员程序。录用函要求因成员国而异，但通知期和书面 particulars 是标准的。
+- **澳大利亚：** 不随意。Fair Work Act 最低通知期、不公平解雇保护、NES。
+- **加拿大：** 不随意。普通法合理通知（可能为数月）、ESA 最低、错误解雇敞口。
+- **新加坡、其他亚太地区：** 不随意。Employment Act 和基于合同的保护。
 
-**Check for at-will language ONLY if the jurisdiction is US.** For non-US jurisdictions, check instead for: notice period (and whether it meets statutory minimum), the written-statement particulars the jurisdiction requires, probation period terms, and any jurisdiction-specific mandatory clauses.
+**仅在司法管辖区为美国时检查随意语言。** 对于非美国司法管辖区，改为检查：通知期（以及是否满足法定最低要求）、司法管辖区要求的书面陈述 particulars、试用期条款以及任何司法管辖区特定的强制性条款。
 
-**Never recommend adding at-will language to a non-US offer letter.** It's legally meaningless, it can conflict with mandatory statutory terms, and it signals to the employee's lawyer that the employer didn't understand the jurisdiction.
+**永远不要建议在非美国录用函中添加随意语言。** 它在法律上没有意义，可能与强制性法定条款冲突，并向员工的律师发出雇主不理解司法管辖辖区的不当信号。
 
-- At-will language present and not undermined elsewhere (US only — see above)
-- Contingencies clear (background check, reference, I-9 if US / right-to-work verification for the applicable jurisdiction)
-- Start date, title, salary, reporting structure stated
-- Equity terms (if any) consistent with the plan
-- Integration clause so the letter is the whole deal
-- For non-US: notice period meets statutory minimum, jurisdiction's required written-statement particulars included, probation period compliant with local rules
+- 随意语言存在且未在其他地方被破坏（仅限美国——见上文）
+- 条件清晰（背景调查、参考信、如果是美国的 I-9 / 适用司法管辖区的工作权验证）
+- 开始日期、职位、薪资、汇报结构已说明
+- 股权条款（如有）与计划一致
+- 完整条款，使信函成为整个交易
+- 对于非美国：通知期满足法定最低要求，包括司法管辖区要求的书面陈述 particulars，试用期符合当地规则
 
-## Output
+## 输出
 
-> **Jurisdiction assumption.** This review applies the rules of the employee's work jurisdiction identified in Step 1. Enforceability of restrictive covenants, exemption thresholds, pay-transparency obligations, salary-history limits, and required notices vary materially by state and locality, and several have shifted recently. If the candidate's work location changes, or the role spans jurisdictions, this review may not apply as written.
+> **司法管辖区假设。** 此审查应用步骤 1 中识别的员工工作司法管辖区的规则。限制性契约的可执行性、豁免阈值、薪酬透明度义务、薪资历史限制和所需通知因州和地区而有很大差异，并且有几个最近发生了变化。如果候选人的工作地点变更，或角色跨越司法管辖区，此审查可能不适用于书面。
 
 ```markdown
-[WORK-PRODUCT HEADER — per plugin config ## Outputs — differs by role; see `## Who's using this`]
+[WORK-PRODUCT HEADER — 根据 plugin 配置 ## Outputs ——因角色而异；见 `## Who's using this`]
 
-## Hiring Review: [Candidate] — [Role] — [Jurisdiction]
+## 招聘审查：[候选人] — [角色] — [司法管辖区]
 
-**Overall:** [Clear to send | Changes needed | Escalate]
+**总体：** [可发送 / 需要变更 / 升级]
 
-### Jurisdiction: [State/Country]
-[Jurisdiction table entry. Any auto-escalate triggers that fire.]
+### 司法管辖区：[州/国家]
+[司法管辖区表条目。任何触发的自动升级触发器。]
 
-### Classification
-[Exempt/non-exempt call, grounded in researched thresholds and duties test.
-Any flags.]
+### 分类
+[豁免/非豁免决定，基于研究阈值和职责测试。任何标志。]
 
-### Restrictive covenants
-[If any. Enforceability call per researched jurisdiction rules, with pinpoint
-cites and currency note. Suggested changes.]
+### 限制性契约
+[如有。根据研究司法管辖区规则的可执行性决定，附精确引用和货币性注释。建议变更。]
 
-### Jurisdiction-specific requirements
-[Pay transparency, notices, salary-history rules, etc. — each researched and
-cited, or flagged as needing research.]
+### 司法管辖区特定要求
+[薪酬透明度、通知、薪资历史规则等——每个都研究和引用，或标记为需要研究。]
 
-### Offer letter
-[Any issues with the letter itself]
+### 录用函
+[信函本身的任何问题]
 
-### Action items
-- [ ] [specific change needed before sending]
+### 行动项目
+- [ ] [发送前需要的具体变更]
 ```
 
-## Consequential-action gate (make an offer)
+## 后果行动关卡（发出录用）
 
-**Before producing a "Clear to send" recommendation or a final offer letter for signature:** Read `## Who's using this` in `~/.claude/plugins/config/claude-for-legal/employment-legal/CLAUDE.md`. If the Role is **Non-lawyer**:
+**在生成"可发送"建议或签署的最终录用函之前：** 阅读 `~/.claude/plugins/config/claude-for-legal/employment-legal/CLAUDE.md` 中的 `## Who's using this`。如果角色是 **非律师**：
 
-> Making an offer has legal consequences — the letter is a contract, and restrictive covenants, classification, and jurisdiction-specific terms are difficult to reset once sent. Have you reviewed this offer with an attorney? If yes, proceed. If no, here's a brief to bring to them:
+> 发出录用有法律后果——信函是合同，限制性契约、分类和司法管辖区特定条款一旦发送就难以重置。你是否已与律师审查此录用？如果是，继续。如果不是，这是带给他们的简报：
 >
-> - Candidate, role, jurisdiction (where they'll actually work)
-> - Classification call (exempt/non-exempt) and why
-> - Restrictive covenants in the offer and the enforceability analysis
-> - Jurisdiction-specific requirements that apply (pay transparency, wage notices, salary-history rules)
-> - Open questions and what's unresolved
-> - What could go wrong (misclassification liability, unenforceable non-compete, missing required notice, conflicting at-will language)
-> - What to ask the attorney (is this the right form for this jurisdiction; can we use our standard non-compete here; what notices need to go with the letter)
+> - 候选人、角色、司法管辖区（他们实际将在哪里工作）
+> - 分类决定（豁免/非豁免）及原因
+> - 录用中的限制性契约及可执行性分析
+> - 适用的司法管辖区特定要求（薪酬透明度、工资通知、薪资历史规则）
+> - 未决问题和未解决的内容
+> - 可能出什么问题（错误分类责任、不可执行的非竞争、缺少所需通知、冲突的随意语言）
+> - 问律师什么（这是否是此司法管辖区的正确表格；我们可以在这里使用我们的标准非竞争；什么通知需要随信发送）
 >
-> If you need to find an attorney, solicitor, barrister, or other authorised legal professional: contact your professional regulator (state bar in the US, SRA/Bar Standards Board in England & Wales, Law Society in Scotland/NI/Ireland/Canada/Australia, or your jurisdiction's equivalent) for a referral service.
+> 如果你需要找到律师、事务律师、大律师或其他授权法律专业人士：联系你专业监管机构（美国的州律协、英格兰和威尔士的 SRA/Bar Standards Board、苏格兰/NI/爱尔兰/加拿大/澳大利亚的 Law Society，或你司法管辖区的等效机构）以获取推荐服务。
 
-Do not produce a "Clear to send" output past this gate without an explicit yes. A marked-DRAFT flagged for attorney review is fine.
+在没有明确是的情况下，不要在此关卡之后生成"可发送"输出。标记为供律师审查的草稿是可以的。
 
 ---
 
-## Close with the next-steps decision tree
+## 关闭时使用下一步决策树
 
-End with the next-steps decision tree per CLAUDE.md `## Outputs`. Customize the options to what this skill just produced — the five default branches (draft the X, escalate, get more facts, watch and wait, something else) are a starting point, not a lock-in. The tree is the output; the lawyer picks.
+根据 CLAUDE.md `## Outputs` 以下一步决策树结束。根据此 skill 刚刚生成的自定义选项——五个默认分支（起草 X、升级、获取更多事实、观察等待、其他）是起点，而非锁定。树就是输出；律师选择。
 
-## What this skill does not do
+## 此 skill 不做什么
 
-- Draft the offer letter — reviews it.
-- Make the hire decision — checks the paperwork.
-- State restrictive-covenant or exemption rules from memory — every
-  jurisdiction-specific call is based on researched, cited sources verified
-  for currency.
-- Research a new jurisdiction in depth on its own — flags that research is
-  needed, and uses `wage-hour-qa` or outside counsel to fill in.
+- 起草录用函——审查它。
+- 做出招聘决定——检查文书工作。
+- 从记忆陈述限制性契约或豁免规则——每个司法管辖区特定的决定基于研究、引用的来源，并已验证货币性。
+- 自己深入研究新司法管辖区——标记需要研究，并使用 `wage-hour-qa` 或外部律师填充。

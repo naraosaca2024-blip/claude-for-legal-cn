@@ -1,476 +1,483 @@
 ---
 name: claim-chart
-description: Build or review an element chart — a patent claim chart (infringement, invalidity, or review) or a civil element chart for any cause of action or defense — with every cell pin-cited and gap detection as the priority output. Use when the user asks for a claim chart, element chart, proof chart, infringement or invalidity contention, element-by-element mapping, or asks "what are we missing to prove [claim]".
+description: 构建或审查元素图表——专利权利要求图表（侵权、无效或审查）或任何诉因或抗辩的民事元素图表——每个单元格精确定位引用，差距检测为优先输出。当用户要求权利要求图表、元素图表、证明图表、侵权或无效主张、逐元素映射，或询问"我们缺什么来证明 [主张]"时使用。
 argument-hint: '[--patent | --civil] [--infringement | --invalidity | --review] [--claim <n>] [--count <name>] [--target <slug>]'
 ---
 
+<!--
+This file is a Chinese translation of the original by Anthropic PBC.
+Original: https://github.com/anthropics/claude-for-legal
+Licensed under Apache License 2.0
+-->
+
+
 # /claim-chart
 
-1. Load `~/.claude/plugins/config/claude-for-legal/litigation-legal/CLAUDE.md` → role, work-product header, decision posture, document storage.
-2. If matter workspaces enabled, confirm or select the active matter; load `matter.md` (side, jurisdiction, phase, theory, pleadings).
-3. Follow the workflow and reference below.
-4. Mode selection:
-   - `--patent` → patent claim chart. Require patent number and at least one asserted claim. Sub-modes: `--infringement`, `--invalidity`, `--review`.
-   - `--civil` → civil element chart. Require the cause of action (or defense) and the side.
-   - No flag → ask the user which.
-5. For civil mode: consult `references/element-templates.md` in the skill directory for the baseline element list. Confirm the controlling pattern instruction or statute with the user before mapping.
-6. For patent mode: parse asserted claims into elements, flag disputed terms for construction, apply any Markman order.
-7. Map elements against the target (accused product / prior art / evidence corpus / chart under review). Every cell pin-cited. Apply the apostrophe-prefix neutralization before writing any cell value starting with `=`, `+`, `-`, `@`, tab, or CR.
-8. Produce the gap list (civil) or needs-evidence list (patent) — the priority output.
-9. Write markdown, CSV (values + `_sources` companion), and Excel or Sheets per user preference. Work-product header on every output.
-10. Write to the matter's `claim-charts/` folder if a matter is active; otherwise the practice-level `claim-charts/` folder. Append a one-line entry to `history.md` if a matter is active.
-11. Return a summary readout: claim(s), target(s), jurisdiction, phase, element counts by state, the gap list, file paths, and the reminder that every cell is a lead.
+1. 加载 `~/.claude/plugins/config/claude-for-legal/litigation-legal/CLAUDE.md` → 角色、工作产品标题、决策姿态、文档存储。
+2. 如果事项工作区已启用，确认或选择活跃事项；加载 `matter.md`（立场、司法管辖区、阶段、理论、诉状）。
+3. 遵循以下工作流和参考。
+4. 模式选择：
+   - `--patent` → 专利权利要求图表。需要专利号和至少一项主张权利要求。子模式：`--infringement`、`--invalidity`、`--review`。
+   - `--civil` → 民事元素图表。需要诉因（或抗辩）和立场。
+   - 无标志 → 询问用户选择哪个。
+5. 民事模式：参阅 skill 目录中的 `references/element-templates.md` 获取基准元素列表。在映射前与用户确认控制性模式指令或法规。
+6. 专利模式：将主张权利要求解析为元素，标注有争议的解释术语，应用任何 Markman 命令。
+7. 将元素映射到目标（被指控产品/现有技术/证据语料库/审查中的图表）。每个单元格精确定位引用。在写入任何以 `=`、`+`、`-`、`@`、制表符或回车开头的单元格值之前，应用撇号前缀中和处理。
+8. 生成差距列表（民事）或证据需求列表（专利）——这是优先输出。
+9. 根据用户偏好写入 markdown、CSV（值 + `_sources` 配套文件）及 Excel 或 Sheets。每个输出附工作产品标题。
+10. 如果事项处于活跃状态，写入事项的 `claim-charts/` 文件夹；否则写入执业级 `claim-charts/` 文件夹。如果事项处于活跃状态，向 `history.md` 追加一行。
+11. 返回摘要读出：权利要求、目标、司法管辖区、阶段、按状态划分的元素计数、差距列表、文件路径，以及提醒每个单元格都是线索。
 
 ---
 
-# Claim Chart
+# 权利要求图表
 
-## Disclosed-document use restrictions
+## 披露文档使用限制
 
-Before working with a set of litigation documents, ask: "Were any of these documents obtained through disclosure or discovery in legal proceedings?" If yes:
+在处理一组诉讼文档之前，询问："这些文档中是否有任何一份是通过法律程序中的披露或发现获得的？"如果是：
 
-- **England & Wales (CPR 31.22):** Documents obtained through disclosure are subject to the implied undertaking — you may only use them for the purpose of the proceedings in which they were disclosed, unless the court grants permission, the disclosing party consents, or the document has been read in open court. Using them for a different matter, a different claim, or a commercial purpose without permission is a contempt.
-- **US:** Protective orders and Rule 26(c) may impose similar restrictions. Check the order.
-- **Other jurisdictions:** Similar restrictions commonly apply. Check the local rule.
+- **英格兰和威尔士（CPR 31.22）：** 通过披露获得的文档受默示承诺约束——您只能将其用于披露它们的程序目的，除非法院允许、披露方同意，或文档已在公开庭审中宣读。在未经允许的情况下将其用于不同事项、不同索赔或商业目的是藐视法庭。
+- **美国：** 保护命令和规则 26(c) 可能施加类似限制。请检查命令。
+- **其他司法管辖区：** 类似限制通常适用。请检查当地规则。
 
-Confirm: "This use is within the proceedings in which the documents were disclosed, or I have permission / consent, or the documents are now public." If not confirmed, flag it: "⚠️ Disclosed documents may have use restrictions. Confirm this use is permitted before proceeding."
+确认："此使用在文档披露的程序范围内，或我有许可/同意，或文档现已公开。"如果未确认，标注："⚠️ 披露文档可能有使用限制。在继续之前确认此使用是否允许。"
 
-## A CHART IS A DRAFT, NOT A FINDING OR A CONTENTION
+## 图表是草稿，而非发现或主张
 
-**Put this at the top of every output. Do not drop it. Do not soften it.**
+**在每个输出顶部放置此内容。不要删除。不要软化。**
 
-> This chart is a draft for attorney analysis and verification, not a filed contention, an MSJ brief, an opening statement, or a legal opinion. Every mapping is a lead the attorney must verify against the source. The elements listed come from pattern jury instructions, the Restatement, or the claim language as parsed — the **controlling** authority in the user's jurisdiction (CACI / NYPJI / the circuit's pattern charge / the governing statute / a Markman order) may differ and always controls. Gap detection is a starting point for discovery or a motion; it is not a conclusion about the merits.
+> 此图表是供律师分析和核实的草稿，而非已提交的主张、简式判决简报、开庭陈述或法律意见。每个映射都是律师必须对照来源核实的线索。所列元素来自模式陪审员指令、《重述》或解析的权利要求语言——用户司法管辖区的**控制性**权威（CACI / NYPJI / 巡回法院的模式指令 / 适用法规 / Markman 命令）可能不同，且始终优先控制。差距检测是发现或动议的起点；它不是关于案件是非曲直的结论。
 
-Under-flagging a gap is a one-way door — a complaint filed without plausibility on an element, an MSJ response served without evidence for a disputed element, or a case tried without proof of damages. Over-flagging is a two-way door — the attorney clears flags in review. The default is biased toward the two-way door.
-
----
-
-## Matter context
-
-Check `## Matter workspaces` in the practice-level CLAUDE.md. If `Enabled` is `✗` (the default for in-house users), skip the rest of this paragraph — skills use practice-level context and the matter machinery is invisible. If enabled and there is no active matter, ask: "Which matter is this for? Run `/litigation-legal:matter-workspace switch <slug>` or say `practice-level`." Load the active matter's `matter.md` — especially the case theory, the pleading / complaint (for the elements actually alleged), the jurisdiction, any Markman order or stipulated constructions (patent mode), and the phase of the case. Write outputs to the matter folder at `~/.claude/plugins/config/claude-for-legal/litigation-legal/matters/<matter-slug>/claim-charts/`. Never read another matter's files unless `Cross-matter context` is `on`.
+低报差距是单向门——未具备可信度要素的投诉、未附证据应对有争议元素的简式判决答复，或未证明损害赔偿的庭审。高报是双向门——律师在审查中清除标注。默认偏向双向门。
 
 ---
 
-## Load context
+## 事项背景
 
-- `~/.claude/plugins/config/claude-for-legal/litigation-legal/CLAUDE.md` → role, work-product header, decision posture, document storage, case-theory scaffolding
-- Active matter's `matter.md` — claims, defenses, side, jurisdiction, phase, theory
-- For civil mode: the complaint or counterclaim (for the actually-pleaded counts), any answer (for the actually-pleaded affirmative defenses), the relevant pattern jury instruction source, and the governing statute if statutory. Also the evidence corpus — deposition transcripts, declarations, produced documents, expert reports.
-- For patent mode: the patent, the asserted claims, the specification, prosecution history if available, the accused-product material or prior art reference, any Markman order or stipulated constructions.
+检查执业档案 CLAUDE.md 中的 `## 事项工作区`。如果 `Enabled` 为 `✗`（内部法务用户的默认值），跳过本段其余内容——skill 使用执业级上下文，事项机制不可见。如果已启用且没有活跃事项，询问："这是哪个事项的？运行 `/litigation-legal:matter-workspace switch <slug>` 或说 `practice-level`。"加载活跃事项的 `matter.md`——特别是案件理论、诉状/起诉状（对于实际主张的元素）、司法管辖区、任何 Markman 命令或约定的解释（专利模式），以及案件阶段。将输出写入 `~/.claude/plugins/config/claude-for-legal/litigation-legal/matters/<matter-slug>/claim-charts/`。除非 `Cross-matter context` 为 `on`，否则绝不读取另一个事项的文件。
 
-If `CLAUDE.md` has `[PLACEHOLDER]` markers, surface this bounce:
+---
 
-> I notice you haven't configured your practice profile yet — that's how I tailor risk calibration, landscape, and house style to your practice.
+## 加载背景
+
+- `~/.claude/plugins/config/claude-for-legal/litigation-legal/CLAUDE.md` → 角色、工作产品标题、决策姿态、文档存储、案件理论脚手架
+- 活跃事项的 `matter.md` — 索赔、抗辩、立场、司法管辖区、阶段、理论
+- 民事模式：起诉状或反诉状（对于实际主张的诉因）、任何答辩（对于实际主张的积极抗辩）、相关模式陪审员指令来源，以及如果是成文法则适用法规。还有证据语料库——庭审证词记录、声明书、已提交文件、专家报告。
+- 专利模式：专利、主张权利要求、说明书、可用的申请历史、被指控产品材料或现有技术参考文件、任何 Markman 命令或约定的解释。
+
+如果 `CLAUDE.md` 有 `[PLACEHOLDER]` 标记，显示此提示：
+
+> 我注意到您尚未配置执业档案——那是我如何为您的执业定制风险校准、格局和内部风格的方式。
 >
-> **Two choices:**
-> - Run `/litigation-legal:cold-start-interview` (2 minutes) to configure your profile, then I'll run this tailored to YOUR practice.
-> - Say **"provisional"** and I'll run this against generic defaults — US jurisdiction, middle risk appetite, lawyer role, no playbook — and tag every output `[PROVISIONAL — configure your profile for tailored output]` so you can see what I do before committing.
+> **两个选择：**
+> - 运行 `/litigation-legal:cold-start-interview`（2 分钟）以配置您的档案，然后我会针对您的执业定制运行此。
+> - 说 **"provisional"**，我会使用通用默认值运行——美国司法管辖区、中等风险偏好、律师角色、无操作手册——并为每个输出标注 `[PROVISIONAL — 配置您的档案以获得定制输出]`，以便您在承诺前看到我能做什么。
 
-### Provisional mode
+### 临时模式
 
-If the user says "provisional," build the claim chart normally using these generic defaults: middle risk appetite, lawyer role, US jurisdiction, no practice-level playbook (work from the matter's pleadings and the elements of the claims as pleaded). Tag the reviewer note and every row of the chart with `[PROVISIONAL]`. At the end of the output, append:
+如果用户说"provisional"，使用以下通用默认值正常构建权利要求图表：中等风险偏好、律师角色、美国司法管辖区、无执业级操作手册（根据事项诉状和权利要求元素来工作）。为审阅者说明和图表中的每一行标注 `[PROVISIONAL]`。在输出结尾附加：
 
-> "That was a generic run against default assumptions. Run `/litigation-legal:cold-start-interview` to get output calibrated to YOUR practice — your risk calibration, your landscape, your house style. 2 minutes."
+> "这是针对默认假设的通用运行。运行 `/litigation-legal:cold-start-interview` 以获得针对您执业校准的输出——您的风险校准、您的格局、您的内部风格。2 分钟。"
 
-**Conflicts gate — unbypassable.** Before building a claim chart, check `~/.claude/plugins/config/claude-for-legal/litigation-legal/matters/_log.yaml` for the matter slug. If the matter is not in `_log.yaml`, refuse and route:
+**冲突关卡——不可绕过。** 在构建权利要求图表之前，检查 `~/.claude/plugins/config/claude-for-legal/litigation-legal/matters/_log.yaml` 中的事项 slug。如果事项不在 `_log.yaml` 中，拒绝并路由：
 
-> "I don't see [matter slug] in the matter log. Run `/litigation-legal:matter-intake` first so the conflicts check runs and the matter workspace is set up. I won't build a claim chart on a matter that hasn't been intaken — the conflicts check is the gate."
+> "我在事项台账中看不到 [事项 slug]。先运行 `/litigation-legal:matter-intake`，以便冲突检查运行并设置事项工作区。我不会对未经 intake 的事项构建权利要求图表——冲突检查是关卡。"
 
-Do not proceed on an unintaken matter. Intake is what runs conflicts and writes the `_log.yaml` row this skill reads from.
+不要在未经 intake 的事项上继续。Intake 才是运行冲突并写入此 skill 读取的 `_log.yaml` 行的过程。
 
 ---
 
-## Mode selection
+## 模式选择
 
-Ask at the top, before anything else:
+在任何其他操作之前，在顶部询问：
 
-> Which kind of chart?
+> 哪种图表？
 >
-> 1. **Patent claim chart** — element-by-element mapping of claim limitations against an accused product (`--infringement`), prior art (`--invalidity`), or another party's chart (`--review`). For patent contentions, IPR petitions / responses, FTO charts.
-> 2. **Civil element chart** — elements of a cause of action (or affirmative defense) mapped against the evidence. For complaint plausibility checks, discovery planning, MSJ prep, order-of-proof outlines.
+> 1. **专利权利要求图表** — 权利要求限制与被指控产品（`--infringement`）、现有技术（`--invalidity`）或另一方图表（`--review`）的逐元素映射。用于专利主张、IPR 申请/答复、FTO 图表。
+> 2. **民事元素图表** — 诉因（或积极抗辩）的元素映射到证据。用于投诉可信度检查、发现规划、简式判决准备、证明顺序提纲。
 
-Plus intake (common to both):
+加上通用 intake（两种模式都需要）：
 
-- **Side.** Asserting or defending? (In civil mode this flips the burden; in patent mode it flips infringement/invalidity framing.)
-- **Jurisdiction / forum.** State and court — pattern instructions vary (CACI in California, NYPJI in New York, federal circuits' pattern charges, state-specific variations). In patent mode, Patent Local Rules vary (N.D. Cal., E.D. Tex., D. Del., ITC, PTAB). Flag which controls.
-- **Phase.** Pre-filing, pleadings, discovery, MSJ, trial prep, post-trial. The chart is the same; the framing of the output changes.
-- **Existing chart?** If `--review`, load it.
+- **立场。** 主张方还是应诉方？（民事模式中这会翻转举证责任；专利模式中它会翻转侵权/无效框架。）
+- **司法管辖区/论坛。** 州和法院——模式指令因司法管辖区而异（加州 CACI、纽约 NYPJI、联邦巡回法院模式指令、州特定变体）。专利模式下，专利地方规则因法院而异（加州北区、东德克萨斯区、德拉华区、ITC、PTAB）。标注哪个控制。
+- **阶段。** 诉前、诉状、发现、简式判决、庭审准备、庭审后。图表相同；输出的框架不同。
+- **现有图表？** 如果是 `--review`，加载它。
 
 ---
 
-# MODE 1 — Patent claim chart
+# 模式一 — 专利权利要求图表
 
-## Sub-modes
+## 子模式
 
-- `--infringement` — claim elements vs. accused product (PLR 3-1 infringement contentions, IPR/PGR response exhibits, complaint exhibits)
-- `--invalidity` — claim elements vs. prior art (PLR 3-3 invalidity contentions, IPR/PGR petition exhibits, §102/§103 defenses)
-- `--review` — audit a chart someone else produced
+- `--infringement` — 权利要求元素 vs. 被指控产品（PLR 3-1 侵权主张、IPR/PGR 答复证据、投诉证据）
+- `--invalidity` — 权利要求元素 vs. 现有技术（PLR 3-3 无效主张、IPR/PGR 申请证据、§102/§103 抗辩）
+- `--review` — 审查他人制作的图表
 
-## Additional patent-mode intake
+## 额外的专利模式 intake
 
-- **Patent number and asserted claims.** Which independent, which dependent. (Don't chart unasserted claims unless asked.)
-- **Priority date.** Establishes the §102 bar and the effective filing date for the AIA / pre-AIA regime.
-- **Existing constructions.** Markman order, stipulated constructions, constructions proposed in briefing.
+- **专利号和主张权利要求。** 哪些是独立权利要求，哪些是从属权利要求。（不要图表未主张的权利要求，除非被要求。）
+- **优先日期。** 确定 §102 绝对新颖性及 AIA/前 AIA 制度下的有效申请日。
+- **现有解释。** Markman 命令、约定的解释、在简报中提出的解释。
 
-## Patent-mode workflow
+## 专利模式工作流
 
-### Step 1: Parse the claims
+### 第一步：解析权利要求
 
-Parse asserted independent claims into numbered elements. Handle:
+将主张的独立权利要求解析为编号元素。处理：
 
-- **Preamble.** Note whether it's limiting — a question of claim construction (*Catalina Marketing Int'l, Inc. v. Coolsavings.com, Inc.*, 289 F.3d 801 (Fed. Cir. 2002)). Flag `preamble-limiting: unresolved` unless the construction order resolves it.
-- **Transitional phrase.** "Comprising" (open) / "consisting of" (closed) / "consisting essentially of" (semi-open). Affects whether additional unrecited elements defeat infringement.
-- **Elements** separated by commas / semicolons, numbered `[1a]`, `[1b]`, `[1c]`. Keep numbering stable — it's the chart's spine.
-- **Means-plus-function (§112(f))** — every "means for [function]" or non-structural functional term. Scope is the structure disclosed in the spec plus equivalents. Cite corresponding structure by col./line. If the spec fails to disclose structure, flag `indefinite-112f`.
-- **Markush groups, Jepson claims, product-by-process, method-step order dependencies** — flag with a note on unusual construction rules.
-- **Dependent claims** — reference parent; chart only the additional limitations. **Execute, don't gesture.** If asserted claims include dependents, produce the actual additional-limitation rows for each dependent in Step 4 — do not emit a note that dependents "should be charted."
-- **Structural-term cognates — default to `construction-dependent`.** For each element that recites a structural noun with a common cognate in the prior art of the field, default the row's state to `literal-construction-dependent` (not `literal`) unless the spec expressly defines the term or an existing Markman order forecloses the ambiguity. These are the terms most commonly disputed at Markman — presuming a clean literal read under-flags the risk. Common cognate families to flag proactively:
+- **前序部分。** 注意它是否具有限制性——这是权利要求解释的问题（*Catalina Marketing Int'l, Inc. v. Coolsavings.com, Inc.*，289 F.3d 801（Fed. Cir. 2002））。标注 `preamble-limiting: unresolved`，除非解释命令已解决。
+- **过渡词语。** "comprising"（开放式）/"consisting of"（封闭式）/"consisting essentially of"（半开放式）。影响是否有未记载的附加元素会排除侵权。
+- **元素** 以逗号/分号分隔，编号为 `[1a]`、`[1b]`、`[1c]`。保持编号稳定——它是图表的脊骨。
+- **功能性手段加限定（§112(f)）** — 每个"means for [function]"或非结构性功能术语。范围是说明书中公开的结构加等效物。按列/行引用相应结构。如果说明书未公开结构，标注 `indefinite-112f`。
+- **马库什类型权利要求、杰普森权利要求、工艺法产品、方法步骤顺序依赖性** — 用关于不寻常解释规则的说明标注。
+- **从属权利要求** — 引用父权利要求；只图表附加的限制。**执行，不要敷衍。** 如果主张权利要求包含从属权利要求，在第四步中为每个从属权利要求生成实际的附加限制行——不要仅发出"应该图表从属权利要求"的说明。
+- **结构性术语认知默认为 `construction-dependent`。** 对于每个记载了在该领域现有技术中有常见认知的结构性名词的元素，将该行的状态默认为 `literal-construction-dependent`（而非 `literal`），除非说明书明确定义了该术语，或现有 Markman 命令已排除歧义。这些是在 Markman 程序中最常被争议的术语——假设干净的字面阅读低报了风险。要主动标注的常见认知系列：
 
-  | Field | Cognate family (flag as `structural-term-cognate`) |
+  | 领域 | 认知系列（标注为 `structural-term-cognate`） |
   |---|---|
-  | Fasteners / anchors | barb / thread / projection / ridge / fin / tooth |
-  | Fluidics / catheters | lumen / channel / bore / passage / conduit |
-  | Mechanical housings | hub / boss / flange / collar / shoulder |
-  | Fasteners / joints | socket / recess / pocket / cavity |
-  | Electrical / electronic | contact / terminal / pad / lead |
-  | Optical | lens / reflector / window / aperture |
-  | Structural | wall / member / support / strut / rib |
-  | Surfaces | surface / face / interface |
+  | 紧固件/锚 | 倒刺/螺纹/凸起/脊/翼片/齿 |
+  | 流体/导管 | 管腔/通道/孔/通道/导管 |
+  | 机械壳体 | 毂/凸台/凸缘/套环/肩部 |
+  | 紧固件/接头 | 插座/凹槽/槽/腔 |
+  | 电气/电子 | 触点/端子/焊盘/引线 |
+  | 光学 | 透镜/反射镜/窗口/孔径 |
+  | 结构 | 壁/构件/支撑/支柱/肋 |
+  | 表面 | 表面/面/界面 |
 
-  This list is not exhaustive — if the claim recites a structural noun that could reasonably be read narrowly (pointed barb vs. any projection) or broadly (channel vs. any passage), flag `structural-term-cognate` in `_constructions` and default the row to `construction-dependent`. The attorney can demote it to `literal` after a Markman order or a definition in the spec forecloses the ambiguity.
+  此列表不是穷举的——如果权利要求记载了一个结构性名词，该名词可以合理地被解读为狭义（尖锐的倒刺）或广义（任何凸起），标注 `structural-term-cognate`，并将该行默认为 `construction-dependent`。律师可以在 Markman 命令或说明书中的定义消除歧义后将其降级为 `literal`。
 
-Show the parse to the user. Confirm before mapping. A wrong parse poisons every row below it.
+向用户显示解析结果。确认后再进行映射。错误的解析会毒害其下的每一行。
 
-### Step 2: Claim construction check
+### 第二步：权利要求解释检查
 
-Flag disputed terms:
+标注有争议的术语：
 
-- Coined terms or terms defined in the spec
-- Terms with prosecution history (amendments, arguments, disavowals — *Phillips v. AWH Corp.*, 415 F.3d 1303 (Fed. Cir. 2005); *Festo* estoppel)
-- Functional language ("configured to", "adapted to", "operable to")
-- Relative terms ("substantially", "about") — definiteness risk under *Nautilus, Inc. v. Biosig Instruments, Inc.*, 572 U.S. 898 (2014)
-- Computer-implemented terms — Alice / §101 exposure for invalidity
+- 说明书中的自创术语或定义术语
+- 具有申请历史的术语（修正、论点、放弃——*Phillips v. AWH Corp.*，415 F.3d 1303（Fed. Cir. 2005）；*Festo* 禁反言）
+- 功能性语言（"configured to"、"adapted to"、"operable to"）
+- 相对术语（"substantially"、"about"）——*Nautilus, Inc. v. Biosig Instruments, Inc.*，572 U.S. 898（2014）下的确定性风险
+- 计算机实现的术语——*Alice*/§101 针对无效的敞口
 
-For each flagged term, state the construction(s) under which the mapping works and the construction(s) under which it fails. If a Markman order exists, apply it. If briefing is underway, chart under each side's proposed construction.
+对于每个标注的术语，说明在哪种解释下映射有效，在哪种解释下映射失败。如果 Markman 命令存在，应用它。如果简报正在进行中，按每一方提议的解释分别绘制图表。
 
-### Step 3: Map
+### 第三步：映射
 
-For each element, for each target:
+对于每个元素，针对每个目标：
 
-1. **Find evidence.** Accused product: documentation, manuals, data sheets, source code, teardowns, deposition testimony, expert reports. Prior art: column/line for US patents, paragraph for published apps, page/figure for NPL. For prior art, flag whether the reference qualifies (§102(a)(1), (a)(2), (b); AIA vs. pre-AIA cutoffs). If prior-art status isn't obvious, mark `prior-art-status: needs-evidence`.
-2. **Quote verbatim.** Character-for-character. No paraphrase. Cut at sentence boundaries and mark elision.
-3. **Characterize the mapping.**
+1. **找到证据。** 被指控产品：文档、手册、数据表、源代码、拆解、庭审证词、专家报告。现有技术：美国专利按列/行，公开申请按段落，非专利文献按页/图。对于现有技术，标注该参考文件是否符合资格（§102(a)(1)、(a)(2)、(b)；AIA vs. 前 AIA 截止日期）。如果现有技术地位不明显，标注 `prior-art-status: needs-evidence`。
+2. **逐字引用。** 逐字逐字。无释义。在句子边界截断并标注省略。
+3. **描述映射。**
 
-   | Mapping | Meaning | Where |
+   | 映射 | 含义 | 适用于 |
    |---|---|---|
-   | `literal` | Claim language reads on the accused feature / prior-art disclosure | Both |
-   | `literal-construction-dependent` | Literal under X; fails under Y | Both |
-   | `doe` | Equivalent (function-way-result or insubstantial differences) | Infringement only |
-   | `anticipation` | Every element in a single reference, arranged as claimed (*Net MoneyIN, Inc. v. VeriSign, Inc.*, 545 F.3d 1359 (Fed. Cir. 2008)) | Invalidity only |
-   | `obviousness-combination` | Secondary reference supplies the missing element; motivation to combine required under *KSR Int'l Co. v. Teleflex Inc.*, 550 U.S. 398 (2007) | Invalidity only |
-   | `partial` | Some of the element is present | Both |
-   | `not-found` | Element not present | Both |
-   | `needs-evidence` | Can't tell from available material | Both |
-   | `construction-dependent` | Turns on how a disputed term is construed | Both |
+   | `literal` | 权利要求语言与被指控特征/现有技术公开相符 | 两者 |
+   | `literal-construction-dependent` | 在 X 解释下字面符合；在 Y 解释下不符 | 两者 |
+   | `doe` | 等效（功能-方式-结果或非实质性差异） | 仅侵权 |
+   | `anticipation` | 每个元素在单一参考文件中，按权利要求排列（*Net MoneyIN, Inc. v. VeriSign, Inc.*，545 F.3d 1359（Fed. Cir. 2008）） | 仅无效 |
+   | `obviousness-combination` | 第二参考文件提供缺失元素；*KSR Int'l Co. v. Teleflex Inc.*，550 U.S. 398（2007）下需要组合动机 | 仅无效 |
+   | `partial` | 元素的部分内容存在 | 两者 |
+   | `not-found` | 元素不存在 | 两者 |
+   | `needs-evidence` | 无法从可用材料判断 | 两者 |
+   | `construction-dependent` | 取决于有争议术语的解释方式 | 两者 |
 
-4. **State per cell.** `mapped` / `mapped-doe` / `partial` / `not-found` / `needs-evidence` / `construction-dependent` / `anticipation` / `obviousness-combination`.
-5. **Flag open questions.** "This maps if [X]. Need [teardown / source code / deposition / expert] to confirm."
+4. **每个单元格注明状态。** `mapped` / `mapped-doe` / `partial` / `not-found` / `needs-evidence` / `construction-dependent` / `anticipation` / `obviousness-combination`。
+5. **标注未解决问题。** "如果 [X] 则映射。需要 [拆解/源代码/庭审证词/专家] 确认。"
 
-**No silent supplement.** Thin documentation means `needs-evidence`, not extrapolation from similar products.
+**不得静默补充。** 文档薄意味着 `needs-evidence`，而非从类似产品外推。
 
-### Step 4: Dependent claims — execute, don't gesture
+### 第四步：从属权利要求——执行，不要敷衍
 
-For each asserted dependent claim, produce an actual row (or set of rows) charting the additional limitation(s) against the target. The parent dependency is noted, and infringement / invalidity of the dependent requires the parent's. **Produce the rows, not a placeholder note that rows should be produced.**
+对于每个主张的从属权利要求，生成实际的行（或一组行）图表附加限制与目标的对应关系。注明父权利要求依赖，从属权利要求的侵权/无效需要父权利要求成立。**生成行，而非仅说明应该生成行的占位符说明。**
 
-If the user provided a list of asserted claims that includes dependents, the chart's output MUST contain rows for each of them. If the user gave only the independent claim and said "chart the independents for now," fine — then the output doesn't chart dependents, but it surfaces the dropped ones explicitly ("Asserted dependents [X, Y, Z] not charted in this run — request: rerun with `--include-dependents` or paste the dependent claim text"). Do not silently skip dependents.
+如果用户提供了包含从属权利要求的主张权利要求列表，图表输出必须包含每个从属权利要求的行。如果用户只给出了独立权利要求并说"暂时只图表独立权利要求"，那么输出不图表从属权利要求，但明确列出被删除的从属权利要求（"主张的从属权利要求 [X、Y、Z] 在本次运行中未图表——要求：使用 `--include-dependents` 重新运行，或粘贴从属权利要求文本"）。不得静默跳过从属权利要求。
 
-A dependent-claim row format:
-
-```markdown
-| [#] | Element (verbatim) | Accused feature (or prior-art disclosure) | Evidence (pin-cited) | Mapping | State | Verified |
-|---|---|---|---|---|---|---|
-| 2 [add'l] | "wherein the barb extends at an angle of 15° to 30° from the body axis" | AnchorFast Mini barb angle 18° per [CM-AM-2026-03 Fig. 4 + §2.3] | [CM-AM-2026-03 §2.3] "barb angle 18° ±2°" | literal-construction-dependent | mapped | ☐ |
-```
-
-### Step 4.5: DOE supplements — execute, don't gesture
-
-For every element charted as `literal` where the accused feature is structurally similar but not literally identical — or every element where the `literal` mapping turns on a contested construction — produce a **paired DOE candidacy row** (infringement mode). Do not footnote "DOE analysis is separate" without producing the actual DOE mapping.
-
-A DOE candidacy row adds a one-paragraph function-way-result sketch, flags prosecution history estoppel and dedication-to-the-public risks per element, and cites the evidence that would support the equivalent. If DOE is inapplicable (the element reads literally on the accused product beyond dispute), skip. If `literal` is construction-dependent and DOE would be the attorney's fallback under the narrower construction, produce the DOE row.
-
-Format:
+从属权利要求行格式：
 
 ```markdown
-| [#-DOE] | Element | Accused feature | Function-way-result | PH estoppel? | Dedication risk? | State |
+| [#] | 元素（逐字） | 被指控特征（或现有技术公开） | 证据（精确定位引用） | 映射 | 状态 | 已核实 |
 |---|---|---|---|---|---|---|
-| 1b-DOE | "at least one barb" | three-barb opposing-face array | function: resist withdrawal; way: mechanical engagement with cancellous bone; result: anchor remains seated under tensile load. | [needs-evidence: prosecution history] | [needs-evidence: disclosed-but-unclaimed alternatives in spec] | construction-dependent |
+| 2 [附加] | "其中倒刺从主体轴线以 15° 至 30° 角延伸" | AnchorFast Mini 倒刺角度 18°，见 [CM-AM-2026-03 图 4 + §2.3] | [CM-AM-2026-03 §2.3] "倒刺角度 18° ±2°" | literal-construction-dependent | mapped | ☐ |
 ```
 
-As with dependents: if the skill can't produce the DOE rows for a reason (no accused-product evidence to ground function-way-result, no prosecution history available), say so explicitly and route to `needs-evidence`. Do not skip DOE silently.
+### 第四步之五：等效物补充——执行，不要敷衍
 
-### Step 5: Indirect, divided, willfulness (infringement only)
+对于每个图表为 `literal` 的元素，其中被指控特征在结构上相似但并非字面相同——或每个 `literal` 映射取决于有争议解释的元素——生成**配对的等效物候选行**（侵权模式）。不要在脚注"等效物分析是单独的"而不生成实际的等效物映射。
 
-Flag, don't opine:
+等效物候选行添加一段功能-方式-结果概述，标注每个元素的申请历史禁反言和公众献赠风险，并引用支持等效物的证据。如果等效物不适用（被指控产品上的元素在任何疑问之外字面读取），跳过。如果 `literal` 是依赖于解释的，且等效物将是律师在较窄解释下的备选，则生成等效物行。
 
-- **Induced (§271(b))** — *Commil USA, LLC v. Cisco Systems, Inc.*, 575 U.S. 632 (2015); *Global-Tech Appliances, Inc. v. SEB S.A.*, 563 U.S. 754 (2011)
-- **Contributory (§271(c))** — component especially made for infringing use
-- **Divided / joint (§271(a))** — *Akamai Techs., Inc. v. Limelight Networks, Inc.*, 797 F.3d 1020 (Fed. Cir. 2015) (en banc) directs/controls test
-- **Willfulness** — *Halo Elecs., Inc. v. Pulse Elecs., Inc.*, 579 U.S. 93 (2016); treble damages under §284
+格式：
 
-### Step 6: Invalidity thresholds (invalidity only)
+```markdown
+| [#-DOE] | 元素 | 被指控特征 | 功能-方式-结果 | 申请历史禁反言？ | 献赠风险？ | 状态 |
+|---|---|---|---|---|---|---|
+| 1b-DOE | "至少一个倒刺" | 三倒刺对面阵列 | 功能：抵抗拔出；方式：与松质骨的机械啮合；结果：锚在张力载荷下保持就位。 | [需要证据：申请历史] | [需要证据：说明书中未主张的公开替代方案] | construction-dependent |
+```
 
-For §102: every element in a single reference. Partial across references is §103.
+与从属权利要求一样：如果 skill 因故无法为等效物行生成（无被指控产品证据支撑功能-方式-结果，无可用申请历史），明确说明并路由到 `needs-evidence`。不得静默跳过等效物。
 
-For §103: primary reference + secondary reference(s) + documented motivation under *KSR*. Flag explicit teaching/suggestion/motivation, market or design-need motivation, reasonable expectation of success, and **secondary considerations** (*Graham v. John Deere Co.*, 383 U.S. 1 (1966)) — commercial success, long-felt need, failure of others, industry praise, copying.
+### 第五步：间接侵权、分割侵权、故意侵权（仅侵权模式）
 
-Also flag:
-- **§101** — *Alice Corp. Pty. Ltd. v. CLS Bank Int'l*, 573 U.S. 208 (2014); *Mayo Collaborative Servs. v. Prometheus Labs., Inc.*, 566 U.S. 66 (2012)
-- **§112 ¶ 1** — written description, enablement (*Amgen Inc. v. Sanofi*, 598 U.S. 594 (2023))
-- **§112 ¶ 2** — definiteness (*Nautilus*, supra)
-- **§112 ¶ 6** — means-plus-function structure
-- **Unenforceability** — inequitable conduct, prosecution laches, assignor/licensee estoppel (attorney-only flags)
+标注，不作定论：
 
-Invalidity must be shown by clear and convincing evidence — *Microsoft Corp. v. i4i Ltd. P'ship*, 564 U.S. 91 (2011). Prima facie in a chart is not proof at trial.
+- **诱导侵权（§271(b)）** — *Commil USA, LLC v. Cisco Systems, Inc.*，575 U.S. 632（2015）；*Global-Tech Appliances, Inc. v. SEB S.A.*，563 U.S. 754（2011）
+- **协助侵权（§271(c)）** — 专为侵权使用而制造的组件
+- **分割/联合（§271(a)）** — *Akamai Techs., Inc. v. Limelight Networks, Inc.*，797 F.3d 1020（Fed. Cir. 2015）（en banc）指挥/控制测试
+- **故意侵权** — *Halo Elecs., Inc. v. Pulse Elecs., Inc.*，579 U.S. 93（2016）；§284 下的三倍赔偿
 
-### Step 7 (review sub-mode): Audit
+### 第六步：无效门槛（仅无效模式）
 
-For each row: is the mapping supported? Is the pin cite accurate? Is the element fully accounted for? What's the strongest counter? What's the rebuttal opportunity? Output verdicts per row (`supported` / `weak` / `unsupported`) and the chart's vulnerabilities.
+§102 下：每个元素在单一参考文件中。跨参考文件的部分匹配是 §103。
 
-## Patent-mode guardrails (in addition to shared guardrails)
+§103 下：主要参考文件 + 次要参考文件 + *KSR* 下的文件化组合动机。标注明确的教导/建议/动机、市场或设计需求动机、成功的合理预期，以及**次要因素**（*Graham v. John Deere Co.*，383 U.S. 1（1966））——商业成功、长期未解决的需求、他人的失败、行业赞誉、复制。
 
-- **Rule 11 / Patent Local Rule.** Infringement and invalidity contentions require a reasonable inquiry and a non-frivolous basis. A chart out of this skill is a draft, not a contention.
-- **Claim construction candor.** Every construction-dependent row states the construction assumed and the construction under which the mapping fails.
-- **DOE candor.** A DOE mapping is not equivalent to a literal one. Flag prosecution history estoppel and dedication-to-the-public risks per element.
-- **Indirect is separate.** Don't fold induced / contributory into direct-infringement rows.
-- **Invalidity burden on the chart.** State the clear-and-convincing standard.
+还要标注：
+- **§101** — *Alice Corp. Pty. Ltd. v. CLS Bank Int'l*，573 U.S. 208（2014）；*Mayo Collaborative Servs. v. Prometheus Labs., Inc.*，566 U.S. 66（2012）
+- **§112 ¶ 1** — 书面描述、可实施性（*Amgen Inc. v. Sanofi*，598 U.S. 594（2023））
+- **§112 ¶ 2** — 确定性（*Nautilus*，同上）
+- **§112 ¶ 6** — 功能性手段加限定结构
+- **不可执行性** — 不公平行为、申请拖延、转让人/被许可人禁反言（仅限律师标注）
+
+无效必须以清晰且令人信服的证据证明——*Microsoft Corp. v. i4i Ltd. P'ship*，564 U.S. 91（2011）。图表中的表面证据在庭审中不是证明。
+
+### 第七步（审查子模式）：审计
+
+对于每一行：映射是否有依据？引用定位是否准确？元素是否被充分解释？最强的反驳是什么？反驳机会是什么？按行输出裁决（`supported` / `weak` / `unsupported`）和图表的薄弱点。
+
+## 专利模式保障措施（除共享保障措施外）
+
+- **规则 11/专利地方规则。** 侵权和无效主张需要合理调查和非无谓的依据。此 skill 产出的图表是草稿，不是主张。
+- **权利要求解释坦诚。** 每个依赖于解释的行都说明假设的解释以及映射失败的解释。
+- **等效物坦诚。** 等效物映射不等同于字面映射。按元素标注申请历史禁反言和公众献赠风险。
+- **间接侵权是独立的。** 不要将诱导侵权/协助侵权折叠进直接侵权行。
+- **图表上的无效举证责任。** 说明清晰且令人信服的标准。
 
 ---
 
-# MODE 2 — Civil element chart
+# 模式二 — 民事元素图表
 
-Map the elements of a cause of action (or affirmative defense) against the evidence. The killer outputs are (a) a chart that says what evidence goes with what element and (b) a gap list that tells the attorney what's missing.
+将诉因（或积极抗辩）的元素映射到证据。关键输出是：(a) 说明哪些证据对应哪个元素的图表，(b) 告知律师缺少什么的差距列表。
 
-## Workflow
+## 工作流
 
-### Step 1: Identify the claim(s)
+### 第一步：识别索赔
 
-- What cause of action? (Or defense?) If multiple counts, chart each separately.
-- Which side? Plaintiff's prima facie case, defendant's affirmative defense, defendant's challenge to plaintiff's prima facie case (MSJ mode). Read `## Side` in the practice profile for the default — `plaintiff` defaults to mapping the prima facie case (proving the elements); `defense` defaults to mapping gaps and affirmative defenses (disproving or avoiding the elements). Confirm the posture matches this matter before starting.
-- Which jurisdiction? State and court. **Elements and pattern-instruction language vary by jurisdiction.** The template library is a baseline; the controlling pattern instruction or statute controls.
-- Which pleading? Load the complaint / counterclaim / answer so the chart tracks the counts actually pleaded, not a generic version.
+- 是什么诉因？（或抗辩？）如果有多个诉因，分别绘制图表。
+- 哪一方？原告的初步证明案件，被告的积极抗辩，被告对原告初步证明案件的挑战（简式判决模式）。从执业档案中读取 `## 立场` 获取默认值——`plaintiff` 默认映射初步证明案件（证明元素）；`defense` 默认映射差距和积极抗辩（反驳或规避元素）。在开始前确认姿态与本事项匹配。
+- 哪个司法管辖区？州和法院。**元素和模式指令语言因司法管辖区而异。** 模板库是基准；用户司法管辖区的控制性模式指令或法规始终控制。
+- 哪份诉状？加载起诉状/反诉状/答辩书，以便图表追踪实际主张的诉因，而非通用版本。
 
-### Step 2: Load the elements
+### 第二步：加载元素
 
-Three paths:
+三条路径：
 
-**(a) Template library.** Reference `references/element-templates.md` (in this skill's directory). Baseline elements for common causes of action and common affirmative defenses, with citations to the Restatement / pattern instructions and a jurisdiction caveat. Select the template that matches the pleaded count.
+**(a) 模板库。** 参阅此 skill 目录中的 `references/element-templates.md`。常见诉因和常见积极抗辩的基准元素，附引用《重述》/模式指令和司法管辖区注意事项。选择与主张诉因匹配的模板。
 
-**(b) Custom.** User defines elements, or pastes a jury instruction / statute / a count from the complaint to parse. Parse into numbered elements.
+**(b) 自定义。** 用户定义元素，或粘贴陪审员指令/法规/起诉状中的诉因以供解析。解析为编号元素。
 
-**(c) Affirmative defenses.** Also support mapping defenses — statute of limitations, laches, estoppel, waiver, unclean hands, release, accord and satisfaction, failure to mitigate, comparative fault, contributory negligence, assumption of risk, etc. Defenses have their own elements the defendant must prove (or, for some, the plaintiff must negate once raised).
+**(c) 积极抗辩。** 也支持映射抗辩——诉讼时效、失效、禁止反言、弃权、"不洁之手"、释放、协议满足、未减损损害赔偿、比较过失、有助于过失、承担风险等。抗辩有其自己的元素，被告必须证明（或对于某些，原告在提出后必须反驳）。
 
-**Jurisdiction-specific formulations — surface proactively.** If the practice profile's `## Company profile → Core jurisdictions` or the active matter's `matter.md` names **Delaware, New York, or California** (the three most-common commercial fora), surface the state-specific formulation proactively alongside the baseline — do not ask "does your jurisdiction add/drop/reword" first. The user shouldn't have to teach the skill the local rule; the skill should offer it and let the user choose.
+**主动提出司法管辖区特定表述。** 如果执业档案的 `## 公司简介 → 核心司法管辖区` 或活跃事项的 `matter.md` 指定了**特拉华州、纽约州或加利福尼亚州**（三个最常见的商事论坛），主动提供州特定表述，而非先问"您的司法管辖区是否有增减/改写"。用户不应该教 skill 当地规则；skill 应该提供并让用户选择。
 
-Divergences to surface without being asked (non-exhaustive — add to this list as patterns recur):
+主动提出的差异（非穷举——随着模式出现不断添加）：
 
-| Cause of action / defense | Baseline (Restatement / pattern) | Jurisdiction-specific formulation |
+| 诉因/抗辩 | 基准（《重述》/模式） | 司法管辖区特定表述 |
 |---|---|---|
-| Breach of contract | 4 elements (contract, performance, breach, damages; CACI 303) | **DE:** 3 elements — contractual obligation, breach, damages (causation folded into breach) per *VLIW Tech., LLC v. Hewlett-Packard Co.*, 840 A.2d 606 (Del. 2003). **DE adds a 5th element** — no adequate remedy at law — when the claim seeks specific performance. |
-| Breach of contract — goods | Common-law breach elements | **If goods + U.C.C. Article 2 jurisdiction (all 50 states except LA):** load U.C.C. breach elements (conforming tender, acceptance / rejection / revocation, cure, cover, seller's remedies). Present both; let user pick. |
-| Breach of contract — multi-lot goods / installment contract | Common-law breach or U.C.C. § 2-711 (single-delivery breach framework) | **Installment contracts under U.C.C. § 2-612** — "substantial impairment of the value of the installment" replaces the perfect-tender rule; aggregate breach requires "substantial impairment of the value of the whole contract." If the contract calls for goods to be delivered in separate lots (multiple shipments, deliveries), default to § 2-612 framing — it is the governing regime and the analysis is materially different from single-delivery breach. Flag for signer: "This is drafted as an installment contract under § 2-612 — confirm that characterization matches the contract's delivery structure." |
-| Negligence | 4 elements (duty, breach, causation, damages; Restatement (Second) Torts § 281) | **CA:** follow CACI No. 400 formulation (negligence per se per CACI 418 when applicable). **NY:** PJI 2:10 formulation — slightly different language on proximate cause. |
-| Negligent misrepresentation | Restatement (Second) Torts § 552 — justifiable reliance, pecuniary loss | **NY:** requires **contemporaneous privity** or a relationship "so close as to approach that of privity" per *Credit Alliance Corp. v. Arthur Andersen & Co.*, 65 N.Y.2d 536 (1985). |
-| Fraud | 9 elements (often condensed to 5 — representation, materiality, knowledge of falsity, intent to induce, justifiable reliance, damages) | **DE:** 5 elements per *Stephenson v. Capano Dev.*, 462 A.2d 1069 (Del. 1983). **CA:** CACI 1900 formulation — 5 elements with reliance being "justifiable." **NY:** requires pleading with particularity under CPLR 3016(b), and scienter is a distinct element. |
-| Breach of fiduciary duty | Restatement / common law — fiduciary duty, breach, damages | **DE:** the most-developed body of fiduciary-duty law (*Aronson v. Lewis*, *Cede & Co. v. Technicolor*, *In re Trados*) — default to the Delaware formulation for any DE-entity matter regardless of forum. |
+| 合同违约 | 4 个元素（合同、履行、违约、损害赔偿；CACI 303） | **特拉华州：** 3 个元素——合同义务、违约、损害赔偿（因果关系并入违约），见 *VLIW Tech., LLC v. Hewlett-Packard Co.*，840 A.2d 606（Del. 2003）。**特拉华州增加第 5 个元素**——当索赔寻求具体履行时，无法律上充分的救济。 |
+| 合同违约——货物 | 普通法违约要素 | **如果是货物 + U.C.C. 第 2 条司法管辖区（除路易斯安那州外的所有州）：** 加载 U.C.C. 违约要素（符合交付、承认/拒绝/撤销承认、补救、补买、卖方救济）。两者都呈现；让用户选择。 |
+| 合同违约——多批货物/分期合同 | 普通法违约或 U.C.C. § 2-711（单次交付违约框架） | **U.C.C. § 2-612 下的分期合同** — "实质损害该分期价值"取代完美交付规则；整体违约需要"实质损害整个合同价值"。如果合同要求分批交付货物（多次发货、批次或随时间交付），默认为 § 2-612 框架——它是适用的制度，分析与单次交付违约实质不同。向签署人标注："此草稿作为 § 2-612 下的分期合同起草——确认该定性符合合同的交付结构。" |
+| 过失 | 4 个元素（注意义务、违反义务、因果关系、损害赔偿；《侵权行为重述（第二）》§ 281） | **加州：** 遵循 CACI No. 400 表述（适用时按 CACI 418 法定过失）。**纽约：** PJI 2:10 表述——近因的措辞略有不同。 |
+| 过失不实陈述 | 《侵权行为重述（第二）》§ 552——合理依赖、经济损失 | **纽约：** 需要**当代相对性**或"如此接近以至于近似相对性"的关系，见 *Credit Alliance Corp. v. Arthur Andersen & Co.*，65 N.Y.2d 536（1985）。 |
+| 欺诈 | 9 个元素（通常简化为 5 个——陈述、重要性、明知虚假、诱导意图、合理依赖、损害赔偿） | **特拉华州：** 5 个元素，见 *Stephenson v. Capano Dev.*，462 A.2d 1069（Del. 1983）。**加州：** CACI 1900 表述——5 个元素，依赖为"合理的"。**纽约：** 根据 CPLR 3016(b) 要求详细陈述，且故意是独立元素。 |
+| 违反信义义务 | 《重述》/普通法——信义义务、违反、损害赔偿 | **特拉华州：** 最发达的信义义务法律体系（*Aronson v. Lewis*、*Cede & Co. v. Technicolor*、*In re Trados*）——对于任何特拉华州实体事项，无论论坛如何，默认使用特拉华州表述。 |
 
-When a jurisdiction-specific formulation differs materially from the baseline, the chart opens with a one-line callout:
+当司法管辖区特定表述与基准实质不同时，图表以单行提示开头：
 
-> **Jurisdiction note:** You told me this is a [DE/NY/CA] matter. Here's how [jurisdiction]'s formulation differs from the baseline: [divergence]. The chart below uses the [jurisdiction] formulation. If that's wrong, say so and I'll reload.
+> **司法管辖区说明：** 您告诉我这是一个 [特拉华/纽约/加州] 事项。以下是 [司法管辖区] 的表述与基准的差异：[差异]。以下图表使用 [司法管辖区] 表述。如果有误，请告知我以便重新加载。
 
-Confirm the element list with the user before mapping. If the user's jurisdiction isn't DE/NY/CA, ask: "Does your jurisdiction's pattern instruction add / drop / reword any of these?" If yes, use their version.
+在映射前与用户确认元素列表。如果用户司法管辖区不是特拉华/纽约/加州，询问："您司法管辖区的模式指令是否有增减/改写其中任何一项？"如果是，使用其版本。
 
-### Step 3: Map
+### 第三步：映射
 
-For each element:
+对于每个元素：
 
-- **Evidence supporting** — what proves this element? Cite the source with a pin cite.
-  - Deposition testimony — `[Doe Dep. 42:15–43:7]`
-  - Declaration — `[Smith Decl. ¶ 12]`
-  - Produced document — `[DEF00012345 at 3]`
-  - Admission — `[Def.'s Resp. to RFA No. 5]`
-  - Exhibit — `[Trial Ex. 14 at 2]`
-  - Expert report — `[Jones Expert Rep. at 18]`
-  - Discovery response — `[Pl.'s Resp. to Interrog. No. 8]`
-  - Statute / case — for purely legal elements
-- **Verbatim quote** where the evidence is testimonial or documentary. No paraphrase.
-- **Evidence contradicting** — what cuts the other way? Cite it. This is the row's vulnerability.
-- **Strength** — `strong` / `moderate` / `weak` / `none`. Keep it simple. Over-calibrated strength scores are noise; `weak` and `none` are the rows that matter.
-- **State per cell** — `supported` / `partial` / `disputed` / `gap` / `needs-discovery`.
+- **支持证据** — 什么能证明这个元素？引用来源并精确定位。
+  - 庭审证词 — `[Doe Dep. 42:15–43:7]`
+  - 声明书 — `[Smith Decl. ¶ 12]`
+  - 已提交文件 — `[DEF00012345 at 3]`
+  - 承认 — `[Def.'s Resp. to RFA No. 5]`
+  - 证据 — `[Trial Ex. 14 at 2]`
+  - 专家报告 — `[Jones Expert Rep. at 18]`
+  - 发现答复 — `[Pl.'s Resp. to Interrog. No. 8]`
+  - 法规/案例 — 对于纯法律元素
+- **逐字引用** 证明性或文件性证据的地方。无释义。
+- **反向证据** — 什么往相反方向走？引用。这是该行的薄弱点。
+- **强度** — `strong` / `moderate` / `weak` / `none`。保持简单。过度校准的强度分数是噪音；`weak` 和 `none` 才是重要的行。
+- **每个单元格注明状态** — `supported` / `partial` / `disputed` / `gap` / `needs-discovery`。
 
-### Step 4: Gap detection — the killer output
+### 第四步：差距检测——关键输出
 
-After mapping, produce a gap list. This is the point of the chart.
+映射后，生成差距列表。这是图表的意义所在。
 
-> **Elements with thin or no evidence:** [list]
+> **证据薄弱或缺乏的元素：** [列表]
 >
-> - If asserting (plaintiff): these defeat your complaint's plausibility (Iqbal/Twombly), your MSJ opposition, or your case at trial. Close them before the next motion.
-> - If defending: these are your MSJ targets and your directed-verdict motion. The plaintiff has to prove each element; a gap is a defense.
-> - If pre-discovery: these are your discovery priorities — the depositions, document requests, and interrogatories that turn a gap into `supported` or confirm `none`.
+> - 如果是主张方（原告）：这些会击败您的投诉可信度（Iqbal/Twombly）、您的简式判决异议或庭审中的案件。在下次动议前填补这些差距。
+> - 如果是应诉方（被告）：这些是您的简式判决目标和指令裁决动议。原告必须证明每个元素；差距是一种防御。
+> - 如果是发现前：这些是您的发现重点——将差距转变为 `supported` 或确认 `none` 的庭审证词、文件请求和质询问题。
 
-Gap detection is not a conclusion about the merits. It's a map of where the case is light.
+差距检测不是关于案件是非曲直的结论。它是案件薄弱处的地图。
 
-### Step 5: Phase-aware framing
+### 第五步：阶段感知框架
 
-Ask the phase. Same chart; different framing on the output:
+询问阶段。相同图表；输出的框架不同：
 
-- **Pre-filing / pleadings.** Does the complaint allege each element with plausibility (*Ashcroft v. Iqbal*, 556 U.S. 662 (2009); *Bell Atl. Corp. v. Twombly*, 550 U.S. 544 (2007))? Any element pleaded on information and belief without factual support is a 12(b)(6) target.
-- **Discovery.** For each `gap` or `needs-discovery` element, what discovery is needed? Which witnesses, which document custodians, which interrogatories, which RFAs.
-- **MSJ.** For each element, is there a genuine dispute of material fact? A `supported` cell for the movant with no contradicting evidence is summary-judgment ammunition; a `disputed` cell is MSJ-defeating.
-- **Trial.** Order of proof. Which witness proves element 1, which exhibit proves element 2, who authenticates, what's the foundation. The chart becomes the trial outline.
+- **诉前/诉状。** 投诉是否对每个元素做出了可信度陈述（*Ashcroft v. Iqbal*，556 U.S. 662（2009）；*Bell Atl. Corp. v. Twombly*，550 U.S. 544（2007））？任何仅凭信息和信念主张而无事实支撑的元素都是 12(b)(6) 的目标。
+- **发现阶段。** 对于每个 `gap` 或 `needs-discovery` 元素，需要哪些发现？哪些证人、哪些文件保管人、哪些质询问题、哪些承认申请。
+- **简式判决阶段。** 对于每个元素，是否存在实质性事实的真实争议？对于申请方没有相反证据的 `supported` 单元格是简式判决弹药；`disputed` 单元格是击败简式判决的。
+- **庭审阶段。** 证明顺序。哪位证人证明元素 1，哪个证据证明元素 2，谁进行认证，基础是什么。图表成为庭审提纲。
 
-### Step 6 (review sub-mode): Audit
+### 第六步（审查子模式）：审计
 
-For an opposing party's MSJ brief, a motion to dismiss, or outside counsel's draft: for each element, does their cited evidence actually prove it? Where is their chart thin? What's your strongest counter?
+对于对方的简式判决简报、驳回动议或外部律师的草稿：对于每个元素，他们引用的证据是否真正证明了它？他们的图表在哪里薄弱？您最强的反驳是什么？
 
-## Civil-mode guardrails (in addition to shared guardrails)
+## 民事模式保障措施（除共享保障措施外）
 
-- **Jurisdiction.** The element list is a baseline. Always confirm the controlling pattern instruction (CACI, NYPJI, federal circuit pattern charge, etc.) or statute. State the source on the chart's `_elements` sheet.
-- **Pleaded counts only.** Chart what's actually pleaded. Don't add a count the complaint doesn't allege just because the facts might support it — that's a different analysis.
-- **Affirmative defenses.** If mapping defenses, note whether the burden is on the defendant (most) or whether raising the defense shifts a burden to the plaintiff.
-- **"Gap" ≠ "case over."** A gap is a lead. Discovery, a declaration, or an expert report can close it. The chart shows where to dig.
+- **司法管辖区。** 元素列表是基准。始终确认控制性模式指令（CACI、NYPJI、联邦巡回法院模式指令等）或法规。在图表的 `_elements` 表中说明来源。
+- **仅主张的诉因。** 图表实际主张的内容。不要仅因为事实可能支持就添加起诉状未主张的诉因——那是不同的分析。
+- **积极抗辩。** 如果映射抗辩，注意举证责任是否在被告（大多数）还是提出抗辩后是否转移到原告。
+- **"差距" ≠ "案件结束"。** 差距是线索。发现、声明书或专家报告可以填补它。图表显示挖掘的方向。
 
 ---
 
-# Shared chassis (both modes)
+# 共享底层结构（两种模式）
 
-## Output
+## 输出
 
-Prepend the work-product header from `~/.claude/plugins/config/claude-for-legal/litigation-legal/CLAUDE.md` `## Outputs`.
+前置 `~/.claude/plugins/config/claude-for-legal/litigation-legal/CLAUDE.md` `## 输出` 中的工作产品标题。
 
-### Markdown table (always)
+### Markdown 表格（始终）
 
-One table per claim / defense / patent-claim per target.
+每个索赔/抗辩/专利权利要求每个目标一张表。
 
-**Patent mode example:**
+**专利模式示例：**
 
 ```markdown
-| [#] | Element (verbatim) | Accused feature | Evidence (pin-cited) | Mapping | State | Verified |
+| [#] | 元素（逐字） | 被指控特征 | 证据（精确定位引用） | 映射 | 状态 | 已核实 |
 |---|---|---|---|---|---|---|
-| 1a | "a processor configured to..." | SoC per datasheet | [Datasheet p. 7] "..." | literal-construction-dependent | mapped | ☐ |
-| 1b | "means for [function]" (§112(f)) | [alleged equiv.] | [source, file.c:124] "..." | needs-evidence | needs-evidence | ☐ |
+| 1a | "a processor configured to..." | SoC 见数据表 | [数据表 p. 7] "..." | literal-construction-dependent | mapped | ☐ |
+| 1b | "means for [function]"（§112(f)）| [所称等效物] | [来源, file.c:124] "..." | needs-evidence | needs-evidence | ☐ |
 ```
 
-**Civil mode example:**
+**民事模式示例：**
 
 ```markdown
-| [#] | Element | Evidence supporting (pin-cited) | Evidence contradicting | Strength | State | Verified |
+| [#] | 元素 | 支持证据（精确定位引用） | 反向证据 | 强度 | 状态 | 已核实 |
 |---|---|---|---|---|---|---|
-| 1 | Existence of a contract | [Ex. 3, MSA § 1; Smith Dep. 22:4–14] | none | strong | supported | ☐ |
-| 2 | Plaintiff's performance | [Jones Decl. ¶¶ 4–9] | [Doe Dep. 101:3–11: "they never delivered Phase 2"] | moderate | disputed | ☐ |
-| 3 | Defendant's breach | — | [Doe Dep. 101:3–11] | none | gap | ☐ |
-| 4 | Causation | — | — | none | needs-discovery | ☐ |
-| 5 | Damages | [Expert Rep. at 18 — $2.4M lost profits] | [Def.'s Expert Rep. at 6 — critiques methodology] | moderate | disputed | ☐ |
+| 1 | 合同存在 | [Ex. 3, MSA § 1; Smith Dep. 22:4–14] | 无 | strong | supported | ☐ |
+| 2 | 原告的履行 | [Jones Decl. ¶¶ 4–9] | [Doe Dep. 101:3–11: "他们从未交付第 2 阶段"] | moderate | disputed | ☐ |
+| 3 | 被告的违约 | — | [Doe Dep. 101:3–11] | none | gap | ☐ |
+| 4 | 因果关系 | — | — | none | needs-discovery | ☐ |
+| 5 | 损害赔偿 | [Expert Rep. at 18 — 240 万美元利润损失] | [Def.'s Expert Rep. at 6 — 批评方法论] | moderate | disputed | ☐ |
 ```
 
-Follow with:
-- **Defenses / thresholds** (patent mode: invalidity / indirect / willfulness flags; civil mode: affirmative-defense flags, Iqbal/Twombly flags pre-pleading)
-- **Gap list** (civil mode) / **needs-evidence list** (patent mode) — **the priority output**
-- **What cuts which way — summary** — strongest elements, weakest elements
-- **Conclusion line** — *"This skill does not conclude."* Elements mapped/supported: [list]. Elements needing evidence / in a gap state: [list]. Elements construction-dependent (patent) / disputed (civil): [list]. Attorney judgment required.
-- **Citation verification** — every pin cite, case, column/line, deposition page:line must be verified against the source.
+随后：
+- **抗辩/门槛**（专利模式：无效/间接/故意标注；民事模式：积极抗辩标注、诉前 Iqbal/Twombly 标注）
+- **差距列表**（民事模式）/**证据需求列表**（专利模式）——**优先输出**
+- **双向因素摘要** — 最强元素、最弱元素
+- **结论行** — *"此 skill 不作结论。"* 已映射/已支持的元素：[列表]。需要证据/处于差距状态的元素：[列表]。依赖于解释（专利）/有争议（民事）的元素：[列表]。需要律师判断。
+- **引用核实** — 每个引用定位、案例、列/行、庭审证词页:行必须对照来源核实。
 
-### CSV (always)
+### CSV（始终）
 
-Two files per chart:
-- `[chart-slug].csv` — values
-- `[chart-slug]_sources.csv` — verbatim quotes, pin cites, notes
+每张图表两个文件：
+- `[chart-slug].csv` — 值
+- `[chart-slug]_sources.csv` — 逐字引用、精确定位引用、说明
 
-**CSV / spreadsheet cell safety.** Before writing any cell value, check the first character. If it is `=`, `+`, `-`, `@`, tab (`\t`), or carriage return (`\r`), prepend a single apostrophe (`'`) to neutralize Excel/Sheets formula interpretation. Verbatim evidence from adversarial sources (opposing counsel's contentions, competitor product manuals, third-party prior art, scraped web pages, deposition transcripts, discovery productions) can contain strings that a spreadsheet will execute as formulas (`=HYPERLINK(...)`, `=cmd|...!A1`, `+WEBSERVICE(...)`), turning the chart into a data-exfiltration or RCE vector when an attorney opens it. RFC 4180 quoting alone does not defeat this — the leading `=` is still interpreted. Apply the apostrophe prefix in CSV, XLSX, and Sheets outputs. Log cells where this was applied so the reviewer can see which quotes were neutralized.
+**CSV/电子表格单元格安全。** 写入任何单元格值之前，检查第一个字符。如果是 `=`、`+`、`-`、`@`、制表符（`\t`）或回车符（`\r`），在前面加单引号（`'`）以中和 Excel/Sheets 公式解析。来自对抗性来源的逐字证据（对方律师的主张、竞争对手产品手册、第三方现有技术、抓取的网页、庭审证词记录、发现制作）可能包含电子表格会执行为公式的字符串（`=HYPERLINK(...)`、`=cmd|...!A1`、`+WEBSERVICE(...)`），当律师打开图表时将其转变为数据泄露或远程代码执行载体。仅 RFC 4180 引用不能消除这种影响——前导 `=` 仍然会被解析。在 CSV、XLSX 和 Sheets 输出中应用撇号前缀。记录应用此处理的单元格，以便审阅者看到哪些引用被中和了。
 
-### Spreadsheet (Excel or Sheets)
+### 电子表格（Excel 或 Sheets）
 
-Ask which the team works in. Use the pattern from `corporate-legal`'s `tabular-review` skill — same cell-level citation model, same state-based color coding, same `Verified` column, same schema sheet:
+询问团队使用哪个。使用来自 `corporate-legal` 的 `tabular-review` skill 的模式——相同的单元格级引用模型、相同的基于状态的颜色编码、相同的 `已核实` 列、相同的 schema 表：
 
-- One row per element (or element × target if comparing multiple targets)
-- Each evidence column paired with a hidden source column containing the verbatim quote and pin cite; cell comments (Excel) or notes (Sheets) surface the quote on hover
-- Color coding by state:
-  - *Patent:* white = `mapped`, yellow = `construction-dependent` / `partial` / DOE, orange = `needs-evidence`, red = `not-found`
-  - *Civil:* white = `supported`, yellow = `partial` / `disputed`, orange = `needs-discovery`, red = `gap`
-- `Verified` column per evidence column, blank by default — reviewer marks it
-- `_elements` sheet documenting the element source: pattern jury instruction (CACI No. X, NYPJI §Y, federal circuit pattern charge), statute (cite), Restatement section, or patent-claim parse. This is what makes the chart auditable — a reader can see where the elements came from.
-- `_gaps` sheet listing every `gap`, `needs-evidence`, or `needs-discovery` row with what's still needed
-- For patent mode only: `_claim-parse` sheet (element decomposition), `_constructions` sheet (disputed terms and assumed constructions)
+- 每个元素一行（或如果比较多个目标则为元素 × 目标）
+- 每个证据列与包含逐字引用和精确定位引用的隐藏来源列配对；单元格注释（Excel）或备注（Sheets）在悬停时显示引用
+- 按状态颜色编码：
+  - *专利：* 白色 = `mapped`，黄色 = `construction-dependent` / `partial` / 等效物，橙色 = `needs-evidence`，红色 = `not-found`
+  - *民事：* 白色 = `supported`，黄色 = `partial` / `disputed`，橙色 = `needs-discovery`，红色 = `gap`
+- 默认空白的 `已核实` 列——审阅者标记
+- `_elements` 表记录元素来源：模式陪审员指令（CACI No. X、NYPJI §Y、联邦巡回法院模式指令）、法规（引用）、《重述》章节或专利权利要求解析。这使图表可审计——读者可以看到元素的来源。
+- `_gaps` 表列出每个 `gap`、`needs-evidence` 或 `needs-discovery` 行及仍需要的内容
+- 仅限专利模式：`_claim-parse` 表（元素分解）、`_constructions` 表（有争议的术语和假设的解释）
 
-Apply the apostrophe-prefix neutralization to every cell written into the spreadsheet.
+将撇号前缀中和处理应用于写入电子表格的每个单元格。
 
-Prepend the work-product header as the top row. Alongside it, include:
+在顶行前置工作产品标题。一并附上：
 
-> This chart is derived from source documents that may be privileged, confidential, or both. It inherits the sources' privilege and confidentiality status — distribution beyond the privilege circle can waive privilege. Store with the matter's privileged files and make distribution decisions deliberately. Nothing in this chart has been filed or served; it is a draft for attorney review.
+> 此图表来源于可能享有特权、保密或两者兼有的源文档。它继承了来源的特权和保密状态——在特权圈之外分发可能放弃特权。与事项的特权文件一起存储，并谨慎做出分发决定。此图表中的任何内容均未提交或送达；它是供律师审查的草稿。
 
-### Filename and location
+### 文件名和位置
 
-- Patent infringement: `claim-chart-infringement-[patent#]-claim[#]-[target]-YYYY-MM-DD.{md,csv,xlsx}`
-- Patent invalidity: `claim-chart-invalidity-[patent#]-claim[#]-[ref]-YYYY-MM-DD.{md,csv,xlsx}`
-- Civil: `element-chart-[count-slug]-[side]-YYYY-MM-DD.{md,csv,xlsx}`
-- Review: `chart-review-[subject]-YYYY-MM-DD.{md,csv,xlsx}`
+- 专利侵权：`claim-chart-infringement-[patent#]-claim[#]-[target]-YYYY-MM-DD.{md,csv,xlsx}`
+- 专利无效：`claim-chart-invalidity-[patent#]-claim[#]-[ref]-YYYY-MM-DD.{md,csv,xlsx}`
+- 民事：`element-chart-[count-slug]-[side]-YYYY-MM-DD.{md,csv,xlsx}`
+- 审查：`chart-review-[subject]-YYYY-MM-DD.{md,csv,xlsx}`
 
-If matter workspaces enabled and a matter is active: `~/.claude/plugins/config/claude-for-legal/litigation-legal/matters/<matter-slug>/claim-charts/`. Otherwise: `~/.claude/plugins/config/claude-for-legal/litigation-legal/claim-charts/`. Surface the path. Append a one-line entry to the matter's `history.md`.
+如果事项工作区已启用且事项处于活跃状态：`~/.claude/plugins/config/claude-for-legal/litigation-legal/matters/<matter-slug>/claim-charts/`。否则：`~/.claude/plugins/config/claude-for-legal/litigation-legal/claim-charts/`。展示路径。向事项的 `history.md` 追加一行。
 
-## Summary readout
+## 摘要读出
 
-After the chart is written, give a one-screen readout:
+图表写入后，给出一屏读出：
 
-- Claim(s) / count(s) / patent claim(s), target(s), jurisdiction, phase
-- Elements charted · supported/mapped · partial · disputed · gap / needs-evidence · not-found
-- The gap list (civil) or needs-evidence list (patent) — **this is the priority list**
-- Where the output files are
-- Reminder: every cell is a lead. The chart is a draft, not a contention / brief / order of proof.
+- 权利要求/诉因/专利权利要求、目标、司法管辖区、阶段
+- 已图表元素 · 已支持/已映射 · 部分 · 有争议 · 差距/需要证据 · 未找到
+- 差距列表（民事）或证据需求列表（专利）——**这是优先列表**
+- 输出文件位置
+- 提醒：每个单元格都是线索。图表是草稿，不是主张/简报/证明顺序。
 
-## Non-lawyer gate
+## 非律师关卡
 
-If `## Who's using this` Role is Non-lawyer:
+如果 `## 使用者` 角色是非律师：
 
-> This chart is a research draft, not a legal filing. Serving contentions, filing a brief, or relying on this for a merits opinion has Rule 11 and substantive legal consequences. An attorney in the relevant jurisdiction must review before this is used for any legal purpose.
+> 此图表是研究草稿，不是法律申请文件。送达主张、提交简报或依此作为是非曲直意见会产生规则 11 和实质性法律后果。相关司法管辖区的律师在将其用于任何法律目的之前必须进行审查。
 >
-> Here's a one-page brief to bring to an attorney:
+> 这是带给律师的一页简报：
 >
-> [Generate: claim / patent, side, jurisdiction, phase, elements, supported / gap / needs-discovery counts, the three most load-bearing open questions.]
+> [生成：索赔/专利、立场、司法管辖区、阶段、元素、已支持/差距/需要发现计数、三个最关键的未解决问题。]
 
-Deliver the chart alongside the brief.
+将图表与简报一同交付。
 
-## Shared guardrails — checklist
+## 共享保障措施——检查清单
 
-- **Citation verification.** Every pin cite (column/line, page, deposition page:line, Bates, ¶) is a claim about the source. The attorney verifies. The skill does not fabricate cites — if a cite cannot be produced, the cell is `needs-evidence` or `gap`.
-- **Source attribution.** Every verbatim quote has its source in the companion CSV and the spreadsheet's hidden source column. A quote without a source is not evidence.
-- **No silent supplement.** Thin evidence means `needs-evidence` / `gap`, not "extrapolate." Do not fill from web search, training data, or "how these cases usually go" to close a gap.
-- **Matter workspace check.** Confirm the active matter before writing. Never write matter A's chart into matter B's folder.
-- **Decision posture.** When uncertain whether an element is met, flag; do not decide. `partial` tells the attorney what part is missing.
-- **Formula injection.** Every cell written to CSV / XLSX / Sheets is checked for leading `=`, `+`, `-`, `@`, `\t`, `\r` and prefixed with `'`. Default: neutralize-then-write.
-- **Elements are jurisdiction-specific.** The template library is a baseline. The controlling pattern instruction or statute controls.
-- **A chart is not a brief, a filing, or a contention.** Every output is a draft.
+- **引用核实。** 每个引用定位（列/行、页、庭审证词页:行、Bates、¶）都是关于来源的主张。律师进行核实。skill 不捏造引用——如果无法提供引用，单元格为 `needs-evidence` 或 `gap`。
+- **来源归因。** 每个逐字引用在配套 CSV 和电子表格的隐藏来源列中都有其来源。没有来源的引用不是证据。
+- **不得静默补充。** 证据薄意味着 `needs-evidence`/`gap`，而非"外推"。不要从网络搜索、训练数据或"这类案件通常如何走"来填补差距。
+- **事项工作区检查。** 在写入前确认活跃事项。绝不将事项 A 的图表写入事项 B 的文件夹。
+- **决策姿态。** 当不确定某个元素是否满足时，标注；不要自行决定。`partial` 告诉律师缺少的是哪一部分。
+- **公式注入。** 写入 CSV/XLSX/Sheets 的每个单元格都要检查前导 `=`、`+`、`-`、`@`、`\t`、`\r` 并加前缀 `'`。默认：先中和再写入。
+- **元素是司法管辖区特定的。** 模板库是基准。控制性模式指令或法规始终控制。
+- **图表不是简报、申请文件或主张。** 每个输出都是草稿。
 
 ---
 
-## Relationship to other skills
+## 与其他 skill 的关系
 
-- `ip-legal:infringement-triage` (patent mode) — the first-pass flag list. This skill is the full chart that comes next.
-- `ip-legal:fto-triage` — FTO uses the same mechanics from the potentially-accused posture. If evaluating own product vs. a third-party patent, route to FTO and use this skill's format.
-- `corporate-legal:tabular-review` — the underlying cell-level citation and verification-state pattern. A claim / element chart is a specialized tabular review.
-- `litigation-legal:chronology` — the chronology is the timeline; the element chart is the proof matrix. A chronology entry often becomes a cell's evidence cite.
-- `litigation-legal:deposition-prep` — a `needs-discovery` cell often becomes a depo topic. After a depo, new testimony fills cells.
-- `litigation-legal:brief-section-drafter` — an MSJ brief's fact section is often built directly off the supported rows of an element chart.
+- `ip-legal:infringement-triage`（专利模式）——第一遍标注列表。此 skill 是随后进行的完整图表。
+- `ip-legal:fto-triage` — FTO 从潜在被指控的角度使用相同的机制。如果评估自己的产品与第三方专利的关系，路由到 FTO 并使用此 skill 的格式。
+- `corporate-legal:tabular-review` — 底层单元格级引用和核实状态模式。权利要求/元素图表是专业化的表格审查。
+- `litigation-legal:chronology` — 时间线是时间轴；元素图表是证明矩阵。时间线条目通常成为单元格的证据引用。
+- `litigation-legal:deposition-prep` — `needs-discovery` 单元格通常成为庭审证词主题。庭审证词后，新的证言填充单元格。
+- `litigation-legal:brief-section-drafter` — 简式判决简报的事实部分通常直接基于元素图表的已支持行构建。
 
 ---
 
-## Close with the next-steps decision tree
+## 以下一步决策树结束
 
-End with the next-steps decision tree per CLAUDE.md `## Outputs`. Customize the options to what this skill just produced — the five default branches (draft the X, escalate, get more facts, watch and wait, something else) are a starting point, not a lock-in. The tree is the output; the lawyer picks.
+以 CLAUDE.md `## 输出` 中的下一步决策树结束。根据此 skill 刚刚生成的内容定制选项——五个默认分支（起草 X、升级、获取更多事实、观察等待、其他）是起点，不是锁定。树就是输出；律师选择。
 
-## What this skill does not do
+## 此 skill 不做什么
 
-- **It does not conclude.** Not infringement, not non-infringement, not liability, not non-liability. Ever.
-- **It does not decide claim construction** (patent) or **the controlling elements** (civil). It flags disputed terms / baseline elements and charts under stated assumptions.
-- **It does not meet the clear-and-convincing burden for invalidity** or **the preponderance at trial**. It produces a prima facie draft for attorney review.
-- **It does not substitute for expert analysis.** Source code review, teardowns, technical experts, damages experts are separate work products this chart routes to, not replaces.
-- **It does not serve, file, or sign anything.** Every output is a draft. An attorney serves and files.
-- **It does not extrapolate.** If the evidence isn't there, the cell is `needs-evidence` / `gap` — never a guess.
+- **不作结论。** 不作侵权、非侵权、责任或不承担责任的结论。永远。
+- **不决定权利要求解释**（专利）或**控制性元素**（民事）。它标注有争议术语/基准元素并在陈述的假设下绘制图表。
+- **不满足无效的清晰且令人信服的举证责任**或**庭审时的优势证明**。它生成供律师审查的初步草稿。
+- **不替代专家分析。** 源代码审查、拆解、技术专家、损害赔偿专家是此图表路由到的独立工作产品，而非替代品。
+- **不送达、提交或签署任何内容。** 每个输出都是草稿。律师送达和提交。
+- **不外推。** 如果证据不在，单元格为 `needs-evidence`/`gap`——绝不猜测。

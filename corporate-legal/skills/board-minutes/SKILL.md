@@ -1,123 +1,124 @@
 ---
 name: board-minutes
 description: >
-  Drafts board or committee meeting minutes in your house format. Auto-detects
-  upcoming board and committee meetings from your calendar, asks for the agenda
-  and any slides or pre-read materials, and produces a complete draft in the
-  format learned from your seed minutes. Also handles written consents in lieu
-  of meetings. Trigger: "board minutes", "draft minutes", "upcoming board
-  meeting", "committee minutes", "written consent", or calendar detection of
-  an upcoming board or committee event.
+  以你的内部格式起草董事会或委员会会议纪要。从日历自动检测即将到来的董事会和委员会会议，要求议程和任何幻灯片或预读材料，并以从种子会议纪要学习的格式生成完整草案。也处理代替会议的书面同意。触发条件："board minutes"、"draft minutes"、"upcoming board meeting"、"committee minutes"、"written consent"，或日历检测到即将到来的董事会或委员会事件。
 ---
 
-# Board Minutes
+<!--
+This file is a Chinese translation of the original by Anthropic PBC.
+Original: https://github.com/anthropics/claude-for-legal
+Licensed under Apache License 2.0
+-->
 
-## Matter context
 
-**Matter context.** Check `## Matter workspaces` in the practice-level CLAUDE.md. If `Enabled` is `✗` (the default for in-house users), skip the rest of this paragraph — skills use practice-level context and the matter machinery is invisible. If enabled and there is no active matter, ask: "Which matter is this for? Run `/corporate-legal:matter-workspace switch <slug>` or say `practice-level`." Load the active matter's `matter.md` for matter-specific context and overrides. Write outputs to the matter folder at `~/.claude/plugins/config/claude-for-legal/corporate-legal/matters/<matter-slug>/`. Never read another matter's files unless `Cross-matter context` is `on`.
+# 董事会会议纪要
 
----
+## 事项上下文
 
-## Purpose
-
-Board minutes are a legal record. They need to be accurate, complete, and in a format that will hold up under scrutiny — whether that's a financing due diligence review, a regulatory inquiry, or an M&A data room. This skill drafts them in your house format so you spend your time reviewing and correcting, not formatting and re-typing.
-
-## Load context
-
-- `~/.claude/plugins/config/claude-for-legal/corporate-legal/CLAUDE.md` → `## Board & Secretary` section:
-  - Minutes format (long-form narrative / action minutes / hybrid)
-  - Minutes template extracted from seed documents (structure, resolution language, header format)
-  - Board composition and committees
-  - Written consents — what they're used for and any limits
-- If `~/.claude/plugins/config/claude-for-legal/corporate-legal/CLAUDE.md` has no minutes format: run cold-start first. Do not proceed with a generic format.
+**事项上下文。** 检查执业级 CLAUDE.md 中的 `## Matter workspaces`。如果 `Enabled` 为 `✗`（内部用户的默认值），跳过本段的其余部分——skills 使用执业级上下文，事项机制不可见。如果已启用且没有活跃事项，询问："这是哪个事项的？运行 `/corporate-legal:matter-workspace switch <slug>` 或说 `practice-level`。"加载活跃事项的 `matter.md` 以获取事项特定上下文和覆盖。将输出写入事项文件夹 `~/.claude/plugins/config/claude-for-legal/corporate-legal/matters/<matter-slug>/`。除非 `Cross-matter context` 为 `on`，否则永远不要阅读另一个事项的文件。
 
 ---
 
-## Step 1: Identify the meeting
+## 目的
 
-### Calendar detection
+董事会会议纪要是法律记录。它们需要准确、完整，并且格式能够经受审查——无论是融资尽调审查、监管询问还是 M&A 数据室。此 skill 以你的内部格式起草它们，以便你花时间审查和纠正，而不是格式化和重新输入。
 
-If the calendar connector is authorized, search for upcoming events matching board and committee keywords:
+## 加载上下文
 
-**Search terms:** "Board of Directors", "Board Meeting", "Audit Committee", "Compensation Committee", "Comp Committee", "Nominating", "Nom/Gov", "Governance Committee", "Special Committee", "Board of Directors — [Company]"
+- `~/.claude/plugins/config/claude-for-legal/corporate-legal/CLAUDE.md` → `## Board & Secretary` 部分：
+  - 会议纪要格式（长篇叙述/行动纪要/混合）
+  - 从种子文档提取的会议纪要模板（结构、决议语言、标题格式）
+  - 董事会组成和委员会
+  - 书面同意——用于什么以及任何限制
+- 如果 `~/.claude/plugins/config/claude-for-legal/corporate-legal/CLAUDE.md` 没有会议纪要格式：先运行冷启动。不要用通用格式继续。
 
-**Time window:** Look 30 days forward. If no upcoming meeting is found, look 14 days back (minutes are often drafted after the fact).
+---
 
-Present what you find:
+## 步骤 1：识别会议
 
-> I found the following board or committee meetings on your calendar:
+### 日历检测
+
+如果日历连接器已授权，搜索匹配董事会和委员会关键词的即将到来的事件：
+
+**搜索词：** "Board of Directors"、"Board Meeting"、"Audit Committee"、"Compensation Committee"、"Comp Committee"、"Nominating"、"Nom/Gov"、"Governance Committee"、"Special Committee"、"Board of Directors — [Company]"
+
+**时间窗口：** 向前查看 30 天。如果未找到即将到来的会议，向后查看 14 天（会议纪要通常在事后起草）。
+
+显示你发现的内容：
+
+> 我在你的日历上找到了以下董事会或委员会会议：
 >
-> 1. **[Meeting name]** — [Date], [Time], [Location/Virtual]
-> 2. **[Meeting name]** — [Date], [Time], [Location/Virtual]
+> 1. **[会议名称]** — [日期]，[时间]，[地点/虚拟]
+> 2. **[会议名称]** — [日期]，[时间]，[地点/虚拟]
 >
-> Which one are these minutes for? Or is it a different meeting not on here?
+> 这些会议纪要是哪一个的？还是不在这里的其他会议？
 
-If the calendar connector is not authorized or returns nothing: ask directly — what meeting, what date, what type (full board / which committee)?
+如果日历连接器未授权或没有返回任何内容：直接询问——什么会议、什么日期、什么类型（全体董事会/哪个委员会）？
 
-### Meeting metadata to confirm
+### 要确认的会议元数据
 
-Once the meeting is identified, confirm or fill in:
+一旦确定了会议，确认或填写：
 
-- **Meeting type:** Full Board of Directors / [Committee name]
-- **Date and time**
-- **Location or platform** (in-person address / Zoom / Teams / telephonic)
-- **Called by / Notice:** Was proper notice given? (Yes / waived — waiver of notice is a common exhibit)
-
----
-
-## Step 2: Attendance
-
-Ask for the attendee list, or offer to pull from the calendar invite if the connector is authorized.
-
-**Directors present:**
-- Pull from board composition in `~/.claude/plugins/config/claude-for-legal/corporate-legal/CLAUDE.md` as the starting point
-- Ask who was actually present, who was absent, and whether any absent directors had advance notice
-
-**Management present:**
-- Who from management attended? (CFO, CAO, CTO, etc.)
-- Note: management attendees are typically listed separately from directors
-
-**Guests:**
-- Outside counsel present? (Name and firm)
-- Investment bankers, auditors, or other advisors?
-- Any guests who attended for specific agenda items only (note their attendance as limited to that item)
-
-**Chair:**
-- Who chaired the meeting?
-- Who acted as secretary?
-
-**Quorum:**
-
-- Check the charter and bylaws for the quorum requirement. If the charter is silent, research the applicable state corporate law for the default rule for this entity type. Record what you confirmed (source and pinpoint) in the drafting notes.
-- Confirm quorum was present. If not: stop and flag before drafting. Do not produce minutes that imply a valid meeting occurred. Surface the question to outside counsel — the remediation path (ratification, re-meeting, written consent, other) depends on the state of incorporation and the nature of the action.
+- **会议类型：** 全体董事会/[委员会名称]
+- **日期和时间**
+- **地点或平台**（当面地址/Zoom/Teams/电话）
+- **召集方/通知：** 是否给予了适当通知？（是/放弃——放弃通知通知是常见的附件）
 
 ---
 
-## Step 3: Materials
+## 步骤 2：出席
 
-Ask for the meeting materials. These are the source for the agenda items and any resolutions.
+要求出席者列表，或如果连接器已授权，提议从日历邀请中提取。
 
-> Can you share the agenda and any pre-read materials for this meeting? Even a rough agenda is enough to structure the minutes. If there were board slides or a management presentation, upload those too — I'll use them to fill in the agenda item summaries.
+**出席的董事：**
+- 从 `~/.claude/plugins/config/claude-for-legal/corporate-legal/CLAUDE.md` 中的董事会组成作为起点
+- 询问实际出席了谁、谁缺席，以及缺席的董事是否有提前通知
+
+**出席的管理层：**
+- 管理层中谁出席了？（CFO、CAO、CTO 等）
+- 注意：管理层出席者通常与董事分开列出
+
+**嘉宾：**
+- 出席了外部律师吗？（姓名和律所）
+- 投资银行家、审计师或其他顾问？
+- 仅参加特定议程项目的嘉宾（注意他们的出席仅限于该项目）
+
+**主席：**
+- 谁主持了会议？
+- 谁担任秘书？
+
+**法定人数：**
+
+- 检查章程和细则中的法定人数要求。如果章程沉默，研究此实体类型的适用州公司法中的默认规则。在起草说明中记录你确认的内容（来源和精确引用）。
+- 确认已达到法定人数。如果没有：在起草前停止并标记。不要产生暗示发生了有效会议的会议纪要。向外部律师提出问题——补救路径（批准、重新会议、书面同意或其他）取决于注册州和行动的性质。
+
+---
+
+## 步骤 3：材料
+
+要求会议材料。这些是议程项目和任何决议的来源。
+
+> 你能分享此会议的议程和任何预读材料吗？即使是粗略的议程也足以构建会议纪要。如果有董事会幻灯片或管理层演示，也上传它们——我会用它们来填写议程项目摘要。
 >
-> If materials weren't distributed in advance, tell me the agenda items and I'll draft placeholders for each.
+> 如果材料没有提前分发，告诉我议程项目，我会为每个起草占位符。
 
-**From the agenda and slides, extract:**
-- Agenda items in order
-- Any resolutions proposed (look for board approval language: "approve," "authorize," "ratify," "adopt," "elect")
-- Any exhibits referenced (management presentations, financial reports, legal memos, valuations)
-- Any votes expected
+**从议程和幻灯片中提取：**
+- 按顺序排列的议程项目
+- 任何提议的决议（查找董事会批准语言："approve"、"authorize"、"ratify"、"adopt"、"elect"）
+- 任何引用的附件（管理层演示、财务报告、法律备忘录、估值）
+- 任何预期的投票
 
-**If no materials:** Ask for the agenda items verbally and proceed with placeholders for discussion content.
+**如果没有材料：** 口头询问议程项目，并为每个起草占位符。
 
 ---
 
-## Step 4: Draft the minutes
+## 步骤 4：起草会议纪要
 
-Use the house format from `~/.claude/plugins/config/claude-for-legal/corporate-legal/CLAUDE.md`. Do not default to a generic format. The seed minutes are the template — replicate the structure, the header, the resolution language, the level of discussion detail.
+使用来自 `~/.claude/plugins/config/claude-for-legal/corporate-legal/CLAUDE.md` 的内部格式。不要默认为通用格式。种子会议纪要是模板——复制结构、标题、决议语言、讨论细节的程度。
 
-### Standard structure (adapt to house format)
+### 标准结构（适应内部格式）
 
-**Header block:**
+**标题块：**
 ```
 MINUTES OF [MEETING TYPE] OF THE BOARD OF DIRECTORS
 [OR: MINUTES OF THE [COMMITTEE NAME] OF THE BOARD OF DIRECTORS]
@@ -127,122 +128,122 @@ OF [COMPANY NAME]
 [Location / Telephonic / Video Conference]
 ```
 
-**Opening:**
-- Meeting called to order by [Chair name] at [time]
-- Notice: [proper notice given / notice waived — attach waiver as exhibit if applicable]
-- Quorum confirmed: [N of M directors present]
-- Secretary: [name]
+**开场：**
+- 会议由 [主席姓名] 于 [时间] 召开
+- 通知：[给予了适当通知/通知已放弃——如果适用，将放弃通知书作为附件]
+- 确认法定人数：[N of M 名董事出席]
+- 秘书：[姓名]
 
-**Attendees:**
-- Directors present: [list]
-- Directors absent: [list, if any]
-- Also present: [management, outside counsel, guests — with roles]
+**出席者：**
+- 出席的董事：[列表]
+- 缺席的董事：[列表，如有]
+- 还出席：[管理层、外部律师、嘉宾——附角色]
 
-**Previous minutes:**
-Standard language: approval of minutes from prior meeting. Pull date of prior meeting from `~/.claude/plugins/config/claude-for-legal/corporate-legal/CLAUDE.md` board calendar if available, otherwise leave as [DATE OF PRIOR MEETING].
+**上次会议纪要：**
+批准上次会议纪要的标准语言。如果 `~/.claude/plugins/config/claude-for-legal/corporate-legal/CLAUDE.md` 董事会日历中有上次会议日期，则从那里提取，否则保留为 [上次会议日期]。
 
-**Agenda items — one section per item:**
+**议程项目——每个项目一个章节：**
 
 ```
-[AGENDA ITEM TITLE]
+[议程项目标题]
 
-[Chair/presenter name] [presented / reported on / led a discussion of] [topic].
+[主席/演示者姓名] [presented / reported on / led a discussion of] [topic]。
 
-[Discussion summary — see drafting notes below]
+[讨论摘要——见下面的起草说明]
 
-[If resolution follows:]
-Upon motion duly made and seconded, the following resolution was adopted [by unanimous vote / by a vote of N for, N against, N abstaining]:
+[如果随后有决议：]
+经适当动议和附议，以下决议以 [一致投票 / N 赞成、N 反对、N 弃权] 通过：
 
-RESOLVED, that [resolution text in house language from `~/.claude/plugins/config/claude-for-legal/corporate-legal/CLAUDE.md`].
+RESOLVED, that [以来自 `~/.claude/plugins/config/claude-for-legal/corporate-legal/CLAUDE.md` 的内部语言表达的决议文本]。
 ```
 
-**Adjournment:**
-Standard language: meeting adjourned at [time], there being no further business.
+**散会：**
+标准语言：会议于 [时间] 散会，没有其他事项。
 
-**Signature block:**
-Secretary signature line. Some formats include a chair countersignature.
-
----
-
-### Drafting notes
-
-**Discussion summaries:** The hardest part of minutes is deciding how much discussion to capture. Follow the house format from seed documents exactly:
-
-- *Long-form narrative:* Summarise the substance of the discussion — what questions were raised, what information was presented, what factors the board considered. Do not quote individuals unless the specific attribution matters legally.
-- *Action minutes:* Note only what was presented and what action was taken. No discussion content beyond "the board discussed the matter."
-- *Hybrid:* Full narrative for major items (acquisitions, financials, significant approvals), action-only for routine items.
-
-When materials were provided: pull summary content from the slides and management presentation. The board "received and reviewed" a presentation — summarize what the presentation covered.
-
-When no materials: insert `[PLACEHOLDER — summarize discussion here]` and flag it clearly. Do not fabricate discussion content.
-
-**Resolutions:** Use the exact resolution language from the seed minutes — "RESOLVED, THAT" vs. "BE IT RESOLVED" vs. "RESOLVED" alone. The language is house style, not interchangeable.
-
-**Exhibit references:** Number exhibits in the order they appear (Exhibit A, B, C). Common exhibits: management presentation, financial statements, valuation reports, legal opinions, waivers of notice, consents.
+**签名块：**
+秘书签名行。某些格式包含主席副签。
 
 ---
 
-## Step 4.5: Consequential-action gate (adopt minutes)
+### 起草说明
 
-**Before adopting minutes as final:** Read `## Who's using this` in `~/.claude/plugins/config/claude-for-legal/corporate-legal/CLAUDE.md`. If the Role is **Non-lawyer**:
+**讨论摘要：** 会议纪要中最难的部分是决定要捕获多少讨论。严格遵循种子文档的内部格式：
 
-> Adopting minutes makes them the official record of what the board decided — they're the primary evidence of authorization for the actions taken at the meeting. Have you reviewed this with an attorney? If yes, proceed. If no, here's a brief to bring to them:
+- *长篇叙述：* 总结讨论的实质——提出了什么问题、呈现了什么信息、董事会考虑了哪些因素。除非具体归因在法律上很重要，否则不要引用个人。
+- *行动纪要：* 只记录呈现了什么以及采取了什么行动。除了"董事会讨论了这个事项"之外没有讨论内容。
+- *混合：* 对重大项目（收购、财务、重大批准）进行完整叙述，对常规项目仅做行动记录。
+
+当提供了材料时：从幻灯片和管理层演示中提取摘要内容。董事会"收到并审查了"一个演示——总结演示涵盖的内容。
+
+当没有材料时：插入 `[PLACEHOLDER——在此处总结讨论]` 并清楚地标记。不要编造讨论内容。
+
+**决议：** 使用来自种子会议纪要的确切决议语言——"RESOLVED, THAT" 与 "BE IT RESOLVED" 与 "RESOLVED" 本身。语言是内部风格，不可互换。
+
+**附件引用：** 按附件出现的顺序编号（附件 A、B、C）。常见附件：管理层演示、财务报表、估值报告、法律意见、放弃通知书、同意书。
+
+---
+
+## 步骤 4.5：后果行动关卡（通过会议纪要）
+
+**在将会议纪要通过为最终版之前：** 读取 `~/.claude/plugins/config/claude-for-legal/corporate-legal/CLAUDE.md` 中的 `## Who's using this`。如果角色是**非律师**：
+
+> 通过会议纪要使其成为董事会决定的官方记录——它们是会议上采取的行动授权的主要证据。你是否已与律师审查过此内容？如果是，继续。如果不是，这是带给他们的简报：
 >
-> - What was decided (resolutions, votes, who was present)
-> - What the draft captures and what is still a placeholder
-> - Open questions (any flagged attendance, quorum, or conflict notes)
-> - What could go wrong (misstated resolutions, missing disclosures, quorum defects, privilege leakage in discussion summaries)
-> - What to ask the attorney (is the discussion depth right for this board's practice; are exec-session notes properly segregated; do any items need more documentation)
+> - 决定了什么（决议、投票、出席者）
+> - 草案捕获的内容以及仍然是占位符的内容
+> - 未决问题（任何标记的出席、法定人数或冲突说明）
+> - 可能出什么问题（决议表述不当、遗漏的披露、法定人数缺陷、讨论摘要中的特权泄漏）
+> - 要问律师什么（讨论深度对于该董事会的惯例是否正确；执行会议备注是否适当分离；是否有任何项目需要更多文件）
 >
-> If you need to find an attorney, solicitor, barrister, or other authorised legal professional: contact your professional regulator (state bar in the US, SRA/Bar Standards Board in England & Wales, Law Society in Scotland/NI/Ireland/Canada/Australia, or your jurisdiction's equivalent) for a referral service.
+> 如果你需要找到律师、事务律师、大律师或其他授权法律专业人士：联系你的专业监管机构（美国的州律师协会、英格兰和威尔士的 SRA/Bar Standards Board、苏格兰/NI/爱尔兰/加拿大/澳大利亚的 Law Society，或你所在司法管辖区的同等机构）以获取推荐服务。
 
-Do not produce the final adoption-ready version past this gate without an explicit yes. A marked-DRAFT for attorney review is fine.
+在没有明确是的情况下，不要产生越过此关卡的最终可通过版本。供律师审查的标记草案是可以的。
 
 ---
 
-## Step 5: Output and review prompts
+## 步骤 5：输出和审查提示
 
-Produce the full draft. The minutes themselves are a corporate record, not privileged; do not apply the work-product header to the minutes as circulated. The drafting notes, placeholder flags, and review checklist below are work product — prepend the work-product header from `~/.claude/plugins/config/claude-for-legal/corporate-legal/CLAUDE.md` `## Outputs` (it differs by user role — see `## Who's using this`):
+产生完整草案。会议纪要本身是公司记录，不具有特权；不要将工作产品标题应用于传阅的会议纪要。以下的起草说明、占位符标志和审查检查清单是工作产品——根据 `~/.claude/plugins/config/claude-for-legal/corporate-legal/CLAUDE.md` `## Outputs` 前置工作产品标题（根据用户角色而不同——见 `## Who's using this`）：
 
 ```
 [WORK-PRODUCT HEADER — per plugin config ## Outputs — differs by role; see `## Who's using this`]
 ```
 
-After the draft, add a review checklist:
+草案之后，添加审查检查清单：
 
 ```
 [WORK-PRODUCT HEADER — per plugin config ## Outputs — differs by role; see `## Who's using this`]
 
-REVIEW CHECKLIST — please verify before circulating:
+审查检查清单——传阅前请核实：
 
-□ All directors confirmed present/absent (check against actual attendance)
-□ Quorum confirmed correct
-□ Resolution language matches what was actually approved (check wording carefully)
-□ Votes recorded correctly — any abstentions or dissents to note?
-□ Exhibits numbered and referenced correctly
-□ Any executive sessions held? (Add separate executive session note if so)
-□ Any conflicts of interest disclosed? (Director recusal to note if applicable)
-□ Time of adjournment to fill in
-□ Outside counsel reviewed? (If required by your process)
+□ 所有董事确认出席/缺席（对照实际出席情况核查）
+□ 法定人数确认正确
+□ 决议语言与实际批准的内容一致（仔细检查措辞）
+□ 投票记录正确——有任何弃权或反对意见需要注意吗？
+□ 附件编号和引用正确
+□ 有没有举行执行会议？（如有，添加单独的执行会议说明）
+□ 有没有披露利益冲突？（如适用，注意董事回避）
+□ 散会时间待填写
+□ 外部律师审查了吗？（如果你的流程要求）
 ```
 
-Flag any sections where content is a placeholder and needs the attorney's input before the minutes are accurate.
+标记任何内容是占位符且需要律师在会议纪要准确之前输入的章节。
 
-Add as a final pre-adoption note on the draft, stripped before adoption:
+在草案末尾添加最终预通过说明，通过前删除：
 
-> This is a draft for attorney review, not adopted minutes. Adopted minutes are the official record of board action and carry legal consequences — a licensed attorney reviews, edits, and takes professional responsibility before adoption. Do not adopt this draft unreviewed.
-
----
-
-## Written consents
-
-For drafting written consents in lieu of a meeting, use `/corporate-legal:written-consent`. That skill handles precedent search, state-law confirmation, and the scope warning for major one-off actions.
+> 这是供律师审查的草案，不是已通过的会议纪要。已通过的会议纪要是董事会行动的官方记录，具有法律后果——持牌律师在通过前审查、编辑并承担专业责任。不要在未经审查的情况下通过此草案。
 
 ---
 
-## What this skill does not do
+## 书面同意
 
-- It does not attend the meeting or capture real-time discussion — it drafts from materials and attorney input.
-- It does not determine whether a resolution is legally valid or sufficient — it drafts in house format; legal judgment on adequacy is the attorney's call.
-- It does not finalize minutes — the draft requires attorney review before circulation.
-- It does not distribute minutes — output is for the attorney to review, edit, and circulate via their own process.
+起草代替会议的书面同意，使用 `/corporate-legal:written-consent`。该 skill 处理先例搜索、州法律确认和主要一次性行动的范围警告。
+
+---
+
+## 此 skill 不做什么
+
+- 它不出席会议或实时捕获讨论——它从材料和律师输入起草。
+- 它不确定决议是否在法律上有效或充分——它以内部格式起草；充分性的法律判断是律师的判断。
+- 它不最终确定会议纪要——草案在传阅前需要律师审查。
+- 它不分发会议纪要——输出供律师通过自己的流程审查、编辑和传阅。

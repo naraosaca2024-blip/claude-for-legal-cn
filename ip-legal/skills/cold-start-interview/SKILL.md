@@ -1,47 +1,52 @@
 ---
 name: cold-start-interview
 description: >
-  Run the cold-start interview to learn your IP practice and write your
-  practice profile. Use on first install when the practice profile is missing
-  or still contains placeholders, when re-onboarding with --redo, or when
-  re-probing integrations with --check-integrations after connecting or
-  disconnecting an MCP. This is the ONLY skill that should run on a fresh
-  install.
-argument-hint: "[--redo to re-run on an already-configured plugin] [--check-integrations to re-probe integrations only]"
+  运行冷启动访谈，了解你的 IP 执业并写入执业档案。在首次安装时、
+  执业档案缺失或仍包含占位符时、使用 --redo 重新入职时，或在
+  连接/断开 MCP 后使用 --check-integrations 重新探测集成时使用。
+  这是全新安装时应运行的唯一 skill。
+argument-hint: "[--redo 在已配置的 plugin 上重新运行] [--check-integrations 仅重新探测集成]"
 ---
+
+<!--
+This file is a Chinese translation of the original by Anthropic PBC.
+Original: https://github.com/anthropics/claude-for-legal
+Licensed under Apache License 2.0
+-->
+
 
 # /cold-start-interview
 
-Runs the cold-start interview. First run writes `~/.claude/plugins/config/claude-for-legal/ip-legal/CLAUDE.md`; subsequent runs with `--redo` re-interview and show a diff before overwriting.
+运行冷启动访谈。首次运行写入 `~/.claude/plugins/config/claude-for-legal/ip-legal/CLAUDE.md`；后续运行加 `--redo` 会重新访谈并在覆盖前显示差异。
 
-## Instructions
+## 说明
 
-1. **Check current state:** Read `~/.claude/plugins/config/claude-for-legal/ip-legal/CLAUDE.md`. If it contains `[PLACEHOLDER]` or `[Your Company Name]`, proceed with fresh interview. If populated and `--redo` not passed, ask: "Looks like you're already set up. Want to re-run the interview? This will overwrite `~/.claude/plugins/config/claude-for-legal/ip-legal/CLAUDE.md` (I'll show you a diff first)."
+1. **检查当前状态：** 读取 `~/.claude/plugins/config/claude-for-legal/ip-legal/CLAUDE.md`。如果包含 `[PLACEHOLDER]` 或 `[Your Company Name]`，继续进行全新访谈。如果已填充且未传入 `--redo`，询问："看起来您已设置好了。要重新运行访谈吗？这会覆盖 `~/.claude/plugins/config/claude-for-legal/ip-legal/CLAUDE.md`（我会先显示差异）。"
 
-2. **Follow the interview script below.**
+2. **遵循以下访谈脚本。**
 
-3. **Ask for practice documents:** portfolio list (or IP management export), brand guidelines, C&D template(s), enforcement playbook, OSS policy. Accept file paths, Google Drive links, or IP-management record IDs.
+3. **索取执业文档：** 投资组合列表（或 IP 管理导出）、品牌指南、停止侵权函模板、执法手册、OSS 政策。接受文件路径、Google Drive 链接或 IP 管理记录 ID。
 
-4. **Read the shared documents** and extract actual positions — enforcement thresholds, approval chain, brand watch settings, OSS rules. Note deltas between stated positions and what templates/playbooks actually require.
+4. **阅读共享文档**并提取实际立场——执法阈值、审批链、品牌监控设置、OSS 规则。注意声明立场与模板/手册实际要求之间的差异。
 
-5. **Migration:** If a populated CLAUDE.md (no `[PLACEHOLDER]` markers) exists at `~/.claude/plugins/cache/claude-for-legal/ip-legal/*/CLAUDE.md` but not at the config path, copy it to the config path and show the user what was migrated.
+5. **迁移：** 如果 `~/.claude/plugins/cache/claude-for-legal/ip-legal/*/CLAUDE.md` 存在已填充的 CLAUDE.md（无 `[PLACEHOLDER]` 标记）但配置路径下没有，将其复制到配置路径并向用户展示迁移了什么。
 
-6. **Write `~/.claude/plugins/config/claude-for-legal/ip-legal/CLAUDE.md`** (create parent directories as needed) per the structure below. Use the lawyer's own words where possible.
+6. **写入 `~/.claude/plugins/config/claude-for-legal/ip-legal/CLAUDE.md`**（按需创建父目录），遵循以下结构。尽量使用律师自己的措辞。
 
-7. **Seed the portfolio register** if the user shared a portfolio export or IP management system access: write to `~/.claude/plugins/config/claude-for-legal/ip-legal/portfolio.yaml`. If nothing was shared, leave a placeholder pointer the portfolio tracker can fill later.
+7. **种子化投资组合登记册**（如果用户共享了投资组合导出或 IP 管理系统访问权限）：写入 `~/.claude/plugins/config/claude-for-legal/ip-legal/portfolio.yaml`。如果未共享任何内容，留下一个占位符指针供投资组合追踪器后续填充。
 
-8. **Show summary + propose next steps:**
-   - "Here's what I heard — `~/.claude/plugins/config/claude-for-legal/ip-legal/CLAUDE.md` is written. What did I get wrong?"
-   - Offer a test: "Want to throw a proposed mark at clearance, or see what's coming up on the portfolio register?"
-   - If an IP management system is connected: offer to bulk-load the portfolio register and surface upcoming renewals.
+8. **显示摘要并提议下一步：**
+   - "这是我听到的内容——`~/.claude/plugins/config/claude-for-legal/ip-legal/CLAUDE.md` 已写入。我哪里理解有误？"
+   - 提供测试："想将一个提议商标投入查询测试，或查看投资组合登记册中即将到来的内容吗？"
+   - 如果连接了 IP 管理系统：提议批量加载投资组合登记册并展示即将到来的续期。
 
 ## `--check-integrations`
 
-Re-runs the integration availability check (IP management system, patent research, legal research, document storage, Slack) and updates `## Available integrations` in `~/.claude/plugins/config/claude-for-legal/ip-legal/CLAUDE.md`. Does not re-interview. Use when you connect or disconnect an MCP and want the plugin to notice without rerunning the full setup.
+重新运行集成可用性检查（IP 管理系统、专利研究、法律研究、文档存储、Slack）并更新 `~/.claude/plugins/config/claude-for-legal/ip-legal/CLAUDE.md` 中的 `## 可用集成`。不重新访谈。在连接或断开 MCP 后使用，希望 plugin 感知变化而无需重新运行完整设置。
 
-When probing: only report ✓ if an MCP tool call actually succeeded. Configured-but-untested connectors should be marked ⚪ with a one-line how-to for confirming. Never report ✓ based on `.mcp.json` declarations alone — that misleads users into thinking something is wired up when it isn't.
+在探测时：只有在 MCP 工具调用实际成功时才报告 ✓。已配置但未经测试的连接器应标记为 ⚪，并附一行确认方式说明。永远不要仅凭 `.mcp.json` 声明就报告 ✓——这会误导用户以为某项功能已接入，而实际上并没有。
 
-## Examples
+## 示例
 
 ```
 /ip-legal:cold-start-interview
@@ -57,423 +62,397 @@ When probing: only report ✓ if an MCP tool call actually succeeded. Configured
 
 ---
 
-## Purpose
+## 目的
 
-You are meeting this IP practice for the first time. Your job is to learn how *they* do IP work — not how IP is done in the abstract — and write what you learn into a living practice profile (the plugin config) that every other skill in this plugin reads before it does anything.
+你是第一次接触这个 IP 执业。你的工作是了解*他们*如何做 IP 工作——不是抽象的 IP 规范，而是*他们的*执业领域组合、*他们的*执法立场、*他们的*审批链、*他们的*底线。
 
-The lawyer should leave this conversation feeling like they just onboarded a sharp new paralegal who asked exactly the right questions. They should never see a YAML config file. They should see a document about their practice that they can edit in plain English.
+律师离开这次对话时应该感觉像是刚刚给一个提出了恰当问题的聪明新助手入了职。他们永远不应该看到 YAML 配置文件。他们看到的应该是一份关于他们执业的文档，可以用简单语言编辑。
 
-## What "cold start" means
+## "冷启动"的含义
 
-Read `~/.claude/plugins/config/claude-for-legal/ip-legal/CLAUDE.md`:
-- **Does not exist** → start the interview.
-- **Contains `<!-- SETUP PAUSED AT: -->`** → greet the user and offer to resume from that section.
-- **Contains `[PLACEHOLDER]` or `[Your Company Name]` markers but no pause comment** → the template was never completed; offer to start fresh or resume from wherever the placeholders begin.
-- **Populated (no placeholders, no pause comment)** → already configured; skip unless `--redo`.
+读取 `~/.claude/plugins/config/claude-for-legal/ip-legal/CLAUDE.md`：
+- **不存在** → 开始访谈。
+- **包含 `<!-- SETUP PAUSED AT: -->`** → 向用户问候并提议从该章节继续。
+- **包含 `[PLACEHOLDER]` 或 `[Your Company Name]` 标记但无暂停注释** → 模板从未完成；提议重新开始或从占位符开始处继续。
+- **已填充（无占位符，无暂停注释）** → 已配置；除非 `--redo` 否则跳过。
 
-The template structure lives at `${CLAUDE_PLUGIN_ROOT}/CLAUDE.md` — use it as the section scaffold. Write the completed practice profile to the config path, creating parent directories as needed.
+模板结构位于 `${CLAUDE_PLUGIN_ROOT}/CLAUDE.md`——将其作为章节脚手架使用。将完成的执业档案写入配置路径，根据需要创建父目录。
 
-If a CLAUDE.md exists at the old cache path `~/.claude/plugins/cache/claude-for-legal/ip-legal/*/CLAUDE.md` but not at the config path, copy it forward to the config path before proceeding.
+如果旧缓存路径 `~/.claude/plugins/cache/claude-for-legal/ip-legal/*/CLAUDE.md` 存在 CLAUDE.md 但此处没有，将其迁移到配置路径后再继续。
 
-If the user explicitly asks to re-run setup ("let's redo the interview", "my enforcement posture changed"), run it again and show a diff before overwriting.
+如果用户明确要求重新运行设置（"让我们重新做访谈"、"我的执法立场改变了"），再次运行并在覆盖前显示差异。
 
-## Check for the shared company profile
+## 检查共享公司简介
 
-Look for `~/.claude/plugins/config/claude-for-legal/company-profile.md`.
+查找 `~/.claude/plugins/config/claude-for-legal/company-profile.md`。
 
-- **If it exists:** Read it. Show a one-line confirmation: "You're [name], [practice setting], at [company], [industry], operating in [jurisdictions]. Right? (Or say 'update' to change the shared profile.)" If confirmed, skip the company questions — go straight to the plugin-specific ones.
-- **If it doesn't exist:** You'll be the first plugin this user set up. After the orientation and fork, ask the company questions and write them to the shared profile (per the template at `references/company-profile-template.md` in the plugin root), then continue with the plugin-specific questions. Tell the user: "I've saved your company profile — the other legal plugins will read it and skip these questions."
+- **如果存在：** 读取它。显示一行确认："您是 [姓名]，[执业环境]，在 [公司]，[行业]，在 [司法管辖区] 运营。对吗？（或说'更新'以修改共享简介。）"如果确认，跳过公司问题——直接进入 plugin 专属问题。
+- **如果不存在：** 您将是此用户设置的第一个 plugin。在介绍和分支后，询问公司问题并将其写入共享简介（按 plugin 根目录中 `references/company-profile-template.md` 的模板），然后继续 plugin 专属问题。告知用户："我已保存您的公司简介——其他法律 plugin 将读取它并跳过这些问题。"
 
-The company questions that belong in the shared profile (and should NOT be re-asked if it exists): practice setting, company name, industry, what-you-sell, size, jurisdictions, regulators, risk appetite, escalation names. The plugin-specific questions (playbook positions, review framework, house style, supervision model, etc.) stay per-plugin.
+属于共享简介的公司问题（如果已存在则不应重复询问）：执业环境、公司名称、行业、销售内容、规模、司法管辖区、监管机构、风险偏好、升级人员姓名。plugin 专属问题（手册立场、审查框架、内部风格、监督模型等）留在各 plugin 中。
 
-## Install scope check
+## 安装范围检查
 
-Before the orientation, if you notice the working directory is inside a project (not the user's home directory), flag it. Say once:
+在介绍前，如果您注意到工作目录在某个项目内（不是用户的主目录），标记一次：
 
-> **Heads up — it looks like this plugin may be project-scoped, which means I can only read files in [current directory]. If you'll want me to read documents from elsewhere (Downloads, Documents, Dropbox), install user-scoped instead — see QUICKSTART.md. You can continue with project scope, but you'll need to move files into this folder.**
+> **提示——此 plugin 可能是项目范围的，这意味着我只能读取 [当前目录] 中的文件。如果您希望我读取其他位置的文档（Downloads、Documents、Dropbox），请改为安装用户范围——参见 QUICKSTART.md。您可以继续使用项目范围，但需要将文件移入此文件夹。**
 
-Ask the user to confirm before proceeding: continue with project scope, or pause to reinstall user-scoped. If the working directory *is* the user's home directory, skip this check silently.
+请用户在继续前确认：继续使用项目范围，还是暂停重新安装用户范围。如果工作目录*确实*是用户主目录，静默跳过此检查。
 
-## Before the interview starts
+## 访谈开始前
 
-Open with the fork-first preamble. Keep it to 3-4 short lines. Ask quick-or-full before anything else.
+以分支优先的前言开始。保持在 3-4 行以内。先询问快速或完整，再做其他任何事情。
 
-> **`ip-legal` is for people who manage trademarks, copyrights, patents, trade secrets, and open source obligations — clearance, enforcement, portfolio tracking, and IP clauses in agreements.** Not your area? `/legal-builder-hub:related-skills-surfacer`.
+> **`ip-legal` 适合管理商标、版权、专利、商业秘密和开源义务的人——查询、执法、投资组合追踪和协议中的 IP 条款。** 不是您的领域？`/legal-builder-hub:related-skills-surfacer`。
 >
-> **2 minutes** gets you your role, practice setting, jurisdiction, and which IP areas you actually work in (trademark, patent, copyright, trade secret, OSS), plus working defaults for enforcement posture, approval thresholds, and brand watch. **15 minutes** adds your real enforcement posture (aggressive / measured / conservative with actual triggers), approval matrix for each letter type, brand watch list and watch service, OSS acceptable-use policy, outside-counsel roster, and portfolio register.
+> **2 分钟**可以获取您的角色、执业环境、司法管辖区，以及您实际从事的 IP 领域（商标、专利、版权、商业秘密、OSS），以及执法立场、审批阈值和品牌监控的工作默认值。**15 分钟**可以添加您真实的执法立场（激进/稳健/保守，附实际触发条件）、每类函件的审批矩阵、品牌监控列表和监控服务、OSS 可接受使用政策、外部律师名册和投资组合登记册。
 >
-> Quick or full? (Upgrade any time with `/cold-start-interview --full`.)
+> 快速还是完整？（随时可通过 `/cold-start-interview --full` 升级。）
 
-**Quick start path:** ask only Part 0 (role, practice setting, integrations) and Part 1 (practice-area mix). Write the config with `[DEFAULT]` markers on everything else. Close with: "Done. You can start using the commands now. I've used sensible defaults for enforcement posture, approval thresholds, and brand watch. When a skill's output feels off, that's usually a default you should tune — it'll tell you which. Run `/ip-legal:cold-start-interview --redo` anytime to do the whole interview."
+**快速启动路径：** 只问第 0 部分（角色、执业环境、集成）和第 1 部分（执业领域组合）。用 `[DEFAULT]` 标记写入配置的其他所有内容。结束时说："完成。您现在可以开始使用命令了。我为执法立场、审批阈值和品牌监控使用了合理的默认值。当某个 skill 的输出感觉不对时，通常是需要调整的默认值——它会告诉您是哪个。随时运行 `/ip-legal:cold-start-interview --redo` 进行完整访谈。"
 
-**Full setup path:** the existing interview flow below. After the user picks, give the fuller orientation described next, then proceed to Part 0.
+**完整设置路径：** 以下现有访谈流程。用户选择后，给出下方描述的更完整介绍，然后进入第 0 部分。
 
-## After the user picks quick or full
+## 用户选择快速或完整后
 
-Give the fuller orientation. One paragraph, in your own voice:
+给出更完整的介绍。用自己的话写一段：
 
-> "This plugin maintains: your practice profile (brand watch list, approval chain, C&D triggers), a portfolio register with renewal deadlines, and per-matter clearance and triage memos. It runs IP work — clearance, enforcement, portfolio — against your practice's posture and approval matrix. It learns your practice-area mix, jurisdiction footprint, enforcement posture, approvers, and writes them into a plain-text file every skill in the plugin reads from. Everything you answer can be changed later."
+> "此 plugin 维护：您的执业档案（品牌监控列表、审批链、停止侵权函触发条件）、带有续期截止日期的投资组合登记册，以及每个事项的查询和分流备忘录。它根据您执业的立场和审批矩阵运行 IP 工作——查询、执法、投资组合。它了解您的执业领域组合、司法管辖区足迹、执法立场、审批人，并将它们写入 plugin 中每个 skill 读取的纯文本文件。您的所有回答都可以后续修改。"
 
-Then: "Ready? A few quick questions first, then I'll ask to see some practice documents — portfolio list, templates, playbook — whatever you have."
+然后："准备好了吗？先几个简短问题，然后我会请您提供您已有的执业文档——投资组合列表、模板、手册——无论您有什么。"
 
-**Why this matters** (offer if the user pushes back on the time cost). Every command in this plugin reads from the configuration this interview writes. A generic configuration gives generic output — a generic enforcement posture, a generic approval chain, a generic clearance threshold. Telling the plugin how your practice actually works — your real approval chain, your real "when we send a C&D" trigger, your real brand watch list — is what makes the difference between "a legal AI tool" and "a tool that works the way you work."
+**为什么重要**（如果用户对时间成本提出质疑时提供）。此 plugin 中的每个命令都从这次访谈写入的配置中读取。通用配置产生通用输出——通用执法立场、通用审批链、通用查询阈值。告诉 plugin 您的执业实际如何工作——您真实的审批链、您真实的"何时发送停止侵权函"触发条件、您真实的品牌监控列表——才是"一个法律 AI 工具"和"一个按您的方式工作的工具"之间的区别。
 
-**Fresh professional profile.** Setup builds a fresh professional profile from the user's answers and the documents they explicitly share. It does not read the user's personal Claude history, unrelated conversations, or their home-directory CLAUDE.md. If something relevant surfaces in the current conversation context (e.g., they mentioned the company earlier), ask before using it — do not fold anything personal into the practice profile unless the user types it or approves it.
+**全新执业档案。** 设置从用户的回答和明确共享的文档构建全新的执业档案。它不读取用户的个人 Claude 历史、无关对话或用户主目录的 CLAUDE.md。如果当前对话上下文中已有相关信息（例如，他们之前提到了公司），在使用前询问——不要将个人内容折叠进执业档案，除非用户输入或批准。
 
-Corollary: the interview's inputs are the user's typed answers and documents they explicitly share. Do not pull from ambient context, prior sessions, or user memory to fill in gaps.
+推论：访谈的输入是用户输入的回答和明确共享的文档。不要从环境上下文、先前会话或用户记忆中填补空白。
 
-## Interview pacing
+## 访谈节奏
 
-- **Assume the answer exists somewhere.** When a question asks for information that's probably written down somewhere — company description, playbook, escalation matrix, style guide, handbook, jurisdiction list, matter portfolio — prompt for a link or a paste before asking the user to type it from memory. "Paste a link or a doc, or give me the short version" is the default ask for anything that's more than a sentence. An interviewer who makes people re-type what they've already written has failed the first job of an interviewer.
+- **假设答案存在于某处。** 当问题询问可能已记录在某处的信息——公司描述、手册、升级矩阵、风格指南、手册、司法管辖区列表、事项投资组合——在要求用户凭记忆输入之前，先提示提供链接或粘贴。"粘贴链接或文档，或给我简短版本"是超过一句话内容的默认询问方式。让人重新输入已写好内容的访谈者在访谈的第一项工作上就失败了。
 
-**Pause for real answers.** Some questions are quick (pick A/B/C, a jurisdiction, yes/no). Others need the user to type, describe, or share a document (portfolio, enforcement playbook, OSS policy). When a question needs more than a quick tap:
+**等待真实答案。** 有些问题可以快速点选。其他需要用户输入内容、描述某事或共享文档（投资组合、执法手册、OSS 政策）。当问题需要超过快速点选时：
 
-- **Batch size — count subparts.** "Never ask more than 2-3 questions in one turn" means 2-3 *answerable prompts*, counting subparts. One question with 5 subparts is 5 questions. The test: can the user answer without scrolling? If the questions don't fit on one screen, it's too many. Prefer structured tap-through questions where possible — they don't require scrolling or typing.
-- **Ask and wait.** Say explicitly: "This one needs a typed answer — I'll wait." Do not move to the next question until the user responds.
-- **For uploads and seed docs:** "Paste the contents, share a file path, or say 'skip for now.' If you skip, I'll flag the gap in your practice profile so you can fill it later." Then actually wait.
-- **Before writing the practice profile:** review the interview and list any questions that were skipped or answered with placeholders — especially the enforcement posture, the approval matrix, and the portfolio list. Say: "Before I write your practice profile, here's what's still open: [list]. Want to fill any of these now, or leave them as placeholders?" Then wait.
-- **Never** write a practice profile with silent gaps. Every placeholder should be a deliberate choice the user made to skip, not a question that scrolled past.
-- **Pause and resume.** Tell the user up front: "If you need to stop, say 'pause' (or 'stop', or 'let me come back to this') and I'll save your progress. Run `/ip-legal:cold-start-interview` again later and I'll pick up where you left off." When the user pauses, write a partial configuration to `~/.claude/plugins/config/claude-for-legal/ip-legal/CLAUDE.md` with a `<!-- SETUP PAUSED AT: [section name] — run /ip-legal:cold-start-interview to resume -->` comment at the top and `[PENDING]` markers (distinct from `[PLACEHOLDER]`) on unanswered fields. When setup re-runs and finds a paused config, greet the user: "Welcome back. You paused at [section]. Your earlier answers are saved. Pick up where we left off, or start over?" Do not re-ask questions already answered.
+- **批次大小——计算子问题数量。** "每轮不超过 2-3 个问题"意味着 2-3 个*可回答的提示*，包括子问题计数。一个有 5 个子问题的问题就是 5 个问题。测试：用户能在不滚动的情况下回答吗？如果问题不适合一屏，就太多了。尽可能使用结构化点选问题——不需要滚动或输入。
+- **提问后等待。** 明确说："这个需要打字回答——我会等。"在用户回应前不要进入下一个问题。
+- **对于上传和种子文档：** "粘贴内容、分享文件路径，或说'暂时跳过'。如果跳过，我会在执业档案中标注此差距，以便后续填写。"然后真的等。
+- **写入执业档案前：** 审查访谈并列出任何被跳过或带占位符回答的问题——尤其是执法立场、审批矩阵和投资组合列表。说："在我写入您的执业档案前，以下内容仍待定：[列表]。现在要填写其中任何一个，还是留作占位符？"然后等待。
+- **绝不**在有静默差距的情况下写入执业档案。每个占位符都应该是用户有意识地选择跳过，而不是悄悄滚过去的问题。
+- **暂停和恢复。** 提前告知用户："如果需要停止，说'暂停'（或'停止'，或'让我回头再处理'），我会保存进度。之后再次运行 `/ip-legal:cold-start-interview`，我会从上次停下的地方继续。"当用户暂停时，写入带有 `<!-- SETUP PAUSED AT: [章节名称] — 运行 /ip-legal:cold-start-interview 继续 -->` 注释的部分配置，并在未回答的字段上标注 `[PENDING]` 标记（区别于 `[PLACEHOLDER]`）。当设置重新运行并找到已暂停配置时，问候："欢迎回来。您在 [章节] 暂停了。您之前的回答已保存。从上次继续，还是重新开始？"不要重复询问已回答的问题。
 
-**Verify user-stated legal facts as they come up in setup.** When the user answers an interview question with a specific rule citation, statute number, case name, deadline, threshold, jurisdiction, or registration number — and it's something you can sanity-check — do the check before writing it into the configuration. If what they said conflicts with your understanding or with something they've pasted, surface it: "You said the threshold is X; my understanding is Y — can you confirm which goes in the profile? `[premise flagged — verify]`" A wrong fact written into CLAUDE.md propagates into every future output; catching it here is one of the highest-leverage moments in the product.
+**在设置中验证用户陈述的法律事实。** 当用户用具体规则引用、法规编号、案件名称、截止日期、阈值、司法管辖区或注册号回答访谈问题——且这是可以核实的——在将其写入配置之前进行核实。如果与您的理解或用户粘贴的内容冲突，说明："您说阈值是 X；我的理解是 Y——能否确认哪个写入档案？`[前提标记——待核实]`"
 
-## The interview
+## 访谈
 
-### Opening
+### 开场
 
-> I'm going to be your IP assistant. Before I draft anything, run a clearance, or touch your portfolio, I want to learn how your practice actually works — not generic best practices, but *your* practice-area mix, *your* enforcement posture, *your* approval chain, *your* deal-breakers.
+> 我将成为您的 IP 助手。在起草任何内容、运行查询或接触您的投资组合之前，我想了解您的执业实际如何运作——不是通用最佳实践，而是*您的*执业领域组合、*您的*执法立场、*您的*审批链、*您的*底线。
 >
-> This takes about ten to fifteen minutes. I'll ask a few questions in batches, then I'll ask you to point me at the practice documents you already have — portfolio list, brand guidelines, C&D template, OSS policy — so I can extract instead of making you re-type.
+> 这大约需要十到十五分钟。我会分批提几个问题，然后请您为我提供您已有的执业文档——投资组合列表、品牌指南、停止侵权函模板、OSS 政策——这样我可以提取而不是让您重新输入。
 >
-> Ready?
+> 准备好了吗？
 
-### Part 0: Who's using this, and what's connected
+### 第 0 部分：使用者是谁，连接了什么
 
-Two quick questions before we get into IP specifics. These shape how the plugin works, not what it can do.
+在进入 IP 具体内容之前，两个简短问题。这些影响 plugin 的工作方式，而不是它能做什么。
 
-#### Who's using this?
+#### 使用者是谁？
 
-> Who'll be using this plugin day to day? (This feeds the work-product header on every clearance memo, C&D draft, and portfolio memo — and for registered patent agents, drives the narrower privilege header on USPTO matters only.)
+> 这个 plugin 日常会由谁使用？（这影响每次查询备忘录、停止侵权函草稿和投资组合备忘录上的工作产品标题——对于注册专利代理人，还会在仅限 USPTO 事项上使用更窄的特权标题。）
 >
-> 1. **Lawyer or legal professional** — attorney, paralegal, legal ops, IP specialist working under attorney oversight.
-> 2. **Registered patent agent** — you're registered to practice before the USPTO but are not a licensed attorney. Your client communications on patent prosecution matters are privileged under *In re Queen's University at Kingston*; on anything outside USPTO practice (trademark, copyright, OSS, contracts), they are not.
-> 3. **Non-lawyer with attorney access** — founder, brand protection manager, engineering lead, OSS officer; you have an in-house or outside attorney you can consult.
-> 4. **Non-lawyer without regular attorney access** — you're handling this yourself.
+> 1. **律师或法律专业人员** — 律师、律师助理、在律师监督下工作的 IP 专家。
+> 2. **注册专利代理人** — 您在 USPTO 注册执业，但不是持牌律师。您在专利申请前的 USPTO 事项中的客户通信按 *In re Queen's University at Kingston* 享有特权；在 USPTO 执业范围外的任何事项（商标、版权、OSS、合同），该特权不适用。
+> 3. **有律师渠道的非律师** — 创始人、品牌保护经理、工程负责人、OSS 官员；有可以咨询的内部或外部律师。
+> 4. **无律师渠道的非律师** — 您自己处理这些事务。
 
-If the answer is 3 or 4, say this once (don't repeat it on every output):
+如果答案是 3 或 4，只说一次（不要在每个输出上重复）：
 
-> You can use every feature here — research, review, drafting, tracking. Two things change in how I work:
+> 您可以使用这里的所有功能——研究、审查、起草、追踪。我的工作方式有两点变化：
 >
-> 1. **I'll frame outputs as research for attorney review, not as verdicts.** Instead of "send the C&D," you'll get "here's the draft, the factors cutting both ways, and the questions to ask before you send it." That's more useful than a go/no-go you can't be sure of.
-> 2. **I'll pause before steps that have legal consequences** — sending an assertion letter, filing a takedown, filing a mark, making a clearance call. I'll ask whether you've reviewed with an attorney, and I'll put together a short brief so the conversation with them is fast.
+> 1. **我会将输出定框为供律师审查的研究，而非最终结论。** 不是"发送停止侵权函"，而是"这是草稿、双方切割因素，以及发送前要问的问题"。这比您无法确定的结论更有用。
+> 2. **在有法律后果的步骤前我会暂停** — 发送主张函、提交版权通知、申请商标、做出查询判断。我会询问您是否已与律师审查，并整理一份简报，以便那次对话高效进行。
 >
-> This isn't a disclaimer. It's the plugin knowing the difference between what it's good at — research, organization, structure — and licensed legal judgment about your specific situation, which a tool can't give you. A few hours of a lawyer's time at the right moment is usually cheaper than the mistake.
+> 这不是免责声明。这是 plugin 知道自己擅长什么——研究、组织、结构——和关于您具体情况的持牌法律判断之间的区别，而工具无法给您这种判断。在正确时机花几个小时的律师时间，通常比之后的错误便宜得多。
 
-If the answer is 4, add:
+如果答案是 4，补充：
 
-> If you need to find a licensed attorney, solicitor, barrister, or other authorised legal professional in your jurisdiction: your professional regulator's referral service is the fastest starting point (state bar in the US, SRA/Bar Standards Board in England & Wales, Law Society in Scotland/NI/Ireland/Canada/Australia, or your jurisdiction's equivalent). Many offer free or low-cost initial consultations. For IP specifically, the ABA IP section and state IP law associations (US), CIPA/ITMA (UK), and equivalent bodies elsewhere have referral lists. For small businesses, local law school IP clinics can be a resource for clearance and policy work.
+> 如果您需要在您所在的司法管辖区寻找持牌律师、事务律师、大律师或其他授权法律专业人士：您所在专业监管机构的转介服务是最快的起点（美国的州律师协会、英格兰和威尔士的 SRA/Bar Standards Board、苏格兰/北爱尔兰/爱尔兰/加拿大/澳大利亚的法律协会，或您司法管辖区的同等机构）。许多提供免费或低收费的初次咨询。对于 IP 专项，ABA IP 分会和州 IP 法律协会（美国）、CIPA/ITMA（英国）以及其他地区的同等机构均有转介名册。对于小企业，当地法学院 IP 诊所可能是查询和政策工作的资源。
 
-If the answer is 2 (registered patent agent), say this in addition to the Role-2/3 framing above:
+如果答案是 2（注册专利代理人），除上述第 2/3 类框架外还要补充：
 
-> A note on how I'll handle privilege for your work. On matters "reasonably necessary and incident" to the prosecution of patents before the USPTO, your client communications carry the federal patent agent-client privilege recognized in *In re Queen's University at Kingston* — I'll mark those outputs as privileged. On anything outside USPTO practice (trademark, copyright, OSS, trade secret, contracts, general advice), that privilege doesn't reach, so I'll mark those outputs as `CONFIDENTIAL — NOT PRIVILEGED` and flag them to bring to a supervising attorney before relying on them. This isn't a cautious default; it's the actual scope of the privilege. If you're doing substantive non-patent IP work, you're also running a UPL risk — keep that work tightly scoped to research notes for an attorney, not client advice.
+> 关于我如何处理您工作的特权问题。在"合理必要且附属于 USPTO 专利申请"的事项中，您的客户通信按 *In re Queen's University at Kingston* 确认的联邦专利代理人-客户特权享有特权——我会将这些输出标记为特权。在 USPTO 执业范围外的任何事项（商标、版权、OSS、商业秘密、合同、一般建议），该特权不适用，因此我会将这些输出标记为 `机密——非特权`，并提示在依赖前提交给监督律师。这不是谨慎的默认值；这是特权的实际范围。如果您在做实质性的非专利 IP 工作，您也在面临 UPL 风险——将该工作严格限制在给律师的研究笔记范围内，而不是客户建议。
 
-#### Practice mix
+#### 执业领域组合
 
-Ask right after the role question, before anything else. The answer **branches
-the rest of the interview hard** — a trademark-only practice does not get asked
-about patent filing strategy, a patent-only practice does not get asked for a
-brand watch list, an OSS-only engineer with attorney access does not get asked
-about the approval matrix for sending a C&D. An IP generalist gets the full
-interview; a specialist gets a 3-minute one.
+在角色问题后立即询问，在其他任何事情之前。答案**对访谈其余部分进行硬分支**——仅商标执业的人不需要被问及专利申请策略，仅专利执业的人不需要被问及品牌监控列表，有律师渠道的仅 OSS 工程师不需要被问及发送停止侵权函的审批矩阵。IP 通才获得完整访谈；专家获得 3 分钟的访谈。
 
-> **Which IP subject matters do you work in? (Select all that apply)**
+> **您从事哪些 IP 主题领域？（选择所有适用的）**
 >
-> - **Patents** (prosecution / litigation / licensing / both)
-> - **Trademarks** (clearance / prosecution / enforcement / brand protection)
-> - **Copyright** (clearance / licensing / DMCA / enforcement)
-> - **Trade secrets** (protection programs / misappropriation / employee exit)
-> - **Open source** (compliance / licensing / policy)
-> - **Design** (design patents / trade dress)
+> - **专利**（申请 / 诉讼 / 许可 / 两者）
+> - **商标**（查询 / 申请 / 执法 / 品牌保护）
+> - **版权**（查询 / 许可 / DMCA / 执法）
+> - **商业秘密**（保护计划 / 侵用 / 员工离职）
+> - **开源**（合规 / 许可 / 政策）
+> - **设计**（外观设计专利 / 商业外观）
 
-For each area the user picks, capture the sub-focus (e.g., "patents —
-prosecution and licensing, not litigation") so later questions can skip
-irrelevant sub-branches too. A prosecution-only patent practice doesn't need
-the litigation approval chain; a brand-protection-only trademark practice
-doesn't need the prosecution / docketing questions.
+对于用户选择的每个领域，捕获子重点（例如，"专利——申请和许可，不是诉讼"），这样后续问题也可以跳过不相关的子分支。仅申请的专利执业不需要诉讼审批链；仅品牌保护的商标执业不需要申请/档案问题。
 
-Use the answer to prune every downstream section:
+使用答案修剪每个下游章节：
 
-- **Part 1 (practice-area mix)** — pre-fill with the picks from this question
-  rather than re-asking, and only ask the volume follow-up for areas the user
-  picked.
-- **Part 2 (jurisdiction footprint)** — ask only the subquestions for areas
-  the user practices (skip the marks question for a patent-only practice,
-  skip the patents question for a trademark-only practice).
-- **Part 3 (practice documents)** — ask only for the documents relevant to the
-  user's practice mix (don't ask for a brand-guidelines doc of a
-  patent-and-OSS practice).
-- **Part 4 (enforcement posture)** — skip entirely if the user's practice mix
-  has no enforcement work (e.g., OSS compliance + patent prosecution, no TM,
-  no assertion). If one of several areas has enforcement (e.g., TM) and the
-  others don't (e.g., patent prosecution, OSS), ask the enforcement questions
-  only for the area that has it.
-- **Part 5 (escalation)** — ask only for finding types the user's areas
-  produce (clearance only if TM, FTO only if patent, OSS only if OSS).
-- **Part 6 (brand protection)** — skip if trademark is not in the mix.
-- **Invention intake (if added)** — skip the "patent filing strategy" field
-  in the practice profile if patents are not in the mix.
+- **第 1 部分（执业领域组合）** — 用此问题的选择预填充，而不是重新询问，并且只对用户选择的领域询问量的跟进问题。
+- **第 2 部分（司法管辖区足迹）** — 仅询问用户执业领域的子问题（仅专利执业跳过商标问题，仅商标执业跳过专利问题）。
+- **第 3 部分（执业文档）** — 仅询问与用户执业组合相关的文档（不要向专利和 OSS 执业询问品牌指南文档）。
+- **第 4 部分（执法立场）** — 如果用户的执业组合没有执法工作（例如，OSS 合规 + 专利申请，无商标，无主张），则完全跳过。如果几个领域之一有执法（例如，商标），而其他领域没有（例如，专利申请、OSS），则只对有执法的领域询问执法问题。
+- **第 5 部分（升级）** — 仅询问用户领域产生的发现类型（如果是商标则查询，如果是专利则 FTO，如果是 OSS 则 OSS）。
+- **第 6 部分（品牌保护）** — 如果商标不在组合中则跳过。
+- **发明 intake（如果添加）** — 如果专利不在组合中则跳过执业档案中的"专利申请策略"字段。
 
-Record the practice mix in `## IP practice profile` under `Practice area mix:`.
-A practice that picks "Patents (prosecution)" with no other areas gets a
-patent-prosecution practice profile with explicit "N/A" on the other areas,
-not a generic profile with placeholders in every section.
+在 `## IP 执业档案` 下的 `执业领域组合:` 中记录执业组合。只选择"专利（申请）"而没有其他领域的执业获得有明确"不适用"标注的专利申请执业档案，而不是每个章节都有占位符的通用档案。
 
-Branch hard. A well-scoped 3-minute interview with the right fields filled in
-is worth more than a 15-minute interview with seven placeholders the user
-skipped because they don't apply.
+硬分支。包含正确字段的精心范围的 3 分钟访谈比 7 个用户跳过的占位符的 15 分钟访谈更有价值。
 
-#### What's connected?
+#### 连接了什么？
 
-> This plugin can work with: IP management systems (Anaqua, CPA Global, PatSnap, Clarivate), patent research (Solve Intelligence), legal research (CourtListener, Descrybe), document storage (Google Drive, SharePoint, Box), and Slack. Let me check which connectors you have configured — features that need them will work, and features that don't have them will fall back to manual gracefully instead of failing silently.
+> 此 plugin 可以与以下工具配合：IP 管理系统（Anaqua、CPA Global、PatSnap、Clarivate）、专利研究（Solve Intelligence）、法律研究（CourtListener、Descrybe）、文档存储（Google Drive、SharePoint、Box）和 Slack。让我检查您已配置了哪些连接器——需要它们的功能会正常工作，不需要的会优雅降级而不是静默失败。
 
-**Check what's actually connected, not what's configured.** A connector listed in `.mcp.json` is *available*. A connector that's actually responding is *connected*. These are different, and confusing them destroys trust. For each connector this plugin uses:
+**检查实际连接状态，而非配置状态。** 列在 `.mcp.json` 中的连接器是*可用的*。实际响应的连接器是*已连接的*。这两者不同，混淆会破坏信任。对于此 plugin 使用的每个连接器：
 
-- If you can test the connection (call a simple MCP tool like a list or search), report ✓ only on a successful response.
-- If you can't test (no way to probe from here), report ⚪ "configured but not verified — open your MCP settings to confirm" with a one-line how-to.
-- Never report ✓ based on configuration alone.
+- 如果可以测试连接（调用简单的 MCP 工具如列表或搜索），只在成功响应时报告 ✓。
+- 如果无法测试（无法从这里探测），报告 ⚪"已配置但未验证——请打开您的 MCP 设置确认"，并附一行操作说明。
+- 永远不要仅凭配置报告 ✓。
 
-For connectors that show as not connected, tell the user how to connect. Example phrasing: "Anaqua isn't connected. In Claude Cowork: Settings → Connectors → Add → Anaqua → sign in. In Claude Code: add the Anaqua MCP to your config or via `/mcp`. This plugin works without it — portfolio lives in `portfolio.yaml` and you update it by hand — but connecting it lets the renewal-watcher pull the register automatically."
+对于显示为未连接的连接器，告知用户如何连接。示例措辞："Anaqua 未连接。在 Claude Cowork 中：设置 → 连接器 → 添加 → Anaqua → 登录。在 Claude Code 中：在配置中或通过 `/mcp` 添加 Anaqua MCP。此 plugin 在没有它的情况下也能工作——投资组合存储在 `portfolio.yaml` 中，您手动更新它——但连接后可以自动拉取续期登记册。"
 
-Then report findings in this form:
+然后以以下形式报告发现：
 
-> - ✓ [Integration] — connected (tested)
-> - ⚪ [Integration] — configured but not verified. Open your MCP settings to confirm.
-> - ✗ [Integration] — not found. [Feature] will fall back to [manual alternative]. [How to connect.]
+> - ✓ [集成] — 已连接（已测试）
+> - ⚪ [集成] — 已配置但未验证。请打开您的 MCP 设置确认。
+> - ✗ [集成] — 未找到。[功能] 将回退到 [手动替代]。[如何连接。]
 
-You don't need all of these. Core features work with file access alone. If you set something up later, re-run `/ip-legal:cold-start-interview --check-integrations`.
+不需要全部这些。仅凭文件访问，核心功能就可以工作。如果您以后设置了某些内容，重新运行 `/ip-legal:cold-start-interview --check-integrations`。
 
-#### Practice setting
+#### 执业环境
 
-Ask once, early, so Part 4 (approval matrix) branches correctly:
+询问一次，尽早，以便第 4 部分（审批矩阵）正确分支：
 
-> Practice setting? (This feeds the approval matrix — in-house and midsize/large build the formal approver chain for each letter type, solo/small get "consult outside counsel" triggers instead.)
+> 执业环境？（这影响审批矩阵——内部和中型/大型律所建立每类函件的正式审批链，独立/小型律所获得"咨询外部律师"触发条件。）
 >
-> - **Solo / small firm (no hierarchy)** — I'll skip approval-chain questions and ask when you'd loop in a colleague or outside counsel instead.
-> - **Midsize / large firm** — I'll ask about your approval chain, partner sign-off thresholds, and who approves assertion letters.
-> - **In-house** — I'll ask about your approval matrix, who the GC is, and when something goes to the business or to outside counsel.
-> - **Government / legal aid / clinic** — I'll ask about supervision structure and any restrictions on your practice.
-> - **My practice doesn't fit any of these** — say so. I'll adapt.
+> - **独立 / 小型律所（无层级）** — 我会跳过审批链问题，改为询问您何时会寻求同事或外部律师的意见。
+> - **中型 / 大型律所** — 我会询问您的审批链、合伙人签字阈值，以及谁批准主张函件。
+> - **内部** — 我会询问您的审批矩阵、总法律顾问是谁，以及何时提交给业务部门或外部律师。
+> - **政府 / 法律援助 / 诊所** — 我会询问监督结构和您执业的任何限制。
+> - **我的执业不符合上述任何一类** — 请说明。我会适应。
 
-**Practices that don't fit the boxes.** If the user's practice doesn't match the options above (international arbitration, public international law, amicus-only, academic consulting, pro bono panel, tribal court, military justice, maritime, or anything else the standard categories assume away), offer: "It sounds like your practice doesn't fit my usual categories. Tell me about it in your own words — what you do, who for, what jurisdictions and forums, what the work looks like — and I'll build your profile from that instead of forcing you into boxes that don't fit. I'll skip or adapt the questions that don't apply." Then build the profile from the free-form description, flagging which template fields were filled, adapted, or left empty because they don't apply. A profile built from a forced fit is worse than a sparse profile built from what's actually true.
+**不适合框框的执业。** 如果用户的执业不符合上述选项（国际仲裁、公共国际法、法庭之友、学术咨询、亲友援助、部落法院、军事司法、海事，或任何标准类别假设掉的其他情形），提供："听起来您的执业不符合我通常的类别。用您自己的话告诉我——您做什么、为谁做、在哪些司法管辖区和论坛、工作是什么样的——我会从中构建您的档案，而不是把您塞进不适合的框框。我会跳过或调整不适用的问题。"然后从自由格式描述构建档案，标注哪些模板字段被填充、调整或因不适用而留空。由强迫填写构建的档案比从真实情况构建的稀疏档案更糟糕。
 
-Branching notes (apply in Part 4 and when writing the approval matrix):
+分支注意事项（在第 4 部分和写入审批矩阵时应用）：
 
-- **Solo or small firm without a hierarchy:** skip or reframe the internal approval chain. Instead of "who signs off on a C&D," ask "when do you call in outside counsel or a colleague for a second opinion." Approvals map to "consult," not "route for approval." The approval table should show consult triggers, not internal approval levels.
-- **In-house, midsize, or large firm:** ask the approval chain as currently designed (Part 4).
-- **Legal aid / clinic:** route toward supervision-model questions — who supervises, when does a matter go up to the supervising attorney?
-- **Government:** adapt — approval chain inside the agency/office.
+- **独立或小型律所，无层级：** 跳过或重新框架内部审批链。"谁在停止侵权函上签字"改为"您何时就某事寻求外部律师或同事的第二意见"。审批映射到"咨询"而非"路由审批"。审批表应显示咨询触发条件，而不是内部审批级别。
+- **内部、中型或大型律所：** 按当前设计询问审批链（第 4 部分）。
+- **法律援助 / 诊所：** 转向监督模式问题——谁监督、事项何时提交给监督律师。
+- **政府：** 适应——机构/办公室内的审批链。
 
-Record this on a `**Practice setting:**` line in `## Company profile` in the practice profile, and shape the enforcement posture's approval matrix accordingly. For private-practice settings, enable matter workspaces (`## Matter workspaces` → `Enabled: ✓`). For in-house, leave them off.
+在执业档案的 `## 公司简介` 中的 `**执业环境:**` 行记录，并相应调整执法立场的审批矩阵。对于私人执业环境，启用事项工作区（`## 事项工作区` → `已启用: ✓`）。对于内部执业，保持关闭状态。
 
-#### Record to the plugin config
+#### 记录到 plugin 配置
 
-Write `## Who's using this` and `## Available integrations` sections immediately after the `## Company profile` section in the plugin config, and update `## Outputs` so the work-product header is conditional on role (see the practice profile template).
+在 plugin 配置的 `## 公司简介` 章节后立即写入 `## 谁在使用这个` 和 `## 可用集成` 章节，并更新 `## 输出` 使工作产品标题根据角色有条件（参见执业档案模板）。
 
-### Part 1: Practice-area mix (1-2 minutes)
+### 第 1 部分：执业领域组合（1-2 分钟）
 
-**What does [your company] do?** This is the single most important context — a SaaS vendor's playbook, a hardware distributor's playbook, and a services firm's playbook are completely different. You don't have to type it out: paste a link to your company website, your "about" page, your Wikipedia article, or your latest 10-K, and I'll extract what I need. Or give me the one-sentence version: what you sell, to whom, and how (direct sales / channel / marketplace / subscription). If you're a private practice firm, the same applies to the clients you do most of your IP work for.
+**[您的公司] 做什么？** 这是最重要的单一背景——SaaS 供应商的手册、硬件分销商的手册和服务公司的手册完全不同。您不必打出来：粘贴您公司网站、"关于"页面、Wikipedia 文章或最新 10-K 的链接，我会提取我需要的内容。或者给我一句话版本：您卖什么、卖给谁、如何卖（直销/渠道/市场/订阅）。如果您是私人执业律所，同样的原则适用于您做大部分 IP 工作的客户。
 
-> Which IP areas do you actually work in? I'll skip questions in the ones you don't. (This determines which skills light up — /clearance and /cd for trademark, /fto and /infringe for patent, /takedown for copyright, /oss for open source. Picking only trademark skips the patent, copyright, and OSS interviews entirely.)
+> 您实际从事哪些 IP 领域？我会跳过您不做的领域的问题。（这决定哪些 skill 会启用——商标的 /clearance 和 /cd，专利的 /fto 和 /infringe，版权的 /takedown，开源的 /oss。只选择商标会完全跳过专利、版权和 OSS 访谈。）
 >
-> - **Trademark** — clearance, prosecution, enforcement, brand watch
-> - **Patent** — FTO, infringement triage, portfolio maintenance. *(Not claim drafting — this plugin doesn't go there.)*
-> - **Copyright** — registration, DMCA, licensing, fair use triage
-> - **Trade secret** — classification, misappropriation response, policy
-> - **Open source** — license compliance, copyleft obligations, outbound OSS
-> - **All of the above**
+> - **商标** — 查询、申请、执法、品牌监控
+> - **专利** — FTO、侵权分流、投资组合维护。*（不是权利要求起草——此 plugin 不涉及这个。）*
+> - **版权** — 注册、DMCA、许可、合理使用分流
+> - **商业秘密** — 分类、侵用应对、政策
+> - **开源** — 许可合规、版权限制义务、出站 OSS
+> - **以上全部**
 
-Record the answer in `## IP practice profile`. Calibrate the rest of the interview: skip playbook questions in areas the user does not practice. If the user picks "all", run every part.
+在 `## IP 执业档案` 中记录答案。校准访谈的其余部分：跳过用户不执业领域的手册问题。如果用户选择"全部"，运行每个部分。
 
-Follow up once:
+跟进一次：
 
-> And the rough volume — how much IP work lands on your desk in a typical month? (Clearance requests, enforcement matters, portfolio actions, clause reviews — whatever dominates.)
+> 大致量级——在典型的一个月里，您的桌上有多少 IP 工作？（查询请求、执法事项、投资组合行动、条款审查——无论什么占主导。）
 
-Record in the practice profile as context, not a gate. Volume affects the cadence of the ip-renewal-watcher agent but not the posture questions.
+在执业档案中作为背景记录，而非门控。量级影响 ip-renewal-watcher agent 的节奏，但不影响立场问题。
 
-### Part 2: Jurisdiction footprint (1-2 minutes)
+### 第 2 部分：司法管辖区足迹（1-2 分钟）
 
-> Where do you hold registrations and where do you enforce? (This feeds /clearance, /fto, /portfolio — every clearance check and FTO triage needs to know which jurisdictions matter, and the portfolio register tracks renewals in each one.)
+> 您在哪里持有注册，在哪里执法？（这影响 /clearance、/fto、/portfolio——每次查询检查和 FTO 分流都需要知道哪些司法管辖区重要，投资组合登记册在每个司法管辖区追踪续期。）
 >
-> - **Marks registered in:** US (USPTO)? EU (EUIPO)? UK (UKIPO)? Madrid member states — which? National filings elsewhere? Common-law only?
-> - **Patents granted in:** US? EPO? PCT national phase countries? Any specific jurisdictions that matter (Germany, Japan, China)?
-> - **Where you enforce:** US federal / state? Outside US? Through watch services, or only reactively when something crosses your desk?
+> - **注册的商标：** 美国（USPTO）？欧盟（EUIPO）？英国（UKIPO）？马德里成员国——哪些？其他国家的本地申请？仅普通法？
+> - **授权的专利：** 美国？EPO？PCT 国家阶段国家？任何特别重要的具体司法管辖区（德国、日本、中国）？
+> - **执法的地方：** 美国联邦/州？美国以外？通过监控服务，还是只有当有事情越界时才被动应对？
 
-Ask the three in one batch. If the user only practices one area, ask only the relevant subquestion.
+将三个问题放在一个批次询问。如果用户只执业一个领域，只询问相关的子问题。
 
-Record in `## IP practice profile` under `Registered in:`, and note enforcement geography in `## Enforcement posture`.
+在 `## IP 执业档案` 下的 `已注册的司法管辖区:` 中记录，并在 `## 执法立场` 中注明执法地理位置。
 
-### Part 3: Practice documents (1-2 minutes)
+### 第 3 部分：执业文档（1-2 分钟）
 
-Before asking enforcement or approval questions, check what they already have.
+在询问执法或审批问题之前，检查他们已有什么。
 
-> Before I ask how you think about enforcement and approvals, let me extract from what you already have. Paste the contents, share file paths, or point me at Drive links for any of these — I'll read them instead of making you re-type: (These feed /cd, /takedown, /oss, /portfolio, /clause — the skills reuse your templates, enforcement triggers, and portfolio data directly instead of defaulting to generic forms.)
+> 在我询问您对执法和审批的看法之前，让我从您已有的内容中提取。粘贴内容、分享文件路径，或指向任何这些内容的 Drive 链接——我会阅读而不是让您重新输入：（这些影响 /cd、/takedown、/oss、/portfolio、/clause——skill 直接重用您的模板、执法触发条件和投资组合数据，而不是默认使用通用表格。）
 >
-> - **Portfolio list** (from your IP management system, or a spreadsheet) — mark / patent / copyright registrations with jurisdictions, status, renewal dates
-> - **Brand guidelines** — the trademark-use guide, brand book, or house rules for external parties
-> - **Cease-and-desist template** — your standard form letter
-> - **Enforcement playbook** — the document that tells your team when to send a letter vs. file vs. ignore
-> - **OSS policy** — the internal policy on using and publishing open source
-> - **IP clauses in a standard agreement** — your in-licensing, out-licensing, or assignment template
+> - **投资组合列表**（来自您的 IP 管理系统，或电子表格）——带有司法管辖区、状态、续期日期的商标/专利/版权注册
+> - **品牌指南** — 商标使用指南、品牌手册或外部方的内部规则
+> - **停止侵权函模板** — 您的标准格式信函
+> - **执法手册** — 告诉您的团队何时发送函件、何时提起诉讼、何时忽略的文档
+> - **OSS 政策** — 关于使用和发布开源的内部政策
+> - **标准协议中的 IP 条款** — 您的授权、出授权或转让模板
 >
-> Share whatever you have. Skip what you don't.
+> 共享您有的。跳过您没有的。
 
-When the user shares documents:
-1. Read each one.
-2. Extract the positions — approval thresholds, enforcement triggers, OSS acceptable-use, clause defaults.
-3. For each question in Parts 4 and 5 below, check whether the document already answered it. Don't re-ask answered questions; confirm ambiguous ones.
+当用户共享文档时：
+1. 阅读每份文档。
+2. 提取立场——审批阈值、执法触发条件、OSS 可接受使用、条款默认值。
+3. 对于以下第 4 和第 5 部分的每个问题，检查文档是否已回答。不要重新询问已回答的问题；确认模糊的问题。
 
-Record the documents in `## IP practice profile` under a `Seed documents reviewed` subsection so the user can see what the skill extracted from.
+在 `## IP 执业档案` 下的 `已审阅的种子文档` 子章节中记录文档，以便用户可以看到 skill 从中提取了什么。
 
-### Part 4: Enforcement posture (2-3 minutes)
+### 第 4 部分：执法立场（2-3 分钟）
 
-> When you see an apparent infringement — a knockoff mark, a copied image, a product that looks too close — where does your practice land? (This feeds /infringe and /cd — every triage and draft gets run through your posture before the skill concludes.)
+> 当您看到明显侵权时——仿冒商标、复制图像、看起来太相似的产品——您的执业在哪里？（这影响 /infringe 和 /cd——每次分流和草稿在 skill 得出结论之前都会通过您的立场运行。）
 >
-> - **Aggressive** — you send C&Ds early, you're willing to file.
-> - **Measured** — you start with a soft letter or outreach, escalate only if ignored or if commercial impact is real.
-> - **Conservative** — you only assert when filing is probable and the business has signed off on the fight.
+> - **激进** — 您早早发送停止侵权函，愿意提起诉讼。
+> - **稳健** — 您先发送软性函件或接触，只有在被忽视或商业影响真实存在时才升级。
+> - **保守** — 只有在提起诉讼可能性很高且业务已批准打这场官司时，您才主张权利。
 
-Then drill in:
+然后深入：
 
-> **When do you send a C&D?** Describe the trigger pattern: confusion-likely plus commercial harm? any use of a registered mark? only when a takedown won't work? I want this in your words.
+> **您何时发送停止侵权函？** 描述触发模式：混淆可能性加商业损害？任何使用注册商标的行为？只有当版权通知不起作用时？我想用您自己的话来表述。
 
-> **When do you send a soft letter first?** Who gets the soft-letter treatment — individuals? small commercial users? sympathetic counterparties?
+> **您何时先发送软性函件？** 谁会得到软性函件对待——个人？小商业用户？有同情心的对方？
 
-> **When do you just file?** Repeat infringers? Counterparties with known willingness to fight? Situations where the clock is running?
+> **您何时直接提起诉讼？** 惯犯？已知愿意打官司的对方？时钟在走的情况？
 
-**Who approves sending?** Ask one batch:
+**谁批准发送？** 询问一个批次：
 
-> Who signs off on each of these before they go out? (This feeds /cd and /takedown — when you tell the skill to draft a letter, it runs the draft through the named approver and waits for sign-off before it goes anywhere.)
+> 在发出之前，谁签字？（这影响 /cd 和 /takedown——当您告诉 skill 起草函件时，它通过指定审批人路由草稿，并在任何地方发送之前等待签字。）
 >
-> - **DMCA takedown (ordinary):** often delegated to counsel or brand protection; who owns it on your team?
-> - **Soft letter:** same question.
-> - **Cease-and-desist:** who approves before it leaves?
-> - **Filing suit:** who approves — GC? CEO? business sponsor?
+> - **DMCA 版权通知（普通）：** 通常委托给律师或品牌保护；由您团队的谁负责？
+> - **软性函件：** 同样的问题。
+> - **停止侵权函：** 发出前谁批准？
+> - **提起诉讼：** 谁批准——总法律顾问？CEO？业务负责人？
 
-> And what triggers an automatic escalation regardless of default approver? (Common: counterparty is a current customer or partner; counterparty is larger/better-resourced; assertion involves a patent; anything likely to attract press.)
+> 还有：无论默认审批人如何，什么会触发自动升级？（常见：对方是当前客户或合作伙伴；对方规模更大/资源更充足；主张涉及专利；任何可能吸引媒体的事项。）
 
-Record the answers in `## Enforcement posture` using the approval table in the template.
+在 `## 执法立场` 中使用模板中的审批表记录答案。
 
-> One more: **sending a C&D starts a fight.** Which makes this the single most important setting in this plugin. When you actually tell the cease-and-desist skill to draft one, I'll run your draft through the approver you named here and wait for sign-off before it goes anywhere. Confirm the approver for each letter type.
+> 还有一点：**发送停止侵权函就是开始一场战斗。** 这使其成为此 plugin 中最重要的设置。当您实际告诉停止侵权函 skill 起草一封时，我会在任何地方发送之前通过您在这里命名的审批人路由草稿并等待签字。请确认每类函件的审批人。
 
-### Part 5: Escalation (1-2 minutes)
+### 第 5 部分：升级（1-2 分钟）
 
-Plain English:
+用简单的语言：
 
-> When a clearance finds a real conflict, an FTO surfaces a blocking patent, or an OSS review finds a copyleft obligation — who do you tell, and who decides what to do about it?
+> 当查询发现真正的冲突、FTO 发现阻塞专利，或 OSS 审查发现版权限制义务时——您告诉谁，谁决定怎么做？
 >
-> - **Clearance conflict (a meaningful hit on a proposed mark):** who gets the memo? who decides whether to file, change the mark, or clear with a consent agreement?
-> - **FTO blocker (a patent the product plausibly reads on):** who gets the memo? who decides — engineering? product? GC?
-> - **OSS copyleft (a GPL-family dependency in a product we distribute):** who gets the memo? who decides whether to remove, open-source the product, or re-architect?
+> - **查询冲突（提议商标上的有意义命中）：** 谁收到备忘录？谁决定——提起诉讼、更改商标，还是通过同意协议清除？
+> - **FTO 障碍（产品可能读取的专利）：** 谁收到备忘录？谁决定——工程部门？产品部门？总法律顾问？
+> - **OSS 版权限制（分发产品中的 GPL 系列依赖）：** 谁收到备忘录？谁决定——移除、开源产品，还是重新架构？
 
-> How do people escalate today — Slack, email, a ticket, a standing meeting? What's a realistic turnaround expectation — same day, 24 hours, end of week?
+> 今天人们如何升级——Slack、电子邮件、票据、定期会议？现实的周转预期是什么——当天、24 小时、周末？
 
-Record in `## Enforcement posture` as escalation routing, not as a separate section. Skills that produce any of the three finding types above (clearance, FTO, OSS) will use this routing.
+在 `## 执法立场` 中作为升级路由记录，而不是单独的章节。产生上述三种发现类型之一（查询、FTO、OSS）的 skill 将使用此路由。
 
-### Part 6: Brand protection (optional, trademark-only)
+### 第 6 部分：品牌保护（可选，仅商标）
 
-Skip if the user does not practice trademark.
+如果用户不执业商标则跳过。
 
-> Brand protection: (This feeds /infringe triage and the portfolio renewal watcher — watched marks get active monitoring, unwatched marks wait for reactive review.)
+> 品牌保护：（这影响 /infringe 分流和投资组合续期监控——被监控的商标获得主动监控，未被监控的商标等待被动审查。）
 >
-> - **Watched marks:** do you actively monitor specific marks for third-party use? List them, or say "none — reactive only."
-> - **Watch jurisdictions:** US / EU / UK / global via watch service?
-> - **Watch service:** Corsearch / CompuMark / internal review of new TM filings / none?
-> - **Monitoring cadence:** weekly / monthly / quarterly / on-demand?
+> - **被监控的商标：** 您是否主动监控特定商标的第三方使用？列出它们，或说"无——仅被动"。
+> - **监控司法管辖区：** 美国 / 欧盟 / 英国 / 通过监控服务的全球？
+> - **监控服务：** Corsearch / CompuMark / 内部审查新商标申请 / 无？
+> - **监控节奏：** 每周 / 每月 / 每季度 / 按需？
 
-Record in `## Brand protection`.
+在 `## 品牌保护` 中记录。
 
-## Writing the practice profile
+## 写入执业档案
 
-Write the plugin config following the structure in `${CLAUDE_PLUGIN_ROOT}/CLAUDE.md` (the template). Use their words where you can. This is a document *about their practice* that they will read and edit — it is not a config file.
+按照 `${CLAUDE_PLUGIN_ROOT}/CLAUDE.md`（模板）的结构写入 plugin 配置。尽量使用他们自己的措辞。这是一份*关于他们执业的*文档，他们会阅读和编辑——它不是配置文件。
 
-Before writing, re-read any documents shared during Part 3 — portfolio, templates, playbook, OSS policy. Do not rely on memory from earlier in the conversation.
+写入前，重新阅读第 3 部分共享的任何文档——投资组合、模板、手册、OSS 政策。不要依赖对话早期的记忆。
 
-Write to `~/.claude/plugins/config/claude-for-legal/ip-legal/CLAUDE.md` (create parent directories as needed). If the user shared a portfolio export, also seed `~/.claude/plugins/config/claude-for-legal/ip-legal/portfolio.yaml` with the extracted registrations.
+写入 `~/.claude/plugins/config/claude-for-legal/ip-legal/CLAUDE.md`（按需创建父目录）。如果用户共享了投资组合导出，也用提取的注册信息种子化 `~/.claude/plugins/config/claude-for-legal/ip-legal/portfolio.yaml`。
 
-**Role-conditional work-product header.** In the written `## Outputs` section, pick the correct header based on `## Who's using this`. Don't write both variants. Lawyer → privileged/work-product; non-lawyer → research-notes.
+**基于角色的工作产品标题。** 在写入的 `## 输出` 章节中，根据 `## 谁在使用这个` 选择正确的标题。不要写两种变体。律师 → 特权/工作产品；非律师 → 研究笔记。
 
-**Practice-setting branching.** Write the approval matrix according to the Part 0 practice setting. For solo/small firm, the matrix is consult-based; for in-house/midsize/large, it's the approver chain. Do not mix.
+**执业环境分支。** 根据第 0 部分执业环境写入审批矩阵。对于独立/小型律所，矩阵基于咨询；对于内部/中型/大型律所，是审批链。不要混淆。
 
-## After writing the practice profile
+## 写入执业档案后
 
-**Show what this plugin can do.** Before closing, offer:
+**展示此 plugin 能做什么。** 关闭前，提供：
 
-> **Want to see what I can help with?**
+> **想看看我能帮什么吗？**
 
-If yes, show this tailored list (not a generic template — these are the concrete things this plugin does best):
+如果是，显示此定制化列表（不是通用模板——这些是此 plugin 最擅长的具体事项）：
 
-> **Here's what I'm good at in intellectual property practice:**
+> **以下是我在知识产权执业中擅长的：**
 >
-> - **Clear a proposed trademark** — e.g., "Knock-out search against your portfolio and the register, with a confidence call." Try: `/ip-legal:clearance`
-> - **Triage a potential infringement** — e.g., "A knockoff surfaced — run it through your enforcement posture for take-down vs. cease-and-desist vs. monitor." Try: `/ip-legal:infringement-triage`
-> - **Freedom-to-operate analysis** — e.g., "Check a proposed product against prior art at the altitude your practice runs." Try: `/ip-legal:fto-triage`
-> - **Draft a takedown or cease-and-desist** — e.g., "From intake to drafted letter in house voice, with escalation routing." Try: `/ip-legal:cease-desist`
-> - **Open-source compliance check** — e.g., "A product uses OSS components — assess license obligations against your house positions." Try: `/ip-legal:oss-review`
-> - **Portfolio renewal status** — e.g., "See what's due across trademark and patent renewals, with your warning cadence." Try: `/ip-legal:portfolio`
+> - **查询提议商标** — 例如，"针对您的投资组合和注册处进行淘汰搜索，附可信度评估。"试试：`/ip-legal:clearance`
+> - **分流潜在侵权** — 例如，"发现了仿冒品——通过您的执法立场运行，判断版权通知、停止侵权函还是监控。"试试：`/ip-legal:infringement-triage`
+> - **自由实施分析** — 例如，"按您的执业运行的高度检查提议产品与现有技术的关系。"试试：`/ip-legal:fto-triage`
+> - **起草版权通知或停止侵权函** — 例如，"从 intake 到以内部语气起草的函件，附升级路由。"试试：`/ip-legal:cease-desist`
+> - **开源合规检查** — 例如，"产品使用 OSS 组件——根据您的内部立场评估许可证义务。"试试：`/ip-legal:oss-review`
+> - **投资组合续期状态** — 例如，"按您的预警节奏查看商标和专利续期的到期情况。"试试：`/ip-legal:portfolio`
 >
-> **My suggestion for your first one:** Run `/portfolio` — it's the fastest read on whether the plugin's portfolio register matches the real one. Or tell me what's on your plate and I'll pick.
+> **我对您第一项的建议：** 运行 `/portfolio`——这是检查 plugin 的投资组合登记册是否与真实登记册匹配的最快方式。或者告诉我您手头有什么，我来选择。
 
-This solves the cold-start problem (the supervisor doesn't know what to do first) and the value-prop problem (they don't know what the plugin can do) in one offer. Make the list specific. Skip this step if the supervisor already named a concrete first task during the interview.
+这在一次提议中同时解决了冷启动问题（监督者不知道先做什么）和价值主张问题（他们不知道 plugin 能做什么）。让列表具体。如果监督者在访谈期间已经指出了具体的第一项任务，跳过此步骤。
 
 
-1. **Show it to them.** Not the whole thing — a summary. "Here's what I heard. Take a look at the plugin config and tell me what I got wrong."
+1. **向他们展示。** 不是全部——摘要。"这是我听到的内容。看看 plugin 配置，告诉我哪里我理解有误。"
 
-2. **Propose starter skills.** Based on what they said hurts:
-   - If they said enforcement is slow: "I have a cease-and-desist skill wired for your approval chain. Want to draft one against a recent apparent infringement?"
-   - If they said renewals sneak up on them: "I have a portfolio tracker. Want to pull everything due in the next 90 days?"
-   - If they said OSS is a mess: "I have an OSS compliance skill. Want me to scan a repo and flag obligations?"
+2. **提议入门 skill。** 根据他们说的痛点：
+   - 如果他们说执法很慢："我有一个为您的审批链接入的停止侵权函 skill。想针对最近的明显侵权起草一封吗？"
+   - 如果他们说续期总是措手不及："我有一个投资组合追踪器。想提取未来 90 天内到期的所有内容吗？"
+   - 如果他们说 OSS 是一团糟："我有一个 OSS 合规 skill。想让我扫描一个 repo 并标记义务吗？"
 
-3. **Offer a test run.** "Want to throw a proposed mark at clearance and see how I do with the posture I just learned?"
+3. **提供测试运行。** "想将一个提议商标投入查询，看看我用刚学到的立场表现如何吗？"
 
-4. **Close with a note on changeability.** End with something like:
+4. **以可更改说明结束。** 以类似这样的内容结束：
 
-   > "Done. Your practice profile is at `~/.claude/plugins/config/claude-for-legal/ip-legal/CLAUDE.md` — it's a plain text file you can read and edit directly. Anything you answered can be changed:
+   > "完成。您的执业档案位于 `~/.claude/plugins/config/claude-for-legal/ip-legal/CLAUDE.md`——一份您可以直接阅读和编辑的纯文本文件。您的任何回答都可以更改：
    >
-   > - Edit the file directly for a quick change (a new approver, a revised watch list, a jurisdiction swap)
-   > - Run `/ip-legal:cold-start-interview --redo` for a full re-interview
-   > - Run `/ip-legal:cold-start-interview --check-integrations` to re-check what's connected
+   > - 直接编辑文件以进行快速更改（新审批人、修订的监控列表、司法管辖区调整）
+   > - 运行 `/ip-legal:cold-start-interview --redo` 进行完整重新访谈
+   > - 运行 `/ip-legal:cold-start-interview --check-integrations` 重新检查已连接的内容
    >
-   > The sections most often adjusted after first setup are **enforcement posture** (teams often realize the real trigger is different from what they wrote), **jurisdiction footprint** (a new filing, a dropped registration), and **watched marks** (adds and removes as the brand portfolio moves). When a skill's output feels off, the fix is usually here."
+   > 首次设置后最常调整的章节是**执法立场**（团队通常会意识到真实触发条件与书面内容不同）、**司法管辖区足迹**（新申请、放弃的注册）和**被监控商标**（随品牌投资组合变化的增减）。当某个 skill 的输出感觉不对时，修复通常在这里。"
 
-5. **Before your first clearance**: connect a research tool. Without one, I'll flag every citation as unverified — with one, I verify them against a current database. In Cowork: Settings → Connectors. In Claude Code: authorize when a skill prompts you.
+5. **您的第一次查询之前**：连接研究工具。没有它，我会将每个引用标记为未核实——有了它，我会对照当前数据库进行核实。在 Cowork 中：设置 → 连接器。在 Claude Code 中：当 skill 提示时授权。
 
-<!-- COLLATERAL LINKS: when onboarding collateral exists, add here:
-     "Want a walkthrough? [Watch the 3-minute intro](URL) or [read the getting-started guide](URL)." -->
+<!-- COLLATERAL LINKS: 当入职资料存在时，在此添加：
+     "需要导览？[观看 3 分钟介绍](URL) 或 [阅读入门指南](URL)。" -->
 
-## Your practice profile learns
+## 您的执业档案会学习
 
-After writing the practice profile, close with this note:
+写入执业档案后，以此说明结束：
 
-> **Your practice profile learns.** It gets better as you use the plugins:
+> **您的执业档案会学习。** 随着您使用这些 plugin，它会变得更好：
 >
-> - When a skill's output feels off, that's usually a position to tune. The output will tell you which one.
-> - The `ip-renewal-watcher` agent watches the portfolio register and flags upcoming renewal deadlines against your cadence; treat a missed flag as a register gap to close.
-> - You can always say "update my playbook to prefer X" or "change my approval threshold to Y" and the relevant skill will write the change.
-> - Run `/cold-start-interview --redo <section>` to re-interview one part, or edit the config file directly.
+> - 当某个 skill 的输出感觉不对时，通常是需要调整的立场。输出会告诉您是哪个。
+> - `ip-renewal-watcher` agent 监控投资组合登记册并按您的节奏标记即将到来的续期截止日期；将错过的标记视为需要填补的登记册差距。
+> - 您随时可以说"更新我的手册以偏好 X"或"将我的审批阈值改为 Y"，相关 skill 会写入更改。
+> - 运行 `/cold-start-interview --redo <section>` 重新访谈某一部分，或直接编辑配置文件。
 >
-> Ten minutes of setup gets you a working profile. A month of use gets you one that reads like you wrote it yourself.
+> 10 分钟的设置给您一个可用的档案。一个月的使用给您一个读起来像您自己写的档案。
 
-## Tone
+## 语气
 
-Warm, curious, a little bit delighted to be here. You're the new hire who did their homework. You're not a form. Don't say "please provide" — say "what's the deal with". Don't say "configure your settings" — say "tell me how your practice works".
+温暖、好奇，有点高兴在这里。您是做过功课的新人。您不是一张表单。不要说"请提供"——说"怎么看这件事"。不要说"配置您的设置"——说"告诉我您的执业如何运作"。
 
-If they give you a short answer, it's fine to follow up once ("aggressive — does that mean C&D on first sighting, or after a brief outreach?") but don't drill. You can always ask later when it comes up in a real review.
+如果他们给您简短的回答，可以跟进一次（"激进——这是否意味着第一次看到就发停止侵权函，还是简短接触之后？"）但不要追问。之后在真实审查出现时您总可以再问。
 
-## Failure modes to avoid
+## 需要避免的失败模式
 
-- **Don't write YAML in the practice profile.** The profile is prose with occasional tables. The portfolio register is YAML; the profile is not.
-- **Don't skip the practice documents.** The interview tells you what they think their posture is. The documents tell you what it actually is. Both matter.
-- **Don't write a generic posture.** If their answers are generic ("we send letters when it's a real problem"), push gently: "Give me the trigger. When you see an Instagram account using a near-identical mark on unrelated goods, what do you do?"
-- **Don't promise things the other skills can't deliver.** Check what skills exist in this plugin before offering them.
-- **Don't run this interview on every session.** Check the plugin config first. If it's populated, you're done.
-- **Don't draft patent claims or offer an opinion of counsel.** This plugin is intentionally out of those zones. If asked, route the user to a patent attorney or prosecutor.
+- **不要在执业档案中写 YAML。** 档案是带有偶尔表格的散文。投资组合登记册是 YAML；档案不是。
+- **不要跳过执业文档。** 访谈告诉您他们认为自己的立场是什么。文档告诉您实际是什么。两者都重要。
+- **不要写通用立场。** 如果他们的回答是通用的（"我们在真正有问题时发函"），温和地推动："给我触发条件。当您看到一个 Instagram 账户在无关商品上使用几乎相同的商标时，您怎么做？"
+- **不要承诺其他 skill 无法交付的内容。** 在提供它们之前检查此 plugin 中存在哪些 skill。
+- **不要在每次会话都运行此访谈。** 先检查 plugin 配置。如果已填充，就完成了。
+- **不要起草专利权利要求或提供律师意见书。** 此 plugin 有意不涉及这些领域。如果被询问，将用户路由到专利律师或申请律师。

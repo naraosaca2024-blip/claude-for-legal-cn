@@ -1,20 +1,25 @@
 ---
 name: supervisor-review-queue
 description: >
-  Professor's review queue — student output waits here for professor approval
-  before going to clients or courts. Only active if "formal review queue"
-  supervision style was chosen at setup; otherwise dormant. Use when the
-  professor wants to see what's waiting for review, approve, edit-then-approve,
-  or return an item.
+  教授审查队列——学生输出在这里等待教授批准，然后再发送给客户或法院。
+  仅当在设置时选择了"正式审查队列"监督风格时才激活；否则休眠。
+  当教授想要查看等待审查的内容、批准、编辑后批准或返回项目时使用。
 argument-hint: "[--approve ID | --return ID 'note' | --edit ID]"
 ---
 
+<!--
+This file is a Chinese translation of the original by Anthropic PBC.
+Original: https://github.com/anthropics/claude-for-legal
+Licensed under Apache License 2.0
+-->
+
+
 # /supervisor-review-queue
 
-1. Check `~/.claude/plugins/config/claude-for-legal/legal-clinic/CLAUDE.md` → supervision style. If NOT "formal review queue": explain the clinic is set up for [flags/lighter-touch], no formal queue exists, and how to switch.
-2. Use the workflow below.
-3. Default: show what's waiting, by urgency, by student.
-4. Actions: approve / edit-then-approve / return with note. All logged.
+1. 检查 `~/.claude/plugins/config/claude-for-legal/legal-clinic/CLAUDE.md` → 监督风格。如果不是"正式审查队列"：说明诊所设置为 [flags/lighter-touch]，不存在正式队列，以及如何切换。
+2. 使用以下工作流。
+3. 默认：显示等待的内容，按紧急程度、按学生。
+4. 操作：批准 / 编辑后批准 / 带备注返回。全部记录。
 
 ```
 /legal-clinic:supervisor-review-queue
@@ -25,84 +30,84 @@ argument-hint: "[--approve ID | --return ID 'note' | --edit ID]"
 ```
 
 ```
-/legal-clinic:supervisor-review-queue --return Q-004 "Check the service requirement — local rules changed"
+/legal-clinic:supervisor-review-queue --return Q-004 "检查服务要求——当地规则已更改"
 ```
 
 ---
 
-# Supervisor Review Queue (Optional)
+# 主管审查队列（可选）
 
-## Purpose
+## 目的
 
-Some clinics want a formal gate: student drafts, professor reviews, output releases. Others find that too prescriptive — they supervise through case rounds and one-on-ones, not through a queue.
+一些诊所想要一个正式门槛：学生起草，教授审查，输出发布。其他人认为这太死板——他们通过案件轮查和一对一来监督，而不是通过队列。
 
-**This skill is only active if `~/.claude/plugins/config/claude-for-legal/legal-clinic/CLAUDE.md` → Supervision style is "formal review queue."** Otherwise it's dormant — the cold-start interview asks the professor which model they want, and this is one of three options.
+**此 skill 仅在 `~/.claude/plugins/config/claude-for-legal/legal-clinic/CLAUDE.md` → 监督风格为"正式审查队列"时才激活。**否则它休眠——冷启动访谈询问教授想要哪个模型，这是三个选项之一。
 
-Whether to use a formal review workflow is genuinely an open question for clinic adoption. It depends on student experience level, caseload, and how the professor already runs supervision. The professor decides at setup and can change it later.
+是否使用正式审查工作流确实是诊所采用的一个开放问题。这取决于学生经验水平、案件量以及教授已经如何运行监督。教授在设置时决定，可以稍后更改。
 
-## Load context
+## 加载上下文
 
-`~/.claude/plugins/config/claude-for-legal/legal-clinic/CLAUDE.md` → supervision style. If NOT "formal review queue": respond with "The clinic is set up for [flags/lighter-touch] supervision — there's no formal queue. [Professor] reviews through [the clinic's existing structure]. To switch to a formal queue, edit CLAUDE.md → Supervision style."
+`~/.claude/plugins/config/claude-for-legal/legal-clinic/CLAUDE.md` → 监督风格。如果不是"正式审查队列"：回复"诊所设置为 [flags/lighter-touch] 监督——没有正式队列。[教授] 通过 [诊所的现有结构] 审查。要切换到正式队列，编辑 CLAUDE.md → 监督风格。"
 
-If formal queue IS enabled → read flag triggers and proceed.
+如果启用了正式队列 → 读取标记触发器并继续。
 
-## The queue
+## 队列
 
-Lives at `references/review-queue.yaml`. Each entry:
+位于 `references/review-queue.yaml`。每个条目：
 
 ```yaml
 - id: Q-001
   type: "draft"  # intake | draft | memo | status | client-letter
-  client: "[name or ID]"
-  student: "[name]"
-  submitted: [timestamp]
+  client: "[名称或 ID]"
+  student: "[名称]"
+  submitted: [时间戳]
   flags:
-    - rule: "Court filing"
-      detail: "Eviction answer — always queued"
-  content_path: "[path to the document]"
+    - rule: "法院提交"
+      detail: "驱逐答复——始终排队"
+  content_path: "[文档路径]"
   status: "pending"  # pending | approved | edited-approved | returned
 ```
 
-## Modes
+## 模式
 
-### What's waiting
+### 等待什么
 
 ```markdown
-## Review Queue — [date]
+## 审查队列——[日期]
 
-**Pending:** [N] | **Oldest:** [N] hours
+**待处理：** [N] | **最旧的：** [N] 小时
 
-### 🔴 Deadline-sensitive
-| ID | Type | Client | Student | Why flagged | Waiting |
+### 🔴 截止期限敏感
+| ID | 类型 | 客户 | 学生 | 标记原因 | 等待时间 |
 |---|---|---|---|---|---|
 
-### Standard
-[same table]
+### 标准
+[相同表格]
 
-### By student
-[Breakdown — spot patterns: who's queueing a lot, who might need a check-in]
+### 按学生
+[细分——发现模式：谁排了很多，谁可能需要检查]
 ```
 
-### Review an item
+### 审查项目
 
-Show full content + why it was flagged + student notes.
+显示完整内容 + 标记原因 + 学生备注。
 
-### Approve / edit-then-approve / return
+### 批准 / 编辑后批准 / 返回
 
-- **Approve:** Status → approved, student notified, logged.
-- **Edit then approve:** Professor edits inline, approved version is the edited one, original preserved in log so student sees the diff (teaching moment).
-- **Return:** With a note. Student revises and resubmits.
+- **批准：** 状态 → 已批准，学生通知，已记录。
+- **编辑后批准：** 教授内联编辑，批准版本是编辑版本，原始保存在日志中以便学生看到差异（教学时刻）。
+- **返回：** 带备注。学生修改并重新提交。
 
-## Logging
+## 记录
 
-Every action logged. Approval logs are clinic records — they document that a licensed attorney, solicitor, barrister, or other authorised legal professional in the clinic's jurisdiction reviewed student work before it went to a client or court. That matters for the clinic's own compliance and for student evaluation.
+每个操作都记录。批准日志是诊所记录——它们记录许可的律师、事务律师、大律师或其他管辖诊所的授权法律专业人员在学生工作发送给客户或法院之前审查了学生工作。这对诊所自身的合规和学生评估很重要。
 
-## Teaching signal
+## 教学信号
 
-The queue is also data. Pattern in returns ("Student X keeps missing the service requirement") is a coaching conversation. Pattern in edits ("Everyone's demand letters are too long") is a `/ramp` update for next semester.
+队列也是数据。返回模式（"学生 X 不断错过服务要求"）是教练对话。编辑模式（"每个人的要求信都太长"）是下学期 `/ramp` 更新。
 
-## What this skill does NOT do
+## 此 skill 不做什么
 
-- **Run unless the professor chose it.** It's one of three supervision models, not the only one.
-- **Auto-approve.** The professor approves.
-- **Replace the clinic's existing supervision structure.** It's a gate for work product, not a substitute for case rounds, one-on-ones, or watching students in action.
+- **除非教授选择否则运行。** 它是三种监督模型之一，不是唯一的。
+- **自动批准。** 教授批准。
+- **替代诊所的现有监督结构。** 它是工作产品的门槛，而不是案件轮查、一对一或观看学生行动的替代品。

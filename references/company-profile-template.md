@@ -1,32 +1,38 @@
+<!--
+This file is a Chinese translation of the original by Anthropic PBC.
+Original: https://github.com/anthropics/claude-for-legal
+Licensed under Apache License 2.0
+-->
+
 # Company Profile
 
-*Shared by all Claude for Legal plugins. The first plugin you set up writes this; the rest read it.
-Edit directly or re-run any plugin's `/cold-start-interview` to update.*
+*由所有 Claude for Legal plugins 共享。你设置的第一个 plugin 写入此文件；其余 plugin 读取它。
+直接编辑或重新运行任何 plugin 的 `/cold-start-interview` 以更新。*
 
-**Practice setting:** [Solo/small firm | Midsize/large firm | In-house | Government/legal aid/clinic]
-**Name:** [Company or firm name]
-**Industry:** [What the company does / the firm's primary practice areas]
-**What we sell / deliver:** [Products, services, who to — or "N/A, law firm"]
-**Size:** [Employee count / lawyers / relevant headcount]
+**Practice setting:** [个人/小型律所 | 中型/大型律所 | 内部 | 政府/法律援助/诊所]
+**Name:** [公司或律所名称]
+**Industry:** [公司做什么 / 律所的主要执业领域]
+**What we sell / deliver:** [产品、服务、给谁——或"N/A，律所"]
+**Size:** [员工数 / 律师 / 相关人数]
 
 ## Geographic and regulatory footprint
 
-**Jurisdictions we operate in:** [e.g., US (CA, NY, TX), UK, EU (DE, FR), AU, SG]
-**Primary jurisdiction:** [Where the bulk of work happens]
-**Regulators we're subject to:** [SEC, FTC, ICO, EDPB, ASIC, OAIC, etc. — only what applies]
-**Open regulatory matters:** [or none]
+**Jurisdictions we operate in:** [例如 US (CA, NY, TX), UK, EU (DE, FR), AU, SG]
+**Primary jurisdiction:** [大部分工作发生在哪里]
+**Regulators we're subject to:** [SEC, FTC, ICO, EDPB, ASIC, OAIC 等——仅适用的]
+**Open regulatory matters:** [或无]
 
 ## Risk posture
 
-**Overall risk appetite:** [Conservative / middle / aggressive]
-**What keeps us up at night:** [The thing that would be a very bad day]
-**The question leadership always asks:** [or not known yet]
+**Overall risk appetite:** [保守 / 中等 / 激进]
+**What keeps us up at night:** [会是非常糟糕的一天的事情]
+**The question leadership always asks:** [或还不知道]
 
 ## Key people
 
-**GC / Head of Legal:** [Name]
-**Escalation chain:** [Name → Name → Name, or "set per plugin"]
+**GC / Head of Legal:** [姓名]
+**Escalation chain:** [姓名 → 姓名 → 姓名，或"每个 plugin 设置"]
 
 ---
 
-*Per-plugin practice profiles (playbooks, review frameworks, house style, matter workspaces) live alongside this file in each plugin's folder. This file holds the facts that are true regardless of which plugin you're using.*
+*每个 plugin 的执业档案（操作手册、审查框架、内部风格、事项工作区）与此文件一起位于每个 plugin 的文件夹中。此文件保存无论你使用哪个 plugin 都为真实的事实。*

@@ -4,43 +4,43 @@
       "type": "http",
       "url": "https://mcp.slack.com/mcp",
       "title": "Slack",
-      "description": "Search messages, read channels, find discussions across your workspace."
+      "description": "在你的工作区中搜索消息、阅读频道、查找讨论。"
     },
     "Google Drive": {
       "type": "http",
       "url": "https://drivemcp.googleapis.com/mcp/v1",
       "title": "Google Drive",
-      "description": "Search, read, and fetch documents from Google Drive."
+      "description": "从 Google Drive 搜索、阅读和获取文档。"
     },
     "Box": {
       "type": "http",
       "url": "https://mcp.box.com/mcp",
       "title": "Box",
-      "description": "Data room and document management."
+      "description": "数据室和文档管理。"
     },
     "iManage": {
       "type": "http",
       "url": "https://cloudimanage.com/mcp/work",
       "title": "iManage",
-      "description": "Governed iManage content connected to Claude — documents stay in iManage, access is permission-bound and auditable."
+      "description": "连接到 Claude 的受治理 iManage 内容——文档保留在 iManage 中，访问受权限约束且可审计。"
     },
     "TopCounsel": {
       "type": "http",
       "url": "https://api.techgc.co/api/mcp/topcounsel",
       "title": "TopCounsel",
-      "description": "Outside counsel recommendations from The L Suite — 5,000+ in-house counsel community sentiment, rankings, and expertise evidence."
+      "description": "来自 The L Suite 的外部法律顾问推荐——5,000+ 内部法律顾问社区观点、排名和专业知识证据。"
     },
     "Definely": {
       "type": "http",
       "url": "https://mcp.uk.definely.com/api/proxy/core-mcp",
       "title": "Definely",
-      "description": "Live, deterministic access to contract structure — resolve definitions, validate cross-references, map dependencies, run structural diffs."
+      "description": "实时、确定性地访问合同结构——解析定义、验证交叉引用、映射依赖关系、运行结构差异。"
     },
     "Solve Intelligence": {
       "type": "http",
       "url": "https://api.solveintelligence.com/mcp/",
       "title": "Solve Intelligence",
-      "description": "Patent workflows — search patent and non-patent literature, legal texts, SEP technical standards, prior art, claim analysis."
+      "description": "专利工作流——搜索专利和非专利文献、法律文本、SEP 技术标准、现有技术、权利要求分析。"
     }
   },
   "recommendedCategories": [

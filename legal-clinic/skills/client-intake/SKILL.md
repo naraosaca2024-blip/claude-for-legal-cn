@@ -1,21 +1,26 @@
 ---
 name: client-intake
 description: >
-  Structured intake — practice-area templates, cross-area issue spotting,
-  conflict flags, and triage classification. Produces a formatted case summary
-  the student analyzes and the professor reviews. Does NOT decide case
-  acceptance. Use when starting a new client intake, running an intake
-  interview, or writing up a new client's situation.
-argument-hint: "[optional: practice area hint]"
+  结构化接案——执业领域模板、跨领域问题发现、冲突标记和分流分类。
+  产生格式化的案件摘要供学生分析、教授审查。不决定案件受理。
+  当开始新客户接案、运行接案访谈或撰写新客户情况时使用。
+argument-hint: "[可选：执业领域提示]"
 ---
+
+<!--
+This file is a Chinese translation of the original by Anthropic PBC.
+Original: https://github.com/anthropics/claude-for-legal
+Licensed under Apache License 2.0
+-->
+
 
 # /client-intake
 
-1. Load `~/.claude/plugins/config/claude-for-legal/legal-clinic/CLAUDE.md` → practice areas, intake templates, supervision style, flag triggers.
-2. Use the workflow below.
-3. Route to practice-area template. Listen for cross-area issues throughout.
-4. Conflict check flags. Triage classification.
-5. Output formatted case summary with AI-assisted label, verification prompts, supervision routing.
+1. 加载 `~/.claude/plugins/config/claude-for-legal/legal-clinic/CLAUDE.md` → 执业领域、接案模板、督导方式、标记触发器。
+2. 使用以下工作流。
+3. 路由到执业领域模板。始终监听跨领域问题。
+4. 冲突检查标记。分流分类。
+5. 输出格式化的案件摘要，带有 AI 辅助标签、验证提示、督导路由。
 
 ```
 /legal-clinic:client-intake
@@ -23,226 +28,221 @@ argument-hint: "[optional: practice area hint]"
 
 ---
 
-# Client Intake
+# 客户接案
 
-## Purpose
+## 目的
 
-Intake is one of the biggest bottlenecks in clinics. A student might spend 45 minutes interviewing, another hour writing it up, more time spotting the issues. Meanwhile the waitlist grows.
+接案是诊所最大的瓶颈之一。学生可能花 45 分钟访谈，再花一个小时写记录，更多时间发现问题。同时候补名单在增长。
 
-This skill structures the conversation, produces the write-up, spots issues across practice areas, and flags conflicts — so the student's time goes to analysis, not transcription.
+此 skill 构建对话结构、产生书面记录、跨执业领域发现问题并标记冲突——这样学生的时间用于分析，不是转录。
 
-**What it doesn't do:** decide whether to take the case. That's the student's analysis and the professor's judgment. Claude accelerates the information-gathering and structuring, not the lawyering.
+**它不做什么：** 决定是否接受案件。那是学生的分析和教授的判断。Claude 加速信息收集和结构化，不是律师工作。
 
-## Load context
+## 加载上下文
 
-`~/.claude/plugins/config/claude-for-legal/legal-clinic/CLAUDE.md` → practice areas, intake templates (per practice area if multiple), supervision style, jurisdiction, flag triggers.
+`~/.claude/plugins/config/claude-for-legal/legal-clinic/CLAUDE.md` → 执业领域、接案模板（如果有多个则按执业领域）、督导方式、司法管辖区、标记触发器。
 
-## Read the supervisor guide
+## 读取督导指南
 
-Check for a practice-area guide at `~/.claude/plugins/config/claude-for-legal/legal-clinic/guides/<practice-area>.md`. If one exists, use its intake questions, red flags, and good-fit criteria instead of the generic defaults below. If one doesn't exist, use the generic intake and note at the end of the intake summary: "This was a generic intake — your supervisor can tailor the questions for your clinic type with `/legal-clinic:build-guide`."
+检查 `~/.claude/plugins/config/claude-for-legal/legal-clinic/guides/<practice-area>.md` 中是否有执业领域指南。如果存在，使用其接案问题、危险信号和适合标准代替以下通用默认值。如果不存在，使用通用接案并在接案摘要末尾注明："这是一次通用接案——您的督导可以通过 `/legal-clinic:build-guide` 为您的诊所类型定制问题。"
 
-When the intake starts before the practice area is routed (Step 1 of the workflow below), re-check for the guide after routing — the guide path depends on which practice area the intake landed in.
+当接案在执业领域路由之前开始（以下工作流的步骤 1）时，在路由后重新检查指南——指南路径取决于接案落入哪个执业领域。
 
-## Workflow
+## 工作流
 
-### Step 1: Practice area routing
+### 步骤 1：执业领域路由
 
-Which practice area does this intake start in? The client may not know — they know their problem, not the legal category.
+此接案从哪个执业领域开始？客户可能不知道——他们知道自己的问题，不是法律类别。
 
-> "Tell me what's going on — what brought you to the clinic today?"
+> "告诉我发生了什么——您今天为什么来诊所？"
 
-From the answer, route to the appropriate intake template. If the clinic handles multiple areas and the problem spans them (housing client mentions immigration status, family client mentions domestic violence), note all relevant areas — cross-area issue spotting is a feature, not a bug.
+从回答中，路由到适当的接案模板。如果诊所处理多个领域且问题跨领域（住房客户提到移民身份，家事客户提到家庭暴力），注意所有相关领域——跨领域问题发现是功能，不是缺陷。
 
-### Step 2: Practice-area-specific intake
+### 步骤 2：执业领域特定接案
 
-Each practice area asks different questions. Use the template from `~/.claude/plugins/config/claude-for-legal/legal-clinic/CLAUDE.md` for this area. Defaults if none provided:
+每个执业领域问不同的问题。使用 `~/.claude/plugins/config/claude-for-legal/legal-clinic/CLAUDE.md` 中此领域的模板。如果没有提供，使用以下默认值：
 
-**Immigration:**
-- Current status and how entered
-- Any prior applications, removals, encounters with ICE/CBP
-- Country conditions relevant to any asylum/withholding claim
-- Family members and their statuses
-- Criminal history (sensitive — explain why asking)
-- Timeline urgency: any pending hearings, deadlines, NTAs
+**移民：**
+- 当前身份和入境方式
+- 任何先前申请、驱逐、与 ICE/CBP 的接触
+- 与任何庇护/扣留申请相关的国家条件
+- 家庭成员及其身份
+- 犯罪历史（敏感——解释为什么询问）
+- 时间线紧急性：任何待处理的听证会、截止日期、NTA
 
-**Housing:**
-- Type of housing (private, subsidized, public)
-- What happened: notice received, lockout, conditions problem, deposit dispute
-- Lease terms and payment history
-- Habitability issues (repairs requested, landlord response, documentation)
-- Timeline urgency: notice date, court date if any
+**住房：**
+- 住房类型（私人、补贴、公共）
+- 发生了什么：收到的通知、锁门、条件问题、押金争议
+- 租约条款和付款历史
+- 可居住性问题（请求的维修、房东响应、文件）
+- 时间线紧急性：通知日期、法院日期（如果有）
 
-**Family:**
-- Relationship and what's at issue (custody, support, divorce, protection)
-- Children involved — ages, current arrangement
-- Safety: any violence, threats, fear (handle carefully — see cross-area flags)
-- Existing court orders
-- Timeline urgency: any hearings scheduled
+**家事：**
+- 关系和争议事项（监护、抚养、离婚、保护）
+- 涉及的子女——年龄、当前安排
+- 安全：任何暴力、威胁、恐惧（小心处理——参见跨领域标记）
+- 现有法院命令
+- 时间线紧急性：任何已安排的听证会
 
-**Consumer:**
-- Type of debt or dispute
-- Who's contacting them and how (FDCPA relevance)
-- Documentation: contracts, statements, collection letters
-- Has anything been filed against them
-- Timeline urgency: answer deadlines, garnishment, judgment
+**消费者：**
+- 债务或争议类型
+- 谁在联系他们以及方式（FDCPA 相关性）
+- 文件：合同、对账单、催收信函
+- 是否有对他们提起的任何诉讼
+- 时间线紧急性：答复截止日期、扣押、判决
 
-### Step 3: Cross-practice-area issue spotting
+### 步骤 3：跨执业领域问题发现
 
-While running the practice-area template, listen for issues outside that area:
+在运行执业领域模板时，监听该领域之外的问题：
 
-| Client says | Also flags |
+| 客户说 | 同时标记 |
 |---|---|
-| "I'm worried about my immigration status" | Immigration issue — even in a housing intake |
-| "My partner [threatening behavior]" | DV / family law / protective order — even in a consumer intake |
-| "I can't work because of my injury" | Possible benefits/disability claim |
-| "They're taking money from my paycheck" | Garnishment — consumer/employment overlap |
-| "The landlord said he'd call ICE" | Housing + immigration + possible retaliation claim |
+| "我担心我的移民身份" | 移民问题——即使在住房接案中 |
+| "我的伴侣 [威胁行为]" | DV/家事法/保护令——即使在消费者接案中 |
+| "我因为受伤不能工作" | 可能的福利/残障索赔 |
+| "他们在从我的工资里扣钱" | 扣押——消费者/雇佣重叠 |
+| "房东说他要打电话给 ICE" | 住房 + 移民 + 可能的报复索赔 |
 
-Note every cross-area issue in the summary. The clinic may handle it, refer it, or both — that's the professor's call. The student should see it.
+在摘要中记录每个跨领域问题。诊所可能处理它、转介它或两者兼有——那是教授的决定。学生应该看到它。
 
-### Step 4: Conflict check flags
+### 步骤 4：冲突检查标记
 
-Per whatever conflict-check process `~/.claude/plugins/config/claude-for-legal/legal-clinic/CLAUDE.md` describes. At minimum:
+按照 `~/.claude/plugins/config/claude-for-legal/legal-clinic/CLAUDE.md` 描述的任何冲突检查流程。至少：
 
-- Opposing party name(s) — does the clinic represent or have represented them?
-- Related parties — anyone else the student or clinic might have a conflict with?
-- Positional conflicts — is this case asking for something that would hurt another clinic client?
+- 对方当事人姓名——诊所是否代表或曾经代表他们？
+- 相关方——学生或诊所可能与之有冲突的其他人？
+- 立场冲突——此案件是否要求会损害另一个诊所客户的东西？
 
-Flag for professor review. Don't resolve the conflict — surface it.
+标记供教授审查。不要解决冲突——展示它。
 
-### Step 5: Triage classification
+### 步骤 5：分流分类
 
-Not a case-acceptance decision — a triage input:
+不是案件受理决定——是分流输入：
 
-| Classification | Means |
+| 分类 | 含义 |
 |---|---|
-| **Urgent** | Deadline in days, safety issue, irreversible harm imminent |
-| **Time-sensitive** | Deadline in weeks, harm ongoing but not immediately irreversible |
-| **Standard** | No immediate deadline, can queue normally |
-| **May be out of scope** | Issue is outside clinic's practice areas — flag for referral assessment |
+| **紧急** | 截止日期在几天内、安全问题、不可逆转的损害迫在眉睫 |
+| **时间敏感** | 截止日期在几周内、损害持续但不会立即不可逆转 |
+| **标准** | 没有立即的截止日期，可以正常排队 |
+| **可能超出范围** | 问题在诊所执业领域之外——标记供转介评估 |
 
-### Step 6: Supervision flag check
+### 步骤 6：督导标记检查
 
-Per `~/.claude/plugins/config/claude-for-legal/legal-clinic/CLAUDE.md` supervision style and flag triggers. If formal queue or configurable flags are enabled, and a trigger is present (deadline mentioned, DV indicator, immigration status at issue, etc.), note the flag.
+按照 `~/.claude/plugins/config/claude-for-legal/legal-clinic/CLAUDE.md` 督导方式和标记触发器。如果启用了正式审查队列或可配置标记，且触发器存在（提到截止日期、DV 指标、移民身份争议等），记录标记。
 
-### Step 7: Deadline handoff — required deliverable
+### 步骤 7：截止日期交接——必需交付物
 
-If the intake surfaces any timeline deadline (answer due, hearing, statute-of-limitations cutoff, cure period, filing window, notice window, ICE check-in, removal hearing, eviction court date, protective order renewal), **emit a copy-paste-ready `/legal-clinic:deadlines --add ...` block as part of the intake output**. This is a required deliverable, not a suggestion — the intake identifies deadlines, and the student shouldn't have to re-transcribe them into the deadline skill.
+如果接案浮现了任何时间线截止日期（答复到期、听证会、诉讼时效截止、补救期限、提交窗口、通知窗口、ICE 报到、驱逐听证日期、保护令续期），**作为接案输出的一部分发出一个可复制粘贴的 `/legal-clinic:deadlines --add ...` 块**。这是必需交付物，不是建议——接案识别截止日期，学生不应该将它们重新转录到截止日期 skill 中。
 
-Format each deadline as a fenced code block the student can copy, with every field pre-populated from the intake:
+将每个截止日期格式化为学生可以复制的围栏代码块，每个字段从接案中预填充：
 
 ```
 /legal-clinic:deadlines --add
-  case=[case slug or client-last-name-keyword]
+  case=[案件 slug 或客户姓氏关键字]
   type=[response|hearing|statute-of-limitations|discovery|cure-period|filing-window|notice|other]
-  description="[one-line description of what is due]"
-  due=[VERIFY — student + supervisor compute from triggering event]
-  source="[triggering event + statute/rule cite, e.g., 'UD complaint served 2026-05-04, CCP § 1167']"
-  owner=[student name]
+  description="[到期内容的一行描述]"
+  due=[VERIFY — 学生 + 督导从触发事件计算]
+  source="[触发事件 + 法规/规则引用，例如，'UD complaint served 2026-05-04, CCP § 1167']"
+  owner=[学生姓名]
   warnings=[14,7,3,1]
 ```
 
-Rules:
-- One block per deadline surfaced. Do not combine. Each one will route through the deadlines skill's pre-add duplicate check.
-- Leave the `due=` value as `[VERIFY — student + supervisor compute]` when the deadline is jurisdictional (response deadline, SOL, notice window under a specific rule). The deadlines skill will not compute for you; the student + supervisor do the math and update the entry.
-- When a date is given in the triggering document (a hearing date on a summons, an ICE check-in date, a renewal deadline on a protective order), put that date in `due=`. When the date is computed (count N days from triggering event), leave the `[VERIFY]` marker.
-- If no deadline is surfaced in the intake, omit this section — don't fabricate one.
+规则：
+- 每个浮现的截止日期一个块。不要合并。每个将通过截止日期 skill 的添加前重复检查路由。
+- 当截止日期是管辖性的（答复截止日期、SOL、特定规则下的通知窗口）时，将 `due=` 值保留为 `[VERIFY — student + supervisor compute]`。截止日期 skill 不会为您计算；学生 + 督导做数学并更新条目。
+- 当触发文件中给出了日期（传票上的听证日期、ICE 报到日期、保护令上的续期截止日期）时，将该日期放入 `due=`。当日期是计算的（从触发事件算 N 天）时，保留 `[VERIFY]` 标记。
+- 如果接案中未浮现截止日期，省略此部分——不要捏造。
 
-## Output
+## 输出
 
 ```markdown
-# Intake Summary: [Client name or ID]
+# 接案摘要：[客户姓名或 ID]
 
 ---
-[AI-ASSISTED DRAFT — requires student analysis and attorney review]
+[AI 辅助草稿——需要学生分析和律师审查]
 
-**Privilege and confidentiality.** This summary is derived from client communications that may be privileged, confidential, or both. It inherits the source's privilege status. Distributing it beyond the privilege circle (including outside the clinic) can waive privilege. Keep it in the clinic's privileged file store, mark it appropriately, and make distribution decisions with your supervisor.
+**特权和保密。** 此摘要衍生自可能享有特权、保密或两者的客户通信。它继承来源的特权状态。在特权圈外分发（包括诊所外）可能放弃特权。将其保留在诊所的特权文件存储中，适当标记，并在督导指导下做出分发决定。
 ---
 
-**Date:** [date] | **Intake by:** [student] | **Practice area:** [primary + any cross-area]
+**日期：** [日期] | **接案人：** [学生] | **执业领域：** [主要 + 任何跨领域]
 
-## Bottom line
+## 要点
 
-[Take the case / Decline because X / Need more info on Y — next step is Z]
+[接受案件 / 因 X 拒绝 / 需要更多关于 Y 的信息——下一步是 Z]
 
-## Client's situation (in their words)
+## 客户情况（用他们自己的话）
 
-[The narrative the client gave, before legal categorization. This is the human story.]
+[客户给出的叙述，在法律分类之前。这是人的故事。]
 
-## Legal issues identified
+## 识别的法律问题
 
-*Every statutory, ordinance, regulatory, rule, or case citation in this section carries a provenance tag (see plugin CLAUDE.md `## Shared guardrails` for the tag vocabulary). `[user provided]` if the supervisor uploaded the text, `[statute / regulator site]` if you fetched it this session from an official source, a research-connector tag (`[CourtListener]`, etc.) if it came from a tool result in this conversation, `[model knowledge — verify]` otherwise. The default is `[model knowledge — verify]`. A supervising attorney who cannot verify a cite against a connector needs to see the tag to know what to check first.*
+*本节中的每个法规、条例、监管、规则或案例引用都带有来源标签（参见插件 CLAUDE.md `## 共享护栏` 了解标签词汇表）。如果督导上传了文本则为 `[user provided]`，如果本会话中从官方来源获取则为 `[statute / regulator site]`，如果来自此对话中的工具结果则为研究连接器标签（`[CourtListener]` 等），否则为 `[model knowledge — verify]`。默认为 `[model knowledge — verify]`。无法根据连接器验证引用的督导律师需要看到标签以知道首先检查什么。*
 
-### Primary ([practice area])
-- [Issue 1]: [one line with any cite tagged, e.g., "RLTO §5-12-080 `[model knowledge — verify]`"]
-- [Issue 2]: [one line]
+### 主要（[执业领域]）
+- [问题 1]：[一行，附任何标签的引用，例如，"RLTO §5-12-080 `[model knowledge — verify]`"]
+- [问题 2]：[一行]
 
-### Cross-practice-area flags
-- [Other area]: [what the client said that raised it]
-  [UNCERTAIN: whether clinic handles this or refers — professor call]
+### 跨执业领域标记
+- [其他领域]：[客户说了什么引起它的]
+  [不确定：诊所是否处理此或转介——教授决定]
 
-## Key facts
+## 关键事实
 
-| Fact | Source | Documentation |
+| 事实 | 来源 | 文件 |
 |---|---|---|
-| [fact] | [client statement / document provided] | [have it / need it] |
+| [事实] | [客户陈述 / 提供的文件] | [有 / 需要获取] |
 
-## Conflict check
+## 冲突检查
 
-**Opposing party:** [name(s)]
-**Related parties:** [any]
-**Flag:** [clear / needs conflict check against clinic database]
+**对方当事人：** [姓名]
+**相关方：** [任何]
+**标记：** [清晰 / 需要根据诊所数据库进行冲突检查]
 
-## Triage
+## 分流
 
-**Classification:** [Urgent / Time-sensitive / Standard / May be out of scope]
-**Driving deadline:** [if any — date and what it is]
+**分类：** [紧急 / 时间敏感 / 标准 / 可能超出范围]
+**驱动截止日期：** [如果有——日期和是什么]
 
-## Deadlines to log
+## 要记录的截止日期
 
-[One `/legal-clinic:deadlines --add ...` block per surfaced deadline — Step 7.
-If none, omit this section.]
+[每个浮现的截止日期一个 `/legal-clinic:deadlines --add ...` 块——步骤 7。
+如果没有，省略此部分。]
 
-## Jurisdictional notes
+## 司法管辖区说明
 
-*Every statute, ordinance, rule, or case citation in this section carries a provenance tag — same vocabulary as `## Legal issues identified`. Default `[model knowledge — verify]`. When no research connector is reachable for this session, record it in the **Sources:** line of the reviewer note (see plugin CLAUDE.md `## Outputs`) — do not emit a standalone banner.*
+*本节中的每个法规、法令、规则或案例引用都带有来源标签——与 `## 识别的法律问题` 相同的词汇表。默认 `[model knowledge — verify]`。当本会话无法访问研究连接器时，在审阅者注释的 **来源：** 行中记录（参见插件 CLAUDE.md `## 输出`）——不要发出独立横幅。*
 
-[State-specific or local-rule-specific issues relevant to this case type, per
-CLAUDE.md jurisdiction, with each cite tagged]
+[特定于 CLAUDE.md 司法管辖区的此案件类型相关的州特定或本地规则特定问题，每个引用附标签]
 
-## Supervision flags
+## 督导标记
 
-[If supervision style includes flags: which fired and why. If formal queue:
-"QUEUED for [professor]."]
+[如果督导方式包括标记：哪些触发了以及为什么。如果是正式审查队列："已排队供 [教授] 审查。"]
 
 ---
 
-## Verification prompts for the student
+## 给学生的验证提示
 
-Before analysis, verify:
-- [ ] [Specific fact the intake relies on — confirm with client or documents]
-- [ ] [Deadline date — confirm from the actual notice/court document, not client's memory]
-- [ ] [Any legal conclusion above is a starting hypothesis — research before relying on it]
+在分析之前，验证：
+- [ ] [接案依赖的具体事实——与客户或文件确认]
+- [ ] [截止日期——从实际通知/法院文件确认，不是客户的记忆]
+- [ ] [上面的任何法律结论是起点假设——在依赖之前进行研究]
 
-## What this summary does NOT do
+## 此摘要不做什么
 
-This summary does not decide whether the clinic takes this case. That's your
-analysis and [Professor]'s judgment. It structures what the client told you
-so you can spend your time on the analysis instead of the write-up.
+此摘要不决定诊所是否接受此案件。那是您的分析和 [教授] 的判断。它结构化了客户告诉您的内容，以便您可以将时间花在分析上而不是写记录上。
 ```
 
-## Practice-area intake template references
+## 执业领域接案模板参考
 
-Store practice-area-specific question sets at `references/intake-templates/[area].md`. Cold-start populates these from the professor's intake form(s); if none provided, use the defaults above.
+将执业领域特定的问题集存储在 `references/intake-templates/[area].md`。冷启动从教授的接案表单填充这些；如果没有提供，使用上面的默认值。
 
-## What this skill does NOT do
+## 此 skill 不做什么
 
-- **Decide case acceptance.** Student analyzes, professor decides.
-- **Resolve conflicts.** Flags them for the professor.
-- **Give advice during intake.** Intake is gathering; advice comes after analysis and professor review.
-- **Produce a final document.** The summary is a starting point — the student reads it, corrects anything mischaracterized, and builds the analysis from it.
+- **决定案件受理。** 学生分析，教授决定。
+- **解决冲突。** 为教授标记它们。
+- **在接案期间给出建议。** 接案是收集；建议在分析和教授审查之后。
+- **产生最终文件。** 摘要是起点——学生阅读它，纠正任何错误表征，并从中构建分析。
 
-## Close with the next-steps decision tree
+## 以下一步决策树关闭
 
-End with the next-steps decision tree per CLAUDE.md `## Outputs`. Customize the options to what this skill just produced — the five default branches (draft the X, escalate, get more facts, watch and wait, something else) are a starting point, not a lock-in. The tree is the output; the lawyer picks.
-
+按照 CLAUDE.md `## 输出` 以下一步决策树结束。根据此 skill 刚刚生成的内容自定义选项——五个默认分支（起草 X、升级、获取更多事实、观察等待、其他事情）是起点，而不是锁定。树就是输出；律师选择。

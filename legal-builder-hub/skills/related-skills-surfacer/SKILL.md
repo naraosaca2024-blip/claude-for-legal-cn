@@ -1,72 +1,78 @@
 ---
 name: related-skills-surfacer
 description: >
-  Suggest community skills based on recent activity in other plugins. Checks
-  whether the community has built something relevant to a task and mentions it
-  once, non-intrusively. Use when the user says "is there a community skill for
-  this", "what else is out there", or asks for skill recommendations; also runs
-  passively as part of other plugins' workflows.
+  根据其他插件中的最近活动建议社区 skills。检查社区是否构建了
+  与任务相关的内容并提及一次、非侵入性地。当用户说"是否有
+  这个的社区 skill"、"还有什么"，或询问 skill 推荐时使用；
+  也可以作为其他插件工作流的一部分被动运行。
 ---
+
+<!--
+This file is a Chinese translation of the original by Anthropic PBC.
+Original: https://github.com/anthropics/claude-for-legal
+Licensed under Apache License 2.0
+-->
+
 
 # /related-skills-surfacer
 
-1. Load `~/.claude/plugins/config/claude-for-legal/legal-builder-hub/CLAUDE.md` → practice profile.
-2. Use the workflow below.
-3. Check what other plugins have been doing. Match against registry.
-4. Suggest: "You've been doing X — community has a skill for Y that's related."
+1. 加载 `~/.claude/plugins/config/claude-for-legal/legal-builder-hub/CLAUDE.md` → 执业档案。
+2. 使用以下工作流。
+3. 检查其他插件一直在做什么。与注册表匹配。
+4. 建议："您一直在做 X——社区有一个针对 Y 的相关技能。"
 
 ---
 
-## Purpose
+## 目的
 
-The community might have built the thing you're about to build. This skill notices and mentions it — once, briefly, non-annoyingly.
+社区可能已经构建了您将要构建的东西。此 skill 注意到并提及它——一次、简短、不烦人。
 
-## How it runs
+## 如何运行
 
-This skill surfaces related community skills after a task. It can be invoked directly by the user ("what else is out there for X?") or wired into other plugins via a Stop hook — the hook-based pattern requires each sibling plugin to declare a Stop hook that calls this skill, which is not wired by default. Without the hook wiring, invoke it directly.
+此 skill 在任务后显示相关的社区 skills。它可以直接由用户调用（"X 还有什么"），或通过 Stop hook 连接到其他插件——基于 hook 的模式要求每个兄弟插件声明一个调用此 skill 的 Stop hook，默认情况下没有连接。没有 hook 连接，直接调用它。
 
-Other plugins can include a light check at the end of a task:
-> "The legal-builder-hub found a community skill that might help with this kind of thing: [name] — [one-line]. Want to take a look?"
+其他插件可以在任务结束时进行轻微检查：
+> "legal-builder-hub 发现了一个可能对此有帮助的社区 skill：[名称] — [一行]。要看看吗？"
 
-## Load context
+## 加载上下文
 
-`~/.claude/plugins/config/claude-for-legal/legal-builder-hub/CLAUDE.md` → practice profile, installed skills (don't suggest what's already installed).
-Registry cache from registry-browser.
+`~/.claude/plugins/config/claude-for-legal/legal-builder-hub/CLAUDE.md` → 执业档案、已安装的 skills（不要建议已安装的内容）。
+来自 registry-browser 的注册表缓存。
 
-## The match
+## 匹配
 
-Given a task description (what the user was just doing), find registry skills that match:
+给定任务描述（用户刚刚在做什么），查找匹配的注册表 skills：
 
-- Keyword overlap between the task and skill descriptions
-- Practice profile fit (don't suggest litigation skills to a transactional lawyer)
-- Not already installed
+- 任务与 skill 描述之间的关键字重叠
+- 执业档案匹配（不要向诉讼律师建议诉讼 skills）
+- 尚未安装
 
-**Threshold:** Only surface if the match is strong. Weak matches are noise. Better to surface nothing than to annoy.
+**阈值：** 仅在匹配强烈时显示。弱匹配是噪音。最好什么都不显示，而不是烦扰。
 
-## Output
+## 输出
 
-If strong match:
-> 💡 The community has a skill for this: **[name]** from [registry] — "[description]". `/legal-builder-hub:skill-installer [name]` to try it.
+如果强匹配：
+> 💡 社区为此有一个 skill：**[名称]** 来自 [注册表] — "[描述]"。`/legal-builder-hub:skill-installer [名称]` 试试看。
 
-If no strong match: silent. No output. Don't announce "I found nothing."
+如果没有强匹配：静默。无输出。不要宣布"我什么都没找到"。
 
-## Frequency limit
+## 频率限制
 
-Don't surface the same skill twice. If the user didn't install it the first time, they saw it and decided no. Track dismissals in `references/surfaced.json`.
+不要两次显示相同的 skill。如果用户第一次没有安装它，他们看到它并决定不要。在 `references/surfaced.json` 中跟踪拒绝。
 
-## User control
+## 用户控制
 
-Per `~/.claude/plugins/config/claude-for-legal/legal-builder-hub/CLAUDE.md` → new skill notifications:
-- **All:** Surface any match
-- **Matching practice profile:** Filter by profile (default)
-- **None:** This skill is off
+根据 `~/.claude/plugins/config/claude-for-legal/legal-builder-hub/CLAUDE.md` → 新 skill 通知：
+- **全部：** 显示任何匹配
+- **匹配执业档案：** 按档案过滤（默认）
+- **无：** 此 skill 关闭
 
-## Close with the next-steps decision tree
+## 关闭决策树
 
-End with the next-steps decision tree per CLAUDE.md `## Outputs`. Customize the options to what this skill just produced — the five default branches (draft the X, escalate, get more facts, watch and wait, something else) are a starting point, not a lock-in. The tree is the output; the lawyer picks.
+根据 CLAUDE.md `## Outputs` 以下一步决策树结束。根据此 skill 刚刚生成的内容自定义选项——五个默认分支（起草 X、升级、获取更多事实、观察等待、其他事情）是起点，而不是锁定。树就是输出；律师选择。
 
-## What this skill does not do
+## 此 skill 不做什么
 
-- Install anything.
-- Interrupt a task in progress. Surfacing happens at the *end* of a task, not in the middle.
-- Nag. One mention per skill, ever.
+- 安装任何东西。
+- 中断正在进行的任务。显示发生在任务结束时，而不是中间。
+- 烦扰。每个 skill 提及一次。

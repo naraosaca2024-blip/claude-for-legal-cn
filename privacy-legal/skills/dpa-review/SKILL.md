@@ -1,20 +1,26 @@
 ---
 name: dpa-review
 description: >
-  Review a Data Processing Agreement against your DPA playbook — auto-detects
-  whether you're processor or controller and applies the right half of the playbook.
-  Use when the user says "review this DPA", "check this data processing addendum",
-  "customer sent their DPA", "is this DPA okay", or attaches a DPA.
+  根据你的 DPA 剧本审查数据处理协议——自动检测你是处理者还是控制者并应用剧本的正确部分。
+  当用户说"审查这个 DPA"、"检查这个数据处理附录"、"客户发了他们的 DPA"、"这个 DPA 可以吗"
+  或附上 DPA 时使用。
 argument-hint: "[file | Drive link | paste text]"
 ---
 
+<!--
+This file is a Chinese translation of the original by Anthropic PBC.
+Original: https://github.com/anthropics/claude-for-legal
+Licensed under Apache License 2.0
+-->
+
+
 # /dpa-review
 
-1. Load `~/.claude/plugins/config/claude-for-legal/privacy-legal/CLAUDE.md` → DPA playbook. If placeholders, stop and prompt setup.
-2. Get the DPA. Determine direction: are we processor (customer's DPA) or controller (vendor's)? Ask if ambiguous.
-3. Run the workflow below — term-by-term against the appropriate playbook row.
-4. Run privacy policy consistency check.
-5. Output: review memo with redlines. Save per house style.
+1. 加载 `~/.claude/plugins/config/claude-for-legal/privacy-legal/CLAUDE.md` → DPA 剧本。如果是占位符，停止并提示设置。
+2. 获取 DPA。确定方向：我们是处理者（客户的 DPA）还是控制者（供应商的）？如果不明确则询问。
+3. 运行以下工作流——逐条对照适当的剧本行。
+4. 运行隐私政策一致性检查。
+5. 输出：带有红线标记的审查备忘录。按内部风格保存。
 
 ```
 /privacy-legal:dpa-review customer-dpa.pdf
@@ -22,224 +28,220 @@ argument-hint: "[file | Drive link | paste text]"
 
 ---
 
-# DPA Review
+# DPA 审查
 
-## Matter context
+## 事项上下文
 
-**Matter context.** Check `## Matter workspaces` in the practice-level CLAUDE.md. If `Enabled` is `✗` (the default for in-house users), skip the rest of this paragraph — skills use practice-level context and the matter machinery is invisible. If enabled and there is no active matter, ask: "Which matter is this for? Run `/privacy-legal:matter-workspace switch <slug>` or say `practice-level`." Load the active matter's `matter.md` for matter-specific context and overrides. Write outputs to the matter folder at `~/.claude/plugins/config/claude-for-legal/privacy-legal/matters/<matter-slug>/`. Never read another matter's files unless `Cross-matter context` is `on`.
+**事项上下文。** 检查执业级 CLAUDE.md 中的 `## Matter workspaces`。如果 `Enabled` 为 `✗`（内部用户的默认值），跳过本段的其余部分——skills 使用执业级上下文，事项机制不可见。如果启用且没有活跃事项，询问："这是哪个事项的？运行 `/privacy-legal:matter-workspace switch <slug>` 或说 `practice-level`。"加载活跃事项的 `matter.md` 以获取事项特定上下文和覆盖。将输出写入事项文件夹 `~/.claude/plugins/config/claude-for-legal/privacy-legal/matters/<matter-slug>/`。除非 `Cross-matter context` 为 `on`，否则永远不要阅读另一个事项的文件。
 
 ---
 
-## Purpose
+## 目的
 
-DPAs come in two flavors and the review is nearly opposite for each. When a customer sends their DPA, we're defending our operational flexibility. When we send one to a vendor, we're protecting our (and our customers') data. Both reviews read from the same `~/.claude/plugins/config/claude-for-legal/privacy-legal/CLAUDE.md` playbook but from opposite rows.
+DPA 有两种类型，每种审查几乎相反。当客户发送他们的 DPA 时，我们在维护运营灵活性。当我们向供应商发送 DPA 时，我们在保护我们（和我们客户）的数据。两种审查都读取相同的 `~/.claude/plugins/config/claude-for-legal/privacy-legal/CLAUDE.md` 剧本，但从相反的行读取。
 
-## First: which direction?
+## 首先：哪个方向？
 
-Before anything else, establish:
+在其他一切之前，确定：
 
-- **We are the processor** → customer is sending us their DPA → read `~/.claude/plugins/config/claude-for-legal/privacy-legal/CLAUDE.md` → "When we are the processor" table
-- **We are the controller** → we're sending a DPA to a vendor (or reviewing theirs) → read "When we are the controller" table
+- **我们是处理者** → 客户发送他们的 DPA → 读取 `~/.claude/plugins/config/claude-for-legal/privacy-legal/CLAUDE.md` → "当我们是处理者时"表
+- **我们是控制者** → 我们向供应商发送 DPA（或审查他们的）→ 读取"当我们是控制者时"表
 
-If unclear, ask. Getting this wrong inverts every recommendation.
+如果不明确，询问。弄错这个会反转每个建议。
 
-## Jurisdiction assumption
+## 司法管辖区假设
 
-This review assumes the jurisdictional scope specified in your configuration. Privacy rules, response deadlines, and lawful bases vary materially by jurisdiction (GDPR vs. state consumer privacy laws vs. sectoral). If the controller, processor, or data subjects are in a different jurisdiction than configured, this review may not apply as written.
+此审查假设你配置中指定的司法管辖区范围。隐私规则、响应截止日期和合法依据因司法管辖区（GDPR vs. 州消费者隐私法 vs. 行业特定）而有很大差异。如果控制者、处理者或数据主体位于与配置不同的司法管辖区，此审查可能不适用于书面内容。
 
-## Load prior context on this counterparty / activity
+## 加载此前关于此对手方/活动的上下文
 
-Before reviewing, check the outputs folder for prior work on this counterparty or processing activity. Read `~/.claude/plugins/config/claude-for-legal/privacy-legal/CLAUDE.md` → `## Outputs` for the outputs folder path. Scan for:
+在审查之前，检查输出文件夹中关于此对手方或处理活动的先前工作。读取 `~/.claude/plugins/config/claude-for-legal/privacy-legal/CLAUDE.md` → `## Outputs` 以获取输出文件夹路径。扫描：
 
-- **Prior `use-case-triage` results** for the same counterparty / processing activity — the triage produces a risk rating and conditions that this DPA review should honor or explicitly depart from.
-- **Prior `pia-generation` outputs** covering this counterparty / processing activity — the PIA may have flagged risk mitigations the DPA needs to implement.
-- **Prior `dpa-review` outputs** for the same counterparty — earlier DPA reviews set expectations about what was acceptable, what was flagged, and what was settled. A fresh review that silently contradicts the earlier one erodes trust in the work product.
+- **相同对手方/处理活动的先前 `use-case-triage` 结果**——分流产生的风险评级和条件，此 DPA 审查应遵守或明确偏离。
+- **涵盖此对手方/处理活动的先前 `pia-generation` 输出**——PIA 可能标记了 DPA 需要实施的风险缓解措施。
+- **相同对手方的先前 `dpa-review` 输出**——早期 DPA 审查设定了关于什么是可接受的、标记了什么以及解决了什么的期望。静默矛盾早期审查的全新审查会削弱对工作产品的信任。
 
-If a prior output is found, cite it in the review:
+如果发现先前输出，在审查中引用：
 
-> "Prior triage ([date]) rated this [risk level] and conditioned approval on [X]. This DPA review is consistent with that finding." — or —
-> "Prior triage ([date]) rated this [risk level]. This DPA review departs from that finding because [reason — new facts, different scope, contract term that changed the picture]."
+> "先前分流（[日期]）将此评为 [风险级别] 并条件批准 [X]。此 DPA 审查与该发现一致。"——或——
+> "先前分流（[日期]）将此评为 [风险级别]。此 DPA 审查偏离该发现，因为 [原因——新事实、不同范围、改变局面的合同条款]。"
 
-**Carry severity from the upstream output as a floor** per the cross-skill severity floor rule in `~/.claude/plugins/config/claude-for-legal/privacy-legal/CLAUDE.md` → `## Shared guardrails`. A processing activity the triage rated 🔴 cannot be quietly downgraded to 🟢 in the DPA review; any demotion is stated and explained.
+**将上游输出的严重性作为下限携带**，根据 `~/.claude/plugins/config/claude-for-legal/privacy-legal/CLAUDE.md` → `## Shared guardrails` 中的跨 skill 严重性下限规则。分流评为 🔴 的处理活动不能在 DPA 审查中被静默降级为 🟢；任何降级必须声明并解释。
 
-If no prior output is found (new counterparty / new activity), say so explicitly in the review — "No prior triage or PIA on this counterparty in outputs folder" — so the reviewing attorney knows the check ran.
+如果未发现先前输出（新对手方/新活动），在审查中明确说明——"输出文件夹中没有此对手方的先前分流或 PIA"——以便审查律师知道检查已运行且未找到任何内容。
 
-## Load the playbook
+## 加载剧本
 
-Read `~/.claude/plugins/config/claude-for-legal/privacy-legal/CLAUDE.md` → `## DPA playbook`. Also read `## Privacy policy commitments` — the DPA can't contradict what the privacy policy promises.
+读取 `~/.claude/plugins/config/claude-for-legal/privacy-legal/CLAUDE.md` → `## DPA playbook`。还要读取 `## Privacy policy commitments`——DPA 不能与隐私政策承诺的内容相矛盾。
 
-## Federal sectoral overlay (ask first, before the term-by-term walk)
+## 联邦行业覆盖（首先询问，在逐条审查之前）
 
-Before walking the term-by-term review, answer: **does the data flowing through this DPA include any federally-regulated category?** GDPR and state consumer-privacy law supply one floor; federal sectoral law often supplies another that does not appear in the generic DPA playbook. A DPA that is GDPR-complete can still be GLBA-blind, HIPAA-blind, or COPPA-blind, and a fintech / healthtech / edtech / kidtech counterparty will notice.
+在逐条审查之前，回答：**流经此 DPA 的数据是否包括任何联邦监管类别？** GDPR 和州消费者隐私法提供一个底线；联邦行业法通常提供另一个未出现在通用 DPA 剧本中的底线。一个 GDPR 完整的 DPA 仍然可能是 GLBA 盲区、HIPAA 盲区或 COPPA 盲区，金融科技/健康科技/教育科技/儿童科技的对手方会注意到。
 
-> **Activity-based federal overlays — ask first:**
+> **基于活动的联邦覆盖——首先询问：**
 >
-> Does this processing touch:
-> - **Financial account data or "nonpublic personal information" about consumers** (GLBA / Reg P)? If yes, the DPA needs: (a) an NPI-sharing restriction consistent with 15 U.S.C. § 6802(a)-(c) and Reg P (no sharing for marketing to non-affiliated third parties without opt-out / opt-in), (b) safeguards language aligned with the Safeguards Rule (16 C.F.R. Part 314), (c) incident notification that reaches FTC/OCC timing where applicable, (d) a clean carve-out so a CCPA § 1798.145(e) exemption doesn't accidentally waive GLBA-level obligations.
-> - **Protected health information held by a covered entity or business associate** (HIPAA Privacy / Security Rules)? If yes, the DPA needs: a Business Associate Agreement (BAA) layered with or integrated into the DPA per 45 C.F.R. § 164.504(e), breach notification timing aligned with HITECH (60 days to CE; CE 60 days to HHS; 500+ threshold for media), permitted-uses clause, subcontractor BAA flow-down. A commercial DPA without BAA flow-down for PHI is a defect.
-> - **Education records held by a school or a service provider acting for a school** (FERPA)? If yes, the DPA needs: a "school official" / directory-information framing consistent with 34 C.F.R. § 99.31, parental-consent flow-through, state student-privacy analog handling (NY Ed Law 2-d, CA SOPIPA, IL SOPPA).
-> - **Data from children under 13 collected by an operator of an online service directed to children or with actual knowledge** (COPPA)? If yes, the DPA needs: verifiable-parental-consent flow-through, retention limits, deletion-on-request machinery, prohibition on behavioral advertising absent VPC.
-> - **Another sectoral federal regime** (VPPA for video-viewing records, CPNI for carrier data, DPPA for DMV records, TCPA / Shaken-Stir for call/SMS, GLBA Reg S-P for broker-dealers, §5 FTC Act for unfair/deceptive practices around sensitive data)?
+> 此处理是否涉及：
+> - **金融账户数据或关于消费者的"非公开个人信息"**（GLBA / Reg P）？如果是，DPA 需要：（a）与 15 U.S.C. § 6802(a)-(c) 和 Reg P 一致的 NPI 共享限制（未经退出/选择加入不对非关联第三方进行营销共享），（b）与 Safeguards Rule（16 C.F.R. Part 314）一致的安全保障语言，（c）在适用时达到 FTC/OCC 时间的事件通知，（d）干净的豁免，以便 CCPA § 1798.145(e) 豁免不会意外放弃 GLBA 级别的义务。
+> - **覆盖实体或业务关联方持有的受保护健康信息**（HIPAA Privacy / Security Rules）？如果是，DPA 需要：根据 45 C.F.R. § 164.504(e) 与 DPA 分层或集成的业务关联协议（BAA）、与 HITECH 一致的违约通知时间（60 天给 CE；CE 60 天给 HHS；500+ 阈值触发媒体通知）、许可使用条款、子处理者 BAA 流转。没有 PHI BAA 流转的商业 DPA 是缺陷。
+> - **学校或代表学校的服务提供商持有的教育记录**（FERPA）？如果是，DPA 需要：与 34 C.F.R. § 99.31 一致的"学校官员"/目录信息框架、家长同意流转、州学生隐私类似处理（NY Ed Law 2-d、CA SOPIPA、IL SOPPA）。
+> - **面向儿童或实际知晓的在线服务运营商收集的 13 岁以下儿童数据**（COPPA）？如果是，DPA 需要：可验证家长同意流转、保留限制、应请求删除机制、禁止在无 VPC 情况下行为广告。
+> - **其他行业联邦制度**（VPPA 用于视频观看记录、CPNI 用于运营商数据、DPPA 用于 DMV 记录、TCPA / Shaken-Stir 用于通话/SMS 同意、GLBA Reg S-P 用于经纪交易商、§5 FTC Act 用于关于敏感数据的不公平/欺骗行为）？
 >
-> If yes to any: the federal overlay usually supplies the controlling substantive restriction, not just an exemption from a state consumer privacy law. Research the currently-operative provision and cite it. A DPA that is "exempt" from CCPA under § 1798.145(e) because it is GLBA-covered is still subject to the GLBA restrictions — the CCPA exemption moves the governing framework, it doesn't eliminate it. Flag sectoral gaps in the deal-breakers list alongside GDPR / state-privacy gaps.
+> 如果任何为是：联邦覆盖通常提供控制性实质限制，而非仅是州消费者隐私法的豁免。研究当前有效的条款并引用它。因 GLBA 覆盖而根据 § 1798.145(e)"豁免"CCPA 的活动仍受 GLBA 限制——CCPA 豁免移动管辖框架，它不消除框架。在交易破坏者列表中与 GDPR/州隐私差距一起标记行业差距。
 
-If no sectoral overlay applies, note that explicitly — "no federally-regulated data categories identified; sectoral overlay n/a" — so the reviewing attorney sees that the check happened, rather than wondering whether it was skipped.
+如果没有行业覆盖适用，明确说明——"未识别联邦监管数据类别；行业覆盖不适用"——以便审查律师看到检查已进行，而非想知道是否被跳过。
 
-## The term-by-term review
+## 逐条审查
 
-### Core terms (check every DPA)
+### 核心条款（检查每个 DPA）
 
-Walk every DPA through these terms, clause by clause. The *specific* numeric and substantive positions (notice periods, breach timelines, acceptable/unacceptable floors) come from `~/.claude/plugins/config/claude-for-legal/privacy-legal/CLAUDE.md` → `## DPA playbook`. The regulatory floors that any DPA has to clear come from primary law — **research the currently operative rule** for each applicable regime and cite primary sources before stating a floor.
+逐条审查每个 DPA。*具体*的数字和实质立场（通知期、违约时间线、可接受/不可接受的底线）来自 `~/.claude/plugins/config/claude-for-legal/privacy-legal/CLAUDE.md` → `## DPA playbook`。任何 DPA 必须通过的监管底线来自主要法律——**研究每个适用制度的当前有效规则**并在声明底线之前引用主要来源。
 
-> **No silent supplement.** If a research query to the configured legal research tool returns few or no results for a regime's breach window, transfer-mechanism requirement, subprocessor-change rule, or any other floor, report what was found and stop. Do NOT fill the gap from web search or model knowledge without asking. Say: "The search returned [N] results from [tool]. Coverage appears thin for [regime / topic]. Options: (1) broaden the search query, (2) try a different research tool, (3) search the web — results will be tagged `[web search — verify]` and should be checked against a primary source before relying, or (4) flag as unverified and stop. Which would you like?" A lawyer decides whether to accept lower-confidence sources.
+> **没有静默补充。** 如果对配置的法律研究工具的搜索查询对于制度的违约窗口、传输机制要求、子处理者变更规则或任何其他底线返回很少或没有结果，报告发现的内容并停止。不要在未询问的情况下从网络搜索或模型知识填充空白。说："搜索从 [工具] 返回了 [N] 个结果。对于 [制度/主题] 的覆盖范围似乎很薄。选项：（1）扩大搜索查询，（2）尝试不同的研究工具，（3）搜索网络——结果将标记为 `[web search — verify]` 并应在依赖之前根据主要来源进行检查，或（4）标记为未验证并停止。你想要哪一个？"律师决定是否接受较低置信度的来源。
 >
-> **Source attribution tiering.** Tag every citation in the review — regulatory floors, SCC versions, adequacy decisions, regulator guidance, case law — with its source. For model-knowledge citations, use one of three tiers rather than a single blanket "verify" tag:
+> **来源归因分层。** 用其来源标记审查中的每个引用——监管底线、SCC 版本、充分性决定、监管机构指导、案例法——对于模型知识引用，使用三个层级之一，而非单一的全局"verify"标记：
 >
-> - `[settled]` — stable, well-known statutory and regulatory references unlikely to have changed (e.g., GDPR Art. 28, Art. 33 72-hour breach notice, SCC Decision 2021/914 by number). Still verify before filing, but lower priority.
-> - `[verify]` — model-knowledge citations that are real but should be verified: specific implementing regulations, regulator guidance, case holdings, adequacy decisions, SCC modules and versions, UK Addendum / IDTA status, thresholds, effective dates.
-> - `[verify-pinpoint]` — pinpoint citations (specific subsection letters, clause numbers within SCCs, paragraph numbers, volume/page references) carry the highest fabrication risk and should ALWAYS be verified against a primary source.
+> - `[settled]` — 稳定、众所周知的法定和监管参考，不太可能改变（例如，GDPR Art. 28、Art. 33 72 小时违约通知、按编号的 SCC Decision 2021/914）。在提交前仍需验证，但优先级较低。
+> - `[verify]` — 真实但应验证的模型知识引用：具体实施法规、监管机构指导、案例裁决、充分性决定、SCC 模块和版本、UK Addendum / IDTA 状态、阈值、生效日期。
+> - `[verify-pinpoint]` — 精确定位引用（具体小节字母、SCC 内的条款号、段落号、卷/页引用）具有最高伪造风险，应始终根据主要来源验证。
 >
-> Tool-retrieved citations keep their source tag (`[Westlaw]`, `[Commission / regulator site]`, or the MCP tool name); web-search citations remain `[web search — verify]`; user-supplied citations remain `[user provided]`. The tiering surfaces the real verification work — a reader who verifies everything verifies nothing. Never strip or collapse the tags.
+> 工具检索的引用保留其来源标记（`[Westlaw]`、`[Commission / regulator site]` 或 MCP 工具名称）；网络搜索引用保持为 `[web search — verify]`；用户提供的引用保持为 `[user provided]`。分层显示真正的验证工作——验证一切的读者什么都没有验证。永远不要剥离或折叠标记。
 
-| Term | Looking for | Playbook field | Common fights |
+| 条款 | 寻找什么 | 剧本字段 | 常见争议 |
 |---|---|---|---|
-| **Roles** | Clear controller/processor designation; matches reality | — | Counterparty labels the relationship (e.g., "joint controller") in a way that doesn't match reality |
-| **Processing scope** | Limited to documented instructions; defined purposes | — | Open-ended scope expanders ("and related purposes") |
-| **Subprocessors** | Current list disclosed, change mechanism defined | Subprocessor changes | Blanket approval vs. veto vs. notice-only |
-| **Security measures** | Annex references specific controls or standards | Security standards | "appropriate technical and organizational measures" with no annex = empty promise |
-| **Breach notification** | Defined trigger ("discovery" vs "confirmation"), defined timeline | Breach notification | Timeline tightness; clock trigger; "without undue delay" is vague |
-| **Audit rights** | Method (report vs. on-site), frequency, notice, cost allocation | Audit rights | On-site audits on tight notice |
-| **International transfers** | Transfer mechanism identified, supplementary measures, transfer impact assessment reference | Transfers | Outdated or missing transfer mechanisms |
-| **Deletion/return** | Timeline post-termination, certification, backup carveout | Deletion on termination | "Commercially reasonable" deletion = ??? |
-| **Liability** | Within MSA cap or separate; carveouts | Liability for data | Uncapped data breach liability = existential |
+| **角色** | 清晰的控制者/处理者指定；符合现实 | — | 对手方以不符合现实的方式标记关系（例如，"联合控制者"） |
+| **处理范围** | 限于书面指示；定义的目的 | — | 开放范围扩展器（"及相关目的"） |
+| **子处理者** | 当前列表已披露，变更机制已定义 | Subprocessor changes | 全权批准 vs. 否决 vs. 仅通知 |
+| **安全措施** | 附件引用具体控制或标准 | Security standards | "适当的技术和组织措施"没有附件 = 空头承诺 |
+| **违约通知** | 定义触发条件（"发现" vs "确认"），定义时间线 | Breach notification | 时间线紧度；时钟触发条件；"无不合理延迟"是模糊的 |
+| **审计权** | 方式（报告 vs. 现场），频率，通知，费用分配 | Audit rights | 短通知的现场审计 |
+| **国际传输** | 传输机制已识别，补充措施，传输影响评估引用 | Transfers | 过时或缺失的传输机制 |
+| **删除/归还** | 终止后时间线，认证，备份豁免 | Deletion on termination | "商业上合理"的删除 = ??? |
+| **责任** | 在 MSA 上限内或单独；豁免 | Liability for data | 不上限的数据违约责任 = 存在性风险 |
 
-### When we're the processor: defensive review
+### 当我们是处理者时：防御性审查
 
-Customer DPAs try to push operational burden onto us. For each clause below, compare the customer's ask to the playbook. Where the customer's ask is outside the playbook, push back to the team's standard position (from the config CLAUDE.md) and be ready to fall back to the acceptable position.
+客户 DPA 试图将运营负担推给我们。对于以下每个条款，将客户的要求与剧本进行比较。当客户的要求超出剧本时，推回到团队的标准立场（来自配置 CLAUDE.md）并准备好退回到可接受立场。
 
-| Clause | Risk | Research / playbook lookup |
+| 条款 | 风险 | 研究/剧本查找 |
 |---|---|---|
-| Subprocessor approval right (veto) | Can't add infrastructure without customer-by-customer approval | Apply playbook position on subprocessor changes |
-| On-site audit on short notice | Unworkable at scale | Apply playbook position on audit rights |
-| Aggressive breach notification window | Often demands notice before we know what happened | Research the regulatory floor for each applicable regime (cite primary sources); compare to playbook position |
-| Hard data residency (single country/DC) | May not match architecture | Apply playbook position on data location; confirm what we can actually commit to |
-| Processor liability uncapped | Bet-the-company | Apply playbook position on liability for data |
-| Customer may issue binding "instructions" | Open-ended operational control | Define instructions as "documented in the Agreement or agreed in writing" |
-| Deletion on very short timeline | Backup and log retention makes this impossible | Apply playbook position on deletion on termination; document backup rotation carveout |
+| 子处理者批准权（否决） | 无法在不逐客户批准的情况下添加基础设施 | 应用剧本中关于子处理者变更的立场 |
+| 短通知现场审计 | 规模上不可行 | 应用剧本中关于审计权的立场 |
+| 激进的违约通知窗口 | 通常要求在我们知道发生了什么之前通知 | 研究每个适用制度的监管底线（引用主要来源）；与剧本立场比较 |
+| 硬数据驻留（单一国家/DC） | 可能不匹配架构 | 应用剧本中关于数据位置的立场；确认我们实际可以承诺什么 |
+| 处理者责任不上限 | 公司存亡 | 应用剧本中关于数据责任的立场 |
+| 客户可以发出约束性"指示" | 开放式运营控制 | 将指示定义为"协议中记录或书面同意的内容" |
+| 很短时间线内删除 | 备份和日志保留使这不可能 | 应用剧本中关于终止时删除的立场；记录备份轮换豁免 |
 
-### When we're the controller: protective review
+### 当我们是控制者时：保护性审查
 
-Vendor DPAs try to give us nothing. For each clause below, compare to the controller-side playbook.
+供应商 DPA 试图什么都不给我们。对于以下每个条款，与控制者侧剧本比较。
 
-| Clause | Gap | Research / playbook lookup |
+| 条款 | 差距 | 研究/剧本查找 |
 |---|---|---|
-| No subprocessor list | Don't know who touches our data | Require published current list + advance notice per playbook |
-| "Industry standard security" | Means nothing | Require annex with specific controls, or reference to a named standard (e.g., SOC 2, ISO 27001) |
-| No breach notification timeline | They tell us whenever | Research applicable regulatory floor; require playbook position |
-| No audit rights at all | Can't verify anything | Require at minimum an independent audit report per playbook |
-| Vendor can use data for "service improvement" | Potential training on our data | Strike; processing limited to providing the service to us |
-| No international transfer mechanism | No lawful transfer mechanism | **Research the currently operative transfer mechanism** for the corridor in question (origin/destination jurisdictions, applicable regime, any adequacy decision, any supplementary measures). Cite primary sources and verify currency. |
-| No deletion commitment | Data lives forever | Require playbook position on deletion + certification on request |
+| 没有子处理者列表 | 不知道谁接触我们的数据 | 要求发布当前列表 + 按剧本的提前通知 |
+| "行业标准安全" | 没有任何意义 | 要求附带具体控制的附件，或引用命名标准（例如，SOC 2、ISO 27001） |
+| 没有违约通知时间线 | 他们随时告诉我们 | 研究适用的监管底线；要求剧本立场 |
+| 完全没有审计权 | 无法验证任何内容 | 要求至少按剧本的独立审计报告 |
+| 供应商可以将数据用于"服务改进" | 可能在我们的数据上训练 | 删除；处理仅限于向我们提供服务 |
+| 没有国际传输机制 | 没有合法的传输机制 | **研究相关通道（起始/目的地司法管辖区、适用制度、任何充分性决定）的当前有效传输机制**。引用主要来源并验证时效性。 |
+| 没有删除承诺 | 数据永远存在 | 要求剧本中关于删除的立场 + 应请求的认证 |
 
-## Consistency check: privacy policy
+## 一致性检查：隐私政策
 
-The DPA you sign can't promise something the privacy policy doesn't cover, and vice versa.
+你签署的 DPA 不能承诺隐私政策未涵盖的内容，反之亦然。
 
-- If the DPA commits to processing only for purposes X, Y, Z — does the privacy policy list those purposes?
-- If the privacy policy says "we never sell data" — does any DPA clause look like a sale under CCPA?
-- If the privacy policy names specific subprocessor categories — does the DPA subprocessor list match?
+- 如果 DPA 承诺仅出于 X、Y、Z 目的处理——隐私政策是否列出这些目的？
+- 如果隐私政策说"我们永不出售数据"——是否有任何 DPA 条款在 CCPA 下看起来像出售？
+- 如果隐私政策命名了特定子处理者类别——DPA 子处理者列表是否匹配？
 
-Flag mismatches. They're usually the privacy policy being stale, not the DPA being wrong, but someone needs to fix one of them.
+标记不匹配。通常隐私政策过时而非 DPA 有误，但需要有人修复其中一个。
 
-## Redline granularity
+## 红线粒度
 
-**Edit at the smallest possible granularity.** A redline is a negotiation artifact, not a rewrite. Wholesale clause replacement signals "we threw out your drafting" — it's aggressive, it forces the counterparty to re-read the whole clause, and it discards the parts of their drafting that were fine. Surgical redlines — strike a word, insert a phrase, restructure a subclause — signal "we have specific asks" and are faster to read, understand, and accept.
+**以最小可能粒度编辑。** 红线是谈判产物，而非重写。整条替换发出"我们扔掉了你的草案"的信号——它激进、迫使对手方重新阅读整个条款、丢弃他们草案中没问题的部分。精准红线——删除一个词、插入一个短语、重构一个子条款——发出"我们有具体要求"的信号，更快阅读、理解和接受。
 
-Default to the smallest edit that achieves the playbook position:
-- Replace a **word** before a phrase. ("twelve (12)" → "twenty-four (24)")
-- Replace a **phrase** before a sentence. ("paid by the Buyer" → "paid and payable by the Buyer")
-- Restructure a **subclause** before replacing the sentence. (Add "(a)" and "(b)" to split a compound condition.)
-- Replace a **sentence** before replacing the clause.
-- Only replace a **whole clause** when the counterparty's version is so far from your position that surgical edits would be harder to read than a fresh draft — and when you do, say so in the transmittal: "We've replaced §8.2 rather than marking it up because the changes were extensive. Happy to walk you through the delta."
+默认使用实现剧本立场的最小编辑：
+- 在替换短语之前替换一个**词**。（"twelve (12)" → "twenty-four (24)"）
+- 在替换句子之前替换一个**短语**。（"paid by the Buyer" → "paid and payable by the Buyer"）
+- 在替换整个条款之前重构一个**子条款**。（添加"(a)"和"(b)"拆分复合条件。）
+- 在替换整个条款之前替换一个**句子**。
+- 仅当对手方版本离你的立场如此之远以至于精准编辑比全新草案更难阅读时才替换**整个条款**——当你这样做时，在传达中说明："我们替换了 §8.2 而非标记，因为更改很广泛。很乐意带你了解差异。"
 
-When in doubt, smaller. A client who receives a surgical redline trusts that you read carefully. A client who receives a wholesale replacement wonders whether you read at all.
+有疑问时，更小。收到精准红线的客户相信你仔细阅读了。收到整条替换的客户怀疑你是否读过。
 
-## Output
+## 输出
 
-Prepend the work-product header from `~/.claude/plugins/config/claude-for-legal/privacy-legal/CLAUDE.md` `## Outputs` (it differs by user role — see `## Who's using this`).
+在前面加上 `~/.claude/plugins/config/claude-for-legal/privacy-legal/CLAUDE.md` `## Outputs` 中的工作产品标题（因用户角色而异——见 `## Who's using this`）。
 
 ```markdown
 [WORK-PRODUCT HEADER — per plugin config ## Outputs]
 
-# DPA Review: [Counterparty]
+# DPA 审查：[对手方]
 
-**Direction:** [We are processor / We are controller]
-**Reviewed:** [date]
-**Attached to:** [MSA / standalone]
-
----
-
-## Bottom line
-
-[Two sentences. Can we sign? What has to change?]
-
-**Issues:** [N]🟢 [N]🟡 [N]🟠 [N]🔴
+**方向：** [我们是处理者 / 我们是控制者]
+**已审查：** [日期]
+**附件：** [MSA / 独立]
 
 ---
 
-## Term-by-term
+## 底线
 
-[For each core term, use a standard deviation-memo format: what the
-counterparty's DPA says, what our playbook says, the gap, the risk, and the
-proposed redline language. Keep each term to a short self-contained block so a
-reviewer can skim.]
+[两句话。我们可以签署吗？必须改变什么？]
 
----
-
-## Privacy policy consistency
-
-[🟢 Consistent | 🟡 Flags: list]
+**问题：** [N]🟢 [N]🟡 [N]🟠 [N]🔴
 
 ---
 
-## Recommended redlines
+## 逐条
 
-[Consolidated — ready to send back]
+[对于每个核心条款，使用标准偏差备忘录格式：对手方 DPA 的内容、我们的剧本内容、差距、风险和建议的红线语言。保持每个条款为简短自含块，便于审查者浏览。]
 
 ---
 
-## If they won't move
+## 隐私政策一致性
 
-[For each issue: the fallback from the config CLAUDE.md, or escalation routing if no
-fallback exists]
+[🟢 一致 | 🟡 标记：列表]
+
+---
+
+## 建议红线
+
+[整合——准备发回]
+
+---
+
+## 如果他们不让步
+
+[对于每个问题：来自配置 CLAUDE.md 的退路，或如果没有退路则升级路由]
 ```
 
-## International transfers note
+## 国际传输备注
 
-If the DPA contemplates cross-border data transfers, **research the currently operative transfer mechanism requirements** for the applicable corridor(s). For each origin/destination pair, identify: the applicable regime, whether any adequacy decision is in force, which transfer mechanism is required or available (e.g., Standard Contractual Clauses and their applicable version/module, UK Addendum or IDTA, BCRs, derogations), whether a transfer impact assessment or equivalent is required, and what supplementary measures may be needed. Cite primary sources (regulation, Commission decision, regulator guidance, controlling case law) with pinpoint cites and verify currency — adequacy decisions, SCC versions, and required supplementary measures change through new Commission decisions, court rulings, and regulator guidance. Flag uncertainty for attorney verification.
+如果 DPA 涉及跨境数据传输，**研究适用通道的当前有效传输机制要求**。对于每个起始/目的地对，识别：适用制度、是否有充分性决定生效、需要或可用什么传输机制（例如，Standard Contractual Clauses 及其适用版本/模块、UK Addendum 或 IDTA、BCR、减损）、是否需要传输影响评估或等效物，以及可能需要什么补充措施。引用主要来源（法规、委员会决定、监管机构指导、控制性案例法）并附精确定位引用，验证时效性——充分性决定、SCC 版本和必需的补充措施通过新委员会决定、法院裁决和监管机构指导而改变。标记不确定性以供律师验证。
 
-If a transfer mechanism is missing and there is an international transfer, that is a 🔴 — there is no lawful transfer mechanism.
+如果传输机制缺失且存在国际传输，那是 🔴——没有合法的传输机制。
 
-## Gate: signing a DPA
+## 关卡：签署 DPA
 
-Reviewing a DPA is research. *Signing* it — or instructing someone to countersign on our behalf — is the consequential act.
+审查 DPA 是研究。*签署*它——或指示某人代表我们会签——是有后果的行为。
 
-**Before proceeding to sign or countersign a DPA (including returning an executed version, consenting to automatic execution on a counterparty platform, or instructing a signatory to execute):** Read `## Who's using this` in `~/.claude/plugins/config/claude-for-legal/privacy-legal/CLAUDE.md`. If the Role is Non-lawyer:
+**在继续签署或会签 DPA 之前（包括返回已执行版本、同意在对手方平台上自动执行，或指示签署人执行）：** 阅读 `~/.claude/plugins/config/claude-for-legal/privacy-legal/CLAUDE.md` 中的 `## Who's using this`。如果角色是非律师：
 
-> Signing a DPA is a legal act — it binds the company to specific data-protection obligations that flow to regulators and data subjects. Have you reviewed this with an attorney? If yes, proceed. If no, here's a brief to bring to them:
+> 签署 DPA 是法律行为——它使公司受约束于特定数据保护义务，这些义务流向监管机构和数据主体。你是否已与律师审查此内容？如果是，继续。如果否，这是带给他们的简报：
 >
-> [Generate a 1-page summary: counterparty, direction (we are processor / controller), the terms that deviate from the playbook and how they were resolved, any open fallback decisions, and the three things to ask the attorney before executing.]
+> [生成 1 页摘要：对手方、方向（我们是处理者/控制者）、偏离剧本的条款及其解决方式、任何未决的退路决定，以及执行前要问律师的三件事。]
 >
-> If you need to find a licensed attorney, solicitor, barrister, or other authorised legal professional in your jurisdiction: your professional regulator's referral service is the fastest starting point (state bar in the US, SRA/Bar Standards Board in England & Wales, Law Society in Scotland/NI/Ireland/Canada/Australia, or your jurisdiction's equivalent).
+> 如果你需要找到许可律师、事务律师、大律师或其他授权法律专业人士：你专业监管机构的推荐服务是最快的起点（美国的州律协、英格兰和威尔士的 SRA/律师标准委员会、苏格兰/NI/爱尔兰/加拿大/澳大利亚的 Law Society，或你司法管辖区的同等机构）。
 
-Do not proceed past this gate without an explicit yes.
+在没有明确是的情况下，不要越过此关卡。
 
-## Close with the next-steps decision tree
+## 以下一步决策树结束
 
-End with the next-steps decision tree per CLAUDE.md `## Outputs`. Customize the options to what this skill just produced — the five default branches (draft the X, escalate, get more facts, watch and wait, something else) are a starting point, not a lock-in. The tree is the output; the lawyer picks.
+根据 CLAUDE.md `## Outputs` 以下一步决策树结束。根据此 skill 刚刚生成的内容自定义选项——五个默认分支（起草 X、升级、获取更多事实、观察等待、其他）是起点，而非锁定。树就是输出；律师选择。
 
-## What this skill does not do
+## 此 skill 不做什么
 
-- It doesn't draft a DPA from scratch. If the answer is "use our template," pull the template from the seed docs path in the config CLAUDE.md.
-- It doesn't do the Transfer Impact Assessment itself — it flags when one is needed.
-- It doesn't decide whether to accept terms outside the fallbacks. It routes those per the escalation table.
+- 它不从零起草 DPA。如果答案是"使用我们的模板"，从配置 CLAUDE.md 中的种子文档路径拉取模板。
+- 它不做传输影响评估本身——它标记何时需要。
+- 它不决定是否接受退路之外的条款。它根据升级表路由这些。

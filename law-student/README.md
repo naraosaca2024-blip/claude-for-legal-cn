@@ -1,16 +1,22 @@
+<!--
+This file is a Chinese translation of the original by Anthropic PBC.
+Original: https://github.com/anthropics/claude-for-legal
+Licensed under Apache License 2.0
+-->
+
 # Law Student Plugin
 
-Learning mode, not answer mode. Socratic drilling that asks YOU questions and pushes back on sloppy reasoning. Case briefing, outline building, flashcards, IRAC grading, cold-call prep, writing feedback that never rewrites for you, and exam forecasting from past professor exams. Calibrated to you — your classes, your bar jurisdiction, whether you want to be drilled or scaffolded.
+学习模式，而非答案模式。苏格拉底式提问训练——它问你问题，质疑不严谨的推理。案例摘要、大纲构建、抽认卡、IRAC 评分、课堂提问准备、从不重写的写作反馈，以及根据教授过往考试进行的考试预测。根据你的情况校准——你的课程、你的律师资格考试司法管辖区、你想要被提问还是被解释。
 
-**Every output is a study scaffold, not a model answer. The plugin structures your thinking, drills you Socratically, and flags what you got wrong. It doesn't write the outline, the brief, or the essay for you — that would defeat the purpose. Citations in study materials are tagged for verification.**
+**每个输出都是学习支架，而非标准答案。Plugin 构建你的思维框架，以苏格拉底式训练你，标记你出错的地方。它不会替你写大纲、摘要或论文——这会违背目的。学习材料中的引用都标记了需要验证。**
 
-## Who this is for
+## 适用对象
 
-Law students. 1L through bar prep.
+法学院学生。从 1L 到律师资格考试准备。
 
-## First run: cold-start
+## 首次运行：冷启动
 
-This one's about you, not an org. Your classes, your bar jurisdiction, your learning style — drill-me vs. explain-to-me. Bring materials: past outlines, graded essays, old exams (especially same-professor), MBE sets, syllabi, papers. Ten to twenty items is the target; below that the practice profile is flagged `LIMITED DATA` and downstream skills will be thinner until more is added.
+这是关于你的，而不是某个组织。你的课程、你的律师资格考试司法管辖区、你的学习风格——训练我 vs 解释给我。带上材料：过往大纲、评分论文、旧考试（特别是同一教授的）、MBE 题集、教学大纲、论文。目标是 10 到 20 项；低于这个数量，执业档案会标记为 `LIMITED DATA`，后续技能会较薄弱，直到添加更多内容。
 
 ```
 /law-student:cold-start-interview
@@ -18,88 +24,87 @@ This one's about you, not an org. Your classes, your bar jurisdiction, your lear
 
 ## Skills
 
-Every skill is invoked as `/law-student:<skill-name>`.
+每个 skill 都以 `/law-student:<skill-name>` 调用。
 
-| Skill | Does |
+| Skill | 功能 |
 |---|---|
-| `/law-student:cold-start-interview` | About-you interview + materials intake — classes, bar, learning style, materials |
-| `/law-student:socratic-drill [subject]` | Socratic drilling — it asks, you answer, it pushes back. Does not give the answer. |
-| `/law-student:case-brief [case]` | Case brief in your preferred format |
-| `/law-student:outline-builder [subject]` | Build or extend an outline in your format from class materials |
-| `/law-student:bar-prep-questions [subject]` | Bar prep questions, MBE or essay — jurisdiction-aware (UBE / NextGen / state-specific), flags majority/UBE vs. your state's rule |
-| `/law-student:flashcards [subject]` | Generate or drill flashcards; Leitner-style buckets; per-subject markdown; `--session <n>` mode |
-| `/law-student:study-plan` | Build or update a long-term study plan — phases, subjects by weakness, adaptive daily schedule from session history |
-| `/law-student:session <subject> <n>` | Focused N-question session on a subject; updates the plan with results |
-| `/law-student:irac-practice` | Grade your IRAC essay — structure, issues, rules, analysis. Tracks patterns across sessions. Never rewrites. |
-| `/law-student:cold-call-prep [case]` | Prep for cold-call — predict professor questions and drill them |
-| `/law-student:legal-writing [path-or-paste]` | Structural feedback on any draft — never rewrites, ever |
-| `/law-student:exam-forecast [class]` | Analyze past exams from same professor; forecast upcoming |
+| `/law-student:cold-start-interview` | 关于你的访谈 + 材料收集——课程、律师资格考试、学习风格、材料 |
+| `/law-student:socratic-drill [subject]` | 苏格拉底式训练——它提问，你回答，它质疑。不给答案。 |
+| `/law-student:case-brief [case]` | 你偏好格式的案例摘要 |
+| `/law-student:outline-builder [subject]` | 根据课程材料构建或扩展你格式的大纲 |
+| `/law-student:bar-prep-questions [subject]` | 律师资格考试准备问题，MBE 或论文——司法管辖区感知（UBE / NextGen / 州特定），标记多数/UBE 规则与你所在州规则的区别 |
+| `/law-student:flashcards [subject]` | 生成或训练抽认卡；莱特纳式分组；每科目 markdown；`--session <n>` 模式 |
+| `/law-student:study-plan` | 构建或更新长期学习计划——阶段、按薄弱科目划分、根据会话历史的自适应每日安排 |
+| `/law-student:session <subject> <n>` | 针对某科目的 N 个问题聚焦会话；用结果更新计划 |
+| `/law-student:irac-practice` | 评分你的 IRAC 论文——结构、争点、规则、分析。追踪跨会话模式。从不重写。 |
+| `/law-student:cold-call-prep [case]` | 课堂提问准备——预测教授问题并训练它们 |
+| `/law-student:legal-writing [path-or-paste]` | 对任何草稿的结构性反馈——从不重写，永远不 |
+| `/law-student:exam-forecast [class]` | 分析同一教授的过往考试；预测即将到来的考试 |
 
-## What "learning mode" means
+## "学习模式"的含义
 
-Several skills here (socratic-drill, case-brief in drill-me mode, cold-call-prep, irac-practice, legal-writing) are deliberately built to *not* give you the answer or write the thing for you. The point is that you learn by doing. If you want an answer or a draft, use a different tool. This plugin is for the struggle.
+这里的几个 skill（socratic-drill、训练模式下的 case-brief、cold-call-prep、irac-practice、legal-writing）被刻意设计为*不*给你答案或替你写东西。关键是你通过做来学习。如果你想要答案或草稿，使用其他工具。这个 plugin 是为了让你挣扎。
 
-**legal-writing is the strictest.** It reads your draft and tells you what's weak, but does not rewrite. Asking it to rewrite will return a polite refusal plus an offer of more specific structural feedback. This is a feature.
+**legal-writing 是最严格的。** 它读你的草稿，告诉你哪里薄弱，但不重写。要求它重写会得到礼貌的拒绝，并提供更具体的结构性反馈。这是一个特性。
 
-**outline-builder and case-brief follow the same rule in a softer form.** Outline builder scaffolds — topic tree, sub-topic slots, case placeholders — and asks Socratic questions as you fill the rules from your own notes and casebook. It won't generate a populated outline from a syllabus alone. Case brief works the same way in every mode (drill-me and explain-to-me both): the skill gives the template and pushes back on what you wrote; it doesn't brief the case for you. If you paste the case text, it can extract the court's own language into the slots — that's pointing at the source, not writing for you.
+**outline-builder 和 case-brief 以更柔和的形式遵循相同规则。** Outline builder 提供支架——主题树、子主题槽、案例占位符——并在你根据自己的笔记和案例书填充规则时提出苏格拉底式问题。它不会仅根据教学大纲生成完整的大纲。Case brief 在每个模式下（训练我和解释给我）都以相同方式工作：skill 给出模板并质疑你写的内容；它不会替你摘要案例。如果你粘贴案例文本，它可以将法院自己的语言提取到槽中——这是指向来源，而非替你写。
 
-## Academic integrity
+## 学术诚信
 
-Before using this plugin on any graded work — take-home exams, graded writing assignments, journal notes, papers — check your school's honor code and your professor's syllabus policy on AI tools. Many schools prohibit or restrict AI use on graded work, and the rules vary by course and professor. This plugin is designed for study and practice; using it where your school prohibits it is an honor code violation, and the consequences are yours, not the tool's. When in doubt, ask your professor in writing.
+在任何评分作业中使用此 plugin 之前——带回家考试、评分写作作业、期刊笔记、论文——检查你学校的荣誉守则和你教授关于 AI 工具的教学大纲政策。许多学校禁止或限制在评分作业中使用 AI，规则因课程和教授而异。此 plugin 设计用于学习和练习；在你学校禁止的地方使用它是违反荣誉守则的，后果由你承担，而不是工具的。有疑问时，书面询问你的教授。
 
-The learning-mode skills here (socratic-drill, irac-practice, legal-writing, cold-call-prep) are deliberately designed to not give you the answer or write the thing for you — that's the pedagogy. It's also the design assumption behind treating some permitted uses (unassisted-looking practice drilling) differently from prohibited ones (ghostwriting a graded memo). Don't work around the guardrails.
+这里的学习模式技能（socratic-drill、irac-practice、legal-writing、cold-call-prep）被刻意设计为不给你答案或替你写东西——这是教学法。这也是将某些允许的使用（看起来无辅助的练习训练）与禁止的使用（代写评分备忘录）区别对待的设计假设。不要绕过护栏。
 
-## Confidence markers
+## 置信度标记
 
-Content-generating skills flag their confidence inline. A rule statement or card without a marker is something the skill is confident on (but still not a substitute for your own source-checking before an exam). Markers used across the plugin:
+生成内容的 skill 内联标记它们的置信度。没有标记的规则陈述或卡片是 skill 置信的内容（但仍不能替代你在考试前自己的来源检查）。整个 plugin 使用的标记：
 
-- `[VERIFY: claim — check source]` — stated as likely correct, but you should confirm against your outline, casebook, prep course, or the primary source before relying on it. Used liberally in bar-prep-questions, case-brief, flashcards, legal-writing, irac-practice.
-- `[UNCERTAIN: specific reason]` — the skill is not confident on this specific call (minority rule, debatable issue-spot, jurisdiction the skill doesn't know well). Make your own judgment; check the source.
-- `[GAP — fill from class notes]` — outline-builder marker for a topic where the skill has no reliable source and won't invent a rule. You fill it from your notes.
-- `[NEEDS CASES — rule stated but no illustrating case]` — outline-builder marker where the rule is there but the case illustration is missing.
-- `[CHECK CLASS NOTES — professor may have emphasized something here]` — outline-builder marker for areas where professor-specific emphasis matters and the skill can't know it.
-- `[EXCEPTION UNCLEAR — casebook mentions an exception, find the rule]` — outline-builder marker for a known exception with unresolved detail.
-- `[UNCERTAIN — framing]` — exam-forecast marker noting that a forecast is a weighting for study time, not a prediction.
+- `[VERIFY: 主张——检查来源]` ——陈述为可能正确，但你应该在依赖之前对照你的大纲、案例书、预备课程或主要来源确认。在 bar-prep-questions、case-brief、flashcards、legal-writing、irac-practice 中大量使用。
+- `[UNCERTAIN: 具体原因]` ——skill 对这个具体判断不置信（少数规则、有争议的争点识别、skill 不熟悉的司法管辖区）。自己判断；检查来源。
+- `[GAP ——从课堂笔记填充]` ——outline-builder 标记，skill 对某个主题没有可靠来源且不会发明规则。你从笔记填充它。
+- `[NEEDS CASES ——陈述规则但没有说明性案例]` ——outline-builder 标记，规则存在但案例说明缺失。
+- `[CHECK CLASS NOTES ——教授可能在这里强调了某些内容]` ——outline-builder 标记，教授特定强调很重要而 skill 无法知道的领域。
+- `[EXCEPTION UNCLEAR ——案例书提到了例外，找到规则]` ——outline-builder 标记，已知例外但细节未解决。
+- `[UNCERTAIN ——框架]` ——exam-forecast 标记，注意预测是学习时间的权重分配，而非预言。
 
-Trust the flags more than the absence of flags — an unflagged rule is something the skill is confident on, but exam prep still demands source-checking.
+信任标记多于没有标记——没有标记的规则是 skill 置信的内容，但考试准备仍需要来源检查。
 
-## Connectors and citation verification
+## 连接器和引用验证
 
-**Connect a research tool first — the citation guardrails depend on it.** Without one, every cite is tagged `[verify]` and the reviewer note above each deliverable records that sources weren't verified. The plugin works either way; it just does more of the verification for you when a research tool is connected.
+**首先连接研究工具——引用护栏依赖它。** 没有它，每个引用都标记为 `[verify]`，每个交付物上方的审稿人注释记录来源未验证。Plugin 两种方式都工作；当连接研究工具时，它只是为你做更多验证。
 
-The legal research connectors in this plugin aren't just data sources — they're the difference between a verified citation and a citation you have to check. A citation retrieved through **CourtListener** (U.S. court opinions, PACER dockets, citation verification) or **Descrybe** (primary-law search, citation treatment, quoted-language verification) is tagged with its source and can be traced back. A citation from the model's knowledge or from web search is tagged `[verify]` or `[verify-pinpoint]` and should be checked against a primary source before anyone relies on it. The plugin tiers its citations so your verification time goes where it matters.
+此 plugin 中的法律研究连接器不仅仅是数据源——它们是经验证引用和你必须检查的引用之间的区别。通过 **CourtListener**（美国法院意见、PACER 案件记录、引用验证）或 **Descrybe**（基本法律搜索、引用对待、引述语言验证）检索的引用标记有其来源，可以追溯。来自模型知识或网络搜索的引用标记为 `[verify]` 或 `[verify-pinpoint]`，应该在任何人依赖之前对照主要来源检查。Plugin 对引用分层，使你的验证时间用在重要的地方。
 
-## Storage
+## 存储
 
-Your practice profile is stored at `~/.claude/plugins/config/claude-for-legal/law-student/CLAUDE.md` and survives plugin updates. Everything else is in your working directory:
+你的练习档案存储在 `~/.claude/plugins/config/claude-for-legal/law-student/CLAUDE.md`，在 plugin 更新后保留。其他所有内容都在你的工作目录中：
 
 ```
 law-student/
 ├── flashcards/
-│   └── [subject]/cards.md             # per-subject flashcard decks
+│   └── [subject]/cards.md             # 每科目抽认卡组
 ├── irac-sessions/
 │   └── [student]/
-│       ├── [date]-[topic].md          # individual session feedback
-│       └── tracker.md                 # cross-session pattern tracking
+│       ├── [date]-[topic].md          # 单个会话反馈
+│       └── tracker.md                 # 跨会话模式追踪
 ├── writing-feedback/
 │   └── [student]/
-│       ├── [date]-[assignment].md     # individual session feedback
-│       └── tracker.md                 # cross-session pattern tracking
+│       ├── [date]-[assignment].md     # 单个会话反馈
+│       └── tracker.md                 # 跨会话模式追踪
 └── exam-forecasts/
     └── [class]/
-        └── forecast-[YYYY-MM-DD].md   # versioned forecasts
+        └── forecast-[YYYY-MM-DD].md   # 版本化预测
 ```
 
-## Testing & QA
+## 测试和 QA
 
+## 它如何学习
 
-## How it learns
+你在 `~/.claude/plugins/config/claude-for-legal/law-student/CLAUDE.md` 的学习档案不是静态的——它会随着你使用 plugin 而改进。Skill 会告诉你何时输出使用了你应该调整的默认值。你可以重新运行设置，直接编辑文件，或告诉 skill 记录新立场。
 
-Your study profile at `~/.claude/plugins/config/claude-for-legal/law-student/CLAUDE.md` isn't static — it improves as you use the plugin. Skills tell you when an output used a default you should tune. You can re-run setup, edit the file directly, or tell a skill to record a new position.
+## 注意事项
 
-## Notes
-
-- Drill-me vs. explain-to-me is set at cold-start; switch per session.
-- Case briefs and outlines use YOUR format. If you have existing outlines, point cold-start at them.
-- Bar prep targets your weak subjects from ~/.claude/plugins/config/claude-for-legal/law-student/CLAUDE.md. It will keep coming back to them.
-- Every content-generating skill flags when it's uncertain. Trust the flags more than the absence of flags — an unflagged rule is something I'm confident on; check your source anyway before an exam.
+- 训练我 vs 解释给我在冷启动时设置；可每会话切换。
+- 案例摘要和大纲使用 *你的* 格式。如果你有现有大纲，让冷启动指向它们。
+- 律师资格考试准备针对你在 `~/.claude/plugins/config/claude-for-legal/law-student/CLAUDE.md` 中的薄弱科目。它会持续回到这些科目。
+- 每个生成内容的 skill 在不确定时标记。信任标记多于没有标记——没有标记的规则是我置信的内容；考试前仍要检查你的来源。

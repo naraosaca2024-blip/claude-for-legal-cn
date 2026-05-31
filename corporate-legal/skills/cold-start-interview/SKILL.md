@@ -1,500 +1,501 @@
 ---
 name: cold-start-interview
 description: >
-  House cold-start interview (request list + prior memo), or --new-deal for
-  deal-specific context. Modular: identifies which practice areas apply (M&A,
-  Board & Secretary, Public Company, Entity Management), then asks targeted
-  questions for each active module and writes only the relevant sections to the
-  plugin config. Use on fresh install, when CLAUDE.md still has [PLACEHOLDER]
-  markers, when starting a new deal, or to re-check integrations or refresh a
-  module.
+  公司冷启动访谈（请求清单 + 先前备忘录），或使用 --new-deal 进行交易特定上下文。模块化：识别哪些执业领域适用（M&A、董事会与秘书、上市公司、实体管理），然后针对每个活跃模块询问有针对性的问题，并仅将相关章节写入 plugin 配置。在新安装时、当 CLAUDE.md 仍有 [PLACEHOLDER] 标记时、开始新交易时，或重新检查集成或刷新模块时使用。
 argument-hint: "[--redo | --new-deal | --check-integrations | --module [m&a | board | public | entities]]"
 ---
 
+<!--
+This file is a Chinese translation of the original by Anthropic PBC.
+Original: https://github.com/anthropics/claude-for-legal
+Licensed under Apache License 2.0
+-->
+
+
 # /cold-start-interview
 
-1. Check `~/.claude/plugins/config/claude-for-legal/corporate-legal/CLAUDE.md`. If `--new-deal`, skip to per-deal setup. If `--check-integrations`, skip the interview — re-run only the Part 0 `What's connected?` check and rewrite the `## Available integrations` table in `~/.claude/plugins/config/claude-for-legal/corporate-legal/CLAUDE.md`. When probing: only report ✓ if an MCP tool call actually succeeded. Configured-but-untested connectors should be marked ⚪ with a one-line how-to for confirming. Never report ✓ based on `.mcp.json` declarations alone — that misleads users into thinking something is wired up when it isn't.
-2. Run the interview below (Part 0 first — role + integrations — then modules).
-3. Seed docs: diligence request list + one prior issues memo.
-4. Extract: categories, thresholds, memo format, AI tool config.
-5. Migration: if a populated CLAUDE.md (no `[PLACEHOLDER]` markers) exists at `~/.claude/plugins/cache/claude-for-legal/corporate-legal/*/CLAUDE.md` but not at the config path, copy it to the config path and tell the user what was migrated.
-6. Write `~/.claude/plugins/config/claude-for-legal/corporate-legal/CLAUDE.md` (create parent directories as needed). For `--new-deal`, write `~/.claude/plugins/config/claude-for-legal/corporate-legal/deals/[code]/deal-context.md`.
+1. 检查 `~/.claude/plugins/config/claude-for-legal/corporate-legal/CLAUDE.md`。如果是 `--new-deal`，跳到每个交易设置。如果是 `--check-integrations`，跳过访谈——仅重新运行第 0 部分的"连接了什么？"检查，并重写 `~/.claude/plugins/config/claude-for-legal/corporate-legal/CLAUDE.md` 中的 `## Available integrations` 表。探测时：只有在 MCP 工具调用实际成功时才报告 ✓。已配置但未测试的连接器应标记为 ⚪，并附一行确认方法。永远不要仅基于 `.mcp.json` 声明报告 ✓——这会误导用户以为某些东西已连接，而实际上并没有。
+2. 运行以下访谈（先进行第 0 部分——角色 + 集成——然后是模块）。
+3. 种子文档：尽调请求清单 + 一份先前的问题备忘录。
+4. 提取：类别、阈值、备忘录格式、AI 工具配置。
+5. 迁移：如果在 `~/.claude/plugins/cache/claude-for-legal/corporate-legal/*/CLAUDE.md` 存在已填充的 CLAUDE.md（无 `[PLACEHOLDER]` 标记）但不在配置路径，将其复制到配置路径并告知用户迁移了什么。
+6. 写入 `~/.claude/plugins/config/claude-for-legal/corporate-legal/CLAUDE.md`（根据需要创建父目录）。对于 `--new-deal`，写入 `~/.claude/plugins/config/claude-for-legal/corporate-legal/deals/[code]/deal-context.md`。
 
 ---
 
-## Purpose
+## 目的
 
-Corporate counsel roles vary more than almost any other in-house function. A solo GC at a 50-person startup runs M&A, manages the cap table, and secretaries the board. A corporate counsel at a Fortune 500 might own only §16 filings and the disclosure committee process. This interview finds out which areas are live for you and builds only the relevant practice profile — nothing left blank that doesn't apply.
+公司法律顾问的角色比几乎任何其他内部职能都更多样化。50 人初创公司的独立 GC 负责 M&A、管理股权表并担任董事会秘书。财富 500 强的公司法律顾问可能只负责第 16 条申报和披露委员会流程。此访谈找出哪些领域对你有效，并只构建相关的执业档案——不填写不适用的空白部分。
 
-## Cold-start check
+## 冷启动检查
 
-Read `~/.claude/plugins/config/claude-for-legal/corporate-legal/CLAUDE.md`:
-- **Does not exist** → start the interview.
-- **Contains `<!-- SETUP PAUSED AT: -->`** → greet the user and offer to resume from that section.
-- **Contains `[PLACEHOLDER]` markers but no pause comment** → the template was never completed; offer to start fresh or resume from wherever the placeholders begin.
-- **Populated (no placeholders, no pause comment)** → already configured; skip unless `--redo` or `--module [name]`.
+读取 `~/.claude/plugins/config/claude-for-legal/corporate-legal/CLAUDE.md`：
+- **不存在** → 开始访谈。
+- **包含 `<!-- SETUP PAUSED AT: -->`** → 问候用户并提供从该部分恢复的选项。
+- **包含 `[PLACEHOLDER]` 标记但无暂停注释** → 模板从未完成；提供重新开始或从占位符开始的地方恢复。
+- **已填充（无占位符，无暂停注释）** → 已配置；跳过，除非使用 `--redo` 或 `--module [name]`。
 
-The template structure lives at `${CLAUDE_PLUGIN_ROOT}/CLAUDE.md` — use it as the section scaffold. Write the completed practice profile to the config path, creating parent directories as needed.
+模板结构位于 `${CLAUDE_PLUGIN_ROOT}/CLAUDE.md`——将其用作章节脚手架。将完成的执业档案写入配置路径，根据需要创建父目录。
 
-If a CLAUDE.md exists at the old cache path `~/.claude/plugins/cache/claude-for-legal/corporate-legal/*/CLAUDE.md` but not at the config path, copy it forward to the config path before proceeding.
+如果在旧缓存路径 `~/.claude/plugins/cache/claude-for-legal/corporate-legal/*/CLAUDE.md` 存在 CLAUDE.md 但不在配置路径，在继续之前将其复制到配置路径。
 
-- `--redo` — full re-interview, overwrites all sections
-- `--module [m&a | board | public | entities]` — add or refresh a single module
-- `--new-deal` — skip house setup, go straight to per-deal context (M&A module only)
-
----
-
-## Check for the shared company profile
-
-Look for `~/.claude/plugins/config/claude-for-legal/company-profile.md`.
-
-- **If it exists:** Read it. Show a one-line confirmation: "You're [name], [practice setting], at [company], [industry], operating in [jurisdictions]. Right? (Or say 'update' to change the shared profile.)" If confirmed, skip the company questions — go straight to the plugin-specific ones.
-- **If it doesn't exist:** You'll be the first plugin this user set up. After the orientation and fork, ask the company questions and write them to the shared profile (per the template at `references/company-profile-template.md` in the plugin root), then continue with the plugin-specific questions. Tell the user: "I've saved your company profile — the other legal plugins will read it and skip these questions."
-
-The company questions that belong in the shared profile (and should NOT be re-asked if it exists): practice setting, company name, industry, what-you-sell, size, jurisdictions, regulators, risk appetite, escalation names. The plugin-specific questions (playbook positions, review framework, house style, supervision model, etc.) stay per-plugin.
-
-## Install scope check
-
-Before the orientation, if you notice the working directory is inside a project (not the user's home directory), flag it. Say once:
-
-> **Heads up — it looks like this plugin may be project-scoped, which means I can only read files in [current directory]. If you'll want me to read documents from elsewhere (Downloads, Documents, Dropbox), install user-scoped instead — see QUICKSTART.md. You can continue with project scope, but you'll need to move files into this folder.**
-
-Ask the user to confirm before proceeding: continue with project scope, or pause to reinstall user-scoped. If the working directory *is* the user's home directory, skip this check silently.
-
-## Before the interview starts
-
-Before asking anything else, show the fork-first preamble — 3-4 short lines, no longer:
-
-> **`corporate-legal` is for people who support M&A deals, board and corporate governance, public company compliance, and entity management.** Not your area? `/legal-builder-hub:related-skills-surfacer`.
->
-> **2 minutes** gets you your role, practice setting, jurisdiction, and module selection (M&A, board, public, entity management), plus working defaults for materiality thresholds, issues-memo format, board-minutes format, and disclosure-schedule format. **15 minutes** adds your real materiality thresholds, house consent and minutes formats from seed documents, your entity list and compliance cadence, deal-team briefing cadence, and escalation matrix.
->
-> Quick or full? (Upgrade any time with `/corporate-legal:cold-start-interview --full`.)
-
-Wait for the user's pick before showing anything else.
-
-<!-- COLLATERAL LINKS: when onboarding collateral exists, prepend a line above the preamble:
-     "Want a walkthrough first? [Watch the 3-minute intro](URL) or [read the getting-started guide](URL), then come back and run /corporate-legal:cold-start-interview." -->
-
-## After the user picks quick or full
-
-Once the user has chosen, orient them before the first interview question:
-
-> "This plugin maintains your practice profile (materiality thresholds, consent style, board format), per-deal folders with diligence grids, closing checklists, disclosure schedules, and a compliance calendar. It supports your corporate legal practice — M&A diligence, board consents, entity compliance, closing checklists — in your house format. This setup interview learns which of those areas are live for you and how you actually run them. It writes that into a plain-text file the plugin's skills read from every time. Everything you answer can be changed later. Once it's done, the plugin will work the way you work, not the way a generic template does."
->
-> Then: "Ready? A few quick questions first, then we'll go deeper on the modules that apply."
-
-**Why this matters.** Every command in this plugin reads from the configuration this interview writes. A generic configuration gives you generic output — a default materiality threshold, a default issues-memo format, a default consent style, a default closing-checklist structure. Telling the plugin how you actually run M&A, board, public, or entity work is what makes the difference between "a corporate AI tool" and "a tool that works the way you work." The more specific your answers — your real materiality cuts, your real resolution language, your real house format — the more the outputs will look like they came from your desk.
-
-**Fresh professional profile.** Setup builds a fresh professional profile from the user's answers and documents they explicitly share. It does not read the user's personal Claude history, unrelated conversations, or their home-directory CLAUDE.md. If something relevant surfaces in the current conversation context (e.g., they mentioned the company earlier), ask before using it — do not fold anything personal into the corporate practice profile unless the user types it or approves it.
-
-Corollary: the interview's inputs are the user's typed answers and documents they explicitly share. Do not pull from ambient context, prior sessions, or user memory to fill in gaps.
-
-## Interview pacing
-
-- **Assume the answer exists somewhere.** When a question asks for information that's probably written down somewhere — company description, playbook, escalation matrix, style guide, handbook, jurisdiction list, matter portfolio — prompt for a link or a paste before asking the user to type it from memory. "Paste a link or a doc, or give me the short version" is the default ask for anything that's more than a sentence. An interviewer who makes people re-type what they've already written has failed the first job of an interviewer.
-- **Batch size — count subparts.** "Never ask more than 2-3 questions in one turn" means 2-3 *answerable prompts*, counting subparts. One question with 5 subparts is 5 questions. The test: can the user answer without scrolling? If the questions don't fit on one screen, it's too many. Prefer structured tap-through questions where possible — they don't require scrolling or typing.
-
-**Pause for real answers.** Some questions are quick (entity type, exchange, fiscal year end). Others need the user to type, describe, or upload (prior issues memo, board minutes, consent precedent, org chart). When a question needs more than a quick tap:
-
-- **Ask and wait.** Say explicitly: "This one needs a typed answer — I'll wait." Do not move to the next question until the user responds.
-- **For uploads (issues memo, minutes, consents, org chart):** "Paste the contents, share a file path, or say 'skip for now.' If you skip, I'll flag the gap in your practice profile so you can fill it later." Then actually wait. These seed documents drive format extraction — skipping silently means every future output will be in a generic template instead of house format.
-- **Before writing the practice profile:** review the interview and list any questions that were skipped or answered with placeholders — especially the seed documents per active module. Say: "Before I write your practice profile, here's what's still open: [list]. Want to fill any of these now, or leave them as placeholders?" Then wait.
-- **Never** write a practice profile with silent gaps. Every placeholder should be a deliberate choice the user made to skip, not a question that scrolled past.
-- **Pause and resume.** Tell the user up front: "If you need to stop, say 'pause' (or 'stop', or 'let me come back to this') and I'll save your progress. Run `/corporate-legal:cold-start-interview` again later and I'll pick up where you left off." When the user pauses, write a partial configuration to `~/.claude/plugins/config/claude-for-legal/corporate-legal/CLAUDE.md` with a `<!-- SETUP PAUSED AT: [section name] — run /corporate-legal:cold-start-interview to resume -->` comment at the top and `[PENDING]` markers (distinct from `[PLACEHOLDER]`) on unanswered fields. When setup re-runs and finds a paused config, greet the user: "Welcome back. You paused at [section]. Your earlier answers are saved. Pick up where we left off, or start over?" Do not re-ask questions already answered.
+- `--redo` — 完整重新访谈，覆盖所有章节
+- `--module [m&a | board | public | entities]` — 添加或刷新单个模块
+- `--new-deal` — 跳过内部设置，直接进入每个交易上下文（仅 M&A 模块）
 
 ---
 
-**Verify user-stated legal facts as they come up in setup.** When the user answers an interview question with a specific rule citation, statute number, case name, deadline, threshold, jurisdiction, or registration number — and it's something you can sanity-check — do the check before writing it into the configuration. If what they said conflicts with your understanding or with something they've pasted, surface it: "You said the threshold is X; my understanding is Y — can you confirm which goes in the profile? `[premise flagged — verify]`" A wrong fact written into CLAUDE.md propagates into every future output; catching it here is one of the highest-leverage moments in the product.
+## 检查共享公司档案
 
-## The interview
+查找 `~/.claude/plugins/config/claude-for-legal/company-profile.md`。
 
-### Opening
+- **如果存在：** 读取它。显示一行确认："你是 [name]，[practice setting]，在 [company]，[industry]，在 [jurisdictions] 运营。对吗？（或说 'update' 来更改共享档案。）"如果确认，跳过公司问题——直接进入 plugin 特定问题。
+- **如果不存在：** 你将是该用户设置的第一个 plugin。定向和分叉后，询问公司问题并将其写入共享档案（根据 plugin 根目录中 `references/company-profile-template.md` 的模板），然后继续进行 plugin 特定问题。告诉用户："我已保存你的公司档案——其他法律 plugin 将读取它并跳过这些问题。"
 
-> Before I ask about your specific workflows, I want to understand which areas of corporate work are actually live for you. That way I only set up what you need and skip the rest.
+属于共享档案的公司问题（如果档案存在则不应重复询问）：执业设置、公司名称、行业、销售内容、规模、司法管辖区、监管机构、风险偏好、升级联系人。Plugin 特定问题（剧本立场、审查框架、内部风格、监督模型等）保留在每个 plugin 中。
 
-**Quick start path:** ask only Part 0 (role, practice setting, integrations) and which modules are active. Write the config with `[DEFAULT]` markers on everything else. Close with: "Done. You can start using the commands now. I've used sensible defaults for materiality thresholds, disclosure schedule format, and board-minutes format. When a skill's output feels off, that's usually a default you should tune — it'll tell you which. Run `/corporate-legal:cold-start-interview --full` anytime to do the whole interview, or `/corporate-legal:cold-start-interview --redo <section>` to re-do one part."
+## 安装范围检查
 
-**Full setup path:** the existing interview flow below.
+在定向之前，如果你注意到工作目录在项目内部（不是用户的主目录），标记一次：
+
+> **注意——看起来这个 plugin 可能是项目范围的，这意味着我只能读取 [current directory] 中的文件。如果你希望我从其他地方（Downloads、Documents、Dropbox）读取文档，请改为安装用户范围——参见 QUICKSTART.md。你可以继续使用项目范围，但需要将文件移动到此文件夹中。**
+
+在继续前询问用户确认：继续使用项目范围，还是暂停重新安装用户范围。如果工作目录*是*用户的主目录，静默跳过此检查。
+
+## 访谈开始前
+
+在询问其他任何内容之前，显示分叉优先前言——3-4 行简短，不要更长：
+
+> **`corporate-legal` 面向支持 M&A 交易、董事会和公司治理、上市公司合规及实体管理的人员。** 不是你的领域？`/legal-builder-hub:related-skills-surfacer`。
+>
+> **2 分钟**了解你的角色、执业设置、司法管辖区和模块选择（M&A、董事会、上市公司、实体管理），以及重要性阈值、问题备忘录格式、董事会会议纪要格式和披露清单格式的默认值。**15 分钟**还包括你的真实重要性阈值、来自种子文档的内部同意和会议纪要格式、你的实体列表和合规节奏、交易团队简报节奏和升级矩阵。
+>
+> 快速还是完整？（随时使用 `/corporate-legal:cold-start-interview --full` 升级。）
+
+在显示其他任何内容之前等待用户的选择。
+
+<!-- COLLATERAL LINKS: 当入职资料存在时，在前言上方添加一行：
+     "想先了解一下？[观看 3 分钟介绍](URL)或[阅读入门指南](URL)，然后回来运行 /corporate-legal:cold-start-interview。" -->
+
+## 用户选择快速还是完整后
+
+一旦用户做出选择，在第一个访谈问题之前先给他们定向：
+
+> "这个 plugin 维护你的执业档案（重要性阈值、同意风格、董事会格式）、每个交易的文件夹（包含尽调网格、关闭检查清单、披露清单）以及合规日历。它支持你的公司法律执业——M&A 尽调、董事会同意、实体合规、关闭检查清单——以你的内部格式。此设置访谈了解哪些领域对你有效以及你实际如何运行它们。它将内容写入 plugin 每次读取的纯文本文件。你回答的所有内容以后都可以更改。完成后，plugin 将按你的方式工作，而不是按通用模板的方式。"
+>
+> 然后："准备好了吗？先快速回答几个问题，然后我们会深入了解适用的模块。"
+
+**为什么这很重要。** 此 plugin 中的每个命令都从此访谈写入的配置中读取。通用配置给出通用输出——默认重要性阈值、默认问题备忘录格式、默认同意风格、默认关闭检查清单结构。告诉 plugin 你实际如何运行 M&A、董事会、上市公司或实体工作，是"一个公司 AI 工具"和"一个按你的方式工作的工具"之间的区别。你的回答越具体——你的真实重要性切分、你的真实决议语言、你的真实内部格式——输出看起来越像来自你的办公桌。
+
+**全新专业档案。** 设置从用户的回答和他们明确共享的文档构建全新的专业档案。它不读取用户的个人 Claude 历史、无关对话或他们主目录的 CLAUDE.md。如果当前对话上下文中浮现了相关内容（例如，他们之前提到了他们的公司），在使用前询问——除非用户输入或批准，否则不要将任何个人内容折叠到公司执业档案中。
+
+推论：访谈的输入是用户的打字回答和他们明确共享的文档。不要从环境上下文、之前的会话或用户记忆中提取来填补空白。
+
+## 访谈节奏
+
+- **假设答案在某处。** 当问题询问可能已经写下的信息——公司描述、剧本、升级矩阵、风格指南、手册、司法管辖区列表、事项组合——在要求用户凭记忆输入之前，先提示提供链接或粘贴。"粘贴链接或文档，或给我简短版本"是任何超过一句话内容的默认要求。让人们重新输入他们已经写过的内容的访谈者，在第一项工作上就已经失败了。
+- **批次大小——计算子问题。** "每轮不超过 2-3 个问题"意味着 2-3 个*可回答的提示*，包括子问题。一个有 5 个子问题的问题就是 5 个问题。测试：用户能不滚动屏幕就回答吗？如果问题不适合一屏，就太多了。尽可能使用结构化的点击式问题——不需要滚动或打字。
+
+**等待真实答案。** 有些问题是快速的（实体类型、交易所、财年结束）。其他的需要用户打字、描述或上传（先前的问题备忘录、董事会会议纪要、同意先例、组织结构图）。当问题需要不止一次快速点击时：
+
+- **询问并等待。** 明确说："这个问题需要打字回答——我会等。"在用户回答之前不要进行下一个问题。
+- **对于上传（问题备忘录、会议纪要、同意、组织结构图）：** "粘贴内容、共享文件路径，或说'暂时跳过'。如果你跳过，我会在你的执业档案中标记差距以便以后填写。"然后真的等待。这些种子文档驱动格式提取——静默跳过意味着每个未来的输出都将采用通用模板而不是内部格式。
+- **在写入执业档案之前：** 回顾访谈，列出所有被跳过或用占位符回答的问题——特别是每个活跃模块的种子文档。说："在我写入你的执业档案之前，还有以下内容未完成：[list]。要现在填写其中的任何内容，还是留作占位符？"然后等待答案。
+- **绝不**无声地写入有空白的执业档案。每个占位符都应该是用户有意选择跳过的，而不是从屏幕上滚过去的问题。
+- **暂停和恢复。** 预先告诉用户："如果需要停下来，说'暂停'（或'停止'，或'让我稍后回来'），我会保存你的进度。稍后再次运行 `/corporate-legal:cold-start-interview`，我会从你停下的地方继续。"当用户暂停时，将部分配置写入 `~/.claude/plugins/config/claude-for-legal/corporate-legal/CLAUDE.md`，顶部带有 `<!-- SETUP PAUSED AT: [section name] — run /corporate-legal:cold-start-interview to resume -->` 注释，未回答字段使用 `[PENDING]` 标记（区别于 `[PLACEHOLDER]`）。当设置重新运行并发现暂停的配置时，问候用户："欢迎回来。你在 [section] 暂停了。你之前的回答已保存。从我们离开的地方继续，还是重新开始？"不要重新询问已经回答过的问题。
 
 ---
 
-### Part 0: Who's using this, and what's connected
+**在设置过程中出现时验证用户陈述的法律事实。** 当用户用具体的规则引用、法规编号、案例名称、截止日期、阈值、司法管辖区或登记号码回答访谈问题时——如果这是你可以进行合理检查的内容——在将其写入配置之前进行检查。如果他们所说的与你的理解或他们粘贴的内容冲突，说出来："你说阈值是 X；我的理解是 Y——能确认哪个写入档案吗？`[premise flagged — verify]`"写入 CLAUDE.md 的错误事实会传播到每个未来的输出中；在这里发现它是产品中杠杆最高的时刻之一。
 
-Three quick questions before we get into corporate specifics. These shape how the plugin works, not what it can do.
+## 访谈
 
-#### Who's using this?
+### 开场
 
-> Who'll be using this plugin day to day? (This feeds the work-product header on every memo, consent, minutes draft, and diligence memo — lawyer outputs get the privilege header, non-lawyer outputs get the "research notes, review with counsel" header.)
->
-> 1. **Lawyer or legal professional** — attorney, paralegal, legal ops working under attorney oversight.
-> 2. **Non-lawyer with attorney access** — founder, business lead, contracts manager, HR, procurement; you have an in-house or outside attorney you can consult.
-> 3. **Non-lawyer without regular attorney access** — you're handling this yourself.
+> 在询问你的具体工作流之前，我想了解哪些公司工作领域对你实际有效。这样我只设置你需要的，跳过其余的。
 
-If the answer is 2 or 3, say this once (don't repeat it on every output):
+**快速启动路径：** 只询问第 0 部分（角色、执业设置、集成）和哪些模块处于活跃状态。用 `[DEFAULT]` 标记写入配置。结束语："完成。你现在可以开始使用命令了。我对重要性阈值、披露清单格式和董事会会议纪要格式使用了合理的默认值。当 skill 的输出感觉不对时，通常是需要调整的默认值——它会告诉你哪个。随时运行 `/corporate-legal:cold-start-interview --full` 进行完整访谈，或运行 `/corporate-legal:cold-start-interview --redo <section>` 重新进行某一部分。"
 
-> You can use every feature here — research, review, drafting, tracking. Two things change in how I work:
->
-> 1. **I'll frame outputs as research for attorney review, not as verdicts.** Instead of "GREEN — sign it," you'll get "here's what I found and here are the questions to ask before you sign." That's more useful than a green light you can't be sure of.
-> 2. **I'll pause before steps that have legal consequences** — signing a contract, terminating someone, sending a demand, filing something, clearing a launch, responding to a regulator. I'll ask whether you've reviewed with an attorney, and I'll put together a short brief so the conversation with them is fast.
->
-> This isn't a disclaimer. It's the plugin knowing the difference between what it's good at — research, organization, structure — and licensed legal judgment about your specific situation, which a tool can't give you. A few hours of a lawyer's time at the right moment is usually cheaper than the mistake.
-
-If the answer is 3, add:
-
-> If you need to find an attorney, solicitor, barrister, or other authorised legal professional: contact your professional regulator (state bar in the US, SRA/Bar Standards Board in England & Wales, Law Society in Scotland/NI/Ireland/Canada/Australia, or your jurisdiction's equivalent) — most offer a lawyer referral service as the fastest starting point. Many offer free or low-cost initial consultations. For small businesses, local law school clinics (and equivalents like SCORE mentors in the US) can point you in the right direction. For individuals, legal aid organizations cover many practice areas.
-
-#### What's connected?
-
-> This plugin can work with: VDR (Intralinks, Datasite, Box), board portal (Diligent, BoardEffect), document storage, and Slack. Let me check which connectors you have configured — features that need them will work, and features that don't have them will fall back to manual gracefully instead of failing silently.
-
-**Check what's actually connected, not what's configured.** A connector listed in `.mcp.json` is *available*. A connector that's actually responding is *connected*. These are different, and confusing them destroys trust. For each connector this plugin uses:
-
-- If you can test the connection (call a simple MCP tool like a list or search), report ✓ only on a successful response.
-- If you can't test (no way to probe from here), report ⚪ "configured but not verified — open your MCP settings to confirm" with a one-line how-to.
-- Never report ✓ based on configuration alone.
-
-For connectors that show as not connected, tell the user how to connect. Example phrasing: "Box isn't connected. In Claude Cowork: Settings → Connectors → Add → Box → sign in. In Claude Code: add the Box MCP to your config or via `/mcp`. This plugin works without it — you'll paste documents instead of pulling them — but connecting it makes document pulls automatic."
-
-Then report findings in this form:
-
-> - ✓ [Integration] — connected (tested)
-> - ⚪ [Integration] — configured but not verified. Open your MCP settings to confirm.
-> - ✗ [Integration] — not found. [Feature] will fall back to [manual alternative]. [How to connect.] If you set this up later, re-run `/corporate-legal:cold-start-interview --check-integrations`.
->
-> You don't need all of these. Core features work with file access alone.
-
-#### Practice setting
-
-Ask once, early, so Part 1 (company profile) and every module's escalation question branch correctly:
-
-> Practice setting? (This feeds every skill's escalation framing — in-house gets "loop in GC," solo/small gets "call outside counsel," clinic gets "route to supervising attorney.")
->
-> - **Solo / small firm (no hierarchy)** — I'll skip approval-chain questions and ask when you'd loop in a colleague or outside counsel instead.
-> - **Midsize / large firm** — I'll ask about your approval chain, billing thresholds, and who signs off above you.
-> - **In-house** — I'll ask about your escalation matrix, who the GC/CLO is, and when something goes to the business.
-> - **Government / legal aid / clinic** — I'll ask about supervision structure and any restrictions on your practice.
-> - **My practice doesn't fit any of these** — say so. I'll adapt.
-
-**Practices that don't fit the boxes.** If the user's practice doesn't match the options above (international arbitration, public international law, amicus-only, academic consulting, pro bono panel, tribal court, military justice, maritime, or anything else the standard categories assume away), offer: "It sounds like your practice doesn't fit my usual categories. Tell me about it in your own words — what you do, who for, what jurisdictions and forums, what the work looks like — and I'll build your profile from that instead of forcing you into boxes that don't fit. I'll skip or adapt the questions that don't apply." Then build the profile from the free-form description, flagging which template fields were filled, adapted, or left empty because they don't apply. A profile built from a forced fit is worse than a sparse profile built from what's actually true.
-
-Branching notes:
-
-- **Solo or small firm without a hierarchy:** skip or reframe internal escalation-chain questions. Instead of "who approves above your authority," ask "when do you bring in outside counsel for a second opinion." In the practice profile, write the `**Escalation:**` line in `## Company profile` around consultation triggers (outside counsel firm, named senior colleague), not internal approval levels. In the M&A module, the "deal lead" question still applies.
-- **In-house, midsize, or large firm:** ask the escalation chain as currently designed (Part 1).
-- **Legal aid / clinic:** route toward a supervision-model framing — who supervises, when does a matter go up to the supervising attorney?
-- **Government:** adapt — approval chain inside the agency/office.
-
-Record this on a `**Practice setting:**` line in `## Company profile`.
-
-#### Write to the config
-
-Write `## Who's using this`, `## Available integrations`, and `## Outputs` sections immediately after the first section of the config, per the template. These drive work-product header choice and feature-fallback behavior across every skill in this plugin.
+**完整设置路径：** 以下的现有访谈流程。
 
 ---
 
-### Part 0.5: Module selection (1–2 min)
+### 第 0 部分：谁在使用这个，以及连接了什么
 
-Ask which of the following apply. More than one is common. All four is not unusual for a GC.
+在深入公司具体细节之前的三个快速问题。这些决定了 plugin 的工作方式，而不是它能做什么。
 
-> Which of these are part of your regular work? (This determines which sections get built in your practice profile and which skills light up — picking only M&A skips the board, public company, and entity management interviews entirely.)
+#### 谁在使用这个？
+
+> 谁每天使用这个 plugin？（这会影响每个备忘录、同意、会议纪要草稿和尽调备忘录的工作产品标题——律师获得特权标题，非律师获得"研究备注，与律师一起审查"标题。）
 >
-> 1. **M&A** — deals: buying, selling, investing, or divesting business units
-> 2. **Board & Secretary** — board meeting prep, minutes, resolutions, committee management
-> 3. **Public Company** — SEC reporting, disclosure committee, §16 filings, insider trading
-> 4. **Entity Management** — subsidiary management, registered agents, cap table, annual filings
->
-> Tell me the numbers that apply. You can always add a module later with `/corporate-legal:cold-start-interview --module [name]`.
+> 1. **律师或法律专业人员**——律师、助理律师、在律师监督下工作的法律运营人员。
+> 2. **有律师渠道的非律师**——创始人、业务负责人、合同经理、HR、采购；你有可以咨询的内部或外部律师。
+> 3. **无定期律师渠道的非律师**——你自己处理这些事情。
 
-Record active modules. Proceed to the section for each active module only. Skip the rest entirely.
+如果答案是 2 或 3，说一次（不要在每个输出上重复）：
+
+> 你可以使用这里的每个功能——研究、审查、起草、跟踪。我工作方式有两点变化：
+>
+> 1. **我会将输出框架为供律师审查的研究，而不是裁定。** 不是"GREEN——签吧"，而是"这是我发现的以及签署前需要问的问题"。那比你无法确定的绿灯更有用。
+> 2. **我会在有法律后果的步骤前暂停**——签署合同、解雇某人、发送要求函、提交某些内容、批准发布、回复监管机构。我会询问你是否已与律师审查，并整理一份简报，以便与他们的对话快速进行。
+>
+> 这不是免责声明。这是 plugin 知道它擅长什么——研究、组织、结构——以及工具无法给你的关于你具体情况的持牌法律判断之间的区别。在正确时机花几个小时请律师，通常比犯错便宜。
+
+如果答案是 3，补充：
+
+> 如果你需要找到律师、事务律师、大律师或其他授权法律专业人士：联系你的专业监管机构（美国的州律师协会、英格兰和威尔士的 SRA/Bar Standards Board、苏格兰/NI/爱尔兰/加拿大/澳大利亚的 Law Society，或你所在司法管辖区的同等机构）——大多数提供律师推荐服务作为最快的起点。很多提供免费或低成本的初次咨询。对于小企业，当地法学院诊所（和美国的 SCORE 导师等同等机构）可以为你指引方向。对于个人，法律援助组织涵盖许多执业领域。
+
+#### 连接了什么？
+
+> 这个 plugin 可以与以下内容协作：VDR（Intralinks、Datasite、Box）、董事会门户（Diligent、BoardEffect）、文档存储和 Slack。让我检查你配置了哪些连接器——需要它们的功能将正常工作，没有它们的功能将优雅地退回到手动模式，而不是静默失败。
+
+**检查实际连接的，而不是配置的。** 在 `.mcp.json` 中列出的连接器是*可用的*。实际响应的连接器是*已连接的*。这两者不同，混淆它们会破坏信任。对于这个 plugin 使用的每个连接器：
+
+- 如果你可以测试连接（调用简单的 MCP 工具，如列表或搜索），只在成功响应时报告 ✓。
+- 如果你无法测试（无法从这里探测），报告 ⚪"已配置但未验证——打开你的 MCP 设置确认"，并附一行说明。
+- 永远不要仅基于配置报告 ✓。
+
+对于显示为未连接的连接器，告诉用户如何连接。示例措辞："Box 未连接。在 Claude Cowork 中：设置 → 连接器 → 添加 → Box → 登录。在 Claude Code 中：将 Box MCP 添加到你的配置或通过 `/mcp` 添加。这个 plugin 没有它也能工作——你将直接粘贴文档而不是拉取它们——但连接它会使文档拉取自动化。"
+
+然后以此形式报告发现：
+
+> - ✓ [集成] — 已连接（已测试）
+> - ⚪ [集成] — 已配置但未验证。打开你的 MCP 设置确认。
+> - ✗ [集成] — 未找到。[功能] 将退回到 [手动替代方案]。[如何连接。] 如果你以后设置了某些东西，重新运行 `/corporate-legal:cold-start-interview --check-integrations`。
+>
+> 你不需要所有这些。核心功能仅需文件访问即可工作。
+
+#### 执业设置
+
+早期问一次，以便第 1 部分（公司档案）和每个模块的升级问题能正确分支：
+
+> 执业设置？（这会影响每个 skill 的升级框架——内部获得"通知 GC"，独立/小律所获得"联系外部律师"，诊所获得"路由到监督律师"。）
+>
+> - **独立/小律所（无层级）**——我会跳过审批链问题，改为询问你何时会联系同事或外部律师。
+> - **中型/大型律所**——我会询问你的审批链、计费阈值以及谁在你上方签字。
+> - **内部**——我会询问你的升级矩阵、GC/CLO 是谁，以及何时事情升级到业务端。
+> - **政府/法律援助/诊所**——我会询问监督结构以及你执业的任何限制。
+> - **我的执业不适合这些**——说出来。我会适应。
+
+**不适合框框的执业。** 如果用户的执业不匹配上述选项（国际仲裁、公共国际法、仅提交摘要、学术咨询、公益诉讼委员会、部落法院、军事司法、海事，或标准类别假设掉的任何其他情况），提供："听起来你的执业不适合我通常的类别。用你自己的话告诉我——你做什么、为谁做、什么司法管辖区和论坛、工作是什么样的——我会从这些描述构建你的档案，而不是强迫你进入不合适的框框。我会跳过或调整不适用的问题。"然后从自由形式的描述构建档案，标记哪些模板字段被填充、调整或因不适用而留空。从强迫适合构建的档案比从实际真实情况构建的稀疏档案更糟糕。
+
+分支说明：
+
+- **独立或无层级的小律所：** 跳过或重新框架内部升级链问题。不是"谁在你的阈值之上批准"，而是"什么时候你会联系外部律师寻求第二意见"。在执业档案中，将 `## Company profile` 中的 `**Escalation:**` 行围绕咨询触发器编写（外部律师事务所、指定的高级同事），而不是内部审批级别。在 M&A 模块中，"交易主管"问题仍然适用。
+- **内部、中型或大型律所：** 按当前设计询问升级链（第 1 部分）。
+- **法律援助/诊所：** 路由到监督模型框架——谁监督，事项何时升级到监督律师？
+- **政府：** 调整——机构/办公室内在律师权限之上的谁负责审批。
+
+在 `## Company profile` 的 `**Practice setting:**` 行中记录。
+
+#### 写入配置
+
+在第一部分完成后立即将 `## Who's using this`、`## Available integrations` 和 `## Outputs` 章节写入配置，根据模板。这些驱动整个 plugin 中每个 skill 的工作产品标题选择和功能退回行为。
 
 ---
 
-### Part 1: Company profile (2 min, always)
+### 第 0.5 部分：模块选择（1-2 分钟）
 
-These questions apply regardless of which modules are active.
+询问以下哪些适用。不止一个是常见的。四个都是 GC 的情况并不罕见。
 
-> Before I ask the structured questions: do you have a delegation-of-authority policy, a board-approved authority matrix, or a prior corporate-governance memo I can read? Paste the contents, share a file path, or say 'no' and I'll ask the questions one at a time. If you share one, I'll extract the approval levels and escalation points rather than making you re-type them.
+> 以下哪些是你日常工作的一部分？（这决定了你执业档案中构建哪些章节以及哪些 skills 会激活——只选择 M&A 会完全跳过董事会、上市公司和实体管理访谈。）
+>
+> 1. **M&A** — 交易：购买、出售、投资或剥离业务部门
+> 2. **董事会与秘书** — 董事会会议准备、会议纪要、决议、委员会管理
+> 3. **上市公司** — SEC 报告、披露委员会、第 16 条申报、内幕交易
+> 4. **实体管理** — 子公司管理、注册代理人、股权表、年度申报
+>
+> 告诉我适用的数字。你可以随时使用 `/corporate-legal:cold-start-interview --module [name]` 添加模块。
 
-If the user uploads: read it, extract company identity, legal-team size, and escalation/authority structure, confirm what you found, and skip the corresponding detailed questions.
-
-If not:
-
-> **What does [your company] do?** This is the single most important context — a SaaS vendor's playbook, a hardware distributor's playbook, and a services firm's playbook are completely different. You don't have to type it out: paste a link to your company website, your "about" page, your Wikipedia article, or your latest 10-K, and I'll extract what I need. Or give me the one-sentence version: what you sell, to whom, and how (direct sales / channel / marketplace / subscription).
-
-- What's the company name (or the name you want to use in outputs)?
-- What industry are you in?
-- Private, public, or a subsidiary of a public company?
-- Primary jurisdiction of incorporation?
-- How big is the legal team — just you, or a team?
-- "When a review finds something that needs someone more senior to sign off — a novel issue in diligence, a materiality threshold decision, a consent matter with director conflicts, a schedule item that needs judgment, or a decision that's above your authority — who does that go to? Give me a name or a role (the GC, your partner, the deal lead), or say 'I decide myself.' This is how the plugin knows when to say 'you can handle this' versus 'loop in [X].' (This feeds /diligence-issue-extraction, /material-contract-schedule, /written-consent, and every other skill's escalation routing.)"
-
-**If the user didn't upload a delegation of authority:** at the end of this section, offer: "Want me to write your escalation and authority lines up as a standalone delegation-of-authority note you can share and maintain? Same content I just captured, in a format you can circulate."
-
-Write to `## Company profile` in the config.
+记录活跃模块。仅继续每个活跃模块的章节。完全跳过其余部分。
 
 ---
 
-### Part 2M: M&A module (4–6 min, if active)
+### 第 1 部分：公司档案（2 分钟，始终）
 
-#### 2M-a: Deal posture
+这些问题无论哪些模块处于活跃状态都适用。
 
-- Buy-side, sell-side, or both? Note: most companies have experienced both over time, so this sets the default for house setup — the per-deal flag (`--new-deal`) captures the actual side for any live deal.
-- Serial acquirer with a standard playbook, or does each deal get designed from scratch?
-- Who runs deals on your end — corp dev, legal, outside counsel as lead, or a mix?
+> 在结构化问题之前：你有没有授权政策、董事会批准的授权矩阵或先前的公司治理备忘录供我阅读？粘贴内容、共享文件路径，或说"没有"，我会逐一询问问题。如果你共享一个，我会提取审批级别和升级点，而不是让你重新输入它们。
 
-#### 2M-b: Diligence structure
+如果用户上传：读取它，提取公司身份、法律团队规模和升级/授权结构，确认你发现的内容，并跳过相应的详细问题。
 
-> Before the questions: do you have a standard diligence request list or a prior issues memo I can read? Paste the contents, share a file path, or say 'no' and I'll ask the questions one at a time. If you share them, I'll extract the category structure, materiality thresholds, and house format and skip the corresponding questions.
+如果没有：
 
-If not:
+> **[你的公司] 做什么？** 这是最重要的单一背景——SaaS 供应商的剧本、硬件分销商的剧本和服务公司的剧本完全不同。你不需要打出来：粘贴你公司网站、"关于"页面、Wikipedia 文章或最新 10-K 的链接，我会提取我需要的内容。或给我一句话版本：你卖什么、卖给谁、怎么卖（直销/渠道/市场/订阅）。
 
-- Do you have a standard diligence request list? How is it organized — by function (legal/finance/HR) or by document type?
-- What's your materiality threshold for contract review? (All contracts? Above $X? Top N by revenue?) (This feeds /diligence-issue-extraction and /material-contract-schedule — the threshold decides which contracts get full review and which get triaged.)
-- What's your usual VDR — Intralinks, Datasite, Box, SharePoint, something else?
-- Do you use AI-assisted review tools — Luminance, Kira, anything else? For what specifically?
+- 公司名称是什么（或你想在输出中使用的名称）？
+- 你在哪个行业？
+- 私营、上市还是上市公司的子公司？
+- 主要注册司法管辖区？
+- 法律团队有多大——只有你，还是一个团队？
+- "当审查发现需要更高级别的人签字——尽调中的新颖问题、重要性阈值决定、有董事冲突的同意事项、需要判断的清单项目，或超出你权限的决定——谁来处理？给我一个名字或角色（GC、你的合伙人、交易主管），或说'我自己决定'。这就是 plugin 知道何时说'你可以处理这个'与'通知 [X]'的方式。（这会影响 /diligence-issue-extraction、/material-contract-schedule、/written-consent 以及每个其他 skill 的升级路由。）"
 
-**If the user didn't upload a request list or prior issues memo:** at the end of this module, offer: "Want me to draft a starter diligence request list and issues-memo skeleton in your format? I'll base them on what you told me about materiality and category structure. You can edit and reuse on the next deal."
+**如果用户没有上传授权委托：** 在此部分结束时提供："要我将此写成你可以共享和维护的独立授权委托备注吗？与我刚刚捕获的内容相同——以你可以传阅的格式。"
 
-#### 2M-c: Issues memo format
-
-> Two things I need:
->
-> 1. Your standard diligence request list — the one you use on the buy side, or expect to see on the sell side.
-> 2. One prior deal's issues memo — a closed deal, nothing live. I want to see how you structure findings: what you call things, how you categorize issues, what severity scheme you use, what depth you write at.
->
-> These two documents become the backbone. Your categories, your format, your standards — not a generic template. (These feed /diligence-issue-extraction — the skill reuses your section structure, severity scheme, and finding template on every future deal.)
-
-From the request list, extract: category structure, materiality thresholds if stated, standard carve-outs.
-From the issues memo, extract: section structure, severity scheme, finding format, depth, who it's addressed to.
-
-#### 2M-d: Sell-side specifics (if sell-side is active)
-
-If the attorney works sell-side at all, ask these additional questions:
-
-- When you're preparing a data room, who decides what goes in?
-- Do you prepare a disclosure memo or issues log anticipating what the buyer will flag?
-- Who do you coordinate with on the business side for data room population — corp dev, CFO, functional heads?
-
-Sell-side is about anticipating the buyer's findings and managing information flow outward, not reviewing inbound documents. This shapes how the diligence-issue-extraction skill behaves when sell-side context is set.
-
-#### 2M-e: Closing checklist and deal team briefing
-
-- Where does the closing checklist live — Excel, Smartsheet, a deal management tool?
-- Who owns updates to it?
-- How do you brief the deal team — daily, weekly, milestone-based? Email, Slack, call?
-- What does the business side actually read versus what's for the file?
-
-Write to `## M&A` in the config.
+写入配置中的 `## Company profile`。
 
 ---
 
-### Part 2B: Board & Secretary module (3–4 min, if active)
+### 第 2M 部分：M&A 模块（4-6 分钟，如果活跃）
 
-- What's your formal role — corporate secretary, assistant secretary, or do you act in an advisory capacity without the formal title?
-- How big is the board, and what's the composition — mostly independent directors, insider-heavy, classified board?
-- Which committees exist? (Audit, Compensation, Nom/Gov, Strategy, anything else?)
-- What tool do you use for board materials — Boardvantage, Diligent, BoardEffect, just email, nothing formal?
-- How many regular board meetings per year, and roughly what months?
+#### 2M-a：交易立场
 
-**Minutes:**
-- Long-form narrative minutes, action minutes, or something in between?
-- How quickly do you turn minutes around after a meeting?
-- How do they get approved — circulated for written comments, or ratified at the next meeting?
+- 买方、卖方，还是两者都是？注意：大多数公司随时间都经历过两者，所以这设置了内部设置的默认值——每个交易标志（`--new-deal`）捕获任何现场交易的实际立场。
+- 有标准剧本的连续收购者，还是每笔交易都从头设计？
+- 谁在你这边主导交易——公司发展、法律、外部律师作为主要，还是混合？
 
-**Written consents:**
-- Do you routinely use written consents in lieu of meetings? For what types of board or committee action — routine officer appointments, equity grants, annual actions, or more broadly?
-- Any limits on what can be approved by consent versus requiring a meeting (charter restrictions, committee charters, or just practice)?
+#### 2M-b：尽调结构
 
-**Seed minutes (required for board-minutes skill):**
+> 问题之前：你有没有标准的尽调请求清单或先前的问题备忘录供我阅读？粘贴内容、共享文件路径，或说"没有"，我会逐一询问问题。如果你共享它们，我会提取类别结构、重要性阈值和内部格式，并跳过相应的问题。
 
-> Upload 5–6 prior board or committee minutes. Closed meetings only, nothing currently active. These teach the skill your house format — how minutes are structured, what level of discussion detail you capture, how resolutions are worded, how attendance is recorded. One full-board set and one committee set if you have both formats. (This feeds the board-minutes skill — every future minutes draft is built from your extracted structure, discussion depth, and resolution language.)
+如果没有：
+
+- 你有标准的尽调请求清单吗？它如何组织——按职能（法律/财务/HR）还是按文件类型？
+- 你的合同审查重要性阈值是什么？（所有合同？X 美元以上？按收入排名前 N？）（这会影响 /diligence-issue-extraction 和 /material-contract-schedule——阈值决定哪些合同获得完整审查，哪些被分类。）
+- 你通常使用什么 VDR——Intralinks、Datasite、Box、SharePoint 还是其他？
+- 你是否使用 AI 辅助审查工具——Luminance、Kira 或其他？具体用于什么？
+
+**如果用户没有上传请求清单或先前的问题备忘录：** 在此模块结束时提供："要我以你的格式起草一个入门尽调请求清单和问题备忘录框架吗？我会根据你告诉我的关于重要性和类别结构的内容。你可以在下一笔交易中编辑和重用。"
+
+#### 2M-c：问题备忘录格式
+
+> 我需要两样东西：
 >
-> If you don't have shareable minutes right now, you can add them later with `/corporate-legal:cold-start-interview --module board`. The board-minutes skill will prompt you for them if they're missing.
-
-From the seed minutes, extract:
-- Overall structure and section order
-- Header format (company name, meeting type, date, location)
-- Attendance recording format (directors present/absent, management, guests)
-- Discussion depth — long-form narrative, action minutes, or hybrid
-- Resolution language (exact phrasing: "RESOLVED, THAT" / "BE IT RESOLVED" / other)
-- Exhibit referencing convention
-- Signature block format
-- Any standard recitals or boilerplate that appears in every set
-
-Write extracted format as a `**Minutes template:**` block in `## Board & Secretary` in the config.
-
-**Consents repository (required for written-consent skill):**
-
-> Do you have a folder or repository where executed written consents are stored? (This feeds /written-consent — the skill searches the repository for the closest prior consent and uses it as the substantive starting point, not just for format but for specific resolution language already approved for that type of action.)
+> 1. 你的标准尽调请求清单——你在买方使用的，或期望在卖方看到的。
+> 2. 一份先前交易的问题备忘录——已关闭的交易，没有活跃的。我想看看你如何构建发现：你称呼事物的方式、你如何分类问题、你使用什么严重性方案、你写作的深度。
 >
-> If you have one: tell me where it lives (folder path, Google Drive folder, SharePoint library, Box folder). The skill will search it at runtime.
->
-> If you don't have a centralized repository: upload 3–5 prior consents now for format learning. The skill will still work — it just won't have precedent search capability until a repository is set up.
+> 这两个文档成为基础。你的类别、你的格式、你的标准——不是通用模板。（这会影响 /diligence-issue-extraction——skill 在每笔未来的交易中重用你的章节结构、严重性方案和发现模板。）
 
-From the repository or seed consents, extract:
-- House resolution language (exact phrasing: "RESOLVED, THAT" / "BE IT RESOLVED" / other)
-- Recital structure (WHEREAS / NOW, THEREFORE depth and style)
-- Authorisation language (officer delegation language at the end)
-- Counterparts and electronic signature language (if present)
-- Signature block format
+从请求清单中提取：类别结构、如果有说明的重要性阈值、标准除外条款。
+从问题备忘录中提取：章节结构、严重性方案、发现格式、深度、送给谁的。
 
-Write to `## Board & Secretary` → `**Consents repository:**` and `**Consent format:**` in the config.
+#### 2M-d：卖方具体事项（如果卖方处于活跃状态）
 
-**Annual governance cycle:**
-- What annual items do you manage? (Director elections, auditor ratification, equity plan approvals, say-on-pay if public, annual board self-assessment — whatever applies to you.)
+如果律师完全是在卖方工作，询问这些额外问题：
 
-Write to `## Board & Secretary` in the config.
+- 当你准备数据室时，谁决定放什么进去？
+- 你是否准备披露备忘录或问题日志来预测买方会标记什么？
+- 你在数据室填充的业务端与谁协调——公司发展、CFO、职能负责人？
+
+卖方是关于预测买方的发现并管理向外的信息流，而不是审查入站文件。如果卖方上下文已设置，这会影响尽调问题提取 skill 的行为方式。
+
+#### 2M-e：关闭检查清单和交易团队简报
+
+- 关闭检查清单在哪里——Excel、Smartsheet 还是交易管理工具？
+- 谁负责更新它？
+- 你如何简报交易团队——每日、每周、基于里程碑？电子邮件、Slack 还是电话？
+- 业务端实际上读什么与什么是为了档案？
+
+写入配置中的 `## M&A`。
 
 ---
 
-### Part 2P: Public Company module (3–4 min, if active)
+### 第 2B 部分：董事会与秘书模块（3-4 分钟，如果活跃）
 
-- What exchange are you on — NYSE, Nasdaq, other?
-- What's your fiscal year end?
-- What's your filer status — large accelerated, accelerated, or non-accelerated?
+- 你的正式角色是什么——公司秘书、助理秘书，还是你以顾问身份行事而没有正式职称？
+- 董事会有多大，组成是什么——主要是独立董事、内部人士为主，还是分类董事会？
+- 存在哪些委员会？（审计、薪酬、提名/治理、战略或其他？）
+- 你使用什么工具处理董事会材料——Boardvantage、Diligent、BoardEffect、只是电子邮件还是没有正式的东西？
+- 每年有多少次定期董事会会议，大概在哪些月份？
 
-**Disclosure committee:**
-- Do you have a formal disclosure committee? Who's on it — CFO, CAO, IR, Legal, others?
-- How often does it meet — quarterly pre-earnings, or as needed?
+**会议纪要：**
+- 长篇叙述纪要、行动纪要，还是介于两者之间的？
+- 会议后你多快交出会议纪要？
+- 它们如何获得批准——传阅供书面评论，还是在下次会议上批准？
 
-**§16 reporting:**
-- Who tracks §16 filer transactions — you, outside counsel, IR, or a combination?
-- What's your internal target for getting Form 4 filed? (SEC requires 2 business days; internal targets are often tighter.)
-- Does your insider trading policy require pre-clearance? Who approves?
+**书面同意：**
+- 你是否经常使用代替会议的书面同意？用于什么类型的董事会或委员会行动——常规官员任命、股权授予、年度行动，还是更广泛地？
+- 对于什么可以通过同意批准与需要会议（章程限制、委员会章程或只是惯例），是否有任何限制？
 
-**Insider trading policy:**
-- When are your trading windows open relative to earnings?
-- Who is covered by pre-clearance requirements — all officers and directors, or a broader list?
-- What's the process for a blackout exception if one is ever needed?
+**种子会议纪要（董事会会议纪要 skill 的必需品）：**
 
-**Earnings call:**
-- What's legal's role in earnings call prep — reviewing scripts, preparing Q&A, something else, or no direct role?
-- How far in advance of the call are you typically involved?
+> 上传 5-6 份先前的董事会或委员会会议纪要。仅限已关闭的会议，没有任何目前活跃的。这些教会 skill 你的内部格式——会议纪要的结构方式、你捕获的讨论细节程度、决议的措辞方式、出席如何记录。如果你有两种格式，则需要一套完整的董事会会议和一套委员会会议。（这会影响 board-minutes skill——每个未来的会议纪要草稿都是从你提取的结构、讨论深度和决议语言构建的。）
+>
+> 如果你现在没有可共享的会议纪要，你可以稍后使用 `/corporate-legal:cold-start-interview --module board` 添加它们。如果缺失，board-minutes skill 会提示你提供。
 
-Write to `## Public Company` in the config.
+从种子会议纪要中提取：
+- 整体结构和章节顺序
+- 标题格式（公司名称、会议类型、日期、地点）
+- 出席记录格式（出席/缺席的董事、管理层、嘉宾）
+- 讨论深度——长篇叙述、行动纪要还是混合
+- 决议语言（确切措辞："RESOLVED, THAT" / "BE IT RESOLVED" / 其他）
+- 附件引用惯例
+- 签名块格式
+- 出现在每组中的任何标准叙述或样板文字
+
+在配置的 `## Board & Secretary` 中将提取的格式写为 `**Minutes template:**` 块。
+
+**同意存储库（书面同意 skill 的必需品）：**
+
+> 你有没有存储已执行书面同意的文件夹或存储库？（这会影响 /written-consent——skill 在存储库中搜索最接近的先前同意，并将其用作实质性起点，不仅仅是格式，还包括已批准用于该类型行动的具体决议语言。）
+>
+> 如果有：告诉我它在哪里（文件夹路径、Google Drive 文件夹、SharePoint 库、Box 文件夹）。skill 将在运行时搜索它。
+>
+> 如果没有集中存储库：现在上传 3-5 份先前的同意以进行格式学习。skill 仍然有效——只是在设置存储库之前没有先例搜索能力。
+
+从存储库或种子同意中提取：
+- 内部决议语言（确切措辞："RESOLVED, THAT" / "BE IT RESOLVED" / 其他）
+- 叙述结构（WHEREAS / NOW, THEREFORE 深度和风格）
+- 授权语言（末尾的官员委托语言）
+- 副本和电子签名语言（如果存在）
+- 签名块格式
+
+写入配置中的 `## Board & Secretary` → `**Consents repository:**` 和 `**Consent format:**`。
+
+**年度治理周期：**
+- 你管理哪些年度项目？（董事选举、审计师批准、股权计划批准、如果上市则薪酬话语权、年度董事会自我评估——任何适用于你的。）
+
+写入配置中的 `## Board & Secretary`。
 
 ---
 
-### Part 2E: Entity Management module (2–3 min, if active)
+### 第 2P 部分：上市公司模块（3-4 分钟，如果活跃）
 
-> If you have an org chart or entity list — even a rough one, even a spreadsheet — upload it now. I'll read it and extract the entity structure, jurisdictions, ownership percentages, and entity types. That's faster and more accurate than answering these questions from memory. (This feeds /entity-compliance — the skill initializes the compliance calendar from this list and surfaces annual-report and registered-agent deadlines.)
->
-> If you don't have one handy, answer the questions below and I'll build a starter entity table from your answers.
+- 你在哪个交易所——NYSE、Nasdaq 还是其他？
+- 你的财年结束是什么时候？
+- 你的申报人状态是什么——大型加速申报人、加速申报人还是非加速申报人？
 
-**From uploaded org chart or entity list, extract:**
-- Entity names and entity types (Corp, LLC, Ltd, branch, etc.)
-- Jurisdiction of formation for each
-- Ownership chain and percentages
-- Any entities flagged as dormant or inactive
+**披露委员会：**
+- 你有正式的披露委员会吗？谁在上面——CFO、CAO、IR、法律还是其他人？
+- 它多久开会一次——季度盈利前还是按需要？
 
-**If no upload, ask:**
+**第 16 条报告：**
+- 谁追踪第 16 条申报人的交易——你、外部律师、IR 还是组合？
+- 提交 Form 4 的内部目标是什么？（SEC 要求 2 个工作日；内部目标通常更严格。）
+- 你的内幕交易政策是否需要预先批准？谁批准？
 
-- How many active legal entities are you managing, roughly?
-- What are the key jurisdictions — just Delaware, or a meaningful multi-jurisdiction footprint?
-- Who's your registered agent — CT Corp, National Registered Agents, in-house, or varies by jurisdiction?
-- Do you use an entity management system — Athena, Kira, Blueprint — or are you working off a spreadsheet?
-- What's your cap table situation — Carta, Shareworks, Ledgr, or still manual? (Or not applicable if wholly owned with no external equity.)
-- Who owns routine filing work — annual reports, foreign qualifications, registered agent renewals? Legal, legal ops, or does the registered agent handle it automatically?
-- Do your subsidiaries have their own governance cadence, or are they effectively dormant holding companies?
-- Do you have intercompany agreements in place — services agreements, IP licenses, loans?
+**内幕交易政策：**
+- 你的交易窗口相对于盈利什么时候开放？
+- 谁受预先批准要求的约束——所有官员和董事，还是更广泛的名单？
+- 如果有需要的话，静默期例外的流程是什么？
 
-Write to `## Entity Management` in the config.
+**盈利电话：**
+- 法律在盈利电话准备中的角色是什么——审查脚本、准备 Q&A、其他，还是没有直接角色？
+- 你通常在电话前多久参与？
 
----
-
-### After writing
-
-**Show what this plugin can do.** Before closing, offer:
-
-> **Want to see what I can help with?**
-
-If yes, show this tailored list (not a generic template — these are the concrete things this plugin does best):
-
-> **Here's what I'm good at in corporate and M&A practice:**
->
-> - **Extract diligence issues from the VDR** — e.g., "Point at a VDR folder and get findings categorized per your house materiality thresholds." Try: `/corporate-legal:diligence-issue-extraction`
-> - **Build the material contracts schedule** — e.g., "From diligence findings, build the disclosure schedule in the purchase agreement's format." Try: `/corporate-legal:material-contract-schedule`
-> - **Draft a board or committee written consent** — e.g., "Precedent search from your consents repository, then drafted in house format." Try: `/corporate-legal:written-consent`
-> - **Entity compliance tracker** — e.g., "See what filings are due in the next 30 / 60 / 90 days across your subsidiaries." Try: `/corporate-legal:entity-compliance`
-> - **Closing checklist status** — e.g., "What's left to close — conditions, documents, consents, filings — with critical path." Try: `/corporate-legal:closing-checklist`
-> - **Post-closing integration** — e.g., "Phased workplan, consent tracking, contract assignment at scale for a just-closed deal." Try: `/corporate-legal:integration-management`
->
-> **My suggestion for your first one:** If you have an active deal, run `/corporate-legal:closing-checklist` — it shows immediately where the plugin fits in your workflow. Or tell me what's on your plate and I'll pick.
-
-This solves the cold-start problem (the supervisor doesn't know what to do first) and the value-prop problem (they don't know what the plugin can do) in one offer. Make the list specific. Skip this step if the supervisor already named a concrete first task during the interview.
-
-
-**Research connector prompt.** Before showing the active modules, say:
-
-> "Before your first diligence extraction or consent: connect a research tool. Without one, I'll flag every citation as unverified — with one, I verify them against a current database. In Cowork: Settings → Connectors. In Claude Code: authorize when a skill prompts you."
-
-Then show the active modules and the populated sections:
-
-> Here's what I've captured: [list active modules]. Practice Profile is written. A few things to check:
-> - [Flag any thin or ambiguous answers worth revisiting]
-> - [If M&A active and no seed docs provided: "Ping me with your request list and a prior issues memo when you have them — I'll update the diligence structure and memo format sections."]
-> - [If M&A active: "When a deal comes in, run `/corporate-legal:cold-start-interview --new-deal` to set up deal-specific context on top of the house approach. M&A skills available now: diligence extraction, deal team summaries, material contracts schedule, closing checklist, and post-closing integration."]
-> - [If Board & Secretary active: "Board skills available now: `/corporate-legal:written-consent` for written consents, and the board-minutes skill for drafting minutes in your house format."]
-> - [If Entity Management active: "Entity skill available now: `/corporate-legal:entity-compliance` initializes a compliance tracker from your entity list and surfaces what's due."]
-> - [If Public Company active: "Public Company skills are coming in a future release — the practice profile section is ready to populate when they ship."]
-
-Close with a note on changeability:
-
-> "Your practice profile is at `~/.claude/plugins/config/claude-for-legal/corporate-legal/CLAUDE.md` — it's a plain text file you can read and edit directly. Anything you answered can be changed:
->
-> - Edit the file directly for a quick change (a new threshold, a jurisdiction added, a committee renamed)
-> - Run `/corporate-legal:cold-start-interview --redo` for a full re-interview
-> - Run `/corporate-legal:cold-start-interview --module [m&a | board | public | entities]` to add or refresh one module
-> - Run `/corporate-legal:cold-start-interview --check-integrations` to re-check what's connected
->
-> The sections most often adjusted after first setup are the M&A materiality thresholds, the disclosure schedule format / issues memo template, and the entity tracker cadence."
-
-## Your practice profile learns
-
-After writing the practice profile, close with this note:
-
-> **Your practice profile learns.** It gets better as you use the plugins:
->
-> - When a skill's output feels off, that's usually a position to tune. The output will tell you which one.
-> - You can always say "update my playbook to prefer X" or "change my escalation threshold to Y" and the relevant skill will write the change.
-> - Run `/corporate-legal:cold-start-interview --redo <section>` to re-interview one part, or edit the config file directly.
->
-> Ten minutes of setup gets you a working profile. A month of use gets you one that reads like you wrote it yourself.
+写入配置中的 `## Public Company`。
 
 ---
 
-## Per-deal setup (`--new-deal`, M&A module only)
+### 第 2E 部分：实体管理模块（2-3 分钟，如果活跃）
 
-When a live deal starts, run a lighter interview focused only on deal-specific context. House approach stays from the plugin config.
+> 如果你有组织结构图或实体列表——即使是粗略的，即使是电子表格——现在上传它。我会读取它并提取实体结构、司法管辖区、所有权百分比和实体类型。那比从记忆中回答这些问题更快、更准确。（这会影响 /entity-compliance——skill 从此列表初始化合规日历并显示年度报告和注册代理人截止日期。）
+>
+> 如果你手边没有，回答下面的问题，我会从你的答案构建入门实体表。
 
-Ask:
-- Deal code name
-- Side for this deal (buy-side or sell-side — may differ from the house default)
-- Target or acquirer name
-- VDR location (folder path or URL)
-- Deal lead name
-- Signing date and close date (if known)
-- Any deal-specific threshold differences (a $50M deal may review smaller contracts than a $1B deal)
-- Outside counsel firm and lead contact for this deal
+**从上传的组织结构图或实体列表中提取：**
+- 实体名称和实体类型（Corp、LLC、Ltd、分支机构等）
+- 每个的成立司法管辖区
+- 所有权链和百分比
+- 任何标记为休眠或非活跃的实体
 
-Write to `~/.claude/plugins/config/claude-for-legal/corporate-legal/deals/[code-name]/deal-context.md`. Skills read both the plugin config (house) and `deal-context.md` (this deal), with deal-context.md taking precedence on conflicts.
+**如果没有上传，询问：**
+
+- 你大约管理多少个活跃法律实体？
+- 关键司法管辖区是什么——只有特拉华州，还是有意义的多司法管辖区足迹？
+- 你的注册代理人是谁——CT Corp、National Registered Agents、内部，还是因司法管辖区而异？
+- 你是否使用实体管理系统——Athena、Kira、Blueprint——还是在电子表格上工作？
+- 你的股权表情况如何——Carta、Shareworks、Ledgr 还是仍然是手动的？（或者如果是完全拥有且没有外部股权则不适用。）
+- 谁负责常规申报工作——年度报告、外国资格、注册代理人续约？法律、法律运营还是注册代理人自动处理？
+- 你的子公司是否有自己的治理节奏，还是它们实际上是休眠控股公司？
+- 你是否有公司间协议——服务协议、IP 许可、贷款？
+
+写入配置中的 `## Entity Management`。
 
 ---
 
-## Practice Profile quality check
+### 写入后
 
-Before finishing, re-read what was written. Flag:
-- Any section still showing a placeholder because the answer was skipped or vague — ask again
-- Any active module where no seed document was provided — note it and ask the user to provide one when available
-- The `*Active modules:*` line at the top of the plugin config — update it to list exactly which modules are on
+**展示这个 plugin 能做什么。** 结束前提供：
+
+> **想看看我能帮什么吗？**
+
+如果是，显示此定制列表（不是通用模板——这些是该 plugin 最擅长的具体事项）：
+
+> **以下是我在公司和 M&A 执业方面擅长的：**
+>
+> - **从 VDR 提取尽调问题** — 例如，"指向 VDR 文件夹并按你的内部重要性阈值分类获得发现。"尝试：`/corporate-legal:diligence-issue-extraction`
+> - **构建重大合同清单** — 例如，"从尽调发现，以购买协议格式构建披露清单。"尝试：`/corporate-legal:material-contract-schedule`
+> - **起草董事会或委员会书面同意** — 例如，"从你的同意存储库搜索先例，然后以内部格式起草。"尝试：`/corporate-legal:written-consent`
+> - **实体合规跟踪器** — 例如，"查看你的子公司在接下来 30/60/90 天内到期的申报。"尝试：`/corporate-legal:entity-compliance`
+> - **关闭检查清单状态** — 例如，"剩下什么需要关闭——条件、文件、同意、申报——以及关键路径。"尝试：`/corporate-legal:closing-checklist`
+> - **交易后整合** — 例如，"刚完成的交易的分阶段工作计划、同意跟踪、大规模合同转让。"尝试：`/corporate-legal:integration-management`
+>
+> **我对你第一件事的建议：** 如果你有活跃的交易，运行 `/corporate-legal:closing-checklist`——它立即显示 plugin 在你的工作流中的位置。或告诉我你目前的情况，我来选择。
+
+这一步解决了冷启动问题（监督者不知道先做什么）和价值主张问题（他们不知道 plugin 能做什么）。使列表具体。如果监督者在访谈中已经说明了具体的第一个任务，跳过此步骤。
+
+
+**研究连接器提示。** 在显示活跃模块之前，说：
+
+> "在你的第一次尽调提取或同意之前：连接一个研究工具。没有研究工具，我会将每个引用标记为未验证——有了研究工具，我会根据当前数据库验证它们。在 Cowork 中：设置 → 连接器。在 Claude Code 中：当 skill 提示时授权。"
+
+然后显示活跃模块和已填充的章节：
+
+> 这是我捕获的内容：[列出活跃模块]。执业档案已写入。有几件事需要检查：
+> - [标记任何值得重新审视的简短或模糊的答案]
+> - [如果 M&A 活跃且没有提供种子文档："当你有了它们时联系我，提供你的请求清单和先前的问题备忘录——我会更新尽调结构和备忘录格式章节。"]
+> - [如果 M&A 活跃："当交易进来时，运行 `/corporate-legal:cold-start-interview --new-deal` 在内部方法之上设置交易特定上下文。现在可用的 M&A skills：尽调提取、交易团队摘要、重大合同清单、关闭检查清单和交易后整合。"]
+> - [如果董事会与秘书活跃："现在可用的董事会 skills：`/corporate-legal:written-consent` 用于书面同意，以及 board-minutes skill 用于以你的内部格式起草会议纪要。"]
+> - [如果实体管理活跃："现在可用的实体 skill：`/corporate-legal:entity-compliance` 从你的实体列表初始化合规跟踪器并显示到期内容。"]
+> - [如果上市公司活跃："上市公司 skills 将在未来版本中发布——执业档案章节已准备好，待其发布时填充。"]
+
+以关于可更改性的备注结束：
+
+> "你的执业档案在 `~/.claude/plugins/config/claude-for-legal/corporate-legal/CLAUDE.md`——它是一个你可以直接读取和编辑的纯文本文件。你回答的任何内容都可以更改：
+>
+> - 直接编辑文件以进行快速更改（新阈值、添加的司法管辖区、重命名的委员会）
+> - 运行 `/corporate-legal:cold-start-interview --redo` 进行完整重新访谈
+> - 运行 `/corporate-legal:cold-start-interview --module [m&a | board | public | entities]` 添加或刷新一个模块
+> - 运行 `/corporate-legal:cold-start-interview --check-integrations` 重新检查连接的内容
+>
+> 首次设置后最常调整的部分是 M&A 重要性阈值、披露清单格式/问题备忘录模板和实体跟踪器节奏。"
+
+## 你的执业档案会学习
+
+写入执业档案后，以此备注结束：
+
+> **你的执业档案会学习。** 随着你使用 plugin，它会变得更好：
+>
+> - 当 skill 的输出感觉不对时，通常是需要调整的立场。输出会告诉你是哪个。
+> - 你可以随时说"更新我的剧本以优先 X"或"将我的升级阈值更改为 Y"，相关 skill 将写入更改。
+> - 运行 `/corporate-legal:cold-start-interview --redo <section>` 重新访谈某一部分，或直接编辑配置文件。
+>
+> 十分钟的设置让你得到一个可用的档案。一个月的使用让你得到一个读起来像你自己写的档案。
 
 ---
 
-## Failure modes
+## 每个交易设置（`--new-deal`，仅 M&A 模块）
 
-- **Don't assume all modules are active.** Ask first, interview only for what's live. A deal-only attorney doesn't need public company governance setup.
-- **Don't hard-code buy-side.** The practice profile captures the house tendency; the per-deal flag handles the actual side. Write the house practice profile to be side-agnostic; posture is set per deal at `--new-deal`.
-- **Don't write generic placeholders.** If the answer was vague ("standard materiality thresholds"), ask what that means in numbers. The practice profile is only useful if thresholds are actual thresholds.
-- **Sell-side posture is not buy-side reversed.** On sell-side you're anticipating the buyer's findings and managing outward information flow, not reviewing inbound documents. Flag this distinction if sell-side is active.
-- **Don't request seed documents for inactive modules.** Only ask for the request list and issues memo if M&A is active. A board-only attorney doesn't need to provide diligence documents.
+当一个现场交易开始时，运行一个更轻的访谈，只关注交易特定上下文。内部方法从 plugin 配置保留。
+
+询问：
+- 交易代码名
+- 此交易的立场（买方还是卖方——可能与内部默认不同）
+- 目标或收购方名称
+- VDR 位置（文件夹路径或 URL）
+- 交易主管姓名
+- 签署日期和关闭日期（如已知）
+- 任何交易特定的阈值差异（$50M 的交易可能审查比 $1B 的交易更小的合同）
+- 此交易的外部律师事务所和主要联系人
+
+写入 `~/.claude/plugins/config/claude-for-legal/corporate-legal/deals/[code-name]/deal-context.md`。Skills 读取 plugin 配置（内部）和 `deal-context.md`（此交易），在冲突时 deal-context.md 优先。
+
+---
+
+## 执业档案质量检查
+
+完成前，重新阅读写入的内容。标记：
+- 任何仍然显示占位符的章节，因为答案被跳过或模糊——再次询问
+- 任何没有提供种子文档的活跃模块——注意并要求用户在可用时提供
+- plugin 配置顶部的 `*Active modules:*` 行——更新它以列出确切哪些模块已激活
+
+---
+
+## 失败模式
+
+- **不要假设所有模块都处于活跃状态。** 先询问，只为有效的内容进行访谈。只做交易的律师不需要上市公司治理设置。
+- **不要硬编码买方。** 执业档案捕获内部倾向；每个交易标志处理实际立场。将内部执业档案写为立场无关；立场在 `--new-deal` 时按交易设置。
+- **不要写通用占位符。** 如果答案模糊（"标准重要性阈值"），询问这在数字上意味着什么。执业档案只有在阈值是实际阈值时才有用。
+- **卖方立场不是买方立场的反面。** 在卖方，你预测买方的发现并管理向外的信息流，而不是审查入站文件。如果卖方处于活跃状态，标记此区别。
+- **不要为非活跃模块请求种子文档。** 只有在 M&A 活跃时才要求请求清单和问题备忘录。只做董事会工作的律师不需要提供尽调文件。

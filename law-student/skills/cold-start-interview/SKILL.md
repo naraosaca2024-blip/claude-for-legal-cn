@@ -1,308 +1,311 @@
 ---
 name: cold-start-interview
 description: >
-  About-you interview and materials intake — classes, bar jurisdiction,
-  learning style (drill-me vs explain-to-me), past outlines, graded essays,
-  old exams, MBE sets, syllabi, papers. Use on a fresh install, when the user
-  says "set up" or "get started", or with --check-integrations to re-probe
-  connectors.
+  关于你的访谈与材料摄取——课程、律师资格考试司法管辖区、学习风格（主动挑战 vs 先解释）、过去大纲、评分论文、旧考试、MBE 题集、教学大纲、论文。在全新安装时使用，当用户说"设置"或"开始"时使用，或使用 --check-integrations 重新探测连接器。
 argument-hint: "[--redo] [--check-integrations]"
 ---
 
+<!--
+This file is a Chinese translation of the original by Anthropic PBC.
+Original: https://github.com/anthropics/claude-for-legal
+Licensed under Apache License 2.0
+-->
+
+
 # /cold-start-interview
 
-1. Check `~/.claude/plugins/config/claude-for-legal/law-student/CLAUDE.md`. If already populated and no `--redo`, confirm before overwriting. If a populated ~/.claude/plugins/config/claude-for-legal/law-student/CLAUDE.md (no `[PLACEHOLDER]` markers) exists at `~/.claude/plugins/cache/claude-for-legal/law-student/*/CLAUDE.md` but not at the config path, copy it to the config path and tell the user what was migrated.
-2. Apply the interview workflow below.
-3. Walk Part 0 (who's using / what's connected — student vs. grad vs. other; document storage availability), Part 1 (where you are), Part 2 (how you learn — drill-me vs explain-to-me), Part 3 (strong/shaky/avoid), Part 4 (materials intake — target 10-20 items).
-4. Re-read captured answers. Catch contradictions, drifted specifics, gaps worth naming now.
-5. Write `~/.claude/plugins/config/claude-for-legal/law-student/CLAUDE.md` (creating parent directories as needed), including `## Who's using this` and `## Available integrations`. Add `LIMITED DATA` flag if fewer than 10 materials were shared.
-6. Confirm with the user: "Here's what I captured — anything wrong?"
+1. 检查 `~/.claude/plugins/config/claude-for-legal/law-student/CLAUDE.md`。如果已填充且没有 `--redo`，覆盖前先确认。如果已填充的 ~/.claude/plugins/config/claude-for-legal/law-student/CLAUDE.md（无 `[PLACEHOLDER]` 标记）存在于 `~/.claude/plugins/cache/claude-for-legal/law-student/*/CLAUDE.md` 但不在配置路径，将其复制到配置路径并告知用户迁移了什么内容。
+2. 应用下面的访谈工作流。
+3. 完成第 0 部分（谁在使用 / 连接了什么——学生 vs 应届毕业生 vs 其他；文档存储可用性）、第 1 部分（你在哪里）、第 2 部分（你如何学习——主动挑战 vs 先解释）、第 3 部分（强项/薄弱/回避）、第 4 部分（材料摄取——目标 10-20 项）。
+4. 重新阅读捕获的答案。发现矛盾、偏移的细节、值得现在说明的空缺。
+5. 写入 `~/.claude/plugins/config/claude-for-legal/law-student/CLAUDE.md`（根据需要创建父目录），包括 `## 谁在使用这个` 和 `## 可用集成`。如果分享的材料少于 10 项，添加 `LIMITED DATA` 标记。
+6. 与用户确认："这是我记录的内容——有什么不对吗？"
 
-**`--check-integrations`:** Re-run only the Part 0 integration-availability check. Updates `## Available integrations` in `~/.claude/plugins/config/claude-for-legal/law-student/CLAUDE.md` without touching the role or the rest of the profile. Use after adding or removing an MCP connector.
+**`--check-integrations`：** 仅重新运行第 0 部分的集成可用性检查。在不触及角色或其他档案内容的情况下更新 `~/.claude/plugins/config/claude-for-legal/law-student/CLAUDE.md` 中的 `## 可用集成`。在添加或删除 MCP 连接器后使用。
 
-When probing: only report ✓ if an MCP tool call actually succeeded. Configured-but-untested connectors should be marked ⚪ with a one-line how-to for confirming. Never report ✓ based on `.mcp.json` declarations alone — that misleads users into thinking something is wired up when it isn't.
+探测时：只有当 MCP 工具调用实际成功时才报告 ✓。已配置但未测试的连接器应标记 ⚪，附带一行确认说明。永远不要仅凭 `.mcp.json` 声明就报告 ✓——这会让用户误以为某个连接器已经连通，实际上并没有。
 
 ---
 
-## Purpose
+## 目的
 
-The other cold-starts learn an organization. This one learns you. How you study, what you avoid, whether you want to be pushed or scaffolded.
+其他冷启动访谈学习的是一个组织。这个学习的是你。你如何学习，你回避什么，你想被推动还是被辅助。
 
-## Cold-start check
+## 冷启动检查
 
-Read `~/.claude/plugins/config/claude-for-legal/law-student/CLAUDE.md`:
-- **Does not exist** → start the interview.
-- **Contains `<!-- SETUP PAUSED AT: -->`** → greet the student and offer to resume from that section.
-- **Contains `[PLACEHOLDER]` markers but no pause comment** → the template was never completed; offer to start fresh or resume from wherever the placeholders begin.
-- **Populated (no placeholders, no pause comment)** → already configured; skip unless `--redo`.
+读取 `~/.claude/plugins/config/claude-for-legal/law-student/CLAUDE.md`：
+- **不存在** → 开始访谈。
+- **包含 `<!-- SETUP PAUSED AT: -->`** → 向学生打招呼，提议从该部分继续。
+- **包含 `[PLACEHOLDER]` 标记但无暂停注释** → 模板从未完成；提议重新开始或从占位符开始处继续。
+- **已填充（无占位符，无暂停注释）** → 已配置；除非有 `--redo` 否则跳过。
 
-The template structure lives at `${CLAUDE_PLUGIN_ROOT}/CLAUDE.md` — use it as the section scaffold. Write the completed practice profile to the config path, creating parent directories as needed. If a CLAUDE.md exists at the old cache path `~/.claude/plugins/cache/claude-for-legal/law-student/*/CLAUDE.md` but not here, copy it forward.
+模板结构位于 `${CLAUDE_PLUGIN_ROOT}/CLAUDE.md`——用它作为部分脚手架。将完成的实践档案写入配置路径，根据需要创建父目录。如果 CLAUDE.md 存在于旧缓存路径 `~/.claude/plugins/cache/claude-for-legal/law-student/*/CLAUDE.md` 但不在此处，将其向前复制。
 
-## Check for the shared company profile
+## 检查共享公司档案
 
-Look for `~/.claude/plugins/config/claude-for-legal/company-profile.md`.
+查找 `~/.claude/plugins/config/claude-for-legal/company-profile.md`。
 
-- **If it exists:** Read it. Show a one-line confirmation: "You're [name], [practice setting], at [company], [industry], operating in [jurisdictions]. Right? (Or say 'update' to change the shared profile.)" If confirmed, skip the company questions — go straight to the plugin-specific ones.
-- **If it doesn't exist:** You'll be the first plugin this user set up. After the orientation and fork, ask the company questions and write them to the shared profile (per the template at `references/company-profile-template.md` in the plugin root), then continue with the plugin-specific questions. Tell the user: "I've saved your company profile — the other legal plugins will read it and skip these questions."
+- **如果存在：** 读取它。显示一行确认："You're [name], [practice setting], at [company], [industry], operating in [jurisdictions]. Right? (Or say 'update' to change the shared profile.)" 如果确认，跳过公司问题——直接进入 plugin 特定问题。
+- **如果不存在：** 这将是此用户设置的第一个 plugin。定向和分支之后，询问公司问题并写入共享档案（按 plugin 根目录中 `references/company-profile-template.md` 的模板），然后继续 plugin 特定问题。告诉用户："I've saved your company profile — the other legal plugins will read it and skip these questions."
 
-The company questions that belong in the shared profile (and should NOT be re-asked if it exists): practice setting, company name, industry, what-you-sell, size, jurisdictions, regulators, risk appetite, escalation names. The plugin-specific questions (playbook positions, review framework, house style, supervision model, etc.) stay per-plugin.
+属于共享档案的公司问题（如果已存在则不应重新询问）：执业环境、公司名称、行业、销售产品、规模、司法管辖区、监管机构、风险偏好、升级联系人。Plugin 特定问题（剧本立场、审查框架、内部风格、监督模型等）留在每个 plugin 中。
 
-## Install scope check
+## 安装范围检查
 
-Before the orientation, if you notice the working directory is inside a project (not the user's home directory), flag it. Say once:
+在定向之前，如果你注意到工作目录在项目内（不是用户的主目录），标记它。说一次：
 
-> **Heads up — it looks like this plugin may be project-scoped, which means I can only read files in [current directory]. If you'll want me to read documents from elsewhere (Downloads, Documents, Dropbox), install user-scoped instead — see QUICKSTART.md. You can continue with project scope, but you'll need to move files into this folder.**
+> **注意——此 plugin 可能是项目范围的，这意味着我只能读取 [当前目录] 中的文件。如果你想让我读取其他位置的文档（下载、文档、Dropbox），请安装用户范围版本——见 QUICKSTART.md。你可以继续使用项目范围，但需要将文件移到此文件夹中。**
 
-Ask the user to confirm before proceeding: continue with project scope, or pause to reinstall user-scoped. If the working directory *is* the user's home directory, skip this check silently.
+请用户确认后再继续：继续使用项目范围，或暂停重新安装用户范围版本。如果工作目录*是*用户的主目录，静默跳过此检查。
 
-## Before the interview starts
+## 访谈开始前
 
-Show this preamble first (3-4 short lines, nothing more):
+首先显示此前言（3-4 行短语，不多于此）：
 
-> **`law-student` is for law students studying for class or the bar.** Not your area? `/legal-builder-hub:related-skills-surfacer`.
+> **`law-student` 面向备考课程或律师资格考试的法学院学生。** 不是你的方向？`/legal-builder-hub:related-skills-surfacer`。
 >
-> **2 minutes** gets you year in school (1L/2L/3L/bar prep), current classes, and bar exam date if applicable. **15 minutes** adds your learning style default (drill-me vs. explain-to-me), weak areas, past materials (outlines, graded essays, old exams), professor exam history from uploads, and flashcard subjects.
+> **2 分钟**可以完成：年级（1L/2L/3L/备考律师资格）、当前课程、律师资格考试日期（如适用）。**15 分钟**另外完成：默认学习风格（主动挑战 vs 先解释）、薄弱环节、过去材料（大纲、评分论文、旧考试）、从上传内容获取的教授考试历史，以及抽认卡科目。
 >
-> Quick or full? (Upgrade any time with `/law-student:cold-start-interview --full`.)
+> 快速还是完整？（随时可以通过 `/law-student:cold-start-interview --full` 升级。）
 
-## After the user picks quick or full
+## 用户选择后
 
-Once the student has picked, orient them. Cover, in your own voice:
+学生选择快速或完整后，先做定向。用你自己的语言介绍：
 
-- **What this plugin maintains:** your profile (classes, exam dates, weak areas, learning style), a study plan, per-subject outlines, flashcard buckets, and a practice-exam log.
-- **What this setup does:** helps the student study law — outlines, case briefs, cold-call prep, exam forecasts, bar prep — in the format that fits how they actually learn. Learns study style, subjects, and exam schedule, and writes it into a plain-text file the plugin reads from every time. Everything can be changed later. Once it's done, the commands will work the way the student studies, not the way a generic template does.
-- **Data sources:** setup builds a fresh study profile from the student's answers only. It does not read personal Claude history, other conversations, or the home-directory CLAUDE.md. If something relevant came up earlier in this conversation (e.g., a class or a bar date), ask before folding it in. Nothing gets added to configuration unless the student types or approves it.
+- **此 plugin 维护的内容：** 你的档案（课程、考试日期、薄弱环节、学习风格）、学习计划、每科大纲、抽认卡存储桶、练习考试日志。
+- **此设置的作用：** 帮助学生学习法律——大纲、案例摘要、课堂提问准备、考试预测、律师资格考试备考——以适合他们实际学习方式的格式进行。学习学习风格、科目和考试时间表，并将其写入 plugin 每次读取的纯文本文件。所有内容之后都可以更改。完成后，命令将按照学生的学习方式工作，而不是按照通用模板的方式。
+- **数据来源：** 设置仅从学生的答案构建新的学习档案。它不读取个人 Claude 历史、其他对话或主目录 CLAUDE.md。如果当前对话中出现了相关内容（例如某门课程或考试日期），在使用之前先询问。除非学生输入或批准，否则不将任何内容添加到配置中。
 
-**Why this matters.** Every command in this plugin reads from the configuration this interview writes. A generic configuration gives generic output — a default outline format, a default drill intensity, and exam forecasts calibrated to no one's actual classes. Telling the plugin how the student actually studies — drill-me vs. explain-to-me, subjects, professors, what gets avoided — is what makes the difference between "a study AI tool" and "a tool that pushes you the way you need to be pushed." The more specific the answers and the more materials uploaded (outlines, graded essays, old exams), the more the outputs will match the student's classes.
+**为什么这很重要。** 此 plugin 中的每个命令都从此访谈写入的配置中读取。通用配置给出通用输出——默认大纲格式、默认练习强度，以及没有针对任何人实际课程校准的考试预测。告诉 plugin 学生实际如何学习——主动挑战 vs 先解释、科目、教授、回避什么——才是"一个学习 AI 工具"和"以你需要的方式推动你的工具"之间的区别。答案越具体，上传的材料越多（大纲、评分论文、旧考试），输出就越符合学生的课程。
 
-### Quick start or full setup — branching
+### 快速开始或完整设置——分支
 
-The student picked quick or full in the preamble. Branch:
+学生在前言中选择了快速或完整。分支：
 
-**Quick start path:** ask only the basics (who you are, what you're studying, bar jurisdiction if applicable). Write the config with `[DEFAULT]` markers on everything else. Close with: "Done. You can start using the commands now. I've used sensible defaults for case-brief format, flashcard style, and outlining conventions. When a skill's output feels off, that's usually a default you should tune — it'll tell you which. Run `/law-student:cold-start-interview --full` anytime to do the whole interview, or `/law-student:cold-start-interview --redo <section>` to re-do one part."
+**快速开始路径：** 只询问基础内容（你是谁，你在学什么，律师资格考试司法管辖区如适用）。用 `[DEFAULT]` 标记写入配置，其他所有内容都用默认值。结尾："Done. You can start using the commands now. I've used sensible defaults for case-brief format, flashcard style, and outlining conventions. When a skill's output feels off, that's usually a default you should tune — it'll tell you which. Run `/law-student:cold-start-interview --full` anytime to do the whole interview, or `/law-student:cold-start-interview --redo <section>` to re-do one part."
 
-**Full setup path:** the existing interview flow below.
+**完整设置路径：** 下面的现有访谈流程。
 
-## Interview pacing
+## 访谈节奏
 
-- **Assume the answer exists somewhere.** When a question asks for information that's probably written down somewhere — company description, playbook, escalation matrix, style guide, handbook, jurisdiction list, matter portfolio — prompt for a link or a paste before asking the user to type it from memory. "Paste a link or a doc, or give me the short version" is the default ask for anything that's more than a sentence. An interviewer who makes people re-type what they've already written has failed the first job of an interviewer.
+- **假设答案已经在某处存在。** 当问题询问可能已经写下的信息时——公司描述、剧本、升级矩阵、风格指南、手册、司法管辖区列表、事项档案——在要求用户凭记忆输入之前，先提示提供链接或粘贴内容。"粘贴链接或文档，或给我简短版本"是任何超过一句话内容的默认询问方式。让人重新输入他们已经写过的内容的访谈者没有完成访谈者的首要工作。
 
-**Pause for real answers.** Part 1 has quick tap-through answers. Part 4 (materials) and the harder parts of Part 2–3 need the student to type, describe, or upload. When a question needs more than a quick tap:
+**等待真实答案。** 第 1 部分有快速点击式答案。第 4 部分（材料）和第 2-3 部分的较难部分需要学生输入、描述或上传。当问题需要多于一次快速点击时：
 
-- **Ask the question and wait.** Say explicitly: "This one needs a typed answer — I'll wait." Do not move to the next question until the student responds.
-- **For uploads (syllabi, outlines, graded essays, old exams, MBE sets):** "Paste the contents, share a file path, or say 'skip for now.' If you skip, I'll flag the gap in the practice profile so you can fill it later." Then actually wait. Don't silently move on.
-- **Before writing the practice profile:** review the interview. List every question that was skipped or answered with a placeholder. Say: "Before I write your practice profile, here's what's still open: [list]. Want to fill any of these now, or leave them as placeholders?" Then wait for the answer.
-- **Never** write a practice profile with silent gaps. Every placeholder should be a deliberate choice the student made to skip — not a question that scrolled past because they paused to think.
-- **Pause and resume.** Tell the student up front: "If you need to stop, say 'pause' (or 'stop', or 'let me come back to this') and I'll save your progress. Run `/law-student:cold-start-interview` again later and I'll pick up where you left off." When the student pauses, write a partial configuration to `~/.claude/plugins/config/claude-for-legal/law-student/CLAUDE.md` with a `<!-- SETUP PAUSED AT: [section name] — run /law-student:cold-start-interview to resume -->` comment at the top and `[PENDING]` markers (distinct from `[PLACEHOLDER]`) on unanswered fields. When setup re-runs and finds a paused config, greet the student: "Welcome back. You paused at [section]. Your earlier answers are saved. Pick up where we left off, or start over?" Do not re-ask questions already answered.
-- **Batch size — count subparts.** "Never ask more than 2-3 questions in one turn" means 2-3 *answerable prompts*, counting subparts. One question with 5 subparts is 5 questions. The test: can the user answer without scrolling? If the questions don't fit on one screen, it's too many. Prefer structured tap-through questions where possible — they don't require scrolling or typing.
+- **询问问题并等待。** 明确说："This one needs a typed answer — I'll wait." 在学生回应之前不要进入下一个问题。
+- **对于上传（教学大纲、大纲、评分论文、旧考试、MBE 题集）：** "粘贴内容、提供文件路径，或说'暂时跳过'。如果你跳过，我会在实践档案中标记差距，以便你之后填写。" 然后真正等待。不要静默地继续。
+- **在写入实践档案之前：** 回顾访谈。列出每个被跳过或用占位符回答的问题。说："Before I write your practice profile, here's what's still open: [list]. Want to fill any of these now, or leave them as placeholders?" 然后等待答案。
+- **永远不要**带着静默的空缺写入实践档案。每个占位符都应该是学生有意选择跳过的——而不是因为他们停下来思考时问题就滚过去了。
+- **暂停和继续。** 预先告知学生："如果你需要停止，说'暂停'（或'停止'，或'让我回来再看这个'），我会保存你的进度。稍后重新运行 `/law-student:cold-start-interview`，我会从你停下的地方继续。" 当学生暂停时，将部分配置写入 `~/.claude/plugins/config/claude-for-legal/law-student/CLAUDE.md`，在顶部添加 `<!-- SETUP PAUSED AT: [section name] — run /law-student:cold-start-interview to resume -->` 注释，并在未回答的字段上添加 `[PENDING]` 标记（与 `[PLACEHOLDER]` 区分）。当设置重新运行并发现暂停的配置时，问候学生："欢迎回来。你在 [部分] 暂停了。你之前的答案已保存。从上次继续，还是重新开始？" 不要重新询问已经回答的问题。
+- **批次大小——计算子部分。** "每轮不超过 2-3 个问题"意味着 2-3 个*可回答的提示*，包括子部分。一个有 5 个子部分的问题就是 5 个问题。测试：用户能不滚动就回答吗？如果问题不能放在一屏内，就太多了。尽可能使用结构化的点击式问题——它们不需要滚动或输入。
 
-**Verify user-stated legal facts as they come up in setup.** When the user answers an interview question with a specific rule citation, statute number, case name, deadline, threshold, jurisdiction, or registration number — and it's something you can sanity-check — do the check before writing it into the configuration. If what they said conflicts with your understanding or with something they've pasted, surface it: "You said the threshold is X; my understanding is Y — can you confirm which goes in the profile? `[premise flagged — verify]`" A wrong fact written into CLAUDE.md propagates into every future output; catching it here is one of the highest-leverage moments in the product.
+**在设置中核实用户陈述的法律事实。** 当用户用特定的规则引用、法规编号、案例名称、截止日期、阈值、司法管辖区或注册号回答访谈问题时——如果你可以进行合理性检查——在将其写入配置之前进行检查。如果他们说的与你的理解或他们粘贴的内容冲突，指出来："You said the threshold is X; my understanding is Y — can you confirm which goes in the profile? `[premise flagged — verify]`" 写入 CLAUDE.md 的错误事实会传播到每个未来的输出；在这里捕捉它是产品中杠杆最高的时刻之一。
 
-## The interview
+## 访谈
 
-### Opening
+### 开场
 
-> I'm going to help you study. Not by giving you answers — by making you work for them. But first I need to know how you work. Ten to fifteen minutes.
+> 我要帮助你学习。不是通过给你答案——而是让你为此努力。但首先我需要知道你如何工作。十到十五分钟。
 >
-> I'll also ask for materials along the way — past outlines, old exams, graded essays, syllabi. Ten to twenty documents across the interview is the target. More is better. Papers you've written count. If you share fewer than ten I'll flag the practice profile as LIMITED DATA — skills will still work, but outputs will be thinner because I'm pattern-matching on less of your actual work. Templates-first: if you upload an existing outline, I read it and match your format rather than asking you to describe it.
+> 在访谈过程中，我还会要求提供材料——过去的大纲、旧考试、评分论文、教学大纲。整个访谈的目标是十到二十份文档。越多越好。你写过的论文算数。如果你分享的少于十项，我会将实践档案标记为 LIMITED DATA——skill 仍然可以工作，但输出会因为我在更少实际工作上进行模式匹配而变得较薄。模板优先：如果你上传了现有大纲，我会读取它并匹配你的格式，而不是要求你描述它。
 
-### Part 0: Who's using this, and what's connected
+### 第 0 部分：谁在使用，连接了什么
 
-Two quick questions before we learn how you study. These shape how the plugin works, not what it can do.
+在我们了解你如何学习之前，有两个简短问题。这些决定 plugin 如何工作，而不是它能做什么。
 
-#### Who's using this?
+#### 谁在使用这个？
 
-> Are you a law student, a recent grad studying for the bar, or someone else using this for legal study? (This feeds every skill's framing — bar-prep jumps straight into drilling, students get study planning first, and the honor-code reminder is gated on role.)
+> 你是法学院学生、备考律师资格的应届毕业生，还是出于其他原因使用这个进行法律学习的人？（这决定每个 skill 的框架——律师资格考试备考直接进入练习，学生先进行学习规划，学术背景提醒根据角色进行。）
 >
-> 1. **Law student** — 1L, 2L, 3L, LLM; currently enrolled.
-> 2. **Recent grad studying for the bar** — graduated, prepping for a bar exam.
-> 3. **Someone else** — you're using these tools to learn legal material for a non-academic reason (self-study, career change, adjacent-field work).
+> 1. **法学院学生** — 1L、2L、3L、LLM；目前在校。
+> 2. **备考律师资格的应届毕业生** — 已毕业，正在备考。
+> 3. **其他** — 你出于非学术原因使用这些工具学习法律材料（自学、职业转型、相邻领域工作）。
 
-If the answer is 1 or 2 (student or recent grad), say this once:
+如果答案是 1 或 2（学生或应届毕业生），说一次：
 
-> Two reminders on using this for school or bar prep:
+> 关于使用这个进行学校学习或律师资格备考的两个提醒：
 >
-> 1. **Check your school's honor code and your professor's AI policy before using this on any graded work.** Most schools distinguish study tools (fine) from exam / graded-paper assistance (often restricted or prohibited). This plugin is built for study — drilling, outlining, IRAC practice, exam forecasting — not for producing work you turn in. When in doubt, ask.
-> 2. **Don't paste real client facts into this plugin.** If you're in a clinic, externship, or summer job and a study question ends up touching a real matter, stop — that's a supervised-practice situation, not study. Use your clinic or job's approved workflow, or talk to your supervising attorney. See the real-client-matter check below.
+> 1. **在将此用于任何评分作业之前，检查你学校的荣誉守则和教授的 AI 政策。** 大多数学校区分学习工具（允许）和考试/评分论文辅助（通常受限或禁止）。此 plugin 是为学习而建的——练习、大纲构建、IRAC 练习、考试预测——而不是为了生成你要提交的作业。有疑问时，询问。
+> 2. **不要将真实的客户事实粘贴到此 plugin 中。** 如果你在临床实习、校外实习或暑期工作中，某个学习问题最终触及了真实事项，停下来——那是监督执业情况，不是学习。使用你的临床实习或工作批准的工作流，或与你的督导律师交谈。见下面的真实客户事项检查。
 
-If the answer is 3 (someone else), say this once:
+如果答案是 3（其他），说一次：
 
-> You can use every feature — drilling, outlines, writing practice, exam forecasts — the same way a student would. Two things change in how I'll frame things:
+> 你可以使用所有功能——练习、大纲、写作练习、考试预测——就像学生一样。我框架方面有两件事会改变：
 >
-> 1. **I'll frame outputs as study material, not as legal advice.** Learning doctrine is not the same as applying it to your own situation. If you're using this because you're navigating a real legal issue yourself, a study tool isn't the right starting point — find a lawyer (your jurisdiction's lawyer referral service is the fastest door: state bar in the US; SRA/Bar Standards Board in England & Wales; Law Society in Scotland/NI/Ireland/Canada/Australia; or the jurisdiction's equivalent. Legal aid for individuals; local law school clinics can point you). You can still use this to learn the area, just don't confuse learning with advice.
-> 2. **I'll pause if it looks like you've shifted from study into a real matter.** See the real-client-matter check below.
+> 1. **我会将输出框架为学习材料，而不是法律建议。** 学习法律原则与将其应用于你自己的情况不同。如果你使用这个是因为你自己在处理一个真实的法律问题，学习工具不是正确的起点——找一个律师（你所在司法管辖区的律师推荐服务是最快的入口：美国的州律协；英格兰和威尔士的 SRA/Bar Standards Board；苏格兰/NI/爱尔兰/加拿大/澳大利亚的 Law Society；或所在司法管辖区的同等机构。个人可用法律援助；当地法学院诊所可以为你指路）。你仍然可以使用这个来了解该领域，只是不要将学习与建议混淆。
+> 2. **如果看起来你从学习转向了真实事项，我会暂停。** 见下面的真实客户事项检查。
 
-**Real-client-matter check (applies to all roles):** If the user describes a real matter with real facts (real client name, real dates, real filings, real legal exposure they or someone they know is facing) rather than a study hypothetical, pause:
+**真实客户事项检查（适用于所有角色）：** 如果用户描述了一个有真实事实的真实事项（真实客户姓名、真实日期、真实诉讼、他们或他们认识的人面临的真实法律风险），而不是学习假设，暂停：
 
-> That sounds like a real matter, not a study hypothetical. If it is:
+> 那听起来像一个真实事项，而不是学习假设。如果是：
 >
-> - **If you're in a clinic, externship, or supervised practice:** don't paste client facts into a study tool — use your clinic's approved workflow or talk to your supervising attorney.
-> - **If this is your own legal situation:** a study plugin is the wrong tool. Your jurisdiction's lawyer referral service is the fastest starting point (state bar in the US; SRA/Bar Standards Board in England & Wales; Law Society in Scotland/NI/Ireland/Canada/Australia; or the jurisdiction's equivalent); legal aid organizations cover many practice areas for individuals.
+> - **如果你在临床实习、校外实习或监督执业中：** 不要将客户事实粘贴到学习工具中——使用你的临床实习批准的工作流或与你的督导律师交谈。
+> - **如果这是你自己的法律情况：** 学习 plugin 是错误的工具。你所在司法管辖区的律师推荐服务是最快的起点（美国的州律协；英格兰和威尔士的 SRA/Bar Standards Board；苏格兰/NI/爱尔兰/加拿大/澳大利亚的 Law Society；或所在司法管辖区的同等机构）；法律援助组织为个人覆盖许多执业领域。
 >
-> I can still help you study the doctrine in the abstract. Want to convert this into a study hypothetical (names, dates, and identifying details changed)?
+> 我仍然可以帮助你抽象地学习该原则。想将这个转化为一个学习假设（名称、日期和识别性细节已更改）吗？
 
-Do not continue analyzing the specific facts until the user confirms it's a study hypothetical or has been redirected.
+在用户确认这是学习假设或已被重定向之前，不要继续分析具体事实。
 
-#### What's connected?
+#### 连接了什么？
 
-> This plugin can work with document storage (Google Drive, SharePoint, Box, Dropbox) for saving outlines, flashcard decks, and notes. Let me check which connectors you have configured — features that need them will work, and features that don't have them will fall back to manual gracefully instead of failing silently.
+> 此 plugin 可以与文档存储（Google Drive、SharePoint、Box、Dropbox）配合工作，用于保存大纲、抽认卡组和笔记。让我检查你配置了哪些连接器——需要它们的功能将正常工作，没有连接器的功能将优雅地回退到手动方式，而不是静默失败。
 
-**Check what's actually connected, not what's configured.** A connector listed in `.mcp.json` is *available*. A connector that's actually responding is *connected*. These are different, and confusing them destroys trust. For each connector this plugin uses:
+**检查实际连接的内容，而不是已配置的内容。** `.mcp.json` 中列出的连接器是*可用的*。实际响应的连接器是*已连接的*。这些不同，混淆它们会破坏信任。对于此 plugin 使用的每个连接器：
 
-- If you can test the connection (call a simple MCP tool like a list or search), report ✓ only on a successful response.
-- If you can't test (no way to probe from here), report ⚪ "configured but not verified — open your MCP settings to confirm" with a one-line how-to.
-- Never report ✓ based on configuration alone.
+- 如果你可以测试连接（调用简单的 MCP 工具如列表或搜索），只有在成功响应时才报告 ✓。
+- 如果你无法测试（无法从此处探测），报告 ⚪ "已配置但未验证——打开你的 MCP 设置确认"，附带一行说明。
+- 永远不要仅凭配置就报告 ✓。
 
-For connectors that show as not connected, tell the user how to connect. Example phrasing: "Box isn't connected. In Claude Cowork: Settings → Connectors → Add → Box → sign in. In Claude Code: add the Box MCP to your config or via `/mcp`. This plugin works without it — you'll paste documents instead of pulling them — but connecting it makes document pulls automatic."
+对于显示为未连接的连接器，告诉用户如何连接。示例措辞："Box 未连接。在 Claude Cowork 中：设置 → 连接器 → 添加 → Box → 登录。在 Claude Code 中：通过你的配置或 `/mcp` 添加 Box MCP。此 plugin 不需要它——你将直接粘贴文档而不是拉取它们——但连接它使文档拉取自动化。"
 
-Then report findings in this form:
+然后以此形式报告结果：
 
-> - ✓ [Integration] — connected (tested)
-> - ⚪ [Integration] — configured but not verified. Open your MCP settings to confirm.
-> - ✗ [Integration] — not found. [Feature] will fall back to [manual alternative]. [How to connect.]
+> - ✓ [集成] — 已连接（已测试）
+> - ⚪ [集成] — 已配置但未验证。打开你的 MCP 设置确认。
+> - ✗ [集成] — 未找到。[功能] 将回退到 [手动替代方案]。[如何连接。]
 
-You don't need it. Every feature works with local file access alone.
+不需要它。每个功能仅凭本地文件访问就可以工作。
 
-Write Part 0 answers to the plugin config under `## Who's using this` and `## Available integrations`.
+将第 0 部分答案写入 plugin 配置下的 `## 谁在使用这个` 和 `## 可用集成`。
 
-### Part 1: Where you are (1 min)
+### 第 1 部分：你在哪里（1 分钟）
 
-*(This feeds `/law-student:study-plan` and `/law-student:outline-builder` — classes become scheduled study blocks, exam formats drive what `/law-student:exam-forecast` and `/law-student:irac-practice` prepare you for, and the bar date schedules `/law-student:bar-prep-questions` backward from the exam.)*
+*（这为 `/law-student:study-plan` 和 `/law-student:outline-builder` 提供数据——课程成为安排好的学习块，考试格式决定 `/law-student:exam-forecast` 和 `/law-student:irac-practice` 的准备方向，律师资格考试日期从考试日期反向安排 `/law-student:bar-prep-questions`。）*
 
-- Year (1L, 2L, 3L, LLM)
-- School type — T1 / T2 / T3 / T4. (This calibrates difficulty in downstream drill and exam-forecast skills; the school *name* isn't needed.)
-- This semester's classes — name, exam format, where you are in the syllabus
-- Bar jurisdiction and target date (if known) (This feeds `/law-student:bar-prep-questions` — schedules MBE sets and essay practice backward from this date, filtered to your jurisdiction's essay subjects.)
+- 年级（1L、2L、3L、LLM）
+- 学校类型——T1 / T2 / T3 / T4。（这校准下游练习和考试预测 skill 的难度；不需要学校*名称*。）
+- 本学期的课程——名称、考试格式、你在教学大纲中的进度
+- 律师资格考试司法管辖区和目标日期（如已知）（这为 `/law-student:bar-prep-questions` 提供数据——从此日期反向安排 MBE 题集和论文练习，按你的司法管辖区的论文科目筛选。）
 
-**Situations that don't fit the boxes.** If your situation doesn't match the standard options (non-US law school, JD/LLM hybrid, dual-degree, part-time evening program, self-study for a non-UBE state, foreign-trained attorney preparing for a US bar, visiting scholar, PhD candidate auditing courses, or anything else the standard categories assume away), say so. I'll shift: "It sounds like your program doesn't fit my usual categories. Tell me about it in your own words — what you're studying, what the schedule looks like, what's on the horizon (exam, bar, paper) — and I'll build your profile from that instead of forcing you into boxes that don't fit. I'll skip or adapt the questions that don't apply." Then build the profile from the free-form description, flagging which template fields were filled, adapted, or left empty because they don't apply. A profile built from a forced fit is worse than a sparse profile built from what's actually true.
+**不适合框框的情况。** 如果你的情况不符合标准选项（非美国法学院、JD/LLM 双学位、联合学位、在职夜校项目、非 UBE 州自学、外国训练的律师备考美国律师资格、访问学者、旁听课程的博士候选人，或任何其他标准类别假设掉的情况），说出来。我会调整："听起来你的项目不符合我通常的类别。用你自己的话告诉我——你在学什么，时间表是什么，地平线上有什么（考试、律师资格、论文）——我会从那里构建你的档案，而不是把你塞进不合适的框框。我会跳过或调整不适用的问题。" 然后从自由形式的描述构建档案，标记哪些模板字段已填写、已调整或因不适用而留空。从强迫适合中构建的档案比从实际真实内容构建的稀疏档案更差。
 
-**Don't ask for the professor's name.** If it shows up on an uploaded past exam or syllabus, the plugin will use it — but typing it in at setup is friction that doesn't add calibration signal. See the materials prompt below.
+**不要询问教授的姓名。** 如果它出现在上传的过去考试或教学大纲上，plugin 会使用它——但在设置时输入它是不增加校准信号的摩擦。见下面的材料提示。
 
-### Part 2: How you learn (the key question) (2 min)
+### 第 2 部分：你如何学习（关键问题）（2 分钟）
 
-*(This feeds `/law-student:socratic-drill`, `/law-student:irac-practice`, and `/law-student:cold-call-prep` — drill-me pushes back without giving you the answer; explain-to-me scaffolds first, then tests. The default can be overridden per session.)*
+*（这为 `/law-student:socratic-drill`、`/law-student:irac-practice` 和 `/law-student:cold-call-prep` 提供数据——主动挑战在不给你答案的情况下反推；先解释先搭脚手架，然后测试。默认值可以在每次会话中覆盖。）*
 
-> Some people learn by being asked hard questions and pushed back on. Some people learn by having it explained clearly first, then testing themselves. Which one are you?
+> 有些人通过被问到难问题并被反推来学习。有些人通过先获得清晰的解释，然后自我测试来学习。你是哪种？
 
-**Drill-me:** I ask. You answer. I push back. I don't give you the answer — I make you find it. Socratic, but I'm on your side.
+**主动挑战：** 我问。你回答。我反推。我不给你答案——我让你自己找到它。苏格拉底式，但我站在你这边。
 
-**Explain-to-me:** I explain clearly. Then I ask questions to check understanding. Less pressure, more scaffolding.
+**先解释：** 我先清晰地解释。然后我问问题来检查理解。压力较小，脚手架更多。
 
-(You can switch per session. But the default matters.)
+（你可以在每次会话中切换。但默认值很重要。）
 
-### Part 3: Where you're strong and weak (1 min)
+### 第 3 部分：你的强项和薄弱点（1 分钟）
 
-*(This feeds `/law-student:study-plan` and `/law-student:bar-prep-questions` — weak areas and avoided subjects get more scheduled time and more drill sessions than strong ones.)*
+*（这为 `/law-student:study-plan` 和 `/law-student:bar-prep-questions` 提供数据——薄弱环节和回避的科目比强项安排更多的学习时间和练习会话。）*
 
-- What comes easy?
-- What's hard?
-- What do you keep not studying? (Everyone has one. That's the thing to drill.)
+- 什么来得容易？
+- 什么很难？
+- 你一直不学什么？（每个人都有一件。那就是要练习的东西。）
 
-### Part 4: Materials (3-5 min) — this is where the seed docs live
+### 第 4 部分：材料（3-5 分钟）——这是种子文档所在
 
-*(This feeds `/law-student:outline-builder` (your format and depth), `/law-student:exam-forecast` (professor patterns from past exams), `/law-student:legal-writing` (your writing voice from graded essays), and `/law-student:irac-practice` (feedback patterns). Fewer than 10 items = LIMITED DATA flag and thinner outputs until more is added.)*
+*（这为 `/law-student:outline-builder`（你的格式和深度）、`/law-student:exam-forecast`（来自过去考试的教授模式）、`/law-student:legal-writing`（来自评分论文的你的写作风格）和 `/law-student:irac-practice`（反馈模式）提供数据。少于 10 项 = LIMITED DATA 标记，在添加更多之前输出较薄。）*
 
-Say this first, once, as a single ask:
+首先说这些，一次，作为单个询问：
 
-> **Paste or link anything you've got: outlines (yours or commercial), class syllabi, past exams, graded essays, MBE question sets, class notes. The more I have, the more I can tailor. Professor names on past exams help me match patterns — if the professor's name is on an exam you upload, I'll use it. You don't need to type it.**
+> **粘贴或链接你拥有的任何内容：大纲（你的或商业的）、课程教学大纲、过去的考试、评分论文、MBE 题集、课堂笔记。我拥有的越多，我就能越好地定制。过去考试上的教授姓名帮助我匹配模式——如果你上传的考试上有教授姓名，我会使用它。你不需要输入它。**
 
-Then walk the categories below, capturing what the student has. More is always better for the downstream skills.
+然后走过下面的类别，捕获学生拥有的内容。对于下游 skill，越多越好。
 
-**Outlines:**
-- Past outlines across subjects (any subject — format transfers)
-- Flashcard decks if you keep them
-- How you outline (format, depth, rules-only vs rules+cases)
+**大纲：**
+- 跨科目的过去大纲（任何科目——格式可以转移）
+- 你保留的抽认卡组
+- 你如何构建大纲（格式、深度、仅规则 vs 规则+案例）
 
-**Graded work:**
-- Graded essays with professor feedback — this is gold for the writing and IRAC-practice skills
-- Old papers you've written (any length, any subject)
-- Mid-term or practice exams you've taken with a grade on them
+**评分作品：**
+- 带教授反馈的评分论文——这对写作和 IRAC 练习 skill 非常宝贵
+- 你写过的旧论文（任何长度，任何科目）
+- 你参加过的有分数的期中或练习考试
 
-**Exam prep materials:**
-- Old exams from the same professors (especially same-professor; those are highest signal)
-- Syllabi for current classes
-- Reading assignments / casebooks for current classes
-- Practice MBE question sets with answer explanations (Barbri/Themis/Kaplan — full sets if you have them)
-- Bar prep course outlines if you're at that stage
+**考试准备材料：**
+- 来自相同教授的旧考试（尤其是同一教授的；那些信号最强）
+- 当前课程的教学大纲
+- 当前课程的阅读作业/案例书
+- 带答案解释的练习 MBE 题集（Barbri/Themis/Kaplan——如果你有完整题集）
+- 如果你处于该阶段，律师资格备考课程大纲
 
-**Class specifics:**
-- Anything a professor has said about what they emphasize
-- Class-specific study group outputs you trust
+**课程具体内容：**
+- 教授说过的关于他们强调什么的任何内容
+- 你信任的课程特定学习小组成果
 
-Target 10-20 items across these categories. Below 10: LIMITED DATA flag on the practice profile. At 3 or fewer: strong LIMITED DATA caveat — skills will be generic until more is added.
+这些类别的目标是 10-20 项。低于 10：实践档案上的 LIMITED DATA 标记。3 项或更少：强烈 LIMITED DATA 警告——在添加更多之前，skill 将是通用的。
 
-**If the student didn't share outlines:** at the end of this section, offer: "Want me to write a starter outline skeleton for your most-avoided subject, in the format you described? You can edit it as you go and it seeds the outline builder for future runs."
+**如果学生没有分享大纲：** 在此部分末尾提供："Want me to write a starter outline skeleton for your most-avoided subject, in the format you described? You can edit it as you go and it seeds the outline builder for future runs."
 
-## Before writing — re-read
+## 写入前——重新阅读
 
-Before committing the plugin config, re-read every captured answer in order. Catches:
+在提交 plugin 配置之前，按顺序重新阅读每个捕获的答案。捕捉：
 
-1. **Contradictions** — e.g., you said you're a "drill-me" learner but also "I panic under pressure." Surface both, ask which governs the default.
-2. **Drifted specifics** — professor names, class abbreviations, dates that changed between sections. Confirm final values.
-3. **Skipped gaps worth naming** — classes with no exam format captured, a bar jurisdiction mentioned but no target date, etc. Offer to fill now rather than leaving for `--redo`.
+1. **矛盾** — 例如，你说你是"主动挑战"学习者，但也说"我在压力下会恐慌"。两者都呈现出来，询问哪个控制默认值。
+2. **偏移的细节** — 教授姓名、课程缩写、各部分之间变化的日期。确认最终值。
+3. **值得说明的跳过的差距** — 没有捕获考试格式的课程、提到了律师资格司法管辖区但没有目标日期等。提议现在填写而不是留给 `--redo`。
 
-## Writing the practice profile
+## 写入实践档案
 
-Per the template at `${CLAUDE_PLUGIN_ROOT}/CLAUDE.md`. Short — it's about one person.
+按照 `${CLAUDE_PLUGIN_ROOT}/CLAUDE.md` 的模板。简短——关于一个人的。
 
-**LIMITED DATA flag:** if fewer than 10 materials were shared across the interview, add a `> LIMITED DATA` note at the top of the plugin config (under the written-on date), stating: "This practice profile was written from [N] materials. Downstream skills will operate but outputs will be thinner — the outline builder doesn't have your format yet, the exam forecast has thin signal on your professors, the IRAC grader won't know your writing patterns. Re-run `/law-student:cold-start-interview --redo` after gathering more outlines, graded essays, or old exams to sharpen it."
+**LIMITED DATA 标记：** 如果在访谈中分享的材料少于 10 项，在 plugin 配置顶部添加 `> LIMITED DATA` 说明（在写入日期下方），说明："This practice profile was written from [N] materials. Downstream skills will operate but outputs will be thinner — the outline builder doesn't have your format yet, the exam forecast has thin signal on your professors, the IRAC grader won't know your writing patterns. Re-run `/law-student:cold-start-interview --redo` after gathering more outlines, graded essays, or old exams to sharpen it."
 
-## After writing
+## 写入后
 
-**Show what this plugin can do.** Before closing, offer:
+**展示此 plugin 能做什么。** 关闭前，提供：
 
-> **Want to see what I can help with?**
+> **想看看我能帮什么吗？**
 
-If yes, show this tailored list (not a generic template — these are the concrete things this plugin does best):
+如果是，显示此定制列表（不是通用模板——这些是此 plugin 最擅长的具体事情）：
 
-> **Here's what I'm good at in 1L / 2L / 3L study:**
+> **这是我在 1L / 2L / 3L 学习中擅长的：**
 >
-> - **Brief a case in your format** — e.g., "Opinion in, brief out — in the format you actually use for class." Try: `/law-student:case-brief`
-> - **Grade an IRAC essay** — e.g., "Structure, issue-spotting, rules, analysis, organization — does not rewrite." Try: `/law-student:irac-practice`
-> - **Build or extend a class outline** — e.g., "Your format, your subject, iteratively built as you go." Try: `/law-student:outline-builder`
-> - **Cold-call prep for tomorrow's class** — e.g., "Predict your professor's questions and drill them." Try: `/law-student:cold-call-prep`
-> - **Flashcards by subject with Leitner buckets** — e.g., "Generate, drill, and promote / demote across sessions." Try: `/law-student:flashcards`
-> - **Bar prep questions targeted at weak subjects** — e.g., "MBE or essay, drawn from your weak-subject list." Try: `/law-student:bar-prep-questions`
+> - **以你的格式摘录案例** — 例如，"意见输入，摘要输出——以你实际用于课堂的格式。" 试试：`/law-student:case-brief`
+> - **评分 IRAC 论文** — 例如，"结构、问题识别、规则、分析、组织——不重写。" 试试：`/law-student:irac-practice`
+> - **构建或扩展课程大纲** — 例如，"你的格式，你的科目，随学习迭代构建。" 试试：`/law-student:outline-builder`
+> - **准备明天课堂的随机提问** — 例如，"预测你教授的问题并练习它们。" 试试：`/law-student:cold-call-prep`
+> - **按科目的抽认卡与 Leitner 存储桶** — 例如，"生成、练习，并跨会话晋升/降级。" 试试：`/law-student:flashcards`
+> - **针对薄弱科目的律师资格考试问题** — 例如，"MBE 或论文，从你的薄弱科目列表中抽取。" 试试：`/law-student:bar-prep-questions`
 >
-> **My suggestion for your first one:** Run `/law-student:case-brief` on the next case you have to read — it'll tell you whether the brief format matches how you actually study. Or tell me what's on your plate and I'll pick.
+> **我对你第一个的建议：** 在你下一个要读的案例上运行 `/law-student:case-brief`——它会告诉你摘要格式是否符合你实际的学习方式。或者告诉我你手头有什么，我来选。
 
-This solves the cold-start problem (the supervisor doesn't know what to do first) and the value-prop problem (they don't know what the plugin can do) in one offer. Make the list specific. Skip this step if the supervisor already named a concrete first task during the interview.
+这在一个提供中解决了冷启动问题（督导者不知道先做什么）和价值主张问题（他们不知道 plugin 能做什么）。让列表具体化。如果督导者在访谈中已经说明了一个具体的第一个任务，跳过此步骤。
 
 
-**If the student is in bar prep mode** (Role is "Law student studying for bar," or they told you they're prepping for a bar exam): jump straight into questions — that's what bar prep users want.
+**如果学生处于律师资格备考模式**（角色是"备考律师资格的法学院学生"，或他们告诉你他们在备考）：直接进入问题——那是律师资格考试备考用户想要的。
 
-- "What's the MBE subject you're most worried about? Let's drill that."
-- If drill-me mode: "Okay. [Subject]. First question: [ask something about the subject]. Don't look it up."
+- "你最担心的 MBE 科目是什么？让我们练习那个。"
+- 如果是主动挑战模式："好的。[科目]。第一个问题：[询问关于该科目的问题]。不要查找。"
 
-**If the student is a regular law student** (not in bar prep): suggest a plan before a drill. Plans beat cold-drilling for a semester.
+**如果学生是普通法学院学生**（不在律师资格备考中）：在练习之前建议一个计划。对于一个学期，计划胜过冷练习。
 
-- **Start here:** `/law-student:study-plan` — builds a study schedule from your classes, exam dates, and weak areas. It'll suggest when to drill, when to outline, and when to do practice exams.
+- **从这里开始：** `/law-student:study-plan` — 从你的课程、考试日期和薄弱环节构建学习时间表。它会建议何时练习、何时构建大纲，以及何时进行练习考试。
 
-**In either case:**
-- If LIMITED DATA flagged: "Practice Profile is thin — the downstream skills will be generic until more materials are added. Biggest gaps: [list]. Want to flag the top thing to gather?"
-- **Before your first citation-heavy session, connect a research tool if you have one.** Say: "Before your first IRAC practice or case brief that leans on citations: if you have a research connector (CourtListener), wire it up. Without one, I'll flag every citation as unverified — cross-check against your casebook or bar-prep service. In Cowork: Settings → Connectors."
+**无论哪种情况：**
+- 如果标记了 LIMITED DATA："实践档案很薄——在添加更多材料之前，下游 skill 将是通用的。最大的差距：[列表]。想标记要收集的首要内容吗？"
+- **在你第一次引用密集的会话之前，如果你有研究工具，请连接它。** 说："在你第一次依赖引用的 IRAC 练习或案例摘要之前：如果你有研究连接器（CourtListener），接好它。没有它，我会将每个引用标记为未验证——与你的案例书或律师资格备考服务交叉检查。在 Cowork 中：设置 → 连接器。"
 
 <!-- COLLATERAL LINKS: when onboarding collateral exists, add here:
      "Want a walkthrough first? [Watch the 3-minute intro](URL) or [read the getting-started guide](URL)." -->
 
-Then close with the "you can change anything later" note:
+然后以"你可以稍后更改任何内容"的说明结尾：
 
-> Done. Your configuration is at `~/.claude/plugins/config/claude-for-legal/law-student/CLAUDE.md` — a plain text file you can read and edit directly. Anything you answered can be changed:
+> 完成。你的配置在 `~/.claude/plugins/config/claude-for-legal/law-student/CLAUDE.md`——一个你可以直接读取和编辑的纯文本文件。你回答的任何内容都可以更改：
 >
-> - Edit the file directly for a quick change
-> - Run `/law-student:cold-start-interview --redo` for a full re-interview
-> - Run `/law-student:cold-start-interview --check-integrations` to re-check what's connected
+> - 直接编辑文件进行快速更改
+> - 运行 `/law-student:cold-start-interview --redo` 进行完整重新访谈
+> - 运行 `/law-student:cold-start-interview --check-integrations` 重新检查已连接的内容
 >
-> The things students most commonly tweak later: your class list (swap in next semester's), your bar jurisdiction or exam date, and your learning-style default (drill-me vs explain-to-me). Your configuration will improve as you use the plugin — if an outline feels off or a cold-call-prep session misses what your professor actually cares about, the fix is usually here.
+> 学生最常事后调整的内容：课程列表（换入下学期的）、律师资格考试司法管辖区或考试日期，以及默认学习风格（主动挑战 vs 先解释）。随着你使用 plugin，你的配置会改善——如果大纲感觉不对或随机提问准备会话遗漏了你教授实际关心的内容，修复通常就在这里。
 
-## Your practice profile learns
+## 你的实践档案在学习
 
-After writing the practice profile, close with this note:
+写入实践档案后，以此说明结尾：
 
-> **Your practice profile learns.** It gets better as you use the plugins:
+> **你的实践档案在学习。** 随着你使用 plugin，它会变得更好：
 >
-> - When a skill's output feels off, that's usually a position to tune. The output will tell you which one.
-> - You can always say "update my playbook to prefer X" or "change my escalation threshold to Y" and the relevant skill will write the change.
-> - Run `/law-student:cold-start-interview --redo <section>` to re-interview one part, or edit the config file directly.
+> - 当 skill 的输出感觉不对时，那通常是需要调整的位置。输出会告诉你是哪个。
+> - 你随时可以说"update my playbook to prefer X"或"change my escalation threshold to Y"，相关 skill 会写入更改。
+> - 运行 `/law-student:cold-start-interview --redo <section>` 重新访谈某一部分，或直接编辑配置文件。
 >
-> Ten minutes of setup gets you a working profile. A month of use gets you one that reads like you wrote it yourself.
+> 十分钟的设置给你一个可用的档案。一个月的使用给你一个读起来像是你自己写的档案。

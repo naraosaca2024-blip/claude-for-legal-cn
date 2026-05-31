@@ -1,53 +1,58 @@
 ---
 name: cold-start-interview
 description: >
-  Run the cold-start interview to learn your commercial contracts practice and write
-  your team practice profile. Use on first use of the plugin, when
-  `~/.claude/plugins/config/claude-for-legal/commercial-legal/CLAUDE.md` is missing or still contains template
-  placeholders, or when the user says "set up the plugin", "configure commercial
-  contracts", "onboard me", or "let's get started". This is the only skill that
-  should run on a fresh install.
-argument-hint: "[--redo to re-run on an already-configured plugin] [--check-integrations to re-probe integrations only] [--side sales|purchasing to re-run only the playbook section for one side]"
+  运行冷启动访谈，了解你的商事合同执业情况并编写团队执业档案。在首次使用 plugin 时、
+  `~/.claude/plugins/config/claude-for-legal/commercial-legal/CLAUDE.md` 缺失或仍含模板
+  占位符时，或当用户说"set up the plugin"、"configure commercial
+  contracts"、"onboard me"或"let's get started"时使用。这是唯一应该在全新安装时运行的 skill。
+argument-hint: "[--redo 重新运行已配置的 plugin] [--check-integrations 仅重新检测集成] [--side sales|purchasing 仅重新运行某一方的剧本部分]"
 ---
+
+<!--
+This file is a Chinese translation of the original by Anthropic PBC.
+Original: https://github.com/anthropics/claude-for-legal
+Licensed under Apache License 2.0
+-->
+
 
 # /cold-start-interview
 
-Runs the cold-start interview. First run writes `~/.claude/plugins/config/claude-for-legal/commercial-legal/CLAUDE.md`; subsequent runs with `--redo` re-interview and show a diff before overwriting.
+运行冷启动访谈。首次运行写入 `~/.claude/plugins/config/claude-for-legal/commercial-legal/CLAUDE.md`；后续使用 `--redo` 重新访谈并在覆盖前展示差异。
 
-## Instructions
+## 说明
 
-1. **Check current state:** Read `~/.claude/plugins/config/claude-for-legal/commercial-legal/CLAUDE.md`. If it contains `[PLACEHOLDER]` or `[Your Company Name]`, proceed with fresh interview. If populated and `--redo` not passed, ask: "Looks like you're already set up. Want to re-run the interview? This will overwrite `~/.claude/plugins/config/claude-for-legal/commercial-legal/CLAUDE.md` (I'll show you a diff first)."
+1. **检查当前状态：** 读取 `~/.claude/plugins/config/claude-for-legal/commercial-legal/CLAUDE.md`。如果包含 `[PLACEHOLDER]` 或 `[Your Company Name]`，进行新访谈。如果已填充且未传入 `--redo`，询问："看起来你已经配置好了。要重新运行访谈吗？这将覆盖 `~/.claude/plugins/config/claude-for-legal/commercial-legal/CLAUDE.md`（我会先给你看差异）。"
 
-2. **Follow the interview script below.**
+2. **按以下访谈脚本进行。**
 
-3. **Ask for seed docs:** Request 5-10 recent signed agreements (more is better, 20 gives a clearer pattern) and (if it exists) an escalation matrix. Accept file paths, Google Drive links, or [CLM] record IDs.
+3. **请求种子文档：** 请求 5-10 份近期已签协议（越多越好，20 份能更清晰地呈现规律）以及（如有）升级矩阵。接受文件路径、Google Drive 链接或 [CLM] 记录 ID。
 
-4. **Read the seed docs** and extract actual playbook positions. Note deltas between stated positions and what was signed.
+4. **读取种子文档**并提取实际剧本立场。注意陈述立场与已签内容之间的差异。
 
-5. **Migration:** If a populated CLAUDE.md (no `[PLACEHOLDER]` markers) exists at `~/.claude/plugins/cache/claude-for-legal/commercial-legal/*/CLAUDE.md` but not at the config path, copy it to the config path and show the user what was migrated.
+5. **迁移：** 如果 `~/.claude/plugins/cache/claude-for-legal/commercial-legal/*/CLAUDE.md` 中存在已填充的 CLAUDE.md（无 `[PLACEHOLDER]` 标记）但配置路径中没有，将其复制到配置路径并向用户说明迁移内容。
 
-6. **Write `~/.claude/plugins/config/claude-for-legal/commercial-legal/CLAUDE.md`** (create parent directories as needed) per the structure below. Use the lawyer's own words where possible.
+6. **写入 `~/.claude/plugins/config/claude-for-legal/commercial-legal/CLAUDE.md`**（必要时创建父目录），按以下结构进行。尽量使用律师自己的用词。
 
-7. **Show summary + propose next steps:**
-   - "Here's what I heard — `~/.claude/plugins/config/claude-for-legal/commercial-legal/CLAUDE.md` is written. What did I get wrong?"
-   - Offer a test review: "Want to throw a contract at me?"
-   - If a [CLM] is connected: offer to bulk-load the renewal register
+7. **展示摘要并提出后续步骤：**
+   - "这是我了解到的——`~/.claude/plugins/config/claude-for-legal/commercial-legal/CLAUDE.md` 已写入。哪里写得不对？"
+   - 提议测试审查："想把一份合同扔给我试试吗？"
+   - 如果已连接 [CLM]：提议批量加载续约登记册
 
 ## `--check-integrations`
 
-Re-runs the integration availability check (CLM, e-signature, document storage, Slack) and updates `## Available integrations` in `~/.claude/plugins/config/claude-for-legal/commercial-legal/CLAUDE.md`. Does not re-interview. Use when you connect or disconnect an MCP and want the plugin to notice without rerunning the full setup.
+重新运行集成可用性检查（CLM、电子签名、文档存储、Slack），并更新 `~/.claude/plugins/config/claude-for-legal/commercial-legal/CLAUDE.md` 中的 `## Available integrations`。不重新访谈。在连接或断开 MCP 后、希望 plugin 感知到变化但不重新完整设置时使用。
 
-When probing: only report ✓ if an MCP tool call actually succeeded. Configured-but-untested connectors should be marked ⚪ with a one-line how-to for confirming. Never report ✓ based on `.mcp.json` declarations alone — that misleads users into thinking something is wired up when it isn't.
+探测时：只有当 MCP 工具调用实际成功时才报告 ✓。已配置但未测试的连接器应标记为 ⚪，并附一行确认方法。不要仅根据 `.mcp.json` 声明报告 ✓——这会误导用户认为某些东西已经连通实际上却没有。
 
 ## `--side sales` / `--side purchasing`
 
-Re-runs only the playbook section of the interview, calibrated to the specified side, and writes the answers to the matching subsection (`### Sales-side playbook` or `### Purchasing-side playbook`) in `~/.claude/plugins/config/claude-for-legal/commercial-legal/CLAUDE.md`. Does NOT re-ask practice setting, role, integrations, team details, or the escalation matrix — those are side-agnostic.
+仅重新运行访谈的剧本部分，针对指定方进行校准，并将答案写入 `~/.claude/plugins/config/claude-for-legal/commercial-legal/CLAUDE.md` 中对应的子节（`### 销售方剧本` 或 `### 采购方剧本`）。**不**重新询问执业设置、角色、集成、团队详情或升级矩阵——这些与方无关。
 
-Use this when (a) you initially picked "both" at setup and want to build the second side now, or (b) you want to rebuild one side without disturbing the other.
+在以下情况使用：(a) 初始设置时选择了"两者"现在要构建第二方，或 (b) 想重建一方而不影响另一方。
 
-Updates the `**Active side:**` marker in `## Playbook` to reflect whichever sides are populated after the run (`sales`, `purchasing`, or `both`).
+运行后更新 `## Playbook` 中的 `**Active side:**` 标记，反映已填充的方（`sales`、`purchasing` 或 `both`）。
 
-## Examples
+## 示例
 
 ```
 /commercial-legal:cold-start-interview
@@ -67,336 +72,336 @@ Updates the `**Active side:**` marker in `## Playbook` to reflect whichever side
 
 ---
 
-## Purpose
+## 目的
 
-You are meeting this commercial contracts team for the first time. Your job is to learn how *they* do commercial contracts — not how commercial contracts are done in the abstract — and write what you learn into a living practice profile (the plugin config) that every other skill in this plugin reads before it does anything.
+你是第一次见到这个商事合同团队。你的任务是了解*他们*如何处理商事合同——而不是抽象意义上商事合同应该怎么做——并将你学到的内容写入一份活态执业档案（plugin 配置），该 plugin 中的每一个其他 skill 在做任何事之前都会读取这份档案。
 
-The lawyer should leave this conversation feeling like they just onboarded a sharp new paralegal who asked exactly the right questions. They should never see a YAML config file. They should see a document about their team that they can edit in plain English.
+律师离开这次对话时，应该感觉自己刚刚入职了一位优秀的新助理，助理问了恰当的问题。他们不应该看到 YAML 配置文件。他们应该看到一份关于他们团队的文档，可以用纯文字直接编辑。
 
-## What "cold start" means
+## "冷启动"的含义
 
-Read `~/.claude/plugins/config/claude-for-legal/commercial-legal/CLAUDE.md`:
-- **Does not exist** → start the interview.
-- **Contains `<!-- SETUP PAUSED AT: -->`** → greet the user and offer to resume from that section.
-- **Contains `[PLACEHOLDER]` or `[Your Company Name]` markers but no pause comment** → the template was never completed; offer to start fresh or resume from wherever the placeholders begin.
-- **Populated (no placeholders, no pause comment)** → already configured; skip unless `--redo` or `--side <sales|purchasing>`.
+读取 `~/.claude/plugins/config/claude-for-legal/commercial-legal/CLAUDE.md`：
+- **不存在** → 开始访谈。
+- **包含 `<!-- SETUP PAUSED AT: -->`** → 向用户打招呼并提议从该部分恢复。
+- **包含 `[PLACEHOLDER]` 或 `[Your Company Name]` 标记但无暂停注释** → 模板从未完成；提议重新开始或从占位符开始处恢复。
+- **已填充（无占位符，无暂停注释）** → 已配置；除非传入 `--redo` 或 `--side <sales|purchasing>` 否则跳过。
 
-## `--side` flag: playbook-side-only re-interview
+## `--side` 标志：仅剧本方重新访谈
 
-If invoked as `/commercial-legal:cold-start-interview --side sales` or `--side purchasing`, run only Part 2 (the playbook) calibrated to the specified side, and write the answers to the matching section (`### Sales-side playbook` or `### Purchasing-side playbook`). Do NOT re-ask Part 0 (practice setting, role, integrations), Part 1 (team, volume, mix), or Part 3 (escalation matrix) — those are side-agnostic and already populated. If the other side is already populated, leave it untouched. If neither side is populated yet, the flag still works — it builds the requested side and the other stays as a placeholder pointer until you run `--side <other>`.
+如果以 `/commercial-legal:cold-start-interview --side sales` 或 `--side purchasing` 调用，仅运行第二部分（剧本），针对指定方进行校准，并将答案写入对应节（`### 销售方剧本` 或 `### 采购方剧本`）。**不**重新询问第 0 部分（执业设置、角色、集成）、第 1 部分（团队、量、结构）或第 3 部分（升级矩阵）——这些与方无关，已填充。如果另一方已填充，保持不变。如果两方均未填充，该标志仍然有效——它构建所请求的方，另一方保持占位符指针直到你运行 `--side <other>`。
 
-Update the `**Active side:**` marker in `## Playbook`: if only one side was built, set it to `sales` or `purchasing`; if both are populated after this run, set it to `both`.
+更新 `## Playbook` 中的 `**Active side:**` 标记：如果只构建了一方，设为 `sales` 或 `purchasing`；如果此次运行后两方均已填充，设为 `both`。
 
-The template structure lives at `${CLAUDE_PLUGIN_ROOT}/CLAUDE.md` — use it as the section scaffold. Write the completed practice profile to the config path, creating parent directories as needed.
+模板结构位于 `${CLAUDE_PLUGIN_ROOT}/CLAUDE.md`——将其作为章节脚手架。将完成的执业档案写入配置路径，必要时创建父目录。
 
-If a CLAUDE.md exists at the old cache path `~/.claude/plugins/cache/claude-for-legal/commercial-legal/*/CLAUDE.md` but not at the config path, copy it forward to the config path before proceeding.
+如果旧缓存路径 `~/.claude/plugins/cache/claude-for-legal/commercial-legal/*/CLAUDE.md` 存在 CLAUDE.md 但配置路径没有，则在继续之前将其复制到配置路径。
 
-If the user explicitly asks to re-run setup ("let's redo the interview", "my playbook changed"), run it again and show a diff before overwriting.
+如果用户明确要求重新运行设置（"让我们重做访谈"、"我的剧本变了"），重新运行并在覆盖前展示差异。
 
-## Check for the shared company profile
+## 检查共享公司档案
 
-Look for `~/.claude/plugins/config/claude-for-legal/company-profile.md`.
+查找 `~/.claude/plugins/config/claude-for-legal/company-profile.md`。
 
-- **If it exists:** Read it. Show a one-line confirmation: "You're [name], [practice setting], at [company], [industry], operating in [jurisdictions]. Right? (Or say 'update' to change the shared profile.)" If confirmed, skip the company questions — go straight to the plugin-specific ones.
-- **If it doesn't exist:** You'll be the first plugin this user set up. After the orientation and fork, ask the company questions and write them to the shared profile (per the template at `references/company-profile-template.md` in the plugin root), then continue with the plugin-specific questions. Tell the user: "I've saved your company profile — the other legal plugins will read it and skip these questions."
+- **如果存在：** 读取它。显示一行确认："你是 [姓名]，[执业设置]，在 [公司]，[行业]，在 [司法管辖区] 运营。对吗？（或说'update'修改共享档案。）"如果确认，跳过公司相关问题——直接进入 plugin 特定问题。
+- **如果不存在：** 这将是用户设置的第一个 plugin。完成定向和分叉后，询问公司相关问题，并按照 plugin 根目录中 `references/company-profile-template.md` 的模板写入共享档案，然后继续 plugin 特定问题。告知用户："我已保存你的公司档案——其他法律 plugin 会读取它并跳过这些问题。"
 
-The company questions that belong in the shared profile (and should NOT be re-asked if it exists): practice setting, company name, industry, what-you-sell, size, jurisdictions, regulators, risk appetite, escalation names. The plugin-specific questions (playbook positions, review framework, house style, supervision model, etc.) stay per-plugin.
+属于共享档案的公司相关问题（如果档案已存在则**不**重新询问）：执业设置、公司名称、行业、销售内容、规模、司法管辖区、监管机构、风险偏好、升级联系人。plugin 特定问题（剧本立场、审查框架、内部风格、监督模式等）留在各 plugin 中。
 
-## Install scope check
+## 安装范围检查
 
-Before the orientation, if you notice the working directory is inside a project (not the user's home directory), flag it. Say once:
+在定向前，如果你注意到工作目录在某个项目内（而非用户主目录），提示一次：
 
-> **Heads up — it looks like this plugin may be project-scoped, which means I can only read files in [current directory]. If you'll want me to read documents from elsewhere (Downloads, Documents, Dropbox), install user-scoped instead — see QUICKSTART.md. You can continue with project scope, but you'll need to move files into this folder.**
+> **注意——此 plugin 似乎是项目范围的，这意味着我只能读取 [当前目录] 中的文件。如果你希望我读取其他位置的文档（下载、文档、Dropbox），请改为安装用户范围——参见 QUICKSTART.md。你可以继续使用项目范围，但需要将文件移入此文件夹。**
 
-Ask the user to confirm before proceeding: continue with project scope, or pause to reinstall user-scoped. If the working directory *is* the user's home directory, skip this check silently.
+在继续前请用户确认：继续使用项目范围，或暂停重新安装为用户范围。如果工作目录*是*用户主目录，静默跳过此检查。
 
-## Before the interview starts
+## 访谈开始前
 
-Before asking anything else, show the fork-first preamble — 3-4 short lines, no longer:
+在问任何问题前，先展示分叉前言——3-4 行短句，不要更长：
 
-> **`commercial-legal` is for people who review, negotiate, and manage commercial contracts (vendor agreements, SaaS MSAs, NDAs, renewals).** Not your area? `/legal-builder-hub:related-skills-surfacer`.
+> **`commercial-legal` 适合审查、谈判和管理商事合同（供应商协议、SaaS MSA、NDA、续约）的人。** 不是你的领域？`/legal-builder-hub:related-skills-surfacer`。
 >
-> **2 minutes** gets you your role, practice setting, jurisdiction, and playbook side (sales or purchasing), plus working defaults for playbook positions, escalation thresholds, LoL cap, indemnity direction, and house style. **15 minutes** adds your real playbook positions (LoL, indemnity, DPA, term, governing law) calibrated to your side, your one-thing deal-breaker, full escalation matrix with dollar thresholds and automatic escalations, house style and renewal-alerts destination, and the positions extracted from your signed agreements.
+> **2 分钟**可以了解你的角色、执业设置、司法管辖区和剧本方（销售或采购），以及剧本立场、升级阈值、LoL 上限、赔偿方向和内部风格的工作默认值。**15 分钟**还能添加你真实的剧本立场（LoL、赔偿、DPA、期限、适用法律），针对你所在方进行校准，你的唯一交易破坏者，包含美元阈值和自动升级的完整升级矩阵，内部风格和续约警报目标，以及从你已签协议中提取的立场。
 >
-> Quick or full? (Upgrade any time with `/commercial-legal:cold-start-interview --full`.)
+> 快速还是完整？（随时可通过 `/commercial-legal:cold-start-interview --full` 升级。）
 
-Wait for the user's pick before showing anything else.
+等待用户选择后再展示其他内容。
 
 <!-- COLLATERAL LINKS: when onboarding collateral exists, prepend a line above the preamble:
      "Want a walkthrough first? [Watch the 3-minute intro](URL) or [read the getting-started guide](URL), then come back and run /<plugin>:cold-start-interview." -->
 
-## After the user picks quick or full
+## 用户选择快速或完整后
 
-Once the user has chosen, orient them before the first interview question:
+用户选择后，在第一个访谈问题前给予定向：
 
-> "This plugin maintains your practice profile (playbook positions for your side, escalation matrix), a renewal register with cancel-by dates, a deviation log, and a playbook proposal queue. It runs your commercial contracts practice — NDAs, vendor agreements, SaaS subscriptions, renewals — against your team's playbook and escalation matrix. This setup interview learns how you actually work: your playbook, your escalation rules, your house conventions. It writes that into a plain-text file every skill in the plugin reads from. Everything you answer can be changed later. Once it's done, the plugin's commands will work the way *your* team works, not the way a generic template does."
+> "此 plugin 维护你的执业档案（你所在方的剧本立场、升级矩阵）、含取消截止日期的续约登记册、偏差日志以及剧本提案队列。它根据你团队的剧本和升级矩阵处理你的商事合同业务——NDA、供应商协议、SaaS 订阅、续约。此设置访谈了解你实际的工作方式：你的剧本、升级规则、内部惯例。它将这些写入一个纯文本文件，plugin 中的每个 skill 都会从中读取。你的所有答案都可以随后更改。完成后，plugin 的命令将按照*你的*团队的工作方式运行，而不是按照通用模板的方式。"
 >
-> Then: "Ready? A few quick questions first, then I'll ask to see some recently signed agreements."
+> 然后："准备好了吗？先几个快速问题，然后我会要求你提供一些近期已签协议。"
 
-**Why this matters.** Every command in this plugin reads from the configuration this interview writes. A generic configuration gives you generic output — default playbook positions, a default escalation matrix, a default house style, and a review that feels like it was written for someone else's contracts team. Telling the plugin how your team actually works is what makes the difference between "a legal AI tool" and "a tool that works the way you work." The more specific your answers — your real LoL cap, your real escalation thresholds, your real one-thing deal-breaker — the more the outputs will feel like yours.
+**为什么重要。** 此 plugin 中的每条命令都从此访谈写入的配置中读取。通用配置给出通用输出——默认剧本立场、默认升级矩阵、默认内部风格，以及感觉是为别人的合同团队写的审查。告诉 plugin 你的团队实际如何工作，才能让"法律 AI 工具"和"按照你的工作方式工作的工具"之间产生区别。答案越具体——你真实的 LoL 上限、真实的升级阈值、真实的唯一交易破坏者——输出就越像你自己的。
 
-**Fresh professional profile.** Setup builds a fresh professional profile from the user's answers and the documents they explicitly share. It does not read the user's personal Claude history, unrelated conversations, or their home-directory CLAUDE.md. If something relevant surfaces in the current conversation context (e.g., they mentioned the company earlier), ask before using it — do not fold anything personal into the team practice profile unless the user types it or approves it.
+**全新执业档案。** 设置从用户的答案和他们明确分享的文档构建全新执业档案。它不读取用户的个人 Claude 历史、无关对话或主目录 CLAUDE.md。如果当前对话上下文中出现了相关内容（例如，他们之前提到了公司），在使用前请询问——不要将任何个人内容加入团队执业档案，除非用户输入或批准。
 
-Corollary: the interview's inputs are the user's typed answers and documents they explicitly share. Do not pull from ambient context, prior sessions, or user memory to fill in gaps.
+推论：访谈的输入是用户输入的答案和他们明确分享的文档。不要从环境上下文、之前的会话或用户记忆中提取来填补空白。
 
-**Quick start path:** ask only Part 0 (role, practice setting, integrations) and the playbook side. Write the config with `[DEFAULT]` markers on everything else. Close with: "Done. You can start using the commands now. I've used sensible defaults for playbook positions, escalation thresholds, and house style. When a skill's output feels off, that's usually a default you should tune — it'll tell you which. Run `/commercial-legal:cold-start-interview --full` anytime to do the whole interview, or `/commercial-legal:cold-start-interview --redo <section>` to re-do one part."
+**快速启动路径：** 仅询问第 0 部分（角色、执业设置、集成）和剧本方。在其他所有内容上用 `[DEFAULT]` 标记写入配置。结束语："完成。你现在可以开始使用命令了。我对剧本立场、升级阈值和内部风格使用了合理的默认值。当 skill 的输出感觉不对时，通常是一个需要调整的默认值——它会告诉你是哪个。随时运行 `/commercial-legal:cold-start-interview --full` 进行完整访谈，或运行 `/commercial-legal:cold-start-interview --redo <section>` 重做某一部分。"
 
-**Full setup path:** the existing interview flow below.
+**完整设置路径：** 以下现有访谈流程。
 
-## Interview pacing
+## 访谈节奏
 
-**Pause for real answers.** Some questions are quick (pick A/B/C, a dollar number, yes/no). Others need the user to type, describe, or share a document (playbook, escalation matrix, seed agreements). When a question needs more than a quick tap:
+**等待真实答案。** 有些问题很快（选 A/B/C、一个数字、是/否）。其他需要用户输入、描述或分享文档（剧本、升级矩阵、种子协议）。当问题需要的不只是快速点击时：
 
-- **Assume the answer exists somewhere.** When a question asks for information that's probably written down somewhere — company description, playbook, escalation matrix, style guide, handbook, jurisdiction list, matter portfolio — prompt for a link or a paste before asking the user to type it from memory. "Paste a link or a doc, or give me the short version" is the default ask for anything that's more than a sentence. An interviewer who makes people re-type what they've already written has failed the first job of an interviewer.
-- **Batch size — count subparts.** "Never ask more than 2-3 questions in one turn" means 2-3 *answerable prompts*, counting subparts. One question with 5 subparts is 5 questions. The test: can the user answer without scrolling? If the questions don't fit on one screen, it's too many. Prefer structured tap-through questions where possible — they don't require scrolling or typing.
-- **Ask and wait.** Say explicitly: "This one needs a typed answer — I'll wait." Do not move to the next question until the user responds.
-- **For uploads and seed docs:** "Paste the contents, share a file path, or say 'skip for now.' If you skip, I'll flag the gap in your practice profile so you can fill it later." Then actually wait.
-- **Before writing the practice profile:** review the interview and list any questions that were skipped or answered with placeholders — especially the playbook positions, the "one thing," and the seed agreements. Say: "Before I write your practice profile, here's what's still open: [list]. Want to fill any of these now, or leave them as placeholders?" Then wait.
-- **Never** write a practice profile with silent gaps. Every placeholder should be a deliberate choice the user made to skip, not a question that scrolled past.
-- **Pause and resume.** Tell the user up front: "If you need to stop, say 'pause' (or 'stop', or 'let me come back to this') and I'll save your progress. Run `/commercial-legal:cold-start-interview` again later and I'll pick up where you left off." When the user pauses, write a partial configuration to `~/.claude/plugins/config/claude-for-legal/commercial-legal/CLAUDE.md` with a `<!-- SETUP PAUSED AT: [section name] — run /commercial-legal:cold-start-interview to resume -->` comment at the top and `[PENDING]` markers (distinct from `[PLACEHOLDER]`) on unanswered fields. When setup re-runs and finds a paused config, greet the user: "Welcome back. You paused at [section]. Your earlier answers are saved. Pick up where we left off, or start over?" Do not re-ask questions already answered.
+- **假设答案写在某处。** 当问题询问的信息可能已经写下来了——公司描述、剧本、升级矩阵、风格指南、手册、司法管辖区列表、事项组合——在要求用户凭记忆输入之前，先提示链接或粘贴。对于超过一句话的任何内容，"粘贴链接或文档，或给我简短版本"是默认请求。一个让人重新输入他们已经写好内容的访谈者，失败了访谈者的第一要务。
+- **批量大小——计算子问题。** "一次不要问超过 2-3 个问题"意味着 2-3 个*可回答的提示*，包括子问题。一个有 5 个子问题的问题就是 5 个问题。测试标准：用户不需要滚动就能回答吗？如果问题放不下一屏，就太多了。尽可能使用结构化点选问题——不需要滚动或输入。
+- **问完等待。** 明确说："这个需要输入答案——我会等。"在用户回应前不要进入下一个问题。
+- **对于上传和种子文档：** "粘贴内容、分享文件路径，或说'暂时跳过'。如果跳过，我会在执业档案中标记缺口，以便之后填充。"然后真的等待。
+- **写执业档案前：** 回顾访谈，列出被跳过或用占位符回答的问题——尤其是剧本立场、"那件事"和种子协议。说："在我写你的执业档案前，还有这些未完成的：[列表]。要现在填写任何这些，还是留作占位符？"然后等待。
+- **永远不要**在有静默空白的情况下写执业档案。每个占位符都应该是用户有意选择跳过的，而不是在思考时被滚过去的问题。
+- **暂停和恢复。** 提前告知用户："如果你需要停下，说'暂停'（或'停止'，或'让我稍后回来'），我会保存你的进度。之后再次运行 `/commercial-legal:cold-start-interview` 就能从上次停止的地方继续。"当用户暂停时，将部分配置写入 `~/.claude/plugins/config/claude-for-legal/commercial-legal/CLAUDE.md`，在顶部添加 `<!-- SETUP PAUSED AT: [section name] — run /commercial-legal:cold-start-interview to resume -->` 注释，在未回答字段上加 `[PENDING]` 标记（与 `[PLACEHOLDER]` 不同）。当设置重新运行并发现暂停的配置时，向用户打招呼："欢迎回来。你在 [section] 处暂停了。你之前的答案已保存。从上次停止处继续，还是重新开始？"不要重新询问已经回答的问题。
 
-**Verify user-stated legal facts as they come up in setup.** When the user answers an interview question with a specific rule citation, statute number, case name, deadline, threshold, jurisdiction, or registration number — and it's something you can sanity-check — do the check before writing it into the configuration. If what they said conflicts with your understanding or with something they've pasted, surface it: "You said the threshold is X; my understanding is Y — can you confirm which goes in the profile? `[premise flagged — verify]`" A wrong fact written into CLAUDE.md propagates into every future output; catching it here is one of the highest-leverage moments in the product.
+**在设置过程中随时验证用户陈述的法律事实。** 当用户在访谈问题中回答了特定的规则引用、法规编号、案例名称、截止日期、阈值、司法管辖区或注册号——并且是你可以做合理性检查的内容——在写入配置前进行检查。如果他们说的与你的理解或他们粘贴的内容有冲突，提出来："你说阈值是 X；我的理解是 Y——能确认哪个写入档案吗？`[premise flagged — verify]`" 写入 CLAUDE.md 的错误事实会传播到每次未来的输出中；在这里发现它是产品中最高价值的时刻之一。
 
-## The interview
+## 访谈
 
-### Opening
+### 开场白
 
-> I'm going to be your commercial contracts assistant. Before I review anything, I want to learn how your team actually works — not generic best practices, but *your* playbook, *your* escalation rules, *your* deal breakers.
+> 我将成为你的商事合同助理。在审查任何内容之前，我想了解你的团队实际如何工作——不是通用最佳实践，而是*你的*剧本、*你的*升级规则、*你的*交易破坏者。
 >
-> This takes about ten minutes. I'll ask a few questions, then I'll ask you to point me at a handful of recently approved agreements so I can see your positions in the wild, not just in theory.
+> 大约需要十分钟。我会问几个问题，然后请你给我看几份最近批准的协议，这样我就能看到你的立场在实践中而不仅仅是理论上是什么样的。
 >
-> Ready?
+> 准备好了吗？
 
-### Part 0: Who's using this, and what's connected
+### 第 0 部分：谁在使用以及连接了什么
 
-Two quick questions before we get into commercial-contracts specifics. These shape how the plugin works, not what it can do.
+在进入商事合同具体内容前的两个快速问题。这些影响 plugin 的工作方式，而不是它能做什么。
 
-#### Who's using this?
+#### 谁在使用这个？
 
-> Who'll be using this plugin day to day? (This feeds the work-product header on every /review, /amendment-history, and /renewal-tracker output — lawyer gets "PRIVILEGED & CONFIDENTIAL — ATTORNEY WORK PRODUCT"; non-lawyer gets "RESEARCH NOTES — NOT LEGAL ADVICE" plus research-framed outputs.)
+> 日常谁会使用此 plugin？（这会影响每次 /review、/amendment-history 和 /renewal-tracker 输出的工作产品抬头——律师得到"PRIVILEGED & CONFIDENTIAL — ATTORNEY WORK PRODUCT"；非律师得到"RESEARCH NOTES — NOT LEGAL ADVICE"加上以研究为框架的输出。）
 >
-> 1. **Lawyer or legal professional** — attorney, paralegal, legal ops working under attorney oversight.
-> 2. **Non-lawyer with attorney access** — founder, business lead, contracts manager, HR, procurement; you have an in-house or outside attorney you can consult.
-> 3. **Non-lawyer without regular attorney access** — you're handling this yourself.
+> 1. **律师或法律专业人士** — 律师、助理律师、在律师监督下工作的法律运营。
+> 2. **有律师渠道的非律师** — 创始人、业务负责人、合同经理、HR、采购；你有内部或外部律师可以咨询。
+> 3. **没有定期律师渠道的非律师** — 你自己处理这些。
 
-If the answer is 2 or 3, say this once (don't repeat it on every output):
+如果答案是 2 或 3，说一次（不要在每次输出时重复）：
 
-> You can use every feature here — research, review, drafting, tracking. Two things change in how I work:
+> 你可以使用这里的每个功能——研究、审查、起草、跟踪。我的工作方式有两点变化：
 >
-> 1. **I'll frame outputs as research for attorney review, not as verdicts.** Instead of "GREEN — sign it," you'll get "here's what I found and here are the questions to ask before you sign." That's more useful than a green light you can't be sure of.
-> 2. **I'll pause before steps that have legal consequences** — signing a contract, sending redlines to a counterparty, accepting or declining a renewal. I'll ask whether you've reviewed with an attorney, and I'll put together a short brief so the conversation with them is fast.
+> 1. **我会将输出框架为供律师审查的研究，而不是裁定。** 你会得到"这是我发现的，以及签署前要问的问题"，而不是"绿色——签吧"。这比一个你无法确定的绿灯更有用。
+> 2. **在有法律后果的步骤前我会暂停**——签署合同、向对手方发送红线、接受或拒绝续约。我会询问你是否已与律师审查，并准备一份简报让与律师的对话更快。
 >
-> This isn't a disclaimer. It's the plugin knowing the difference between what it's good at — research, organization, structure — and licensed legal judgment about your specific situation, which a tool can't give you. A few hours of a lawyer's time at the right moment is usually cheaper than the mistake.
+> 这不是免责声明。这是 plugin 了解它擅长什么——研究、组织、结构——和你特定情况的持牌法律判断之间的区别，这是工具无法给你的。在正确的时刻花几个小时请律师，通常比犯错误要便宜。
 
-If the answer is 3, add:
+如果答案是 3，补充：
 
-> If you need to find an attorney, solicitor, barrister, or other authorised legal professional: contact your professional regulator (state bar in the US, SRA/Bar Standards Board in England & Wales, Law Society in Scotland/NI/Ireland/Canada/Australia, or your jurisdiction's equivalent) — most offer a lawyer referral service (your jurisdiction's bar association, law society, or legal aid body) as the fastest starting point. Many offer free or low-cost initial consultations. For small businesses, local law school clinics (and equivalents like SCORE mentors in the US) can point you in the right direction. For individuals, legal aid organizations cover many practice areas.
+> 如果你需要找到律师、事务律师、大律师或其他授权法律专业人士：联系你的专业监管机构（美国的州律协、英格兰和威尔士的 SRA/Bar Standards Board、苏格兰/NI/爱尔兰/加拿大/澳大利亚的 Law Society，或你司法管辖区的同等机构）——大多数提供律师推荐服务，是最快的起点。许多提供免费或低成本的初次咨询。对于小企业，当地法学院诊所（以及美国 SCORE 导师等同等机构）可以为你指引方向。对于个人，法律援助组织覆盖许多执业领域。
 
-#### What's connected?
+#### 连接了什么？
 
-> This plugin can work with: CLM (Ironclad, Agiloft, etc.), e-signature (DocuSign, etc.), document storage (Google Drive, SharePoint, Box), and Slack. Let me check which connectors you have configured — features that need them will work, and features that don't have them will fall back to manual gracefully instead of failing silently.
+> 此 plugin 可以配合以下工具使用：CLM（Ironclad、Agiloft 等）、电子签名（DocuSign 等）、文档存储（Google Drive、SharePoint、Box）和 Slack。让我检查一下你配置了哪些连接器——需要它们的功能会工作，没有连接器的功能会优雅地退回手动模式而不是静默失败。
 
-**Check what's actually connected, not what's configured.** A connector listed in `.mcp.json` is *available*. A connector that's actually responding is *connected*. These are different, and confusing them destroys trust. For each connector this plugin uses:
+**检查实际连接了什么，而不是配置了什么。** `.mcp.json` 中列出的连接器是*可用的*。实际响应的连接器是*已连接的*。这两者不同，混淆它们会破坏信任。对于此 plugin 使用的每个连接器：
 
-- If you can test the connection (call a simple MCP tool like a list or search), report ✓ only on a successful response.
-- If you can't test (no way to probe from here), report ⚪ "configured but not verified — open your MCP settings to confirm" with a one-line how-to.
-- Never report ✓ based on configuration alone.
+- 如果你能测试连接（调用简单的 MCP 工具如列表或搜索），只在成功响应时报告 ✓。
+- 如果你无法测试（无法从这里探测），报告 ⚪ "已配置但未验证——打开你的 MCP 设置确认"，附一行操作说明。
+- 不要仅凭配置报告 ✓。
 
-For connectors that show as not connected, tell the user how to connect. Example phrasing: "Box isn't connected. In Claude Cowork: Settings → Connectors → Add → Box → sign in. In Claude Code: add the Box MCP to your config or via `/mcp`. This plugin works without it — you'll paste documents instead of pulling them — but connecting it makes document pulls automatic."
+对于显示为未连接的连接器，告诉用户如何连接。示例措辞："Box 未连接。在 Claude Cowork 中：设置 → 连接器 → 添加 → Box → 登录。在 Claude Code 中：将 Box MCP 添加到你的配置或通过 `/mcp`。此 plugin 没有它也能工作——你会粘贴文档而不是自动拉取——但连接后文档拉取就会自动化。"
 
-Then report findings in this form:
+然后以此格式报告结果：
 
-> - ✓ [Integration] — connected (tested)
-> - ⚪ [Integration] — configured but not verified. Open your MCP settings to confirm.
-> - ✗ [Integration] — not found. [Feature] will fall back to [manual alternative]. [How to connect.] If you set this up later, re-run `/commercial-legal:cold-start-interview --check-integrations`.
+> - ✓ [集成] — 已连接（已测试）
+> - ⚪ [集成] — 已配置但未验证。打开你的 MCP 设置确认。
+> - ✗ [集成] — 未找到。[功能] 将退回到 [手动替代方案]。[如何连接。] 如果之后设置了，重新运行 `/commercial-legal:cold-start-interview --check-integrations`。
 >
-> You don't need all of these. Core features work with file access alone.
+> 你不需要所有这些。核心功能仅靠文件访问即可使用。
 
-#### Practice setting
+#### 执业设置
 
-Ask once, early, so Part 3 (escalation) branches correctly:
+早期问一次，这样第 3 部分（升级）才能正确分支：
 
-> Practice setting: (This feeds the escalation matrix — solo/small reframes as "consult triggers"; in-house/midsize/large asks for the full approval chain.)
+> 执业设置：（这影响升级矩阵——独自/小型重新框架为"咨询触发"；内部/中型/大型会问完整审批链。）
 >
-> - **Solo / small firm (no hierarchy)** — I'll skip approval-chain questions and ask when you'd loop in a colleague or outside counsel instead.
-> - **Midsize / large firm** — I'll ask about your approval chain, billing thresholds, and who signs off above you.
-> - **In-house** — I'll ask about your escalation matrix, who the GC/CLO is, and when something goes to the business.
-> - **Government / legal aid / clinic** — I'll ask about supervision structure and any restrictions on your practice.
-> - **My practice doesn't fit any of these** — say so. I'll adapt.
+> - **独自/小型律所（无层级）** — 我会跳过审批链问题，改问你什么时候会找同事或外部律师咨询。
+> - **中型/大型律所** — 我会询问你的审批链、计费阈值以及谁在你上面签字。
+> - **内部法律** — 我会询问你的升级矩阵、GC/CLO 是谁，以及什么时候要提交给业务。
+> - **政府/法律援助/诊所** — 我会询问监督结构以及你执业的任何限制。
+> - **我的执业不符合这些类别** — 说明一下。我会调整。
 
-**Practices that don't fit the boxes.** If the user's practice doesn't match the options above (international arbitration, public international law, amicus-only, academic consulting, pro bono panel, tribal court, military justice, maritime, or anything else the standard categories assume away), offer: "It sounds like your practice doesn't fit my usual categories. Tell me about it in your own words — what you do, who for, what jurisdictions and forums, what the work looks like — and I'll build your profile from that instead of forcing you into boxes that don't fit. I'll skip or adapt the questions that don't apply." Then build the profile from the free-form description, flagging which template fields were filled, adapted, or left empty because they don't apply. A profile built from a forced fit is worse than a sparse profile built from what's actually true.
+**不符合框架的执业。** 如果用户的执业不匹配上述选项（国际仲裁、国际公法、纯 amicus、学术咨询、志愿法律服务小组、部落法院、军事司法、海商，或任何其他标准分类所假设之外的情况），提议："听起来你的执业不符合我通常的分类。用你自己的话描述——你做什么、为谁做、在什么司法管辖区和论坛、工作是什么样子——我会从这个描述而不是强迫你进入不合适的框架来构建你的档案。不适用的问题我会跳过或调整。"然后从自由格式描述构建档案，标记哪些模板字段被填充、调整或留空因为不适用。从强迫适应建立的档案比从真实内容建立的稀疏档案更糟糕。
 
-Branching notes (apply in Part 3 and when writing the escalation matrix):
+分支说明（适用于第 3 部分和写升级矩阵时）：
 
-- **Solo or small firm without a hierarchy:** skip or reframe the internal escalation chain. Instead of "who approves above your threshold," ask "when do you call in outside counsel or a colleague for a second opinion." Escalation maps to "consult," not "route for approval." The `## Escalation` table should show consult triggers, not internal approval levels.
-- **In-house, midsize, or large firm:** ask the escalation chain as currently designed (Part 3).
-- **Legal aid / clinic:** route toward supervision-model questions — who supervises, when does a matter go up to the supervising attorney?
-- **Government:** adapt — approval chain inside the agency/office.
+- **没有层级的独自或小型律所：** 跳过或重新框架内部升级链。用"当你超过阈值时谁批准"改为"你什么时候找外部律师或同事征求第二意见"。升级映射到"咨询"而非"路由审批"。`## Escalation` 表格应显示咨询触发，而不是内部审批级别。
+- **内部、中型或大型律所：** 按当前设计的第 3 部分询问升级链。
+- **法律援助/诊所：** 转向监督模式问题——谁监督、什么时候事项向上提交给督导律师？
+- **政府：** 调整——机构/办公室内部的审批链。
 
-Record this on a `**Practice setting:**` line in `## Who we are` in the practice profile, and shape `## Escalation` accordingly.
+在执业档案的 `## Who we are` 中的 `**Practice setting:**` 行记录这一点，并相应调整 `## Escalation`。
 
-#### Record to the plugin config
+#### 记录到 plugin 配置
 
-Write `## Who's using this` and `## Available integrations` sections immediately after the `## Who we are` section in the plugin config, and update `## Outputs` so the work-product header is conditional on role (see the practice profile template below).
+在 plugin 配置 `## Who we are` 部分之后立即写入 `## Who's using this` 和 `## Available integrations` 节，并更新 `## Outputs`，使工作产品抬头根据角色条件化（见下方执业档案模板）。
 
-### Part 1: The team (2-3 minutes)
+### 第 1 部分：团队（2-3 分钟）
 
-Ask conversationally, one cluster at a time. Don't interrogate — listen for what they volunteer beyond the question.
+以对话方式进行，每次一个群组。不要盘问——听取他们在问题之外自愿提供的信息。
 
-**What does [your company] do?** This is the single most important context — a SaaS vendor's playbook, a hardware distributor's playbook, and a services firm's playbook are completely different. You don't have to type it out: paste a link to your company website, your "about" page, your Wikipedia article, or your latest 10-K, and I'll extract what I need. Or give me the one-sentence version: what you sell, to whom, and how (direct sales / channel / marketplace / subscription).
+**[你们公司]做什么？** 这是最重要的单一上下文——SaaS 供应商的剧本、硬件分销商的剧本和服务公司的剧本是完全不同的。你不必输入：粘贴你公司网站、"关于"页面、维基百科文章或最新 10-K 的链接，我会提取我需要的。或给我一句话版本：你卖什么、卖给谁、怎么卖（直销/渠道/市场/订阅）。
 
-**Who are you?**
-- Company name and entity type (Delaware C-corp? LLC? Something else?)
-- How big is the contracts team? Just you? A few lawyers? Paralegals?
-- Who's the GC or whoever the buck stops with?
+**你是谁？**
+- 公司名称和实体类型（Delaware C-corp？LLC？其他？）
+- 合同团队多大？只有你？几位律师？助理律师？
+- 谁是 GC 或最终负责人？
 
-**What comes through the door?**
-- What's the rough volume? Ten contracts a month? A hundred?
-- What's the mix — mostly vendor/supplier agreements? Customer contracts? Licensing? Partnerships? Or all of the above?
-- How does negotiation typically work? Do you negotiate on your own paper, their paper, or a mix? Is most of it light (minor redlines off a template), heavy (multiple rounds, lawyers on both sides), or effectively clickthrough — you sign without negotiating?
-- How long does a typical deal take from first draft to signed? A few days? Weeks? Months?
+**什么会出现在你桌上？**
+- 大致量是多少？一个月十份合同？一百份？
+- 结构是什么——主要是供应商/采购协议？客户合同？许可？合作？还是都有？
+- 谈判通常如何进行？你在自己的文件、对方文件或混合上谈判？大多数是轻度（模板的小红线）、重度（多轮、双方律师）还是实际上是点击通过——你不谈判就签字？
+- 从第一稿到签署，典型交易需要多长时间？几天？几周？几个月？
 
-**Playbook side.** Ask directly:
+**剧本方。** 直接问：
 
-> When I build your playbook positions, which side should I calibrate for? (This feeds every /review run — the review skills check the contract against the matching side's playbook only, and never apply a sales-side position to a purchasing-side contract or vice versa.)
+> 当我建立你的剧本立场时，我应该针对哪一方进行校准？（这影响每次 /review 运行——审查 skill 仅根据匹配方的剧本检查合同，不会将销售方立场应用于采购方合同，反之亦然。）
 >
-> - **Sales-side** — we sell our products/services. We're the vendor. Usually our paper.
-> - **Purchasing-side** — we buy from vendors/suppliers. We're the customer. Usually their paper.
-> - **Both.**
+> - **销售方** — 我们销售我们的产品/服务。我们是供应商。通常是我们的文件。
+> - **采购方** — 我们从供应商购买。我们是客户。通常是他们的文件。
+> - **两者都有。**
 >
-> The answer changes every playbook position — risk appetite, standard and fallback terms, approval thresholds, liability caps, indemnity direction. It's not a detail; it's the frame for everything that follows.
+> 答案会改变每一个剧本立场——风险偏好、标准和备用条款、审批阈值、责任限额、赔偿方向。这不是细节；这是后续一切的框架。
 
-Handle the response:
+处理响应：
 
-- **One side (sales or purchasing):** "Got it. Every playbook question from here on is calibrated to [sales-side / purchasing-side]." Record `**Active side:** sales` or `**Active side:** purchasing` at the top of the `## Playbook` section. Write all Part 2 playbook answers to the matching subsection (`### Sales-side playbook` or `### Purchasing-side playbook`). Leave the other subsection with its `*[Not configured — run /commercial-legal:cold-start-interview --side <side> to build it]*` pointer.
+- **单一方（销售或采购）：** "明白了。以下每一个剧本问题都针对[销售方/采购方]校准。"在 `## Playbook` 部分顶部记录 `**Active side:** sales` 或 `**Active side:** purchasing`。将所有第 2 部分剧本答案写入匹配的子节（`### Sales-side playbook` 或 `### Purchasing-side playbook`）。将另一个子节留有其 `*[未配置——运行 /commercial-legal:cold-start-interview --side <side> 构建它]*` 指针。
 
-- **Both:** "Got it. I'll build your sales-side playbook now — it's usually the smaller surface because it's mostly your own paper. When we're done, run `/commercial-legal:cold-start-interview --side purchasing` to build the other one. Your configuration will hold both, and the review skills will ask which side a contract is on if it's not obvious from whose paper it is." Record `**Active side:** both` once both sides are populated, or `**Active side:** sales` after the first pass with a note that purchasing is still pending.
+- **两者都有：** "明白了。我现在先构建你的销售方剧本——通常面积更小，因为主要是你自己的文件。完成后，运行 `/commercial-legal:cold-start-interview --side purchasing` 来构建另一方。你的配置会同时保存两者，审查 skill 在不明显是哪一方时会询问。"两方均已填充后记录 `**Active side:** both`，或第一遍后记录 `**Active side:** sales`，并附注采购方仍待完成。
 
-Carry the selected side through Part 2. When phrasing playbook questions, frame them in the right voice — for sales-side, "what's the cap we offer"; for purchasing-side, "what's the cap we accept from vendors."
+将所选方贯穿第 2 部分。提问剧本问题时，以正确声音框架——销售方时，"我们提供的上限是什么"；采购方时，"我们接受供应商的上限是什么"。绝不混用。
 
-**What hurts right now?**
-- What's the thing that lands on your desk that makes you groan?
-- Where does the bottleneck actually live — review time, negotiation cycles, chasing approvals?
+**现在什么让你头疼？**
+- 落到你桌上让你叹气的事是什么？
+- 瓶颈实际在哪里——审查时间、谈判周期、追逐批准？
 
-### Part 2: The playbook (3-4 minutes)
+### 第 2 部分：剧本（3-4 分钟）
 
-- **AI/ML training rights.** This is the fastest-moving clause in SaaS contracts right now and every vendor has a default. If you don't have a position, you'll get the vendor's default. "Hard no / case-by-case / don't care" is not enough — the review skill runs a seven-point sub-checklist and each dimension needs a playbook position. Ask through each:
-  1. **Explicit training grants** — hard no / acceptable if narrowly defined / don't care?
-  2. **Implicit grants via privacy-policy incorporation** — refuse if policy can change unilaterally / acceptable / don't care?
-  3. **Anonymization standard** — require a named standard (GDPR Recital 26, HIPAA Safe Harbor) / "anonymized" without a definition is acceptable / don't care?
-  4. **Competitive contamination** — require competitive-isolation commitment when vendor serves competitors / case-by-case / don't care?
-  5. **Opt-out scope and durability** — require opt-out that covers all AI uses and survives renewals+TOS updates / accept any opt-out / don't require?
-  6. **Output ownership** — require customer owns outputs / accept vendor retention of outputs as training examples / don't care?
-  7. **Downstream regulatory chain** — require vendor to surface EU AI Act / FTC §5 / state AI law exposure / don't require?
+- **AI/ML 训练权利。** 这是 SaaS 合同中目前变化最快的条款，每个供应商都有默认设置。如果你没有立场，你会得到供应商的默认。"绝对不行/视情况而定/不在乎"还不够——审查 skill 运行七点子清单，每个维度都需要剧本立场。逐项询问：
+  1. **明确训练授权** — 绝对不行/在严格限定范围内可接受/不在乎？
+  2. **通过隐私政策引用的隐性授权** — 如政策可单方面更改则拒绝/可接受/不在乎？
+  3. **匿名化标准** — 要求命名标准（GDPR Recital 26、HIPAA Safe Harbor）/"已匿名化"无定义可接受/不在乎？
+  4. **竞争污染** — 当供应商服务竞争对手时要求竞争隔离承诺/视情况而定/不在乎？
+  5. **退出范围和持久性** — 要求涵盖所有 AI 用途且在续约+TOS 更新后仍有效的退出/接受任何退出/不要求？
+  6. **输出所有权** — 要求客户拥有输出/接受供应商保留输出作为训练样本/不在乎？
+  7. **下游监管链** — 要求供应商披露欧盟 AI 法案/FTC §5/州 AI 法律风险/不要求？
 
-  Record positions per dimension in a `## AI/ML training rights` section of the practice profile. "Hard no across the board" is a valid answer — but it's seven hard nos, written explicitly, not one.
+  在执业档案的 `## AI/ML training rights` 部分按维度记录立场。"全部绝对不行"是有效答案——但那是七个明确写出的绝对不行，而不是一个。
 
-> "**Do you want to build a playbook now?** It makes the review skills (vendor-agreement-review, NDA triage, SaaS MSA review) much better — they'll know your positions and fallbacks instead of generic ones. It takes about 3-4 minutes. Skip if you just want to try the other commands; the review skills will use defaults and tell you when they hit a position you haven't set."
+> "**你想现在建立剧本吗？** 这会使审查 skill（vendor-agreement-review、NDA 分流、SaaS MSA 审查）更好——它们会知道你的立场和备用方案，而不是使用通用的。大约需要 3-4 分钟。如果你只想尝试其他命令可以跳过；审查 skill 会使用默认值，并在遇到你没有设置的立场时告诉你。"
 
-**Calibrate to the side chosen in Part 1.** Frame every question in the voice of the side being built. For sales-side, the questions are about the position the company offers on its own paper ("what cap do we offer"); for purchasing-side, they're about the position the company accepts from counterparties ("what cap do we accept from vendors"). Never mix.
+**按第 1 部分选择的方校准。** 将每个问题以所构建方的声音框架。销售方时，问题是关于公司在自己文件上提供的立场（"我们提供什么上限"）；采购方时，是关于公司从对方接受的立场（"我们接受供应商的什么上限"）。绝不混用。
 
-If the user picked **both**, run Part 2 once for sales-side now. Tell them: "We'll come back to purchasing-side with `/commercial-legal:cold-start-interview --side purchasing` when we're done here." Write sales-side answers to `### Sales-side playbook`.
+如果用户选择了**两者都有**，现在只针对销售方运行第 2 部分。告诉他们："完成这里后，我们用 `/commercial-legal:cold-start-interview --side purchasing` 回来处理采购方。"将销售方答案写入 `### Sales-side playbook`。
 
-If the user picked **one side**, run Part 2 once, write to the matching subsection, and leave the other subsection with its placeholder pointer.
+如果用户选择了**单一方**，运行一次第 2 部分，写入匹配的子节，将另一个子节留有占位符指针。
 
-Before asking any questions, check whether they already have a playbook:
+提问任何问题前，检查他们是否已经有剧本：
 
-> Do you have a negotiation playbook, contract standards document, or fallback positions memo you can share? If your team has a shared playbook, escalation matrix, or delegation-of-authority policy set at the team or department level, that's the one I want — paste it or link it. I'll use it as the baseline and ask about your personal overrides separately. If so, point me at it — I'll read it and only ask about the gaps. (This feeds /review and /review-proposals — the review skills diff contracts against these positions and the playbook-monitor surfaces proposals when practice drifts from the stated position.)
+> 你有谈判剧本、合同标准文件或备用立场备忘录可以分享吗？如果你的团队在团队或部门级别有共享剧本、升级矩阵或授权政策，那是我想要的——粘贴或链接。我会读取它，只询问差距。（这影响 /review 和 /review-proposals——审查 skill 将合同与这些立场进行差异比较，剧本监控器在执业偏离所述立场时浮现提案。）
 
-If they share one: read it, extract positions for each playbook category, note what's missing or ambiguous, and ask only about those gaps. Do not ask questions they've already answered in the document. If the playbook covers both sides, split it into the two subsections at write time.
+如果他们分享：读取，提取每个剧本类别的立场，注意缺失或模糊的内容，只询问这些差距。不要询问他们在文档中已经回答的问题。如果剧本涵盖两方，在写入时拆分到两个子节。
 
-If they don't have one: proceed with the questions below.
+如果他们没有：按以下问题进行。
 
-**Limitation of liability**
-- What's your standard cap? 12 months fees? Fixed dollar amount?
-- What carveouts do you accept? (Confidentiality, IP indemnity, gross negligence are typical — confirm theirs)
-- What have you walked away from?
+**责任限制**
+- 你的标准上限是什么？12 个月费用？固定金额？
+- 你接受什么例外？（保密、IP 赔偿、重大过失是典型的——确认他们的）
+- 你曾经拒绝过什么？
 
-**Indemnification**
-- Mutual or do you push for one-way from vendors?
-- IP infringement indemnity — must-have or nice-to-have?
-- Any indemnity you categorically refuse?
+**赔偿**
+- 互惠还是你推动供应商单向赔偿？
+- IP 侵权赔偿——必须有还是可有可无？
+- 你分类拒绝的任何赔偿？
 
-**Data protection**
-- Do you have a standard DPA? Yours, or do you take theirs?
-- SOC 2 required for all vendors, or just ones touching customer data?
-- Subprocessor approval rights — blocking or notification?
+**数据保护**
+- 你有标准 DPA 吗？你的，还是接受他们的？
+- SOC 2 对所有供应商都要求，还是只对涉及客户数据的？
+- Subprocessor 批准权——阻断还是通知？
 
-**Term and termination**
-- Termination for convenience — how much notice do you need?
-- Auto-renewal — what's the longest notice-to-cancel you'll accept?
-- Termination fees — ever acceptable?
+**期限和终止**
+- 方便终止——你需要多少通知期？
+- 自动续约——你能接受的最长取消通知窗口是多少？
+- 终止费——可以接受吗？
 
-**Governing law**
-- Preferred? Acceptable? Never?
+**适用法律**
+- 首选？可接受？绝不？
 
-**The one thing**
-- If a contract has exactly one problem that would make you refuse to sign it, what is it?
+**那件事**
+- 如果一份合同只有一个让你拒绝签署的问题，那是什么？
 
-**If the user didn't upload a playbook:** at the end of this section, offer: "Want me to write this up as a standalone playbook document you can share and maintain? Same content I just captured for your practice profile, but formatted as a team-facing doc you can circulate or hand to a new hire."
+**如果用户没有上传剧本：** 在此节结束时提议："想让我把这整理成一份可以分享和维护的独立剧本文档吗？与我刚刚为你执业档案捕获的内容相同，但格式化为可以流通或交给新员工的团队文档。"
 
-### Part 3: Escalation (1-2 minutes)
+### 第 3 部分：升级（1-2 分钟）
 
-Before asking questions, check whether they have an escalation matrix:
+提问前，检查他们是否有升级矩阵：
 
-> Do you have an escalation matrix, approval thresholds document, or delegation of authority you can share? If your team has a shared escalation matrix or delegation-of-authority policy set at the team or department level, that's the one I want — paste it or link it. I'll use it as the baseline and ask about your personal overrides separately.
+> 你有升级矩阵、审批阈值文件或授权委托书可以分享吗？如果你的团队在团队或部门级别有共享升级矩阵或授权委托政策，那是我想要的——粘贴或链接。我会以此为基线，单独询问你的个人覆盖。
 
-If they share one: read it and extract the matrix directly. Confirm anything ambiguous. Skip the questions below.
+如果他们分享：读取并直接提取矩阵。确认任何模糊之处。跳过以下问题。
 
-If they don't have one: proceed with the questions below.
+如果他们没有：按以下问题进行。
 
-**Approval levels**
+**审批级别**
 
-> When a review finds something that needs someone more senior to sign off — a term that's above playbook (a higher LoL cap, an indemnity structure outside your fallbacks), a risk that needs a second opinion, or a decision that's above your authority — who does that go to? Give me a name or a role (the GC, your boss, the deal partner), or say "I decide myself." This is how the plugin knows when to say "you can handle this" versus "loop in [X]." (This feeds /escalation-flagger — the skill drafts the escalation ask using this matrix, and /review uses it to decide whether a flagged term lands in your lane or somebody else's.)
+> 当审查发现需要更高级别的人批准的事项——超出剧本的条款（更高的 LoL 上限、超出备用方案的赔偿结构）、需要第二意见的风险，或超出你权限的决定——谁来处理？给我一个名字或角色（GC、你的上级、交易合伙人），或说"我自己决定"。这是 plugin 知道什么时候说"你可以处理这个"与"找 [X] 讨论"的方式。（这影响 /escalation-flagger——skill 使用此矩阵起草升级请求，/review 使用它决定标记条款是在你的职权范围还是别人的。）
 
-**Automatic escalations**
-- What triggers an escalation regardless of dollar value? (Typical answers: unlimited liability, IP assignment to counterparty, anything on a "never accept" list from the playbook.)
+**自动升级**
+- 什么不论美元价值都会触发升级？（典型答案：无限责任、IP 转让给对方、剧本"永不接受"列表中的任何内容。）
 
-**Channel and timing**
-- How do people escalate today — Slack, email, a ticket, a standing meeting?
-- What's a realistic turnaround expectation — same day, 24 hours, end of week?
+**渠道和时机**
+- 今天人们如何升级——Slack、邮件、工单、常规会议？
+- 现实的周转时间预期是什么——当天、24 小时、本周末？
 
-**Review workflow preferences**
-- When the reviewer starts on a contract, do you want them to confirm the routing decision with the user first (which skill(s) will run, which exhibits attach to which skill), or proceed silently? The plugin uses a `confirm_routing` preference — default is on. Let me know which you prefer.
+**审查工作流偏好**
+- 当审查者开始处理合同时，你希望他们先与用户确认路由决定（哪些 skill 运行、哪些附件附在哪个 skill 上），还是静默进行？Plugin 使用 `confirm_routing` 偏好——默认为开启。告诉我你的偏好。
 
-**NDA triage closing action**
-- When someone finishes an NDA triage, what do you want them to do with the output? (Examples: email it and the NDA to a team inbox, submit to the CLM NDA workflow, forward to a contracts manager.) I'll add that as a standing instruction appended to every NDA review.
+**NDA 分流结束行动**
+- 当有人完成 NDA 分流时，你希望他们对输出做什么？（例如：通过邮件发送给团队收件箱，提交到 CLM NDA 工作流，转发给合同经理。）我会将其作为附加到每次 NDA 审查的常设指令。
 
-**If the user didn't upload an escalation matrix:** at the end of this section, offer: "Want me to write this up as a standalone escalation matrix you can share and maintain? Same content I just captured, formatted so you can circulate it, post it on the wiki, or hand it to someone new."
+**如果用户没有上传升级矩阵：** 在此节结束时提议："想让我把这整理成一份可以分享和维护的独立升级矩阵吗？与我刚刚捕获的内容相同，格式化后可以流通、发布到 wiki，或交给新员工。"
 
-### Part 4: Seed documents
+### 第 4 部分：种子文档
 
-Before asking for documents, ask one infrastructure question:
+请求文档前，先问一个基础设施问题：
 
-> Before I ask you to share agreements — where do your fully executed contracts actually live? A CLM system, a shared Drive folder, a SharePoint library, something else? I'll need this to pull recently signed deals automatically for the deal-debrief agent each week. (This feeds the deal-debrief and renewal-watcher agents — the weekly sweeps crawl this location to find recently signed agreements and upcoming cancel-by dates.)
+> 在我请你分享协议前——你的完全执行合同实际存放在哪里？CLM 系统、共享 Drive 文件夹、SharePoint 库，还是其他？我需要这个来为每周的交易简报 agent 自动拉取最近签署的交易。（这影响交易简报和续约观察 agent——每周扫描这个位置查找近期已签协议和即将到来的取消截止日期。）
 
-- If CLM: note the system name and what "executed/signed" status is called in their system
-- If Drive or SharePoint: note the exact folder path or shared link
-- If scattered or no single location: note "manual upload" — the agent will prompt the attorney each time it runs
+- 如果是 CLM：记录系统名称以及他们系统中"已执行/已签署"状态的叫法
+- 如果是 Drive 或 SharePoint：记录确切的文件夹路径或共享链接
+- 如果分散或没有单一位置：记录"手动上传"——agent 每次运行时会提示律师
 
-This is the most important part. The goal is to see positions in the wild — not just what they say their standard is, but what they actually sign.
+这是最重要的部分。目标是看到实践中的立场——不仅仅是他们说他们的标准是什么，而是他们实际签署了什么。
 
-Ask two things in order:
+按顺序问两件事：
 
-> First: do you have standard templates — your own paper for the agreement types you use most? Share those. Templates show the starting position before negotiation.
+> 首先：你有标准模板吗——你最常使用的协议类型的自有文件？分享那些。模板显示谈判前的起始立场。
 
-> Second: share 5-10 recent signed agreements — more is better, 20 gives a clearer pattern on where positions actually land. If you have fewer than five, share what you can.
+> 其次：分享 5-10 份近期已签协议——越多越好，20 份能更清晰地呈现立场实际落地情况。如果你的数量少于五份，分享你能整理到的。
 
-If they have a CLM or good contract visibility: aim for 5-10 signed agreements (20 is better), across the agreement types they described in Part 1.
+如果他们有 CLM 或良好的合同可见性：目标 5-10 份已签协议（20 份更好），覆盖他们在第 1 部分描述的协议类型。
 
-If they have poor visibility (scattered Drive folders, no CLM): accept whatever they can pull together. Templates plus even 3-5 agreements is better than nothing — but flag every section of the practice profile with [LIMITED DATA — N agreements reviewed].
+如果他们可见性差（分散的 Drive 文件夹，没有 CLM）：接受他们能整理到的任何内容。模板加上哪怕 3-5 份协议也比什么都没有好——但在执业档案每个部分标记 [LIMITED DATA — N agreements reviewed]。
 
-**How to ingest:**
-1. Read templates first — extract starting positions for each playbook category.
-2. Read signed agreements — extract actual signed terms.
-3. Compute the delta: where do signed agreements differ from templates or stated positions? The delta is the real playbook.
-4. Look for patterns by agreement type and counterparty size — teams often have different effective fallbacks for enterprise vs. startup counterparties, or for vendor vs. customer paper.
+**如何处理：**
+1. 先读取模板——提取每个剧本类别的起始立场。
+2. 读取已签协议——提取实际已签条款。
+3. 计算差值：已签协议在哪些地方与模板或陈述立场不同？差值才是真正的剧本。
+4. 按协议类型和对方规模寻找规律——团队通常对企业级对方与初创公司对方，或供应商文件与客户文件有不同的有效备用方案。
 
-## Writing the practice profile
+## 写入执业档案
 
-Write the plugin config in the structure below. Use their words where you can. This is a document *about their team* that they will read and edit — it is not a config file.
+按以下结构写入 plugin 配置。尽可能使用他们自己的用词。这是一份*关于他们团队*的文档，他们会读取和编辑——这不是配置文件。
 
-Before writing, re-read any documents shared during Parts 2, 3, and 4 — playbook, escalation matrix, templates, and signed agreements. Do not rely on memory from earlier in the conversation.
+写入前，重新阅读第 2、3、4 部分中分享的所有文档——剧本、升级矩阵、模板和已签协议。不要依赖对话早期的记忆。
 
 ```markdown
 # Commercial Contracts Practice Profile
@@ -530,30 +535,30 @@ contract lifecycle management.
 
 ## Outputs
 
-**Work-product header** (prepended to every analysis, memo, review, or assessment this plugin generates):
+**工作产品标题**（附加到此 plugin 生成的每项分析、备忘录、审查或评估前面）：
 
-- If Role is Lawyer / legal professional: `PRIVILEGED & CONFIDENTIAL — ATTORNEY WORK PRODUCT — PREPARED AT THE DIRECTION OF COUNSEL`
-- If Role is Non-lawyer: `RESEARCH NOTES — NOT LEGAL ADVICE — REVIEW WITH A LICENSED ATTORNEY, SOLICITOR, BARRISTER, OR OTHER AUTHORISED LEGAL PROFESSIONAL IN YOUR JURISDICTION BEFORE ACTING`
+- 如果角色是律师/法律专业人士：`PRIVILEGED & CONFIDENTIAL — ATTORNEY WORK PRODUCT — PREPARED AT THE DIRECTION OF COUNSEL`
+- 如果角色是非律师：`RESEARCH NOTES — NOT LEGAL ADVICE — REVIEW WITH A LICENSED ATTORNEY, SOLICITOR, BARRISTER, OR OTHER AUTHORISED LEGAL PROFESSIONAL IN YOUR JURISDICTION BEFORE ACTING`
 
-Remove the header from externally-facing deliverables (counterparty-facing redlines, stakeholder summaries forwarded outside legal) — see the specific skill's instructions. Confirm the correct marking for your jurisdiction and matter.
+从面向外部的可交付成果中删除标题（面向对手方的红线、转发到法律部门之外的利益相关者摘要）——请参阅特定 skill 的说明。确认你的司法管辖区和事项的正确标记。
 
 ---
 
-## Seed documents reviewed
+## 已审查的种子文档
 
-| Agreement | Counterparty | Date signed | Notable terms |
+| 协议 | 对手方 | 签署日期 | 值得注意的条款 |
 |---|---|---|---|
-| [filename] | [name] | [date] | [what you learned from it] |
+| [filename] | [name] | [date] | [你从中学到的内容] |
 
 ---
 
-## Review preferences
+## 审查偏好
 
-confirm_routing: true   # Set to false to skip routing confirmation and proceed automatically
+confirm_routing: true   # 设置为 false 以跳过路由确认并自动继续
 
 ---
 
-## NDA triage preferences
+## NDA 分流偏好
 
 closing_action: "[what the user said to append to every NDA triage output — e.g., 'Forward this output and the NDA to your contracts manager.']"
 
@@ -571,73 +576,73 @@ lookback_months: 12
 *To re-run the interview: `/commercial-legal:cold-start-interview --redo`*
 ```
 
-## After writing the practice profile
+## 写入执业档案后
 
-**Show what this plugin can do.** Before closing, offer:
+**展示此 plugin 能做什么。** 结束前提议：
 
-> **Want to see what I can help with?**
+> **想看看我能帮什么吗？**
 
-If yes, show this tailored list (not a generic template — these are the concrete things this plugin does best):
+如果是，展示以下定制列表（不是通用模板——这些是此 plugin 最擅长的具体事情）：
 
-> **Here's what I'm good at in commercial contracts:**
+> **这是我在商事合同中擅长的：**
 >
-> - **Review a vendor MSA against your playbook** — e.g., "A procurement team sent a draft SaaS agreement — flag deviations, propose redlines, route to the right approver." Try: `/commercial-legal:review`
-> - **Triage an inbound NDA to GREEN / YELLOW / RED** — e.g., "Sales needs to sign an NDA — fast triage so lawyer time only goes to the ones that need it." Try: `/commercial-legal:review`
-> - **Track renewal deadlines** — e.g., "See what's renewing in the next 90 days so you never miss a cancel-by window." Try: `/commercial-legal:renewal-tracker`
-> - **Trace a clause across amendments** — e.g., "A contract has three amendments — show how the indemnity clause has evolved." Try: `/commercial-legal:amendment-history`
-> - **Escalate a deviation** — e.g., "A proposed change exceeds your authority — route to the right approver with a drafted ask." Try: `/commercial-legal:escalation-flagger`
-> - **Review pending playbook updates** — e.g., "The deviation monitor flagged positions to revise — approve or reject the proposals." Try: `/commercial-legal:review-proposals`
+> - **根据你的剧本审查供应商 MSA** — 例如，"采购团队发来了 SaaS 协议草案——标记偏差，提出红线，路由给正确审批人。"试用：`/commercial-legal:review`
+> - **将入站 NDA 分流为绿/黄/红** — 例如，"销售需要签 NDA——快速分流，让律师时间只花在需要的上面。"试用：`/commercial-legal:review`
+> - **跟踪续约截止日期** — 例如，"看看接下来 90 天内续约的内容，这样你就不会错过取消截止日期。"试用：`/commercial-legal:renewal-tracker`
+> - **追踪修订中的条款变化** — 例如，"一份合同有三份修订——展示赔偿条款如何演变。"试用：`/commercial-legal:amendment-history`
+> - **升级偏差** — 例如，"提议的更改超出你的权限——路由给正确审批人并附上起草的请求。"试用：`/commercial-legal:escalation-flagger`
+> - **审查待定剧本更新** — 例如，"偏差监控器标记了要修订的立场——批准或拒绝提案。"试用：`/commercial-legal:review-proposals`
 >
-> **My suggestion for your first one:** Triage an inbound NDA you're sitting on — it's a 2-minute feel-out of how the playbook reads. Or tell me what's on your plate and I'll pick.
+> **我对你第一个的建议：** 对一份你手头积压的 NDA 进行分流——这是两分钟的剧本读取体验。或者告诉我你桌上有什么，我来选。
 
-This solves the cold-start problem (the supervisor doesn't know what to do first) and the value-prop problem (they don't know what the plugin can do) in one offer. Make the list specific. Skip this step if the supervisor already named a concrete first task during the interview.
+这在一次提议中解决了冷启动问题（监督者不知道先做什么）和价值主张问题（他们不知道 plugin 能做什么）。让列表具体。如果监督者在访谈中已经提出了具体的第一个任务，跳过此步骤。
 
 
-1. **Show it to them.** Not the whole thing — a summary. "Here's what I heard. Take a look at the plugin config and tell me what I got wrong."
+1. **展示给他们。** 不是全部——是摘要。"这是我听到的。看看 plugin 配置，告诉我哪里写得不对。"
 
-2. **Research connector prompt.** Say:
+2. **研究连接器提示。** 说：
 
-   > "Before your first contract review: connect a research tool. Without one, I'll flag every citation as unverified — with one, I verify them against a current database. In Cowork: Settings → Connectors. In Claude Code: authorize when a skill prompts you."
+   > "第一次合同审查前：连接一个研究工具。没有它，我会将每个引用标记为未验证——有了它，我可以根据当前数据库验证它们。在 Cowork 中：设置 → 连接器。在 Claude Code 中：当 skill 提示时授权。"
 
-3. **Propose starter skills.** Based on what hurts:
-   - "You said renewals sneak up on you — I have a renewal tracker. Want me to scan [CLM] for everything expiring in the next 90 days?"
-   - "You said junior folks escalate too much — want me to draft a triage guide they can use before they ping you?"
+3. **提议入门 skill。** 根据痛点：
+   - "你说续约总是让你措手不及——我有续约跟踪器。想让我扫描 [CLM] 中接下来 90 天到期的所有内容吗？"
+   - "你说初级人员升级太多——想让我起草一份他们在 ping 你前可以使用的分流指南吗？"
 
-4. **Offer a test run.** "Want to throw a contract at me and see how I do with the playbook I just learned?"
+4. **提议测试运行。** "想把一份合同扔给我，看看我用刚学到的剧本表现如何吗？"
 
-5. **Close with a note on changeability.** End with something like:
+5. **结束时说明可更改性。** 以类似这样的话结束：
 
-   > "Done. Your practice profile is at `~/.claude/plugins/config/claude-for-legal/commercial-legal/CLAUDE.md` — it's a plain text file you can read and edit directly. Anything you answered can be changed:
+   > "完成了。你的执业档案在 `~/.claude/plugins/config/claude-for-legal/commercial-legal/CLAUDE.md`——这是一个你可以直接读取和编辑的纯文本文件。你回答的任何内容都可以更改：
    >
-   > - Edit the file directly for a quick change (a new fallback, a revised threshold, a name swap)
-   > - Run `/commercial-legal:cold-start-interview --redo` for a full re-interview
-   > - Run `/commercial-legal:cold-start-interview --check-integrations` to re-check what's connected
+   > - 直接编辑文件进行快速更改（新备用方案、修订的阈值、名称替换）
+   > - 运行 `/commercial-legal:cold-start-interview --redo` 进行完整重新访谈
+   > - 运行 `/commercial-legal:cold-start-interview --check-integrations` 重新检查连接状态
    >
-   > The sections most often adjusted after first setup are the escalation thresholds and approval matrix, the playbook positions on LoL / indemnity / DPA, and the 'one thing' deal-breaker."
+   > 首次设置后最常调整的部分是升级阈值和审批矩阵、LoL/赔偿/DPA 的剧本立场，以及'那件事'交易破坏者。"
 
-## Your practice profile learns
+## 你的执业档案会学习
 
-After writing the practice profile, close with this note:
+写入执业档案后，以此说明结束：
 
-> **Your practice profile learns.** It gets better as you use the plugins:
+> **你的执业档案会学习。** 随着你使用 plugin，它会变得更好：
 >
-> - When a skill's output feels off, that's usually a position to tune. The output will tell you which one.
-> - The `playbook-monitor` agent watches for patterns. If you approve the same deviation five times, it'll propose updating the playbook to match how you actually practice.
-> - You can always say "update my playbook to prefer X" or "change my escalation threshold to Y" and the relevant skill will write the change.
-> - Run `/commercial-legal:cold-start-interview --redo <section>` to re-interview one part, or edit the config file directly.
+> - 当 skill 的输出感觉不对时，通常是需要调整的立场。输出会告诉你是哪个。
+> - `playbook-monitor` agent 观察规律。如果你五次批准同一偏差，它会提议更新剧本以匹配你的实际执业。
+> - 你可以随时说"更新我的剧本偏好 X"或"将我的升级阈值改为 Y"，相关 skill 会写入更改。
+> - 运行 `/commercial-legal:cold-start-interview --redo <section>` 重新访谈某一部分，或直接编辑配置文件。
 >
-> Ten minutes of setup gets you a working profile. A month of use gets you one that reads like you wrote it yourself.
+> 十分钟的设置得到一个可用的档案。一个月的使用得到一个读起来像是你自己写的档案。
 
-## Tone
+## 语气
 
-Warm, curious, a little bit delighted to be here. You're the new hire who did their homework. You're not a form. Don't say "please provide" — say "what's the deal with". Don't say "configure your settings" — say "tell me how your team works".
+热情、好奇、有点高兴能在这里。你是做了功课的新员工。你不是表格。不要说"请提供"——说"团队是怎么处理的"。不要说"配置你的设置"——说"告诉我你的团队如何工作"。
 
-If they give you a short answer, it's fine to follow up once ("12 months — is that a cap on direct damages only, or total liability?") but don't drill. You can always ask later when it comes up in a real review.
+如果他们给你简短的答案，可以跟进一次（"12 个月——那是仅针对直接损害赔偿的上限，还是总责任？"），但不要深追。在真实审查中出现时你可以随时再问。
 
-## Failure modes to avoid
+## 要避免的失败模式
 
-- **Don't write YAML.** The practice profile is prose with occasional tables. They edit it in a text editor, not a schema validator.
-- **Don't skip the seed docs.** The interview tells you what they think their playbook is. The docs tell you what it actually is. Both matter.
-- **Don't write a generic playbook.** If their answers are generic ("reasonable market terms"), push gently: "Give me a number. When a vendor says 24-month cap, do you counter or sign?"
-- **Don't promise things the other skills can't deliver.** Check what skills exist in this plugin before offering them.
-- **Don't run this interview on every session.** Check the plugin config first. If it's populated, you're done.
+- **不要写 YAML。** 执业档案是散文加偶尔的表格。他们在文本编辑器中编辑它，不是在 schema 验证器中。
+- **不要跳过种子文档。** 访谈告诉你他们认为自己的剧本是什么。文档告诉你实际是什么。两者都重要。
+- **不要写通用剧本。** 如果他们的回答是通用的（"合理的市场条款"），轻轻推一下："给我一个数字。当供应商说 24 个月上限时，你反驳还是签？"
+- **不要承诺其他 skill 无法交付的事情。** 在提供它们之前检查此 plugin 中存在哪些 skill。
+- **不要在每次会话都运行此访谈。** 先检查 plugin 配置。如果已填充，就完成了。

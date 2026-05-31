@@ -1,286 +1,291 @@
 ---
 name: cold-start-interview
 description: >
-  Practice-profile interview that recommends and installs a starter pack of
-  community legal skills. This IS the cold start for the whole ecosystem — it
-  asks what kind of lawyer you are and recommends what to install first. Use
-  on fresh install, when the user says "get me started" or "what should I
-  install", or to re-run the integration-availability check after adding or
-  removing an MCP connector.
+  执业档案访谈，推荐并安装社区法律 skills 的入门包。这是整个生态系统
+  的冷启动——它询问您是哪种律师并推荐首先安装什么。在全新安装时、
+  当用户说"让我开始"或"我应该安装什么"时使用，或在添加/移除 MCP
+  连接器后重新运行集成可用性检查时使用。
 argument-hint: "[--redo] [--check-integrations]"
 ---
 
+<!--
+This file is a Chinese translation of the original by Anthropic PBC.
+Original: https://github.com/anthropics/claude-for-legal
+Licensed under Apache License 2.0
+-->
+
+
 # /cold-start-interview
 
-1. Check `~/.claude/plugins/config/claude-for-legal/legal-builder-hub/CLAUDE.md`. If a populated CLAUDE.md (no `[PLACEHOLDER]` markers) exists at `~/.claude/plugins/cache/claude-for-legal/legal-builder-hub/*/CLAUDE.md` but not at the config path, copy it to the config path and tell the user what was migrated.
-2. Run Part 0 (role + integration check), then the five questions (practice type, industry, team, tooling comfort), per the workflow below.
-3. Match profile to registry skills. Recommend starter pack.
-4. Show each recommended skill's SKILL.md summary. User picks.
-5. Install picked skills. Write `~/.claude/plugins/config/claude-for-legal/legal-builder-hub/CLAUDE.md` (creating parent directories as needed) with `## Who's using this`, `## Available integrations`, profile + installed list.
+1. 检查 `~/.claude/plugins/config/claude-for-legal/legal-builder-hub/CLAUDE.md`。如果在 `~/.claude/plugins/cache/claude-for-legal/legal-builder-hub/*/CLAUDE.md` 存在已填充的 CLAUDE.md（无 `[PLACEHOLDER]` 标记）但不在配置路径，将其复制到配置路径并告诉用户迁移了什么。
+2. 运行第 0 部分（角色 + 集成检查），然后是五个问题（执业类型、行业、团队、工具使用习惯），按照以下工作流。
+3. 将档案匹配到注册表 skills。推荐入门包。
+4. 展示每个推荐 skill 的 SKILL.md 摘要。用户选择。
+5. 安装选定的 skills。写入 `~/.claude/plugins/config/claude-for-legal/legal-builder-hub/CLAUDE.md`（按需创建父目录），包含 `## 谁在使用这个`、`## 可用集成`、档案 + 已安装列表。
 
-**`--check-integrations`:** Re-run only the Part 0 integration-availability check. Updates the `## Available integrations` table in `~/.claude/plugins/config/claude-for-legal/legal-builder-hub/CLAUDE.md` without touching the role or practice profile. Use this after adding or removing an MCP connector.
+**`--check-integrations`：** 仅重新运行第 0 部分的集成可用性检查。更新 `~/.claude/plugins/config/claude-for-legal/legal-builder-hub/CLAUDE.md` 中的 `## 可用集成` 表格，不触碰角色或执业档案。在添加或移除 MCP 连接器后使用。
 
-When probing: only report ✓ if an MCP tool call actually succeeded. Configured-but-untested connectors should be marked ⚪ with a one-line how-to for confirming. Never report ✓ based on `.mcp.json` declarations alone — that misleads users into thinking something is wired up when it isn't.
+在探测时：仅在 MCP 工具调用实际成功时报告 ✓。已配置但未测试的连接器应标记为 ⚪，附一行确认方法。永不仅基于 `.mcp.json` 声明报告 ✓——那会误导用户认为某些东西已连接而实际上没有。
 
 ---
 
-## Cold-start check
+## 冷启动检查
 
-Read `~/.claude/plugins/config/claude-for-legal/legal-builder-hub/CLAUDE.md`:
-- **Does not exist** → start the interview.
-- **Contains `<!-- SETUP PAUSED AT: -->`** → greet the user and offer to resume from that section.
-- **Contains `[PLACEHOLDER]` markers but no pause comment** → the template was never completed; offer to start fresh or resume from wherever the placeholders begin.
-- **Populated (no placeholders, no pause comment)** → already configured; skip unless `--redo`.
+读取 `~/.claude/plugins/config/claude-for-legal/legal-builder-hub/CLAUDE.md`：
+- **不存在** → 开始访谈。
+- **包含 `<!-- SETUP PAUSED AT: -->`** → 问候用户并提供从该部分恢复。
+- **包含 `[PLACEHOLDER]` 标记但没有暂停注释** → 模板从未完成；提供从头开始或从占位符开始的地方恢复。
+- **已填充（无占位符，无暂停注释）** → 已配置；除非 `--redo`，否则跳过。
 
-The template structure lives at `${CLAUDE_PLUGIN_ROOT}/CLAUDE.md` — use it as the section scaffold. Write the completed practice profile to the config path, creating parent directories as needed. If a CLAUDE.md exists at the old cache path `~/.claude/plugins/cache/claude-for-legal/legal-builder-hub/*/CLAUDE.md` but not here, copy it forward.
+模板结构位于 `${CLAUDE_PLUGIN_ROOT}/CLAUDE.md`——将其用作章节脚手架。将完成的执业档案写入配置路径，按需创建父目录。如果在旧缓存路径 `~/.claude/plugins/cache/claude-for-legal/legal-builder-hub/*/CLAUDE.md` 存在 CLAUDE.md 但不在这里，将其前向复制。
 
-## Check for the shared company profile
+## 检查共享公司档案
 
-Look for `~/.claude/plugins/config/claude-for-legal/company-profile.md`.
+查找 `~/.claude/plugins/config/claude-for-legal/company-profile.md`。
 
-- **If it exists:** Read it. Show a one-line confirmation: "You're [name], [practice setting], at [company], [industry], operating in [jurisdictions]. Right? (Or say 'update' to change the shared profile.)" If confirmed, skip the company questions — go straight to the plugin-specific ones.
-- **If it doesn't exist:** You'll be the first plugin this user set up. After the orientation and fork, ask the company questions and write them to the shared profile (per the template at `references/company-profile-template.md` in the plugin root), then continue with the plugin-specific questions. Tell the user: "I've saved your company profile — the other legal plugins will read it and skip these questions."
+- **如果存在：** 读取它。显示一行确认："您是 [姓名]，[执业设置]，在 [公司]，[行业]，在 [司法管辖区] 运营。对吗？（或者说 'update' 更改共享档案。）" 如果确认，跳过公司问题——直接进入插件特定的问题。
+- **如果不存在：** 您将是该用户设置的第一个插件。在导向和分叉后，询问公司问题并将其写入共享档案（按照插件根目录中 `references/company-profile-template.md` 的模板），然后继续插件特定的问题。告诉用户："我已保存您的公司档案——其他法律插件将读取它并跳过这些问题。"
 
-The company questions that belong in the shared profile (and should NOT be re-asked if it exists): practice setting, company name, industry, what-you-sell, size, jurisdictions, regulators, risk appetite, escalation names. The plugin-specific questions (playbook positions, review framework, house style, supervision model, etc.) stay per-plugin.
+属于共享档案的公司问题（如果已存在则不应重新询问）：执业设置、公司名称、行业、销售内容、规模、司法管辖区、监管机构、风险偏好、升级联系人。插件特定的问题（剧本立场、审查框架、内部风格、监督模式等）保持在每个插件。
 
-## Purpose
+## 目的
 
-This plugin is the app store. The cold-start interview is the onboarding recommendation engine — asks what you do, recommends a starter pack, installs what you pick.
+此插件是应用商店。冷启动访谈是入职推荐引擎——询问您做什么，推荐入门包，安装您选择的。
 
-Unlike the other cold-starts, this one is short. Five questions, a recommendation, done.
+与其他冷启动不同，这个很短。五个问题，一个推荐，完成。
 
-## Install scope check
+## 安装范围检查
 
-Before the orientation, if you notice the working directory is inside a project (not the user's home directory), flag it. Say once:
+在导向之前，如果您注意到工作目录在项目内（不是用户的主目录），标记它。说一次：
 
-> **Heads up — it looks like this plugin may be project-scoped, which means I can only read files in [current directory]. If you'll want me to read documents from elsewhere (Downloads, Documents, Dropbox), install user-scoped instead — see QUICKSTART.md. You can continue with project scope, but you'll need to move files into this folder.**
+> **注意——看起来此插件可能是项目范围的，这意味着我只能读取 [当前目录] 中的文件。如果您希望我从其他地方读取文档（Downloads、Documents、Dropbox），请改为用户范围安装——参见 QUICKSTART.md。您可以继续使用项目范围，但需要将文件移到此文件夹中。**
 
-Ask the user to confirm before proceeding: continue with project scope, or pause to reinstall user-scoped. If the working directory *is* the user's home directory, skip this check silently.
+在继续之前要求用户确认：使用项目范围继续，或暂停以用户范围重新安装。如果工作目录就是用户的主目录，静默跳过此检查。
 
-## Before the interview starts
+## 访谈开始之前
 
-Show this preamble first (3-4 short lines, nothing more):
+首先显示此导言（3-4 行简短内容，仅此而已）：
 
-> **`legal-builder-hub` is for finding, installing, and managing community-contributed legal skills.** Looking for a practice-area workflow? Install one of the `legal-*` plugins directly; run `/legal-builder-hub:registry-browser` to see what's out there.
+> **`legal-builder-hub` 用于查找、安装和管理社区贡献的法律 skills。** 在寻找执业领域工作流？直接安装 `legal-*` 插件之一；运行 `/legal-builder-hub:registry-browser` 查看有什么可用的。
 >
-> **2 minutes** gets you role and practice area(s) — plus working defaults for registry watchlist, update cadence, and a permissive-by-default allowlist. **15 minutes** adds a calibrated starter pack matched to your practice, a trusted-sources policy written to `allowlist.yaml` (registries, publishers, licenses seeded from your deployment context), update notification preferences, and your industry/team-size signal for recommendations.
+> **2 分钟**让您获得角色和执业领域——加上注册表监控列表、更新频率和默认宽松的 allowlist 的工作默认值。**15 分钟**添加与您的执业匹配的校准入门包、写入 `allowlist.yaml` 的可信来源策略（注册表、发布者、从您的部署上下文播种的许可证）、更新通知偏好，以及用于推荐的行业/团队规模信号。
 >
-> Quick or full? (Upgrade any time with `/legal-builder-hub:cold-start-interview --full`.)
+> 快速还是完整？（随时可以通过 `/legal-builder-hub:cold-start-interview --full` 升级。）
 
-## After the user picks quick or full
+## 用户选择快速或完整后
 
-Once the user has picked, orient them. Cover, in your own voice:
+用户选择后，引导他们。用您自己的语言覆盖：
 
-- **What this plugin maintains:** your practice profile (trusted sources, update preferences, deployment context), an `allowlist.yaml` that gates installs, and an install log.
-- **What this setup does:** helps the user discover, install, and evaluate community legal skills — a practice-profile-driven starter pack plus a design-quality check before anything touches their workflow. Learns the practice profile and update preferences and writes them into a plain-text file the plugin reads from every time. Everything can be changed later.
-- **Data sources:** setup builds a fresh practice profile from the user's answers only. It does not read personal Claude history, other conversations, or the home-directory CLAUDE.md. If something relevant came up earlier in this conversation (e.g., the user mentioned their firm or team), ask before folding it in. Nothing gets added to configuration unless the user types or approves it.
+- **此插件维护什么：** 您的执业档案（可信来源、更新偏好、部署上下文）、一个控制安装的 `allowlist.yaml`，以及一个安装日志。
+- **此设置做什么：** 帮助用户发现、安装和评估社区法律 skills——一个执业档案驱动的入门包加上一个设计质量检查，然后才接触他们的工作流。学习执业档案和更新偏好并将它们写入一个纯文本文件，插件每次都会读取。一切都可以稍后更改。
+- **数据来源：** 设置仅从用户的回答构建新的执业档案。它不读取个人 Claude 历史、其他对话或主目录 CLAUDE.md。如果在此对话中早些时候出现了相关内容（例如，用户提到了他们的律所或团队），在纳入之前先询问。除非用户输入或批准，否则不会添加任何内容到配置中。
 
-**Why this matters.** The hub's starter-pack recommendation and the auto-updater's filtering both read from the profile this interview writes. A generic profile gets a generic starter pack — skills that are plausibly useful but not matched to the user's actual practice. Telling the hub what kind of lawyer the user is and what they do most is what makes the difference between "here are all the skills other lawyers have built" and "here's the set that matches your work." The more specific the answers, the more the recommendations will feel like the user's own.
+**为什么这很重要。** 中心的入门包推荐和自动更新程序的过滤都读取此访谈写入的档案。通用档案获得通用入门包——合理有用但与用户实际执业不匹配的 skills。告诉中心用户是哪种律师以及他们最常做什么是"这里有其他律师构建的所有 skills"和"这是与您的工作匹配的集合"之间的区别。回答越具体，推荐就越感觉像用户自己的。
 
-### Quick start or full setup — branching
+### 快速开始或完整设置——分叉
 
-The user picked quick or full in the preamble. Branch:
+用户在导言中选择了快速或完整。分叉：
 
-**Quick start path:** ask only role and practice area(s). Write the config with `[DEFAULT]` markers on everything else. Close with: "Done. You can start browsing and installing now. I've used sensible defaults for registry watchlist and update cadence. Run `/legal-builder-hub:cold-start-interview --full` anytime to do the whole interview, or `/legal-builder-hub:cold-start-interview --redo <section>` to re-do one part."
+**快速开始路径：** 仅询问角色和执业领域。用 `[DEFAULT]` 标记写入其他所有内容的配置。关闭时说："完成。您现在可以开始浏览和安装了。我为注册表监控列表和更新频率使用了合理的默认值。随时运行 `/legal-builder-hub:cold-start-interview --full` 进行完整访谈，或 `/legal-builder-hub:cold-start-interview --redo <section>` 重做某个部分。"
 
-**Full setup path:** the existing interview flow below.
+**完整设置路径：** 以下现有访谈流程。
 
-## Interview pacing
+## 访谈节奏
 
-- **Assume the answer exists somewhere.** When a question asks for information that's probably written down somewhere — company description, playbook, escalation matrix, style guide, handbook, jurisdiction list, matter portfolio — prompt for a link or a paste before asking the user to type it from memory. "Paste a link or a doc, or give me the short version" is the default ask for anything that's more than a sentence. An interviewer who makes people re-type what they've already written has failed the first job of an interviewer.
+- **假设答案存在于某处。** 当问题询问可能已写好的信息——公司描述、剧本、升级矩阵、风格指南、手册、司法管辖区列表、事项组合——在要求用户凭记忆输入之前先提示链接或粘贴。"粘贴链接或文档，或者给我简短版本"是超过一句话的任何内容的默认询问。让用户重新输入已经写好的内容的访谈官没有完成访谈官的首要工作。
 
-Short as this interview is, the five questions vary — practice area and industry are tap-through, but "what's the thing you do most" needs a real answer. When a question needs more than a quick tap:
+虽然此访谈很短，但五个问题各不相同——执业领域和行业是点击选择，但"您最常做的事情"需要一个真正的答案。当问题需要的不仅是快速点击时：
 
-- **Ask the question and wait.** Say explicitly: "This one needs a typed answer — I'll wait." Do not move to the next question until the user responds.
-- **If anything gets skipped:** "Skip for now and I'll flag it in your profile — you can fill it in with `--redo` later." Then move on, but track the skip.
-- **Before writing the profile and recommending a starter pack:** if any answer was skipped or left as a placeholder, list them and ask: "Want to fill any of these now, or leave them as placeholders? Your starter-pack recommendation is only as good as the profile." Then wait.
-- **Never** write the profile with silent gaps — every placeholder should be a deliberate skip the user confirmed.
-- **Batch size — count subparts.** "Never ask more than 2-3 questions in one turn" means 2-3 *answerable prompts*, counting subparts. One question with 5 subparts is 5 questions. The test: can the user answer without scrolling? If the questions don't fit on one screen, it's too many. Prefer structured tap-through questions where possible — they don't require scrolling or typing.
-- **Pause and resume.** Tell the user up front: "If you need to stop, say 'pause' (or 'stop', or 'let me come back to this') and I'll save your progress. Run `/legal-builder-hub:cold-start-interview` again later and I'll pick up where you left off." When the user pauses, write a partial configuration to `~/.claude/plugins/config/claude-for-legal/legal-builder-hub/CLAUDE.md` with a `<!-- SETUP PAUSED AT: [section name] — run /legal-builder-hub:cold-start-interview to resume -->` comment at the top and `[PENDING]` markers (distinct from `[PLACEHOLDER]`) on unanswered fields. When setup re-runs and finds a paused config, greet the user: "Welcome back. You paused at [section]. Your earlier answers are saved. Pick up where we left off, or start over?" Do not re-ask questions already answered.
+- **提问并等待。** 明确说："这个需要输入答案——我会等。" 在用户回应之前不要进入下一个问题。
+- **如果跳过了任何内容：** "暂时跳过，我会在您的档案中标记——您可以稍后用 `--redo` 填充。" 然后继续，但跟踪跳过。
+- **在写入档案和推荐入门包之前：** 如果任何答案被跳过或保留为占位符，列出它们并询问："想要现在填充这些吗，还是保留为占位符？您的入门包推荐仅与档案一样好。" 然后等待。
+- **永不**在有静默间隙的情况下写入档案——每个占位符都应该是用户确认的刻意跳过。
+- **批量大小——计算子部分。** "每轮不超过 2-3 个问题"意味着 2-3 个*可回答的提示*，计算子部分。一个有 5 个子部分的问题是 5 个问题。测试标准：用户可以在不滚动的情况下回答吗？如果不能，就太多了。尽可能优先使用结构化的点击选择问题——它们不需要滚动或输入。
+- **暂停和恢复。** 预先告诉用户："如果您需要停止，说 'pause'（或 'stop'，或 '让我稍后再来'），我会保存您的进度。稍后再次运行 `/legal-builder-hub:cold-start-interview`，我会从您停下的地方继续。" 当用户暂停时，将部分配置写入 `~/.claude/plugins/config/claude-for-legal/legal-builder-hub/CLAUDE.md`，顶部附有 `<!-- SETUP PAUSED AT: [section name] — run /legal-builder-hub:cold-start-interview to resume -->` 注释，未回答的字段上有 `[PENDING]` 标记（与 `[PLACEHOLDER]` 不同）。当设置重新运行并发现暂停的配置时，问候用户："欢迎回来。您在 [section] 暂停了。您之前的答案已保存。从我们停下的地方继续，还是重新开始？" 不要重新询问已回答的问题。
 
-**Verify user-stated legal facts as they come up in setup.** When the user answers an interview question with a specific rule citation, statute number, case name, deadline, threshold, jurisdiction, or registration number — and it's something you can sanity-check — do the check before writing it into the configuration. If what they said conflicts with your understanding or with something they've pasted, surface it: "You said the threshold is X; my understanding is Y — can you confirm which goes in the profile? `[premise flagged — verify]`" A wrong fact written into CLAUDE.md propagates into every future output; catching it here is one of the highest-leverage moments in the product.
+**在设置中验证用户陈述的法律事实。** 当用户用特定的规则引用、法规编号、案例名称、截止日期、阈值、司法管辖区或注册号回答访谈问题时——并且这是您可以合理性检查的内容——在写入配置之前进行验证。如果用户说的与您的理解或他们粘贴的内容冲突，提出来："您说阈值是 X；我的理解是 Y——您能确认哪个写入档案吗？`[premise flagged — verify]`" 写入 CLAUDE.md 的错误事实会传播到每个未来输出；在这里捕捉它是产品中最高杠杆的时刻之一。
 
-## The interview
+## 访谈
 
-### Opening
+### 开场
 
-> I'll help you find and install community legal skills — things other lawyers have built and shared. First, what kind of lawyer are you? I'll recommend a starting pack.
+> 我将帮助您查找和安装社区法律 skills——其他律师构建和分享的内容。首先，您是哪种律师？我会推荐一个入门包。
 
-### Part 0: Who's using this, and what's connected
+### 第 0 部分：谁在使用这个，以及连接了什么
 
-Two quick questions before the practice profile. These shape how the plugin works, not what it can do.
+在执业档案之前的两个快速问题。这些问题塑造插件的工作方式，而不是它能做什么。
 
-#### Who's using this?
+#### 谁在使用这个？
 
-> Who'll be using this plugin day to day? (This feeds the Role signal carried across every plugin you install — skills with non-lawyer mode read from here instead of re-asking, and the `recommend` and `qa` outputs structure for non-lawyer readers when appropriate.)
+> 谁每天使用此插件？（这会传递到您安装的每个插件的角色信号——具有非律师模式的 skills 从这里读取而不是重新询问，并且 `recommend` 和 `qa` 输出在适当的时候为非律师读者构建结构。）
 >
-> 1. **Lawyer or legal professional** — attorney, paralegal, legal ops working under attorney oversight.
-> 2. **Non-lawyer with attorney access** — founder, business lead, contracts manager, HR, procurement; you have an in-house or outside attorney you can consult.
-> 3. **Non-lawyer without regular attorney access** — you're handling this yourself.
+> 1. **律师或法律专业人士** — 律师、律师助理、在律师监督下工作的法律运营人员。
+> 2. **有律师渠道的非律师** — 创始人、业务负责人、合同经理、人力资源、采购；您有内部或外部律师可以咨询。
+> 3. **没有定期律师渠道的非律师** — 您自己处理这些。
 
-If the answer is 2 or 3, say this once:
+如果答案是 2 或 3，说一次：
 
-> This plugin discovers and installs skills. Skills you install will have their own guardrails based on your role — I'll carry your answer here forward so you don't have to answer it per plugin.
+> 此插件发现和安装 skills。您安装的 skills 将根据您的角色有自己的护栏——我会将您在这里的回答传递给后续插件，这样您就不必每个插件都回答一次。
 
-If the answer is 3, add:
+如果答案是 3，添加：
 
-> If you need to find an attorney, solicitor, barrister, or other authorised legal professional: your professional regulator's referral service is the fastest starting point (state bar in the US, SRA/Bar Standards Board in England & Wales, Law Society in Scotland/NI/Ireland/Canada/Australia, or your jurisdiction's equivalent). Many offer free or low-cost initial consultations. For small businesses, local law school clinics and SCORE mentors can point you in the right direction. For individuals, legal aid organizations cover many practice areas.
+> 如果您需要寻找律师、事务律师、大律师或其他授权法律专业人士：您的专业监管机构的推荐服务是最快的起点（美国的州律师协会、英格兰和威尔士的 SRA/Bar Standards Board、苏格兰/北爱尔兰/爱尔兰/加拿大的 Law Society/澳大利亚，或您所在司法管辖区的等效机构）。许多提供免费或低成本初步咨询。对于小企业，当地法学院诊所和 SCORE 导师可以指引方向。对于个人，法律援助组织覆盖许多执业领域。
 
-#### What's connected?
+#### 连接了什么？
 
-> This plugin can work with: Slack (for new-skill / update notifications). Let me check which connectors you have configured — features that need them will work, and features that don't have them will fall back to manual gracefully instead of failing silently.
+> 此插件可以与 Slack（用于新 skill/更新通知）配合使用。让我检查哪些连接器已配置——需要它们的功能将正常工作，没有它们的功能将优雅地回退到手动操作，而不是静默失败。
 
-**Check what's actually connected, not what's configured.** A connector listed in `.mcp.json` is *available*. A connector that's actually responding is *connected*. These are different, and confusing them destroys trust. For each connector this plugin uses:
+**检查实际连接了什么，而不是配置了什么。** `.mcp.json` 中列出的连接器是*可用的*。实际响应的连接器是*已连接的*。这些是不同的，混淆它们会破坏信任。对于此插件使用的每个连接器：
 
-- If you can test the connection (call a simple MCP tool like a list or search), report ✓ only on a successful response.
-- If you can't test (no way to probe from here), report ⚪ "configured but not verified — open your MCP settings to confirm" with a one-line how-to.
-- Never report ✓ based on configuration alone.
+- 如果您可以测试连接（调用简单的 MCP 工具如列表或搜索），仅在成功响应时报告 ✓。
+- 如果您无法测试（无法从这里探测），报告 ⚪ "已配置但未验证——打开您的 MCP 设置确认"，附一行操作方法。
+- 永不仅基于配置报告 ✓。
 
-For connectors that show as not connected, tell the user how to connect. Example phrasing: "Slack isn't connected. In Claude Cowork: Settings → Connectors → Add → Slack → sign in. In Claude Code: add the Slack MCP to your config or via `/mcp`. This plugin works without it — update notifications surface on next `/legal-builder-hub:registry-browser` or `/legal-builder-hub:auto-updater` instead of proactively — but connecting it makes notifications real-time."
+对于显示为未连接的连接器，告诉用户如何连接。示例措辞："Slack 未连接。在 Claude Cowork 中：Settings → Connectors → Add → Slack → sign in。在 Claude Code 中：将 Slack MCP 添加到您的配置或通过 `/mcp`。此插件没有它也能工作——更新通知会在下次运行 `/legal-builder-hub:registry-browser` 或 `/legal-builder-hub:auto-updater` 时显示，而不是主动推送——但连接它可以使通知实时化。"
 
-Then report findings in this form:
+然后以此格式报告发现：
 
-> - ✓ [Integration] — connected (tested)
-> - ⚪ [Integration] — configured but not verified. Open your MCP settings to confirm.
-> - ✗ [Integration] — not found. [Feature] will fall back to [manual alternative]. [How to connect.]
+> - ✓ [集成] — 已连接（已测试）
+> - ⚪ [集成] — 已配置但未验证。打开您的 MCP 设置确认。
+> - ✗ [集成] — 未找到。[功能] 将回退到 [手动替代方案]。[如何连接。]
 
-You don't need this. Core features — browse, install, QA, update — work with file access alone.
+您不需要这些。核心功能——浏览、安装、QA、更新——仅凭文件访问即可工作。
 
-Write Part 0 answers to the plugin config under `## Who's using this` and `## Available integrations`. This plugin writes `## Who's using this` so other plugins installed afterward can read the role from here instead of re-asking.
+将第 0 部分答案写入插件配置的 `## 谁在使用这个` 和 `## 可用集成`。此插件写入 `## 谁在使用这个`，以便之后安装的其他插件可以从这里读取角色，而不是重新询问。
 
-Before the five questions: "Do you already have a list of community-skill registries you watch, or an allowlist / blocklist of skill sources your team uses? Paste the contents, share a file path, or say 'no' and I'll add the default. If you share one, I'll read it and add those registries plus your allowlist to the profile rather than making you re-type them. (This feeds /legal-builder-hub:skill-installer — the installer reads `allowlist.yaml` before fetching anything, and blocks any source that isn't on the list in restrictive mode.)"
+在五个问题之前："您是否已有社区 skill 注册表监控列表，或团队使用的 allowlist/blocklist？粘贴内容、分享文件路径，或者说 'no'，我会添加默认值。如果您分享一个，我会读取它并将这些注册表加上您的 allowlist 添加到档案中，而不是让您重新输入。（这会传递给 /legal-builder-hub:skill-installer——安装器在获取任何内容之前读取 `allowlist.yaml`，并在限制模式下阻止不在列表中的来源。）"
 
-**Deployment context.** After the allowlist question and before writing the file, ask:
+**部署上下文。** 在 allowlist 问题之后、写入文件之前，询问：
 
-> "How are you going to use the skills you install — just for yourself, shared across your firm, or embedded in a product or service you ship to others? (Personal / Firm-internal / Product-embedding.) (This feeds `allowlist.yaml` — the deployment context seeds the `licenses:` list, and /legal-builder-hub:skill-installer refuses to fetch any skill under a license not on that list.) This sets your license defaults. Most open source licenses are fine for personal use. Firm-internal adds file-level copyleft (LGPL, MPL — fine when you're not distributing). Product-embedding is the strict one: strong copyleft (GPL, AGPL) creates obligations that need legal review before you ship, so those get flagged rather than defaulted."
+> "您打算如何使用安装的 skills——仅自己使用、在律所内共享，还是嵌入到您交付给他人的产品或服务中？(Personal / Firm-internal / Product-embedding。)（这会传递给 `allowlist.yaml`——部署上下文播种 `licenses:` 列表，/legal-builder-hub:skill-installer 拒绝获取许可证不在该列表中的 skill。）这设置了您的许可证默认值。大多数开源许可证适合个人使用。律所内部增加了文件级 copyleft（LGPL、MPL——当您不分发时没问题）。产品嵌入是最严格的：强 copyleft（GPL、AGPL）创建需要在交付前进行法律审查的义务，所以这些会被标记而不是设为默认。"
 
-Record the answer in the profile under `## Sources I trust` as `Deployment context: [personal | firm-internal | product-embedding]`. The allowlist's `licenses:` seeding below reads from it.
+在档案的 `## 我信任的来源` 中记录答案为 `Deployment context: [personal | firm-internal | product-embedding]`。以下 allowlist 的 `licenses:` 播种读取它。
 
-**Write the allowlist to `allowlist.yaml`, not just the profile.** The installer's gate reads from `~/.claude/plugins/config/claude-for-legal/legal-builder-hub/allowlist.yaml`, not from CLAUDE.md. If you only record the answer in the profile, the installer sees an empty allowlist and falls back to permissive regardless of what the user said — silently defeating the headline structural defense. After this question:
+**将 allowlist 写入 `allowlist.yaml`，而不仅是档案。** 安装器的门槛读取 `~/.claude/plugins/config/claude-for-legal/legal-builder-hub/allowlist.yaml`，而不是 CLAUDE.md。如果您仅在档案中记录答案，安装器看到空 allowlist 并回退到宽松模式，无论用户说了什么——静默击败了标题结构防御。在此问题之后：
 
-1. Write `allowlist.yaml` at the config path, following the schema in `skill-installer/references/allowlist.md`:
-   - `mode:` — the template default is `restrictive` (fail-closed). Offer `permissive` for Solo/small firm (they don't have IT-curated publisher lists, so restrictive mode would refuse everything). Keep `restrictive` for Midsize/large firm, In-house, or Government (those have security policies that want a firm gate). Always confirm: "I'm setting the allowlist to [mode]. Restrictive refuses unknown sources until you add them — safest, but you'll need to approve each new publisher. Permissive flags unknown sources and asks you before installing — more convenient, less strict. Which do you want?" Never write permissive without explicit user consent.
-   - `registries:` — what the user provided plus the default.
-   - `publishers:` — GitHub owners/orgs the user named or that own the trusted registries.
-   - `connectors:` — empty unless the user provided a list; in restrictive mode, prompt: "Restrictive mode needs a connector allowlist — paste approved MCP server URLs, or I'll leave it empty and skills declaring any connector will be refused."
-   - `licenses:` — seed based on the deployment-context answer above:
-     - **Personal** → `MIT`, `Apache-2.0`, `BSD-2-Clause`, `BSD-3-Clause`, `ISC`, `CC0-1.0`.
-     - **Firm-internal** → same as Personal plus `LGPL-2.1-only`, `LGPL-3.0-only`, `MPL-2.0`.
-     - **Product-embedding** → same as Personal. Also write a top-of-file comment in `allowlist.yaml`: `## License review required before shipping — anything not on this list needs legal sign-off.` Strong copyleft (GPL, AGPL) is deliberately excluded from the default here; adding those requires a deliberate edit.
-2. Also summarize in the profile's `## Sources I trust` section so a human can see the policy.
-3. Tell the user where it lives: "Your allowlist is at `~/.claude/plugins/config/claude-for-legal/legal-builder-hub/allowlist.yaml`. The installer reads it before fetching anything."
+1. 在配置路径写入 `allowlist.yaml`，遵循 `skill-installer/references/allowlist.md` 中的 schema：
+   - `mode:` — 模板默认为 `restrictive`（失败关闭）。为个人/小团队提供 `permissive`（他们没有 IT 策划的发布者列表，所以限制模式会拒绝一切）。中型/大型律所、内部或政府保持 `restrictive`（他们有需要严格门槛的安全策略）。始终确认："我正在将 allowlist 设置为 [mode]。Restrictive 拒绝未知来源直到您添加它们——最安全，但您需要批准每个新发布者。Permissive 标记未知来源并在安装前询问您——更方便，不那么严格。您想要哪个？" 永不在没有明确用户同意的情况下写入 permissive。
+   - `registries:` — 用户提供的加上默认值。
+   - `publishers:` — 用户命名的或拥有可信注册表的 GitHub 所有者/组织。
+   - `connectors:` — 除非用户提供列表否则为空；在限制模式下，提示："限制模式需要连接器 allowlist——粘贴批准的 MCP 服务器 URL，或者我将其留空，声明任何连接器的 skills 将被拒绝。"
+   - `licenses:` — 根据上面的部署上下文答案播种：
+     - **Personal** → `MIT`、`Apache-2.0`、`BSD-2-Clause`、`BSD-3-Clause`、`ISC`、`CC0-1.0`。
+     - **Firm-internal** → 与 Personal 相同加上 `LGPL-2.1-only`、`LGPL-3.0-only`、`MPL-2.0`。
+     - **Product-embedding** → 与 Personal 相同。还在 `allowlist.yaml` 顶部写入注释：`## 交付前需要许可证审查——不在此列表中的任何内容需要法律签署。` 强 copyleft（GPL、AGPL）在此默认中故意排除；添加这些需要刻意编辑。
+2. 还在档案的 `## 我信任的来源` 部分中总结，以便人类可以看到策略。
+3. 告诉用户它在哪里："您的 allowlist 位于 `~/.claude/plugins/config/claude-for-legal/legal-builder-hub/allowlist.yaml`。安装器在获取任何内容之前读取它。"
 
-If the user uploads a registry/allowlist file: read it, extract the registry URLs and allowlist/blocklist entries, confirm what you found, write `allowlist.yaml` per the schema, and summarize in the profile.
+如果用户上传了注册表/allowlist 文件：读取它，提取注册表 URL 和 allowlist/blocklist 条目，确认您找到了什么，按照 schema 写入 `allowlist.yaml`，并在档案中总结。
 
-**Freshness reminders.** After the allowlist question (deployment context is set) and before the five questions, ask:
+**新鲜度提醒。** 在 allowlist 问题之后（部署上下文已设置）和五个问题之前，询问：
 
-> "When a community skill bundles reference material — regulations, statutes, procedural templates — how long should it be trusted before I remind you to verify it's still current? (6 months is a common default for regulatory content. 12 months for procedural/stylistic content. Set it tighter if you work in a fast-moving area.)"
+> "当社区 skill 捆绑参考材料——法规、法律、程序模板——应该信任多长时间后我再提醒您验证它是否仍然最新？（6 个月是监管内容的常见默认值。12 个月用于程序/风格内容。如果您在快速变化的领域工作，设置更紧。）"
 
-Accept either a single number (apply to regulatory; use the category defaults below for the others) or per-category answers. Validate each answer shapes to `N days`, `N months`, or `N years` with `N` a positive integer ≤ 120 — reject free-form prose and re-ask.
+接受单个数字（应用于监管；以下类别的默认值用于其他）或按类别的答案。验证每个答案的形状为 `N days`、`N months` 或 `N years`，其中 `N` 为正整数 ≤ 120——拒绝自由形式散文并重新询问。
 
-Write the answer to a `## Freshness reminders` section in the profile (insert after `## Sources I trust` and before `## Installed starter pack`):
+将答案写入档案中的 `## 新鲜度提醒` 部分（在 `## 我信任的来源` 之后、`## 已安装的入门包` 之前插入）：
 
 ```markdown
-## Freshness reminders
+## 新鲜度提醒
 
-| Content category | Max age before reminder | Rationale |
+| 内容类别 | 提醒前的最大年龄 | 理由 |
 |---|---|---|
-| regulatory | 6 months | Regulators update frequently; enforcement priorities shift |
-| procedural | 12 months | Court rules and procedures change slower |
-| stylistic | 24 months | House style, formatting templates |
-| unknown | 3 months | A skill that doesn't declare freshness is treated cautiously |
+| regulatory | 6 个月 | 监管机构频繁更新；执法优先级变化 |
+| procedural | 12 个月 | 法院规则和程序变化较慢 |
+| stylistic | 24 个月 | 内部风格、格式模板 |
+| unknown | 3 个月 | 未声明新鲜度的 skill 被谨慎对待 |
 
-When a skill's `last_verified` + `freshness_window` is past, or the user's threshold (above) is past — whichever is tighter — the skill-installer surfaces a warning before running.
+当 skill 的 `last_verified` + `freshness_window` 已过，或用户的阈值（上方）已过——以更紧者为准——skill-installer 在运行前显示警告。
 ```
 
-If the user gave tighter numbers, write those in place of the defaults. If the user said "use defaults," write the table as shown.
+如果用户给了更紧的数字，用它们替换默认值。如果用户说"使用默认值"，按原样写入表格。
 
-**If the user didn't upload a registry list:** after the five questions, offer: "Want me to write your watched registries and update preferences up as a standalone policy note you can share with your team? Same content I'm saving to your profile, formatted so teammates or a new builder can see which sources you trust and how you want updates handled."
+**如果用户没有上传注册表列表：** 在五个问题之后，提供："想要我将您的监控注册表和更新偏好写成一个独立的策略笔记，您可以与团队分享吗？与我要保存到档案的内容相同，格式化以便队友或新构建者可以看到您信任哪些来源以及您希望如何处理更新。"
 
-### The five questions
+### 五个问题
 
-1. **Practice area** — In-house or firm? Commercial, privacy, product, employment, litigation, M&A, something else? (This feeds /legal-builder-hub:related-skills-surfacer — the practice area is the primary key that maps to the starter pack.)
+1. **执业领域** — 内部还是律所？商业、隐私、产品、雇佣、诉讼、并购，还是其他？（这会传递给 /legal-builder-hub:related-skills-surfacer——执业领域是映射到入门包的主键。）
 
-   **Practices that don't fit the boxes.** If the user's practice doesn't match the options (international arbitration, public international law, amicus-only, academic consulting, pro bono panel, tribal court, military justice, maritime, or anything else the standard categories assume away), offer: "It sounds like your practice doesn't fit my usual categories. Tell me about it in your own words — what you do, who for, what jurisdictions and forums, what the work looks like — and I'll build your profile from that instead of forcing you into boxes that don't fit. I'll skip or adapt the questions that don't apply." Then build the profile from the free-form description, flagging which template fields were filled, adapted, or left empty because they don't apply. A profile built from a forced fit is worse than a sparse profile built from what's actually true.
+   **不适合分类框的执业。** 如果用户的执业不匹配选项（国际仲裁、国际公法、仅法庭之友、学术咨询、公益面板、部落法院、军事司法、海事，或其他标准类别假设不涵盖的内容），提供："听起来您的执业不适合我的常用类别。用您自己的话告诉我——您做什么，为谁做，什么司法管辖区和论坛，工作是什么样的——我会从这些构建您的档案，而不是强迫您适应不适合的框。我会跳过或调整不适用的问题。" 然后从自由形式描述构建档案，标记哪些模板字段被填充、调整或因不适用而留空。从强行适应构建的档案比从真实情况构建的稀疏档案更差。
 
-2. **Industry** — Tech, healthcare, finance, other, doesn't matter? (This feeds /legal-builder-hub:related-skills-surfacer and /legal-builder-hub:registry-browser — industry narrows the starter pack and filters registry results.)
+2. **行业** — 科技、医疗、金融、其他、无所谓？（这会传递给 /legal-builder-hub:related-skills-surfacer 和 /legal-builder-hub:registry-browser——行业缩小入门包并过滤注册表结果。）
 
-3. **Team size** — Solo, small team (2-5), large legal department? (This feeds the `allowlist.yaml` mode default — Solo/small gets permissive, Midsize/large/In-house/Government gets restrictive.)
+3. **团队规模** — 个人、小团队（2-5人）、大型法务部？（这会传递给 `allowlist.yaml` 模式默认——个人/小团队获得 permissive，中型/大型/内部/政府获得 restrictive。）
 
-4. **What's the thing you do most?** — Contract review, compliance, launch reviews, deal support, brief writing, etc. (This feeds /legal-builder-hub:related-skills-surfacer — the surfacer nudges you when you're doing something the community has a skill for.)
+4. **您最常做的事情是什么？** — 合同审查、合规、发布审查、交易支持、书状撰写等。（这会传递给 /legal-builder-hub:related-skills-surfacer——当您在做社区有 skill 的事情时，surfacer 会提醒您。）
 
-5. **Tooling comfort** — Builder (you write your own skills), tinkerer (you edit what's installed), just-make-it-work (you want it to work out of the box)? (This feeds /legal-builder-hub:related-skills-surfacer — builders get the raw registries and /legal-builder-hub:skills-qa framework; just-make-it-work gets a curated, working pack.)
+5. **工具使用习惯** — 构建者（您编写自己的 skills）、修补者（您编辑已安装的内容）、只要能用就行（您希望开箱即用）？（这会传递给 /legal-builder-hub:related-skills-surfacer——构建者获得原始注册表和 /legal-builder-hub:skills-qa 框架；只要能用就行获得精选的、可用的包。）
 
-### Recommend
+### 推荐
 
-Map the profile to registry skills:
+将档案映射到注册表 skills：
 
-| Profile | Starter pack |
+| 档案 | 入门包 |
 |---|---|
-| In-house commercial, tech | commercial-legal plugin + lpm-skills (matter intake, scope control) |
-| Privacy counsel | privacy-legal plugin + any community DPA/PIA skills |
-| Product counsel | product-legal plugin + community marketing-review skills |
-| Firm litigation | litigation-legal plugin + lpm-skills (matter planning, budget) |
-| Solo / small team | Everything lightweight — triage skills over full review skills |
-| Builder | the raw registries and the skills-qa framework — they'll build and validate their own |
+| 内部商业，科技 | commercial-legal 插件 + lpm-skills（事项接案、范围控制） |
+| 隐私顾问 | privacy-legal 插件 + 任何社区 DPA/PIA skills |
+| 产品顾问 | product-legal 插件 + 社区营销审查 skills |
+| 律所诉讼 | litigation-legal 插件 + lpm-skills（事项规划、预算） |
+| 个人/小团队 | 所有轻量级——分流 skills 优先于完整审查 skills |
+| 构建者 | 原始注册表和 skills-qa 框架——他们会构建和验证自己的 |
 
-For each recommended skill: show the SKILL.md description. Let them pick — don't install anything without a yes.
+对于每个推荐的 skill：展示 SKILL.md 描述。让他们选择——未经 yes 不安装任何东西。
 
-## Writing the practice profile
+## 写入执业档案
 
-Short. Profile + installed list + registry prefs. Per the template at `${CLAUDE_PLUGIN_ROOT}/CLAUDE.md`.
+简短。档案 + 已安装列表 + 注册表偏好。按照 `${CLAUDE_PLUGIN_ROOT}/CLAUDE.md` 的模板。
 
-## After writing
+## 写入后
 
-**Show what this plugin can do.** Before closing, offer:
+**展示此插件能做什么。** 关闭前，提供：
 
-> **Want to see what I can help with?**
+> **想看看我能帮什么吗？**
 
-If yes, show this tailored list (not a generic template — these are the concrete things this plugin does best):
+如果是，展示此定制列表（不是通用模板——这些是此插件最擅长的具体事项）：
 
-> **Here's what I'm good at in legal skill management:**
+> **以下是我在法律 skill 管理方面擅长的：**
 >
-> - **Browse community legal skills** — e.g., "See what other practitioners have built for your practice area." Try: `/legal-builder-hub:registry-browser`
-> - **Install a skill from a registry** — e.g., "Add a community skill to your environment — license-gated and allowlist-checked before it runs." Try: `/legal-builder-hub:skill-installer`
-> - **Check for updates** — e.g., "See which installed skills have newer versions in their source registry." Try: `/legal-builder-hub:auto-updater`
-> - **Get skill recommendations** — e.g., "Based on recent activity in your other plugins, surface skills worth trying." Try: `/legal-builder-hub:related-skills-surfacer`
-> - **Evaluate a skill against the design framework** — e.g., "Run the Legal Skill Design Framework on a skill — nine design parameters, three failure modes, a trust-surface check." Try: `/legal-builder-hub:skills-qa`
+> - **浏览社区法律 skills** — 例如，"看看其他从业者为您执业领域构建了什么。" 试试：`/legal-builder-hub:registry-browser`
+> - **从注册表安装 skill** — 例如，"将社区 skill 添加到您的环境——许可证门控和 allowlist 检查在运行前完成。" 试试：`/legal-builder-hub:skill-installer`
+> - **检查更新** — 例如，"查看哪些已安装的 skills 在源注册表中有更新版本。" 试试：`/legal-builder-hub:auto-updater`
+> - **获取 skill 推荐** — 例如，"基于其他插件的最近活动，展示值得尝试的 skills。" 试试：`/legal-builder-hub:related-skills-surfacer`
+> - **根据设计框架评估 skill** — 例如，"对 skill 运行法律 Skill 设计框架——九个设计参数、三个失败模式、信任表面检查。" 试试：`/legal-builder-hub:skills-qa`
 >
-> **My suggestion for your first one:** Browse the registry and pick one skill that matches a current project — install it and see how the allowlist gate feels. Or tell me what's on your plate and I'll pick.
+> **我建议您的第一个：** 浏览注册表并挑选一个匹配当前项目的 skill——安装它并感受 allowlist 门槛。或者告诉我您手头有什么，我来挑选。
 
-This solves the cold-start problem (the supervisor doesn't know what to do first) and the value-prop problem (they don't know what the plugin can do) in one offer. Make the list specific. Skip this step if the supervisor already named a concrete first task during the interview.
+这在一次提供中解决了冷启动问题（督导不知道首先该做什么）和价值主张问题（他们不知道插件能做什么）。使列表具体。如果督导在访谈中已经命名了具体的首个任务，跳过此步骤。
 
 
-- "Here's what I installed. Want to see what else is in the registries?"
-- "The related-skills-surfacer will nudge you when you're doing something the community has a skill for. Want that on or off?"
-- **Before the first installed skill that cites authority, connect a research tool.** Say: "Before the first installed skill that cites authority: connect a research tool if one of the installed plugins needs it. Without one, skills will flag every citation as unverified. In Cowork: Settings → Connectors. In Claude Code: authorize when a skill prompts you."
+- "这是我安装的内容。想看看注册表中还有什么吗？"
+- "related-skills-surfacer 会在您做社区有 skill 的事情时提醒您。想要开启还是关闭？"
+- **在第一个需要引用权威的已安装 skill 之前，连接研究工具。** 说："在第一个需要引用权威的已安装 skill 之前：连接研究工具，如果安装的插件需要的话。没有的话，skills 会将每个引用标记为未验证。在 Cowork 中：Settings → Connectors。在 Claude Code 中：在 skill 提示时授权。"
 
 <!-- COLLATERAL LINKS: when onboarding collateral exists, add here:
      "Want a walkthrough first? [Watch the 3-minute intro](URL) or [read the getting-started guide](URL)." -->
 
-Then close with the "you can change anything later" note:
+然后用"您可以稍后更改任何内容"的注释关闭：
 
-> Done. Your configuration is at `~/.claude/plugins/config/claude-for-legal/legal-builder-hub/CLAUDE.md` — a plain text file you can read and edit directly. Anything you answered can be changed:
+> 完成。您的配置位于 `~/.claude/plugins/config/claude-for-legal/legal-builder-hub/CLAUDE.md`——一个您可以直接读取和编辑的纯文本文件。您回答的任何内容都可以更改：
 >
-> - Edit the file directly for a quick change
-> - Run `/legal-builder-hub:cold-start-interview --redo` for a full re-interview
-> - Run `/legal-builder-hub:cold-start-interview --check-integrations` to re-check what's connected
+> - 直接编辑文件进行快速更改
+> - 运行 `/legal-builder-hub:cold-start-interview --redo` 进行完整重新访谈
+> - 运行 `/legal-builder-hub:cold-start-interview --check-integrations` 重新检查连接状态
 >
-> The things most commonly tweaked later: your watched registries (add or drop sources), your update preference (notify vs. manual), and the scope of your practice profile (add an industry or a second practice type as your work shifts). Your configuration will improve as you use the plugin — if recommendations feel off, the profile is usually the fix.
+> 最常被调整的内容：监控的注册表（添加或移除来源）、更新偏好（通知 vs. 手动），以及执业档案的范围（随着工作变化添加行业或第二执业类型）。您的配置会随着使用插件而改善——如果推荐感觉不对，通常是档案的问题。
 
-## Your practice profile learns
+## 您的执业档案会学习
 
-After writing the practice profile, close with this note:
+写入执业档案后，以此注释关闭：
 
-> **Your practice profile learns.** It gets better as you use the plugins:
+> **您的执业档案会学习。** 随着您使用插件它会变得更好：
 >
-> - When a skill's output feels off, that's usually a position to tune. The output will tell you which one.
-> - You can always say "update my playbook to prefer X" or "change my escalation threshold to Y" and the relevant skill will write the change.
-> - Run `/legal-builder-hub:cold-start-interview --redo <section>` to re-interview one part, or edit the config file directly.
+> - 当 skill 的输出感觉不对时，通常是某个需要调整的立场。输出会告诉您是哪个。
+> - 您随时可以说"更新我的剧本以偏好 X"或"将我的升级阈值改为 Y"，相关的 skill 会写入更改。
+> - 运行 `/legal-builder-hub:cold-start-interview --redo <section>` 重新访谈某个部分，或直接编辑配置文件。
 >
-> Ten minutes of setup gets you a working profile. A month of use gets you one that reads like you wrote it yourself.
+> 十分钟的设置给您一个可用的档案。一个月的使用给您一个读起来像是您自己写的档案。
 
-## Registries watched by default
+## 默认监控的注册表
 
-- **lpm-skills** (github.com/legalopsconsulting/lpm-skills) — legal project management, practice-area agnostic
-- User can add others via `/legal-builder-hub:registry-browser`
+- **lpm-skills** (github.com/legalopsconsulting/lpm-skills) — 法律项目管理，与执业领域无关
+- 用户可以通过 `/legal-builder-hub:registry-browser` 添加其他注册表

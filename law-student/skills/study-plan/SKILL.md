@@ -1,132 +1,140 @@
 ---
 name: study-plan
 description: >
-  Build or update a long-term bar prep (or exam prep) study plan — phases,
-  subjects weighted by weakness, daily session schedule, adaptive to session
-  history in study-plan.yaml. Use when the user says "build a study plan",
-  "plan my bar prep", "schedule my studying", or "how should I study for [X]".
+  构建或更新长期律师考试（或期末考试）学习计划——阶段划分、
+  按薄弱程度加权的学科、每日学习会安排、根据 study-plan.yaml
+  中的会话历史自适应。当用户说"build a study plan"、
+  "plan my bar prep"、"schedule my studying"或
+  "how should I study for [X]"时使用。
 argument-hint: "[--build | --update | --status | --cram]"
 ---
 
+<!--
+This file is a Chinese translation of the original by Anthropic PBC.
+Original: https://github.com/anthropics/claude-for-legal
+Licensed under Apache License 2.0
+-->
+
+
 # /study-plan
 
-1. Load `~/.claude/plugins/config/claude-for-legal/law-student/CLAUDE.md` → bar jurisdiction, exam format, bar date, weak subjects, target study hours/day, prep course.
-2. Load `~/.claude/plugins/config/claude-for-legal/law-student/study-plan.yaml` if it exists.
-3. Apply the framework below.
-4. Route by flag:
-   - `--build` (default if no plan exists): walk the inputs gate (exam, subjects, hours/week, days off, methods). Build the phase structure + daily schedule for the first two weeks. Write `study-plan.yaml`.
-   - `--update` (default if plan exists): re-read `session_history`, adjust subject priorities and weekly_hours, fill in the next stretch of daily schedule.
-   - `--status`: what's scheduled today / this week, score trend, subjects slipping, next scheduled session per subject.
-   - `--cram`: force cram mode — 80/20 high-yield prioritization, daily MBE volume, taper last 2-3 days.
-5. Before writing: summarize the plan in prose and confirm with the student. Adjust based on their answer.
-6. Always sanity-check hours/week against the student's stated life constraints. Over-ambitious plans fail.
+1. 加载 `~/.claude/plugins/config/claude-for-legal/law-student/CLAUDE.md` → 律师考试司法管辖区、考试格式、考试日期、薄弱学科、目标学习小时/天、预备课程。
+2. 加载 `~/.claude/plugins/config/claude-for-legal/law-student/study-plan.yaml`（如果存在）。
+3. 应用以下框架。
+4. 按标志路由：
+   - `--build`（无计划存在时的默认值）：走一遍输入门控（考试、学科、小时/周、休息日、方法）。构建阶段结构 + 前两周的每日安排。写入 `study-plan.yaml`。
+   - `--update`（有计划存在时的默认值）：重新阅读 `session_history`，调整学科优先级和每周小时，填写下一段每日安排。
+   - `--status`：今天/本周安排了什么、分数趋势、正在滑落的学科、每个学科的下一次安排会话。
+   - `--cram`：强制进入冲刺模式——80/20 高收益优先、每日 MBE 量、最后 2-3 天逐步减少。
+5. 写入前：以散文形式总结计划并与学生确认。根据他们的答案调整。
+6. 始终根据学生陈述的生活约束对小时/周进行合理性检查。过于雄心勃勃的计划会失败。
 
 ---
 
-## Purpose
+## 目的
 
-Sitting down to study and not knowing what to study is how weeks disappear. This skill builds a plan — weeks to exam, sessions per day, subjects per week, session types — and then adapts as the student actually does the sessions. It is a living plan, not a calendar export.
+坐下来学习却不知道学习什么就是几周消失的方式。此 skill 构建一个计划——到考试的周数、每天的学习会、每周的学科、会话类型——然后随着学生实际进行会话而适应。它是一个活的计划，而不是日历导出。
 
-It also gives downstream skills (bar-prep, flashcards, drill, irac) a shared schedule to honor, so the student isn't asked "what do you want to study today" every time they open a session.
+它还为下游 skills（bar-prep、flashcards、drill、irac）提供了一个共享的 schedule 来遵守，这样学生每次打开会话时都不会被问"你今天想学习什么"。
 
-## Confidence discipline
+## 信心纪律
 
-A plan is opinion, not doctrine. The skill states clearly what's an estimate:
+计划是意见，而不是教条。Skill 明确说明什么是估计：
 
-- **Time-per-topic estimates** are general guidance (based on typical Barbri/Themis/Kaplan weightings). Flag them as estimates — the student's real pace will differ.
-- **Subject weightings** are derived from the student's own reported weak subjects and session history. Confident.
-- **High-yield-topic prioritization in cram mode** is based on multi-year bar exam release patterns (MBE/MEE subject frequency). Flag any "this is definitely on the exam" claim as `[UNCERTAIN — past frequency is not a prediction]`.
+- **每个主题的时间估计**是一般指导（基于典型的 Barbri/Themis/Kaplan 权重）。将它们标记为估计——学生的实际节奏会有所不同。
+- **学科权重**源于学生自己报告的薄弱学科和会话历史。有信心。
+- **冲刺模式中的高收益主题优先**基于多年的律师考试发布模式（MBE/MEE 学科频率）。将任何"这肯定在考试上"的主张标记为 `[UNCERTAIN — past frequency is not a prediction]`。
 
-## Load context
+## 加载上下文
 
-`~/.claude/plugins/config/claude-for-legal/law-student/CLAUDE.md`:
-- Bar jurisdiction, exam format, bar date
-- Current classes (for non-bar use)
-- Weak subjects (MBE, essay)
-- Prep course
-- Target study hours/day
+`~/.claude/plugins/config/claude-for-legal/law-student/CLAUDE.md`：
+- 律师考试司法管辖区、考试格式、考试日期
+- 当前课程（用于非律师考试）
+- 薄弱学科（MBE、论文）
+- 预备课程
+- 目标学习小时/天
 
-`~/.claude/plugins/config/claude-for-legal/law-student/study-plan.yaml` if it exists — extend, don't overwrite.
+`~/.claude/plugins/config/claude-for-legal/law-student/study-plan.yaml`（如果存在）——扩展，不要覆盖。
 
-## Workflow
+## 工作流
 
-### Step 1: What are we planning for
+### 步骤 1：我们在为什么做计划
 
-> What are we building a plan for?
+> 我们在为什么做计划？
 >
-> 1. **Bar exam** (you have a bar date in mind)
-> 2. **A specific law school exam or set of finals**
-> 3. **General semester study cadence** (outlining, reading, drilling across all classes)
+> 1. **律师考试**（你有一个考试日期）
+> 2. **特定的法学院考试或一组期末考试**
+> 3. **一般学期学习节奏**（大纲、阅读、抽问跨所有课程）
 
-For (1) bar: read bar date from practice profile, confirm. If no bar date captured, ask.
-For (2) law school exam: ask which class, what date, what format.
-For (3) semester: ask for the term-end date as the anchor.
+对于 (1) 律师考试：从执业档案阅读考试日期，确认。如果未捕获考试日期，询问。
+对于 (2) 法学院考试：询问哪门课、什么日期、什么格式。
+对于 (3) 学期：询问学期结束日期作为锚点。
 
-### Step 2: Inputs — one at a time, wait for each
+### 步骤 2：输入——一次一个，等待每个
 
-**Ask and wait.** Do not bulk all questions into one prompt and move on.
+**询问并等待。** 不要将所有问题合并到一个提示中然后继续。
 
-- **Exam date:** confirmed? (If bar: ask for jurisdiction if not in practice profile — study content depends on it.)
-- **Subjects to cover:** for bar, read from NCBE subject outline for the exam format (NextGen / traditional UBE / state-specific). For a class, the syllabus. Confirm with student — "any subject I should add or drop?"
-- **Strongest subjects:** least priority. Still reviewed, not drilled heavily.
-- **Weakest subjects:** most priority. Get more sessions.
-- **Hours per week available:** realistic, not aspirational. "I can do 20 hours" is different from "I will do 20 hours for 8 weeks." Ask what they can actually sustain.
-- **Life-context sanity check — force it.** After the student gives a number, ask (one question at a time — do not skip):
+- **考试日期：** 已确认？（如果是律师考试：如果不在执业档案中则询问司法管辖区——学习内容取决于它。）
+- **要覆盖的学科：** 对于律师考试，从考试格式的 NCBE 学科大纲阅读（NextGen / 传统 UBE / 州特定）。对于课程，教学大纲。与学生确认——"有什么学科我应该添加或删除吗？"
+- **最强的学科：** 最低优先级。仍然复习，不大量抽问。
+- **最薄弱的学科：** 最高优先级。获得更多会话。
+- **每周可用小时：** 现实的，不是理想的。"我可以做 20 小时"与"我将在 8 周内做 20 小时"不同。询问他们实际能维持什么。
+- **生活情境合理性检查——强制执行。** 在学生给出一个数字后，询问（一次一个问题——不要跳过）：
 
-  > You said [N] hours per week. Before I build this, tell me what else is in your week — job (hours/week), family (kids, caregiving), commute, workout, therapy, clinic, anything meaningful. The plan should fit your life, not the other way around. A plan you can't follow is worse than a lighter plan you can.
+  > 你说每周 [N] 小时。在我构建之前，告诉我你一周中还有什么——工作（小时/周）、家庭（孩子、照护）、通勤、锻炼、治疗、诊所、任何有意义的事情。计划应该适合你的生活，而不是反过来。你无法遵循的计划比更轻的你 能遵循的计划更糟糕。
 
-  Wait for the answer. Then sanity-check the stated hours against their reported load:
+  等待答案。然后根据他们报告的负荷对陈述的小时进行合理性检查：
 
-  > That's ~[X] hours/day across [N] study days, on top of [job + family + commute + other]. In my experience that's [realistic / tight / unsustainable]. Want to adjust the hours/week target before I build, or keep them and see how week 1 goes?
+  > 那是跨 [N] 个学习日每天约 [X] 小时，加上 [工作 + 家庭 + 通勤 + 其他]。按我的经验，这是 [现实的 / 紧张的 / 不可持续的]。想在构建前调整小时/周目标，还是保持它们看看第一周怎么样？
 
-  Do not skip this step even if the practice profile's target hours number was already captured at cold-start. The profile captures what the student said; the life-context check captures whether it's sustainable. If the check produces a lower number, use the lower number for the plan and note the adjustment in the `confidence_flags` block.
+  不要跳过此步骤，即使执业档案的目标小时数已在冷启动时捕获。档案捕获学生说了什么；生活情境检查捕获它是否可持续。如果检查产生更低的数字，使用更低的数字并在 `confidence_flags` 块中注明调整。
 
-  If the student declines to share life context ("just build it"), respect that — but add a `confidence_flags` entry: "Life-context check declined; plan assumes [N] hours/week is sustainable. Revisit at end of week 2 if adherence is below [X]%."
-- **Preferred study methods:** multi-select. MBE practice / essays / flashcards / outlining / drilling / re-reading. Weight the schedule toward the methods they say they'll actually do.
-- **Days off per week:** rest days matter. Plans that schedule 7/7 days fail in week 3.
+  如果学生拒绝分享生活情境（"just build it"），尊重——但添加 `confidence_flags` 条目："Life-context check declined; plan assumes [N] hours/week is sustainable. Revisit at end of week 2 if adherence is below [X]%."
+- **偏好的学习方法：** 多选。MBE 练习 / 论文 / 抽认卡 / 大纲 / 抽问 / 重新阅读。将安排加权到他们说他们会实际做的方法。
+- **每周休息天数：** 休息日很重要。安排 7/7 天的计划在第 3 周失败。
 
-### Step 2.5: Supplement vs. replace (prep-course users)
+### 步骤 2.5：补充 vs. 替代（预备课程用户）
 
-If `~/.claude/plugins/config/claude-for-legal/law-student/CLAUDE.md` → `Prep course` is **Barbri**, **Themis**, **Kaplan**, or any other structured prep course (i.e., NOT `self` or `N/A`), the student already has a prep-course calendar. This skill's plan must choose one of two roles — it cannot run a full parallel curriculum alongside the prep course without burning the student out.
+如果 `~/.claude/plugins/config/claude-for-legal/law-student/CLAUDE.md` → `Prep course` 是 **Barbri**、**Themis**、**Kaplan** 或任何其他结构化预备课程（即不是 `self` 或 `N/A`），学生已经有预备课程日历。此 skill 的计划必须选择两个角色之一——它不能在预备课程旁边运行完整的平行课程而不让学生筋疲力尽。
 
-Ask, one question, wait:
+询问，一个问题，等待：
 
-> Your profile says you're on [Barbri / Themis / Kaplan]. They publish a day-by-day calendar with every subject and task scheduled. Two ways this plan can work — pick one:
+> 你的档案说你在使用 [Barbri / Themis / Kaplan]。他们发布每日日历，安排了每个学科和任务。此计划可以有两种工作方式——选择一种：
 >
-> 1. **Supplement.** The prep course is your primary curriculum. This plan fills gaps: extra MBE drilling on your weak subjects, targeted essay practice, flashcard loops on the topics you're missing. I won't rebuild the prep-course calendar; I'll layer on top of it.
-> 2. **Replace.** You're not following the prep-course calendar (maybe because its pacing doesn't work for your life). I'll build the whole plan — subjects, hours, phases, schedule — and you drop the prep-course calendar.
+> 1. **补充。** 预备课程是你的主要课程。此计划填补缺口：针对薄弱学科的额外 MBE 抽问、有针对性的论文练习、你遗漏的主题的抽认卡循环。我不会重建预备课程日历；我会叠加在上面。
+> 2. **替代。** 你不遵循预备课程日历（可能因为它的节奏不适合你的生活）。我将构建整个计划——学科、小时、阶段、安排——你放弃预备课程日历。
 >
-> Don't pick both. Running two full curricula against each other is how students blow up in week 4.
+> 不要选两者。同时运行两个完整课程是学生在第 4 周爆炸的方式。
 
-Wait for the answer. Record it in the yaml as `prep_course_mode: supplement | replace`.
+等待答案。在 yaml 中记录为 `prep_course_mode: supplement | replace`。
 
-If **supplement**: the plan's daily schedule is lighter — it only adds weak-subject drilling and targeted practice, does not duplicate prep-course coverage. Flag in `confidence_flags`: "Supplement mode — this plan assumes you're on track with [prep course] for primary coverage. If you fall behind on the prep course, tell me and we'll re-plan."
+如果 **补充**：计划的每日安排更轻——它只添加薄弱学科抽问和有针对性的练习，不重复预备课程覆盖。在 `confidence_flags` 中标记："Supplement mode — this plan assumes you're on track with [prep course] for primary coverage. If you fall behind on the prep course, tell me and we'll re-plan."
 
-If **replace**: build the full plan as specified below.
+如果 **替代**：按下面指定的方式构建完整计划。
 
-If the student's prep course is `self` or `N/A`, skip this step — there's nothing to supplement.
+如果学生的预备课程是 `self` 或 `N/A`，跳过此步骤——没有什么要补充的。
 
-### Step 3: Build the schedule
+### 步骤 3：构建安排
 
-Calculate weeks-to-exam from today's date. Then:
+从今天日期计算到考试的周数。然后：
 
-**Normal mode (4+ weeks out):**
-- Split weeks into phases:
-  - **Learning phase** (first ~60% of time): one subject per ~3-5 days, mixing outlining/reading with flashcards and a few MBE/essay questions on fresh material.
-  - **Drilling phase** (next ~30%): more MBE volume, more essay practice, simulated conditions, all subjects in rotation.
-  - **Review phase** (last ~10%): focused on weakest subtopics from session_history, full practice exams, light review of strong areas.
-- Weight subjects by weakness: weak subjects get ~2x the hours of strong subjects.
-- Schedule day-by-day: which subject, which method, how long. Leave slack for the student's actual life.
+**正常模式（距离 4+ 周）：**
+- 将周数划分为阶段：
+  - **学习阶段**（前约 60% 时间）：每约 3-5 天一个学科，混合大纲/阅读与抽认卡和少量 MBE/论文问题。
+  - **抽问阶段**（接下来约 30%）：更多 MBE 量、更多论文练习、模拟条件、所有学科轮换。
+  - **复习阶段**（最后约 10%）：专注于 session_history 中最薄弱的子主题、完整模拟考试、强领域的轻量复习。
+- 按薄弱程度加权学科：薄弱学科获得约 2 倍于强学科的小时。
+- 逐日安排：哪个学科、哪个方法、多长时间。为学生实际生活留出余量。
 
-**Cram mode (< 4 weeks out):**
-- Flag it: "You're less than four weeks out. This is cram mode — the plan prioritizes high-yield topics over full coverage. You will leave gaps. That's the tradeoff at this point."
-- 80/20 prioritization: the MBE subjects that historically appear most (Civ Pro, Evidence, Con Law, Contracts) get the lion's share. Narrower subjects get minimum viable coverage.
-- Daily schedule: MBE blocks every day (volume matters now), essay practice every other day, one simulated exam per week.
-- Sleep and taper the last 2-3 days. Do not schedule hard drilling the day before the exam. This is real — students who cram through the night before score worse.
+**冲刺模式（距离不到 4 周）：**
+- 标记："你距离不到四周。这是冲刺模式——计划优先高收益主题而非完整覆盖。你将留下缺口。这就是此时此地的权衡。"
+- 80/20 优先化：历史上出现最多的 MBE 学科（Civ Pro、Evidence、Con Law、Contracts）获得最大份额。更窄的学科获得最低可行覆盖。
+- 每日安排：每天 MBE 块（现在量很重要）、隔日论文练习、每周一次模拟考试。
+- 最后 2-3 天睡眠和逐步减少。不要在考试前一天安排硬抽问。这是真实的——通宵冲刺到前一天晚上的人得分更差。
 
-### Step 4: Write it
+### 步骤 4：写入
 
-Write to `~/.claude/plugins/config/claude-for-legal/law-student/study-plan.yaml`:
+写入 `~/.claude/plugins/config/claude-for-legal/law-student/study-plan.yaml`：
 
 ```yaml
 plan_type: bar  # or law-school-exam or semester
@@ -143,15 +151,15 @@ phases:
   - name: learning
     start: 2026-05-08
     end: 2026-06-20
-    focus: outlining, flashcards, introductory MBE
+    focus: 大纲、抽认卡、入门 MBE
   - name: drilling
     start: 2026-06-21
     end: 2026-07-18
-    focus: MBE volume, essay practice, simulated conditions
+    focus: MBE 量、论文练习、模拟条件
   - name: review
     start: 2026-07-19
     end: 2026-07-27
-    focus: weak-subtopic review, full practice exams
+    focus: 薄弱子主题复习、完整模拟考试
 subjects:
   evidence:
     priority: high  # weak
@@ -183,32 +191,32 @@ schedule:
         method: essay
         duration_min: 60
   # etc.
-session_history: []  # appended by bar-prep, flashcards, drill, irac as sessions complete
+session_history: []  # 由 bar-prep、flashcards、drill、irac 在会话完成时附加
 ```
 
-### Step 5: Confirm with the student
+### 步骤 5：与学生确认
 
-**Header — required on every in-chat presentation and on any separate prose-format plan document written alongside the YAML.** The first line of the summary (and the first line of any `study-plan.md` companion file) must be the verbatim header from plugin config `## Outputs`:
+**标题——每次聊天展示和任何与 YAML 一起编写的独立散文格式计划文档上的必需项。** 摘要的第一行（以及任何 `study-plan.md` 伴侣文件的第一行）必须是 plugin 配置 `## Outputs` 中的逐字标题：
 
 ```
 STUDY NOTES — NOT LEGAL ADVICE
 ```
 
-The header does not go inside the YAML itself (it's a data file), but it belongs on the prose summary you show the student and on any human-readable plan document you save next to the YAML. This is not a disclaimer afterthought — it is the output's identity. Do not omit, rephrase, or relocate it.
+标题不进入 YAML 本身（它是数据文件），但它属于你展示给学生的散文摘要和保存的任何人类可读计划文档上。这不是免责声明后记——它是输出的身份。不要省略、改写或重新定位它。
 
-Summarize the plan in prose (not raw YAML) before saving, with the header on top:
+在保存前以散文形式（不是原始 YAML）总结计划，顶部有标题：
 
 > STUDY NOTES — NOT LEGAL ADVICE
 >
-> Here's what I built. [X] weeks to the [exam]. [Y] hours/week across [Z] days. Weak subjects (Evidence, Contracts) get 2x the hours. Three phases: learning through [date], drilling through [date], review the last [N] days. I've scheduled the first two weeks day-by-day. Beyond that it's allocated by week — I'll fill in the daily schedule as you complete sessions, so the plan adapts to where you actually are.
+> 这是我构建的内容。到 [exam] 还有 [X] 周。跨 [Z] 天每周 [Y] 小时。薄弱学科（Evidence、Contracts）获得 2 倍小时。三个阶段：学习到 [date]，抽问到 [date]，最后 [N] 天复习。我已安排了前两周的逐日计划。之后按周分配——我会随着你完成会话填写每日安排，所以计划适应你实际在哪里。
 >
-> Does this feel right? Too ambitious? Too light? Missing a subject?
+> 这感觉对吗？太雄心勃勃了？太轻了？遗漏了学科？
 
-Adjust based on the answer. Then write.
+根据答案调整。然后写入。
 
-## Adapting the plan
+## 适应计划
 
-After each session (via bar-prep-questions, flashcards, drill, irac), the corresponding skill appends to `session_history`:
+每次会话后（通过 bar-prep-questions、flashcards、drill、irac），相应的 skill 附加到 `session_history`：
 
 ```yaml
 session_history:
@@ -220,29 +228,29 @@ session_history:
     weak_subtopics: [hearsay-exceptions, character-evidence]
 ```
 
-On the next `/law-student:study-plan --update` run (or when any skill detects the plan is stale):
-- Subjects with consistently low scores get promoted in `priority` and `weekly_hours`.
-- Weak subtopics within a subject get flagged for the next scheduled session on that subject.
-- If the student is falling behind (scheduled sessions not appearing in history), adjust: either compress coverage or note the gap and ask.
-- If the student is ahead, open up time for deeper weak-subject drilling.
+在下次 `/law-student:study-plan --update` 运行时（或当任何 skill 检测到计划过时时）：
+- 持续低分的学科在 `priority` 和 `weekly_hours` 中提升。
+- 学科内的薄弱子主题为该学科的下一次安排会话标记。
+- 如果学生落后（安排的会话未出现在历史中），调整：要么压缩覆盖，要么标记缺口并询问。
+- 如果学生超前，开放更多时间进行更深入的薄弱学科抽问。
 
-## Modes
+## 模式
 
-`--build` (default) — fresh plan
-`--update` — re-read session_history and adjust weightings, fill in upcoming daily schedule
-`--status` — what's on deck today / this week, what's the score trend, what's slipping
-`--cram` — force cram mode even if more than 4 weeks out (user override)
+`--build`（默认）——新计划
+`--update`——重新阅读 session_history 并调整权重，填写即将到来的每日安排
+`--status`——今天/本周安排了什么、分数趋势、什么在滑落
+`--cram`——即使距离超过 4 周也强制冲刺模式（用户覆盖）
 
-## Integration
+## 集成
 
-- `/law-student:session <subject> <n>` writes results to this plan's `session_history`.
-- `/law-student:bar-prep-questions` reads the plan to know which subject is scheduled for today.
-- `/law-student:flashcards` can `--session <n>` and results land in the plan.
-- `/law-student:socratic-drill` and `/law-student:irac-practice` session completions also append.
+- `/law-student:session <subject> <n>` 将结果写入此计划的 `session_history`。
+- `/law-student:bar-prep-questions` 阅读计划以了解今天安排了哪个学科。
+- `/law-student:flashcards` 可以 `--session <n>`，结果进入计划。
+- `/law-student:socratic-drill` 和 `/law-student:irac-practice` 会话完成也附加。
 
-## What this skill does not do
+## 此 skill 不做什么
 
-- **Guarantee you pass.** The plan is a scaffold. The work is on you.
-- **Predict the exam.** Cram mode uses historical subject frequency; high-yield ≠ guaranteed-tested.
-- **Replace your prep course schedule.** If you're on Barbri/Themis/Kaplan, this plan can supplement — don't run two full curricula against each other. Use one as primary.
-- **Schedule your life.** Hours available is what you tell me. If you overstate, the plan will break in week 2. Be honest.
+- **保证你通过。** 计划是脚手架。工作在你身上。
+- **预测考试。** 冲刺模式使用历史学科频率；高收益 ≠ 保证测试。
+- **替代你的预备课程安排。** 如果你在 Barbri/Themis/Kaplan，此计划可以补充——不要同时运行两个完整课程。使用一个作为主要。
+- **安排你的生活。** 可用小时是你告诉我的。如果你高估了，计划会在第 2 周断裂。诚实一点。

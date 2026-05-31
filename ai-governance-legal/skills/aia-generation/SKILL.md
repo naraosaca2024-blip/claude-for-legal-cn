@@ -1,399 +1,370 @@
 ---
 name: aia-generation
 description: >
-  Run an AI impact assessment — structured intake, risk analysis, regulatory
-  classification per regime in scope, policy consistency diff, and recommendation
-  with conditions. Uses the house-style structure learned from the seed impact
-  assessment in `~/.claude/plugins/config/claude-for-legal/ai-governance-legal/CLAUDE.md`.
-  Use when user says "impact assessment for", "assess this AI use case", "run an
-  AIA", "generate an AIA", "we need to document this AI system", "AI risk
-  assessment for X", or follows a conditional triage result.
-argument-hint: "[describe the use case or system, or pass a triage result]"
+  运行 AI 影响评估——结构化 intake、风险分析、按范围内制度进行监管分类、政策一致性差异以及附条件的建议。使用在 `~/.claude/plugins/config/claude-for-legal/ai-governance-legal/CLAUDE.md` 中从种子影响评估学习的内部风格结构。当用户说"影响评估用于"、"评估此 AI 用例"、"运行 AIA"、"生成 AIA"、"我们需要记录此 AI 系统"、"AI 风险评估用于 X"或跟随有条件分流结果时使用。
+argument-hint: "[描述用例或系统，或传递分流结果]"
 ---
+
+<!--
+This file is a Chinese translation of the original by Anthropic PBC.
+Original: https://github.com/anthropics/claude-for-legal
+Licensed under Apache License 2.0
+-->
+
 
 # /aia-generation
 
-1. Read `~/.claude/plugins/config/claude-for-legal/ai-governance-legal/CLAUDE.md`. Confirm impact assessment house style is populated.
-2. Determine risk track (fast or full) from governance tier and use case characteristics, using the framework below.
-3. Run intake — conversational, not a form.
-4. Regulatory classification for each regime in the footprint — research tier, prohibited-practice exposure, and applicable obligations; cite primary sources.
-5. Write assessment in house style (from seed doc, or default if none captured).
-6. Policy diff against `~/.claude/plugins/config/claude-for-legal/ai-governance-legal/CLAUDE.md` AI policy commitments.
-7. Output: assessment doc + conditions list + handoff flags (privacy PIA, vendor review if needed).
+1. 阅读 `~/.claude/plugins/config/claude-for-legal/ai-governance-legal/CLAUDE.md`。确认影响评估内部风格已填充。
+2. 根据治理层级和用例特征确定风险轨道（快速或完整），使用以下框架。
+3. 运行 intake——对话式，而非表单。
+4. 针对范围内每个制度的监管分类——研究层级、禁止做法敞口和适用义务；引用主要来源。
+5. 按内部风格（来自种子文档，如无捕获则为默认值）撰写评估。
+6. 对照 `~/.claude/plugins/config/claude-for-legal/ai-governance-legal/CLAUDE.md` AI 政策承诺进行政策差异分析。
+7. 输出：评估文档 + 条件列表 + 交接标志（如需要隐私 PIA、供应商审查）。
 
 ```
-/ai-governance-legal:aia-generation "AI résumé screening for HR"
+/ai-governance-legal:aia-generation "用于 HR 的 AI 简历筛选"
 ```
 
 ---
 
-## Matter context
+## 事项上下文
 
-**Matter context.** Check `## Matter workspaces` in the practice-level CLAUDE.md. If `Enabled` is `✗` (the default for in-house users), skip the rest of this paragraph — skills use practice-level context and the matter machinery is invisible. If enabled and there is no active matter, ask: "Which matter is this for? Run `/ai-governance-legal:matter-workspace switch <slug>` or say `practice-level`." Load the active matter's `matter.md` for matter-specific context and overrides. Write outputs to the matter folder at `~/.claude/plugins/config/claude-for-legal/ai-governance-legal/matters/<matter-slug>/`. Never read another matter's files unless `Cross-matter context` is `on`.
-
----
-
-## Purpose
-
-An AI impact assessment is a documented decision, not a form. It answers: what
-does this AI system do, how does it reach its outputs, who's affected if it's
-wrong, what's the oversight, and is it okay to deploy. This skill structures that
-conversation and writes the output in this team's format — the one learned from the
-seed impact assessment during cold-start.
-
-An AI impact assessment is not the same as a PIA. A PIA asks whether personal data
-is handled lawfully. An AIA asks whether the AI system is designed and deployed
-responsibly. They often need to happen in parallel; they're not substitutes.
-
-## Load house style
-
-Read `~/.claude/plugins/config/claude-for-legal/ai-governance-legal/CLAUDE.md` → `## Impact assessment house style`. That has:
-- What triggers an impact assessment at this company
-- The structure template extracted from the seed assessment
-- Typical depth
-- Who signs off
-
-If the seed structure is in `~/.claude/plugins/config/claude-for-legal/ai-governance-legal/CLAUDE.md`, **use it**. The point is that this assessment
-looks like the other assessments this team produces.
-
-**Jurisdictional scope.** This assessment applies the regulatory regimes listed in `## Regulatory footprint` in `~/.claude/plugins/config/claude-for-legal/ai-governance-legal/CLAUDE.md`. AI legal rules, risk classifications, and deployment obligations vary materially by jurisdiction and are moving fast. If this system is (or will be) deployed outside that footprint, or if a choice-of-law question is in play, this analysis may not apply as written — re-run or expand the footprint.
+**事项上下文。** 检查执业级 CLAUDE.md 中的 `## Matter workspaces`。如果 `Enabled` 为 `✗`（内部用户的默认值），跳过本段的其余部分——skills 使用执业级上下文，事项机制不可见。如果已启用且没有活跃事项，询问："这是哪个事项的？Run `/ai-governance-legal:matter-workspace switch <slug>` 或说 `practice-level`。"加载活跃事项的 `matter.md` 以获取事项特定上下文和覆盖。将输出写入事项文件夹 `~/.claude/plugins/config/claude-for-legal/ai-governance-legal/matters/<matter-slug>/`。除非 `Cross-matter context` 为 `on`，否则永远不要阅读另一个事项的文件。
 
 ---
 
-## Step 0: Is an impact assessment needed?
+## 目的
 
-Check the trigger criteria in `~/.claude/plugins/config/claude-for-legal/ai-governance-legal/CLAUDE.md`.
+AI 影响评估是记录的决策，而非表单。它回答：此 AI 系统做什么、它如何得出其输出、如果错误谁会受影响、监督是什么、可以部署吗。此 skill 构建该对话并以此团队的格式——在冷启动期间从种子影响评估学习的格式——撰写输出。
 
-**Also check these regardless:**
-- Does this AI make or materially influence a decision affecting a person (employment,
-  credit, access, pricing, content moderation)?
-- Does this AI process personal data about individuals?
-- Is this a customer-facing AI system rather than purely internal?
-- Does this AI use a third-party model where the company is the deployer?
-- Is the use case in the elevated or high governance tier per `~/.claude/plugins/config/claude-for-legal/ai-governance-legal/CLAUDE.md`?
+AI 影响评估与 PIA 不同。PIA 询问个人数据是否合法处理。AIA 询问 AI 系统是否负责任地设计和部署。它们通常需要并行进行；它们不是替代品。
 
-If none of the above and the house trigger isn't met:
-> "Doesn't look like this needs a full impact assessment. Here's a one-paragraph
-> record for the file explaining why — in case anyone asks later."
+## 加载内部风格
 
----
+阅读 `~/.claude/plugins/config/claude-for-legal/ai-governance-legal/CLAUDE.md` → `## Impact assessment house style`。那里有：
+- 在此公司什么触发影响评估
+- 从种子评估提取的结构模板
+- 典型深度
+- 谁签字
 
-## Step 1: Risk track
+如果种子结构在 `~/.claude/plugins/config/claude-for-legal/ai-governance-legal/CLAUDE.md` 中，**使用它**。重点是此评估看起来像此团队生成的其他评估。
 
-Before intake, determine which track to run. The tier definitions and the fast-track criteria come from `~/.claude/plugins/config/claude-for-legal/ai-governance-legal/CLAUDE.md` (`## Use case registry` and `## Governance tiers`), not from any hardcoded regime-specific framework.
-
-Research the applicable risk classification framework for each regime in the user's regulatory footprint. Many regimes distinguish by risk tier, affected population, and decision consequentiality — research the specific criteria. Note that most regimes treat employee data as personal data and employee monitoring as consequential; don't assume internal-only systems are out of scope.
-
-> **No silent supplement.** If a research query to the configured legal research tool (Westlaw, EUR-Lex, regulator sites, or firm platform) returns few or no results for a regime's risk tiers or triggers, report what was found and stop. Do NOT fill the gap from web search or model knowledge without asking. Say: "The search returned [N] results from [tool]. Coverage appears thin for [regime / topic]. Options: (1) broaden the search query, (2) try a different research tool, (3) search the web — results will be tagged `[web search — verify]` and should be checked against the issuing authority before relying, or (4) flag as unverified and stop. Which would you like?" A lawyer decides whether to accept lower-confidence sources.
->
-> **Source attribution tiering.** Tag every citation in the AIA — regulatory text, delegated acts, guidance, standards — with its source. For model-knowledge citations, use one of three tiers rather than a single blanket "verify" tag:
->
-> - `[settled]` — stable, well-known statutory and regulatory references unlikely to have changed (e.g., GDPR Art. 22 as a concept, the existence of Regulation (EU) 2024/1689 as the EU AI Act). Still verify before certifying, but lower priority.
-> - `[verify]` — model-knowledge citations that are real but should be verified: specific delegated / implementing acts, regulator guidance, NYC DCWP rules, Colorado AI Act provisions, harmonized standards, effective dates, EEOC guidance, and anything post-2023.
-> - `[verify-pinpoint]` — pinpoint citations (specific EU AI Act article numbers, annex references, Colorado AI Act subsections, NYC LL 144 rule sections, sub-paragraph letters) carry the highest fabrication risk and should ALWAYS be verified against a primary source. EU AI Act article numbers in particular shifted during consolidation; every pinpoint cite to the Act should be verified against the Official Journal text.
->
-> Tool-retrieved citations keep their source tag (`[Westlaw]`, `[EUR-Lex]`, `[regulator site]`, or the MCP tool name); web-search citations remain `[web search — verify]`; user-supplied citations remain `[user provided]`. The tiering surfaces the real verification work — a reader who verifies everything verifies nothing. Never strip or collapse the tags.
->
-> **For non-lawyer users, uncertain dates go in a confirm-list, not inline.** A `[verify]` tag on "effective February 1, 2026" reads as "effective February 1, 2026" to a CISO who doesn't know what `[verify]` means. Read `## Who's using this` in `~/.claude/plugins/config/claude-for-legal/ai-governance-legal/CLAUDE.md`. If Role is **Non-lawyer** and a date, deadline, phase-in, threshold, or effective-date assertion is uncertain (would carry `[verify]` or `[verify-pinpoint]` if inline), replace the inline assertion with "effective date: confirm with counsel" (or "threshold: confirm with counsel", etc.) and collect all uncertain assertions in a final AIA section titled:
->
-> > **Things I'm not certain about — ask your attorney to confirm before relying on this:**
->
-> List each uncertain item there with (1) what I said, (2) what I'm uncertain about, (3) why it matters to the assessment. This prevents a non-lawyer reader from mistaking a flagged best-guess for a checked fact. Lawyer-role users get the inline `[verify]` treatment — they know what the tag means.
-
-**Fast track vs. full assessment:** `~/.claude/plugins/config/claude-for-legal/ai-governance-legal/CLAUDE.md` defines what qualifies for abbreviated treatment. If `~/.claude/plugins/config/claude-for-legal/ai-governance-legal/CLAUDE.md` doesn't define fast-track criteria, default to full assessment and ask the user what criteria they want captured for next time.
-
-If in doubt, run the full assessment. A fast track that turns out to be wrong
-is worse than a thorough assessment on something low-risk.
+**司法管辖区范围。** 此评估应用 `~/.claude/plugins/config/claude-for-legal/ai-governance-legal/CLAUDE.md` 的 `## Regulatory footprint` 中列出的监管制度。AI 法律规则、风险分类和部署义务因司法管辖区而有很大差异且变化迅速。如果此系统（或将）在该足迹之外部署，或者如果存在选择法律问题，此分析可能不适用于书面——重新运行或扩展足迹。
 
 ---
 
-## Step 2: Intake
+## 步骤 0：是否需要影响评估？
 
-Before writing anything, get answers to these. Conversational is fine — this
-is not a form to send them.
+检查 `~/.claude/plugins/config/claude-for-legal/ai-governance-legal/CLAUDE.md` 中的触发标准。
 
-### The system
+**无论何种情况都要检查这些：**
+- 此 AI 是否做出或实质性影响影响个人的决策（雇佣、信贷、访问、定价、内容审核）？
+- 此 AI 是否处理有关个人的个人数据？
+- 这是面向客户的 AI 系统而非纯粹的内部吗？
+- 此 AI 是否使用公司是部署者的第三方模型？
+- 用例是否按照 `~/.claude/plugins/config/claude-for-legal/ai-governance-legal/CLAUDE.md` 处于升级或高治理层级？
 
-- What does the AI do? Describe it in plain language, not marketing copy.
-- Which model or vendor is powering it? Fine-tuned or off-the-shelf?
-- Where does it sit in the workflow — is it assistive (human reviews output),
-  augmentative (human can override but usually doesn't), or automated (no human
-  in the loop)?
-- What's the output — generated text, a score, a classification, a recommendation,
-  an action?
-
-### Who's affected
-
-- Who does the AI's output act on — employees, customers, third parties?
-- If the AI produces an error (false positive, false negative, hallucination), who
-  bears the harm and what's the worst realistic case?
-- Are any vulnerable groups disproportionately in scope — minors, job applicants,
-  people in financial distress, patients?
-
-### Inputs and data
-
-- What data does the AI take in?
-- Does it take in personal data? Whose?
-- Was the model trained on data from this company, or is it a foundation model
-  with no company-specific training?
-- Where does input data go — does it leave the perimeter to a third-party model
-  API?
-
-### Decisions and oversight
-
-- Does the AI output trigger an action automatically, or does a human decide what
-  to do with the output?
-- If there's human review: how often does the human actually change the AI's output?
-  (If the answer is "rarely" — the human isn't really reviewing; they're rubber-stamping.)
-- Is there an appeals or correction process for people affected by the AI's outputs?
-- Who is accountable for the AI system's outputs — is there a named owner?
-
-### Accuracy and failure
-
-- What's the known or estimated error rate? What testing has been done?
-- What happens when the AI is wrong — is the error surfaced, logged, corrected?
-- Has bias testing been done? Against what demographic groups?
-
-### Deployment stage and scale
-
-Ask:
-- **Stage:** "Is this system (a) proposed and not yet built, (b) in pilot, (c) live in production, or (d) live and scaled?"
-- **Scale:** "Roughly how many individuals are affected per [month/year]? How long has it been running?"
-- **History:** "Has it been assessed before? Has it produced decisions that were challenged, appealed, or reversed?"
-
-Stage changes the assessment: a proposed system gets a design review (can we build it safely?). A pilot gets a design review plus a "before you scale" gate. A live system gets a retrospective impact check (has it caused harm?) AND a go-forward review. A live-and-scaled system gets all of the above plus a remediation plan if issues are found, because you can't just turn it off.
+如果以上都不是且未满足内部触发器：
+> "看起来这不需要完整的影响评估。这里有一段用于存档的记录解释原因——以防以后有人问。"
 
 ---
 
-## Step 3: Regulatory classification
+## 步骤 1：风险轨道
 
-**Step 3 pre-check — footprint freshness.** Before iterating over the captured `## Regulatory footprint`, compare the use case's affected population and decision type (from Step 2) against the footprint as written. The footprint was set at cold-start, based on the company's operating posture at that moment. If the use case introduces an affected population (e.g., children, employees in a new state, EU data subjects) or a decision type (e.g., hiring, creditworthiness, health diagnosis, law enforcement, critical infrastructure) that the footprint does not contemplate, **re-derive the applicable regimes rather than iterating over the stale list.**
+在 intake 之前，确定运行哪个轨道。层级定义和快速通道标准来自 `~/.claude/plugins/config/claude-for-legal/ai-governance-legal/CLAUDE.md`（`## Use case registry` 和 `## Governance tiers`），而非任何硬编码的制度特定框架。
 
-Say to the user:
+研究用户监管足迹中每个制度的适用风险分类框架。许多制度按风险层级、受影响人群和决策后果性区分——研究具体标准。注意大多数制度将员工数据视为个人数据，将员工监控视为后果性；不要假设仅内部系统超出范围。
 
-> "The practice profile's regulatory footprint was set for [affected populations / decision types captured at cold-start]. This use case affects **[new population or decision type — e.g., employees in Colorado, minors under 13, credit decisions, biometric identification]**, which is not in the captured footprint. I'm going to re-derive the applicable regimes from the company's operating jurisdictions ([list from `## Company profile`]) and this use case's decision type ([Y]), rather than use the stale footprint. If this use case is representative of work you expect to see more of, update `## Regulatory footprint` at the end of this run so the next AIA doesn't have to re-derive."
+> **没有静默补充。** 如果对配置的法律研究工具（Westlaw、EUR-Lex、监管机构网站或律所平台）的研究查询对于制度的风险层级或触发器返回很少或没有结果，报告发现的内容并停止。不要未经询问就从网络搜索或模型知识填充空白。说："搜索从 [工具] 返回了 [N] 个结果。对于 [制度/主题] 的覆盖范围似乎很薄。选项：(1)扩大搜索查询，(2)尝试不同的研究工具，(3)搜索网络——结果将标记为 `[web search — verify]`，在依赖之前应根据发布机构进行检查，或(4)标记为未验证并停止。你想要哪一个？"律师决定是否接受较低置信度的来源。
+>
+> **来源归因分层。** 用其来源标记 AIA 中的每个引用——监管文本、授权法案、指导、标准。对于模型知识引用，使用三个层级之一，而非单一的笼统"verify"标记：
+>
+> - `[settled]` — 稳定的、众所周知的法定和监管参考，不太可能改变（例如，GDPR Art. 22 作为概念、Regulation (EU) 2024/1689 作为 EU AI Act 的存在）。在认证之前仍需验证，但优先级较低。
+> - `[verify]` — 真实但应验证的模型知识引用：具体授权/实施法案、监管机构指导、NYC DCWP 规则、科罗拉多 AI 法案条款、协调标准、生效日期、EEOC 指导以及 2023 年后的任何内容。
+> - `[verify-pinpoint]` — 精确引用（具体 EU AI Act 条款号、附录参考、科罗拉多 AI 法案小节、NYC LL 144 规则部分、子段落字母）具有最高捏造风险，应始终根据主要来源进行验证。EU AI Act 条款号在整合期间特别转移；每个对 Act 的精确引用都应根据官方期刊文本进行验证。
+>
+> 工具检索的引用保留其来源标记（`[Westlaw]`、`[EUR-Lex]`、`[regulator site]` 或 MCP 工具名称）；网络搜索引用保留 `[web search — verify]`；用户提供的引用保留 `[user provided]`。分层显示真正的验证工作——验证一切的读者什么都没有验证。永远不要剥离或折叠标记。
+>
+> **对于非律师用户，不确定的日期进入确认列表，而非内联。** 对"effective February 1, 2026"的 `[verify]` 标记对不知道 `[verify]` 含义的 CISO 读起来就是"effective February 1, 2026"。阅读 `~/.claude/plugins/config/claude-for-legal/ai-governance-legal/CLAUDE.md` 中的 `## Who's using this`。如果角色是 **非律师**，且生效日期、截止日期、分阶段、阈值或生效日期断言不确定（如果内联会携带 `[verify]` 或 `[verify-pinpoint]`），用"生效日期：与律师确认"（或"阈值：与律师确认"等）替换内联断言，并在最终 AIA 部分标题为"**我不确定的事情——在依赖之前请你的律师确认：**"中收集所有不确定断言。
+>
+> 在那里列出每个不确定项目并附上(1)我说了什么，(2)我不确定什么，(3)为什么对评估重要。这防止非律师读者将标记的最佳猜测误认为已检查的事实。律师角色用户获得内联 `[verify]` 处理——他们知道标记的含义。
 
-A common failure mode: the footprint lists EU AI Act + GDPR + NYC Local Law 144, and the use case is a hiring system being deployed into Illinois and Colorado. The footprint has no Illinois or Colorado entry, so iterating over it silently misses IL AIVIA, the new Colorado AI Act deployer obligations, and BIPA implications of any biometric component. Re-derive.
+**快速通道 vs 完整评估：** `~/.claude/plugins/config/claude-for-legal/ai-governance-legal/CLAUDE.md` 定义什么有资格进行缩写处理。如果 `~/.claude/plugins/config/claude-for-legal/ai-governance-legal/CLAUDE.md` 未定义快速通道标准，默认为完整评估并询问用户下次想要捕获什么标准。
 
-A second failure mode: the footprint was set before a regime that now matters existed (or took effect). If re-derivation surfaces a regime not in the footprint, flag it in the output's recommendation section, cite the authority, and recommend updating the footprint.
+如有疑问，运行完整评估。结果错误的快速通道比低风险项目的彻底评估更糟糕。
 
-For each regime in `~/.claude/plugins/config/claude-for-legal/ai-governance-legal/CLAUDE.md` → `## Regulatory footprint` that applies to this system — **plus any regime surfaced by the re-derivation above** — research the currently operative risk classification framework and determine where the system lands.
+---
 
-Research tasks:
-- What is the regime's own tier taxonomy (e.g., prohibited / high-risk / limited / minimal, or the regime's equivalent)?
-- What are the criteria for each tier? Cite primary sources with pinpoint references.
-- Which tier does this system fall into given its function, affected parties, and decision consequentiality?
-- Are there prohibited practices the system might touch? Treat any possible match as critical — flag immediately.
-- Are there transparency obligations that apply regardless of tier (disclosure that a user is interacting with AI, labeling of AI-generated content, notice to people subject to automated decisions)?
-- If the company is a builder providing a general-purpose or foundation model, what provider-level obligations apply (technical documentation, training data transparency, copyright compliance, systemic-risk testing)?
-- **Does any regime in the footprint require a separate fundamental-rights impact assessment (FRIA)?** EU AI Act Art. 27 requires a FRIA for certain deployers of high-risk AI systems (public bodies and private entities providing public services, plus certain creditworthiness and insurance-risk-assessment use cases). Check each regime for an equivalent fundamental-rights or human-rights impact assessment that is a distinct deliverable from this AIA. If a FRIA (or regime equivalent) is required, flag it as a separate deliverable in the recommendation and conditions — do not treat this AIA as a substitute.
+## 步骤 2：Intake
 
-Don't assume internal-only systems are out of scope — most regimes treat employee data as personal data and employee monitoring as consequential. Verify the specific rule.
+在撰写任何内容之前，获得这些问题的答案。对话式即可——这不是发送给他们的表单。
 
-**Provider-vs-deployer split (when `AI role: Both`).** If `~/.claude/plugins/config/claude-for-legal/ai-governance-legal/CLAUDE.md` → `## Company profile` → `AI role` is `Both` (the company is both a provider/builder and a deployer), Section 6 MUST include a provider-vs-deployer mapping table per regime. Most regimes impose materially different obligations on providers (or builders) versus deployers (or users) — collapsing them into one undifferentiated list misses obligations and conflates risks. Do not combine provider and deployer obligations into a single section. Produce, per regime:
+### 系统
 
-| Obligation | As provider | As deployer |
+- AI 做什么？用简单的英语描述，而非营销文案。
+- 哪个模型或供应商为其提供支持？是微调的还是现成的？
+- 它在工作流中的位置——是辅助性的（人工审查输出）、增强性的（人工可以覆盖但通常不）还是自动化的（环中无人）？
+- 输出是什么——生成的文本、分数、分类、建议、行动？
+
+### 谁受影响
+
+- AI 的输出作用于谁——员工、客户、第三方？
+- 如果 AI 产生错误（假阳性、假阴性、幻觉），谁承担伤害，最现实的最坏情况是什么？
+- 是否有任何脆弱群体不成比例地在范围内——未成年人、求职者、财务困难中的人、患者？
+
+### 输入和数据
+
+- AI 接受什么数据？
+- 它接受个人数据吗？谁的？
+- 模型是在这家公司的数据上训练的，还是没有公司特定训练的基础模型？
+- 输入数据去哪里——是否会离开边界到第三方模型 API？
+
+### 决策和监督
+
+- AI 输出是否自动触发行动，还是人类决定对输出做什么？
+- 如果有人类审查：人类实际上多久改变一次 AI 的输出？（如果答案是"很少"——人类并不是真的在审查；他们在橡皮图章。）
+- 受 AI 输出影响的人是否有申诉或纠正流程？
+- 谁对 AI 系统的输出负责——是否有指定的所有者？
+
+### 准确性和失败
+
+- 已知或估计的错误率是多少？做了什么测试？
+- 当 AI 错误时会发生什么——错误是否被浮现、记录、纠正？
+- 做了偏见测试吗？针对哪些人口群体？
+
+### 部署阶段和规模
+
+询问：
+- **阶段：** "此系统是(a)提议且未构建，(b)试点中，(c)生产中已上线，还是(d)已上线并扩展？"
+- **规模：** "大约有多少个体受到影响 [每月/每年]？它运行了多久？"
+- **历史：** "之前评估过吗？它是否产生过被质疑、申诉或撤销的决策？"
+
+阶段改变评估：提议的系统获得设计审查（我们可以安全构建它吗？）。试点获得设计审查加上"在你扩展之前"的关卡。已上线系统获得回顾性影响检查（它造成伤害了吗？）加上前瞻性审查。已上线并扩展的系统获得以上所有，如果发现问题还有补救计划，因为你不能只是关闭它。
+
+---
+
+## 步骤 3：监管分类
+
+**步骤 3 预检查——足迹新鲜度。** 在迭代捕获的 `## Regulatory footprint` 之前，将用例的受影响人群和决策类型（来自步骤 2）与书面足迹进行比较。足迹是在冷启动时设置的，基于公司当时的操作姿态。如果用例引入足迹未设想的受影响人群（例如，儿童、新州的员工、欧盟数据主体）或决策类型（例如，雇佣、信誉度、健康诊断、执法、关键基础设施），**重新推导适用的制度，而不是迭代陈旧列表。**
+
+对用户说：
+
+> "执业档案的监管足迹是为 [冷启动时捕获的受影响人群/决策类型] 设置的。此用例影响 **[新人群或决策类型——例如，科罗拉多州的员工、13 岁以下的未成年人、信贷决策、生物识别识别]**，这不在捕获的足迹中。我将从公司的运营司法管辖区（来自 `## Company profile` 的列表）和此用例的决策类型（[Y]）重新推导适用的制度，而不是使用陈旧的足迹。如果此用例代表你期望看到更多的工作，在此运行结束时更新 `## Regulatory footprint`，以便下一个 AIA 不必重新推导。"
+
+常见失败模式：足迹列出 EU AI Act + GDPR + NYC Local Law 144，用例是正在部署到伊利诺伊州和科罗拉多州的雇佣系统。足迹没有伊利诺伊州或科罗拉多州条目，因此迭代它会默默错过 IL AIVIA、新的科罗拉多 AI 法案部署者义务，以及任何生物识别组件的 BIPA 含义。重新推导。
+
+第二个失败模式：足迹是在现在重要的制度（或生效）存在之前设置的。如果重新推导浮现出足迹中没有的制度，在输出的建议部分标记它，引用权威，并建议更新足迹。
+
+对于 `~/.claude/plugins/config/claude-for-legal/ai-governance-legal/CLAUDE.md` → `## Regulatory footprint` 中适用于此系统的每个制度——**加上上述重新推导浮现的任何制度**——研究当前有效的风险分类框架并确定系统落在何处。
+
+研究任务：
+- 制度自己的层级分类法是什么（例如，prohibited / high-risk / limited / minimal，或制度的等效项）？
+- 每个层级的标准是什么？引用主要来源并附精确引用。
+- 鉴于其功能、受影响方和决策后果性，此系统落入哪个层级？
+- 系统可能触及的禁止做法有哪些？将任何可能的匹配视为关键——立即标记。
+- 是否有无论层级如何都适用的透明度义务（披露用户正在与 AI 交互、AI 生成内容的标签、通知受自动化决策的人）？
+- 如果公司是提供通用或基础模型的构建者，什么提供者级别义务适用（技术文档、训练数据透明度、版权合规、系统性风险测试）？
+- **足迹中的任何制度是否需要单独的基本权利影响评估（FRIA）？** EU AI Act Art. 27 要求某些高风险 AI 系统的部署者的 FRIA（公共机构和提供公共服务的私人实体，加上某些信誉度和保险风险评估用例）。检查每个制度的等效基本权利或人权影响评估，这是与此 AIA 不同的可交付成果。如果需要 FRIA（或制度等效项），在建议和条件中将其标记为单独的可交付成果——不要将此 AIA 视为替代品。
+
+不要假设仅内部系统超出范围——大多数制度将员工数据视为个人数据，将员工监控视为后果性。验证具体规则。
+
+**提供者-vs-部署者拆分（当 `AI role: Both`）。** 如果 `~/.claude/plugins/config/claude-for-legal/ai-governance-legal/CLAUDE.md` → `## Company profile` → `AI role` 是 `Both`（公司既是提供者/构建者又是部署者），第 6 节必须包括每个制度的提供者-vs-部署者映射表。大多数制度对提供者（或构建者）与部署者（或用户）施加 materially 不同的义务——将它们折叠到一个无差别列表中会错过义务并混淆风险。不要将提供者和部署者义务合并到单个部分。每个制度生成：
+
+| 义务 | 作为提供者 | 作为部署者 |
 |---|---|---|
-| [specific obligation, pinpoint cite] | [what applies / does not apply / with what carve-outs] | [what applies / does not apply / with what carve-outs] |
+| [具体义务、精确引用] | [适用 / 不适用 / 带有什么例外] | [适用 / 不适用 / 带有什么例外] |
 
-**If a high-risk or equivalent classification applies:**
-Flag in the assessment, citing the specific provision and regime. Note that this AIA documents the internal review but does not substitute for any formal conformity assessment the regime requires. Recommend external legal review before deployment in the affected jurisdiction.
+**如果适用高风险或等效分类：**
+在评估中标记，引用具体条款和制度。注意此 AIA 记录内部审查，但不替代制度要求的任何正式合格评估。建议在受影响司法管辖区部署之前进行外部法律审查。
 
-Capture the classification and the cited authority in the assessment output.
+在评估输出中捕获分类和引用的权威。
 
 ---
 
-## Step 4: Write the assessment
+## 步骤 4：撰写评估
 
-**Use the seed structure from `~/.claude/plugins/config/claude-for-legal/ai-governance-legal/CLAUDE.md`.** If none was captured, use this default:
+**使用来自 `~/.claude/plugins/config/claude-for-legal/ai-governance-legal/CLAUDE.md` 的种子结构。** 如果未捕获，使用此默认值：
 
 ```markdown
-[WORK-PRODUCT HEADER — per plugin config ## Outputs — differs by role; see `## Who's using this`]
+[WORK-PRODUCT HEADER — 根据 plugin 配置 ## Outputs ——因角色而异；见 `## Who's using this`]
 
-# AI Impact Assessment: [System/Feature Name]
+# AI 影响评估：[系统/功能名称]
 
-**Prepared by:** [name] | **Date:** [date] | **Status:** DRAFT / APPROVED
-**System owner:** [name] | **AI governance reviewer:** [name]
-**Governance tier:** [Standard / Elevated / High]
-**Track:** [Fast track / Full assessment]
-
----
-
-## Executive summary
-
-[Two sentences: what this AI does and whether it's okay to deploy. E.g., "This
-system uses a third-party LLM to draft initial responses to customer support tickets
-before human agent review. Processing is consistent with the company's AI policy;
-three conditions required before production deployment."]
-
-**Overall risk:** 🟢 Low / 🟡 Medium / 🟠 High / 🔴 Very high
+**准备人：** [姓名] | **日期：** [日期] | **状态：** 草稿 / 已批准
+**系统所有者：** [姓名] | **AI 治理审查者：** [姓名]
+**治理层级：** [标准 / 升级 / 高]
+**轨道：** [快速通道 / 完整评估]
 
 ---
 
-## 1. System description
+## 执行摘要
 
-**What it does:** [plain English — not marketing]
-**Model / vendor:** [who's providing the AI]
-**Deployment mode:** [Assistive / Augmentative / Automated]
-**Output type:** [text / score / classification / recommendation / action]
-**Status:** [Not started / Pilot / Production]
+[两句话：此 AI 做什么以及是否可以部署。例如，"此系统使用第三方 LLM 在人工代理审查之前起草客户支持票证的初始响应。处理与公司 AI 政策一致；生产部署前需要三个条件。"]
+
+**总体风险：** 🟢 低 / 🟡 中 / 🟠 高 / 🔴 很高
 
 ---
 
-## 2. Affected parties
+## 1. 系统描述
 
-**Who it acts on:** [employees / customers / third parties]
-**Scale:** [how many people, how often]
-**Harm if wrong:** [most realistic worst case — specific, not generic]
-**Vulnerable groups in scope:** [yes — [who] / no]
-
----
-
-## 3. Data inputs
-
-**Data categories used:** [specific fields, not "user data"]
-**Personal data:** [yes — [whose] / no]
-**Data leaves perimeter?** [yes — to [vendor] / no]
-**Model training:** [company data used / foundation model / fine-tuned on [dataset]]
+**它做什么：** [简单的英语——不是营销]
+**模型 / 供应商：** [谁提供 AI]
+**部署模式：** [辅助 / 增强 / 自动化]
+**输出类型：** [文本 / 分数 / 分类 / 建议 / 行动]
+**状态：** [未开始 / 试点 / 生产]
 
 ---
 
-## 4. Decision-making and oversight
+## 2. 受影响方
 
-**Human in the loop:** [Always / Nominally (rubber-stamp risk) / No]
-**Override mechanism:** [how a human can intervene or correct]
-**Appeals / correction for affected parties:** [yes — [how] / no]
-**Named owner:** [name or role]
-
----
-
-## 5. Accuracy and bias
-
-**Error rate:** [known / estimated / untested]
-**Failure mode:** [what happens when it's wrong — surfaced? logged? corrected?]
-**Bias testing:** [done — [results] / not done / not applicable]
+**作用于谁：** [员工 / 客户 / 第三方]
+**规模：** [多少人，多频繁]
+**错误时的伤害：** [最现实的最坏情况——具体，而非通用]
+**范围内的脆弱群体：** [是——[谁] / 否]
 
 ---
 
-## 6. Regulatory classification
+## 3. 数据输入
 
-*[One subsection per regime in the regulatory footprint that applies to this system.]*
+**使用的数据类别：** [具体字段，不是"用户数据"]
+**个人数据：** [是——[谁的] / 否]
+**数据离开边界？** [是——到 [供应商] / 否]
+**模型训练：** [使用公司数据 / 基础模型 / 在 [数据集] 上微调]
 
-**Regime:** [name]
-**Classification under this regime:** [tier, with pinpoint citation to the controlling provision]
-**Prohibited practices triggered:** [none identified / [specific provision and why]]
-**Applicable obligations:** [researched list with citations — transparency, documentation, human oversight, testing, registration, etc.]
-**Fundamental-rights impact assessment required?** [Yes — e.g., EU AI Act Art. 27 FRIA applies / regime equivalent / No / Not applicable. If yes, this is a separate deliverable, not subsumed by this AIA.]
-**Effective / enforcement date:** [date(s)]
-**Ambiguity or open interpretation:** [flag anything not yet settled]
+---
 
-**Provider-vs-deployer obligation split (required if `AI role: Both`):**
+## 4. 决策和监督
 
-| Obligation | As provider | As deployer |
+**环中人：** [始终 / 名义上（橡皮图章风险） / 否]
+**覆盖机制：** [人类如何干预或纠正]
+**受影响方的申诉 / 纠正：** [是——[如何] / 否]
+**指定所有者：** [姓名或角色]
+
+---
+
+## 5. 准确性和偏见
+
+**错误率：** [已知 / 估计 / 未测试]
+**失败模式：** [错误时会发生什么——是否浮现？记录？纠正？]
+**偏见测试：** [已完成——[结果] / 未完成 / 不适用]
+
+---
+
+## 6. 监管分类
+
+*[针对监管足迹中适用于此系统的每个制度一个子部分。]*
+
+**制度：** [名称]
+**在此制度下的分类：** [层级，附对控制条款的精确引用]
+**触发的禁止做法：** [未识别 / [具体条款和原因]]
+**适用义务：** [研究列表并附引用——透明度、文档、人工监督、测试、注册等]
+**需要基本权利影响评估？** [是——例如，EU AI Act Art. 27 FRIA 适用 / 制度等效项 / 否 / 不适用。如果是，这是单独的可交付成果，不被此 AIA 吸收。]
+**生效 / 执行日期：** [日期]
+**模糊性或开放解释：** [标记任何未决的内容]
+
+**提供者-vs-部署者义务拆分（如果 `AI role: Both` 则要求）：**
+
+| 义务 | 作为提供者 | 作为部署者 |
 |---|---|---|
-| [specific obligation + pinpoint cite] | [what applies / does not apply] | [what applies / does not apply] |
+| [具体义务 + 精确引用] | [适用 / 不适用] | [适用 / 不适用] |
 
 ---
 
-## 7. AI policy consistency
+## 7. AI 政策一致性
 
-| Policy commitment | Consistent? | Notes |
+| 政策承诺 | 一致？ | 备注 |
 |---|---|---|
-| [commitment from `~/.claude/plugins/config/claude-for-legal/ai-governance-legal/CLAUDE.md` AI policy section] | 🟢 / 🟡 / 🟠 / 🔴 | |
+| [来自 `~/.claude/plugins/config/claude-for-legal/ai-governance-legal/CLAUDE.md` AI 政策部分的承诺] | 🟢 / 🟡 / 🟠 / 🔴 | |
 
-[If any item is 🟡 or worse: policy update needed before deployment, or design needs to change.
-One of them has to change — not both flagged and left open.]
+[如果有任何项目是 🟡 或更差：部署前需要政策更新，或设计需要变更。
+其中一个必须变更——不要两者都标记并留作开放。]
 
 ---
 
-## 8. Risks and mitigations
+## 8. 风险和缓解措施
 
-| # | Risk | Likelihood | Impact | Mitigation | Status | Owner |
+| # | 风险 | 可能性 | 影响 | 缓解措施 | 状态 | 负责人 |
 |---|---|---|---|---|---|---|
-| 1 | [specific risk tied to this design — not "AI hallucination" generically] | L/M/H | L/M/H | [specific control] | Done / Planned / Gap | [name] |
+| 1 | [与此设计相关的具体风险——非通用的"AI 幻觉"] | 低/中/高 | 低/中/高 | [具体控制] | 已完成 / 已计划 / 差距 | [姓名] |
 
-**Residual risk after mitigations:** [assessment]
-
----
-
-## 9. Recommendation
-
-**[APPROVED / APPROVED WITH CONDITIONS / CHANGES REQUIRED / NOT APPROVED]**
-
-**Conditions (if any):**
-- [ ] [specific action before deployment — owner, deadline]
-
-**Privacy review required?** [Yes — run `/privacy-legal:pia-generation`, if the plugin is installed /
-No]
-
-**Sign-off:** [name, date]
+**缓解后的残余风险：** [评估]
 
 ---
 
-## Cite check
+## 9. 建议
 
-Regulatory citations in Section 6 (and anywhere else) were generated by an AI model and have not been verified against primary sources. Before the assessment is certified or relied on, run a verification pass against a legal research tool (Westlaw, EUR-Lex, or your firm's platform) for each cited provision — confirm the pinpoint, currency, and any delegated or implementing acts. The AI regulatory landscape shifts quickly; verify before advising. Source tags on each citation (e.g., `[EUR-Lex]`, `[web search — verify]`) show where it came from; `verify` tags carry higher fabrication risk and should be checked first.
+**[已批准 / 有条件批准 / 需要变更 / 未批准]**
+
+**条件（如果有）：**
+- [ ] [部署前的具体行动——负责人、截止日期]
+
+**需要隐私审查？** [是——运行 `/privacy-legal:pia-generation`，如果安装了 plugin / 否]
+
+**签字：** [姓名、日期]
+
+---
+
+## 引用检查
+
+第 6 节（以及其他任何地方）的监管引用由 AI 模型生成，尚未根据主要来源进行验证。在评估被认证或依赖之前，针对法律研究工具（Westlaw、EUR-Lex 或你的律所平台）对每个引用的条款运行验证通过——确认精确性、货币性以及任何授权或实施法案。AI 监管格局快速变化；在建议之前验证。每个引用上的来源标记（例如，`[EUR-Lex]`、`[web search — verify]`）显示它来自哪里；`verify` 标记携带更高的捏造风险，应首先检查。
 ```
 
-**Before certifying the AIA (the Sign-off step, marking Status: APPROVED):** Read `## Who's using this` in `~/.claude/plugins/config/claude-for-legal/ai-governance-legal/CLAUDE.md`. If the Role is Non-lawyer:
+**在认证 AIA 之前（签字步骤，标记状态：已批准）：** 阅读 `~/.claude/plugins/config/claude-for-legal/ai-governance-legal/CLAUDE.md` 中的 `## Who's using this`。如果角色是非律师：
 
-> Certifying this AIA has legal consequences — it becomes the record the company relies on if a regulator or affected party asks how this use case was assessed. Have you reviewed this with an attorney? If yes, proceed. If no, here's a brief to bring to them:
+> 认证此 AIA 有法律后果——它成为公司依赖的记录，如果监管机构或受影响方询问此用例如何评估。你是否已与律师审查此内容？如果是，继续。如果不是，这是带给他们的简报：
 >
-> [Generate a 1-page summary: the system, the regulatory classification, the risks identified, the mitigations in place, residual risk, open questions, what to ask the attorney before certifying.]
+> [生成 1 页摘要：系统、监管分类、识别的风险、到位的缓解措施、残余风险、未决问题、在认证前问律师什么。]
 >
-> If you need to find an attorney, solicitor, barrister, or other authorised legal professional: your professional regulator's referral service is the fastest starting point (state bar in the US, SRA/Bar Standards Board in England & Wales, Law Society in Scotland/NI/Ireland/Canada/Australia, or your jurisdiction's equivalent).
+> 如果你需要找到律师、事务律师、大律师或其他授权法律专业人士：你专业监管机构的推荐服务是最快的起点（美国的州律协、英格兰和威尔士的 SRA/Bar Standards Board、苏格兰/NI/爱尔兰/加拿大/澳大利亚的 Law Society，或你司法管辖区的等效机构）。
 
-Do not proceed past this gate without an explicit yes. DRAFT assessments for attorney review do not require the gate — certification does.
+在没有明确是的情况下不要越过此关卡。供律师审查的草稿评估不需要关卡——认证需要。
 
 ---
 
-## Risk quality standards
+## 风险质量标准
 
-Same standard as the PIA skill — risks must be **specific and tied to the design**.
+与 PIA skill 相同的标准——风险必须**具体并与设计相关**。
 
-| Bad risk | Why bad | Better |
+| 糟糕的风险 | 为什么糟糕 | 更好 |
 |---|---|---|
-| "AI hallucination" | Applies to every LLM; says nothing | "Model may generate plausible but incorrect legal citations — support agents have no current verification step before sending to customers" |
-| "Bias" | Too vague | "Résumé scoring model trained on historical hires; if historical cohort was demographically homogeneous, underrepresented candidates may be systematically scored lower" |
-| "Vendor risk" | Circular | "OpenAI's terms permit training on API inputs by default; unless the opt-out is confirmed in the agreement, customer support messages may be used to train the model" |
+| "AI 幻觉" | 适用于每个 LLM；什么也没说 | "模型可能生成合理但不正确的法律引用——支持代理在发送给客户之前没有当前验证步骤" |
+| "偏见" | 太模糊 | "简历评分模型在历史雇用上训练；如果历史队列在人口统计上是同质的，代表性不足的候选人可能系统地评分较低" |
+| "供应商风险" | 循环 | "OpenAI 的条款默认允许在 API 输入上训练；除非在协议中确认选择退出，客户支持消息可能用于训练模型""
 
-Aim for 2-5 real risks, not 12 padded ones.
-
----
-
-## AI policy diff
-
-Every assessment should cross-check against the AI policy commitments in `~/.claude/plugins/config/claude-for-legal/ai-governance-legal/CLAUDE.md`.
-Common drift:
-
-- Policy prohibits AI use in [category] — this use case is that category. Stop.
-- Policy requires human review — this deployment has no human step. Design needs to change.
-- Policy requires disclosure to affected parties — disclosure mechanism hasn't been built.
-- Approved vendor list exists — this vendor isn't on it. Procurement step required.
-
-Flag every mismatch. One of them has to change before deployment.
+目标是 2-5 个真实风险，而非 12 个填充风险。
 
 ---
 
-## Handoffs
+## AI 政策差异
 
-- **To product / engineering:** Conditions list with owners and deadlines. Not
-  "add oversight" — "add a human review step before any automated email is sent,
-  owner: [product lead], before launch."
-- **To privacy:** If personal data is involved, flag: "Run `/privacy-legal:pia-generation [system name]` in parallel, if the plugin is installed — the AIA doesn't substitute for a PIA."
-- **To vendor-ai-review:** If a new vendor is involved, flag: "If there's no AI addendum reviewed for [vendor], run `/ai-governance-legal:vendor-ai-review` before production."
-- **To reg-gap-analysis:** If new regulatory obligations emerged (EU AI Act high-risk, new sector rule), that skill tracks the gap.
+每个评估应对照 `~/.claude/plugins/config/claude-for-legal/ai-governance-legal/CLAUDE.md` 中的 AI 政策承诺进行交叉检查。常见漂移：
+
+- 政策禁止在 [类别] 中使用 AI——此用例是该类别。停止。
+- 政策要求人工审查——此部署无人工程步骤。设计需要变更。
+- 政策要求向受影响方披露——披露机制尚未构建。
+- 存在已批准供应商列表——此供应商不在列表上。需要采购步骤。
+
+标记每个不匹配。其中一个必须在部署前变更。
 
 ---
 
-## Close with the next-steps decision tree
+## 交接
 
-End with the next-steps decision tree per CLAUDE.md `## Outputs`. Customize the options to what this skill just produced — the five default branches (draft the X, escalate, get more facts, watch and wait, something else) are a starting point, not a lock-in. The tree is the output; the lawyer picks.
+- **致产品/工程：** 条件列表并附负责人和截止日期。不是"添加监督"——"在任何自动电子邮件发送之前添加人工审查步骤，负责人：[产品负责人]，在发布前。"
+- **致隐私：** 如果涉及个人数据，标记："如果安装了 plugin，并行运行 `/privacy-legal:pia-generation [系统名称]`——AIA 不能替代 PIA。"
+- **致供应商 AI 审查：** 如果涉及新供应商，标记："如果 [供应商] 没有审查的 AI 附加条款，在生产前运行 `/ai-governance-legal:vendor-ai-review`。"
+- **致 reg-gap-analysis：** 如果浮现新监管义务（EU AI Act 高风险、新部门规则），该 skill 跟踪差距。
 
-## What this skill does not do
+---
 
-- It doesn't approve the deployment. A human signs the assessment.
-- It doesn't constitute any regulatory conformity assessment — where a regime (e.g., EU AI Act) requires a formal conformity assessment, that is a separate exercise requiring external legal review and technical documentation beyond what's here.
-- It doesn't design the mitigations. It describes what needs mitigating; engineering
-  designs the fix.
-- It doesn't substitute for a PIA when personal data is involved. Run both.
+## 关闭时使用下一步决策树
+
+根据 CLAUDE.md `## Outputs` 以下一步决策树结束。根据此 skill 刚刚生成的自定义选项——五个默认分支（起草 X、升级、获取更多事实、观察等待、其他）是起点，而非锁定。树就是输出；律师选择。
+
+## 此 skill 不做什么
+
+- 它不批准部署。人类签署评估。
+- 它不构成任何监管合格评估——当制度（例如 EU AI Act）要求正式合格评估时，那是需要外部法律审查和技术文档的单独练习，超出此处内容。
+- 它不设计缓解措施。它描述需要缓解的内容；工程设计修复。
+- 当涉及个人数据时它不替代 PIA。两者都运行。

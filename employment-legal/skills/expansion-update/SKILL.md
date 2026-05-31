@@ -1,64 +1,59 @@
 ---
 name: expansion-update
 description: >
-  Update the status of an in-progress international expansion project —
-  recalculates what is now unblocked, flags anything overdue, and surfaces
-  the next priorities. Use when work has happened since the last session and
-  the expansion tracker needs to reflect the current state.
+  更新进行中的国际扩张项目状态——重新计算现已解除阻止的项目，标记任何逾期项目，并 surfaced 下一个优先事项。当自上次会话以来有新进展且扩张追踪器需要反映当前状态时使用。
 argument-hint: "[country name]"
 ---
 
+<!--
+This file is a Chinese translation of the original by Anthropic PBC.
+Original: https://github.com/anthropics/claude-for-legal
+Licensed under Apache License 2.0
+-->
+
+
 # /expansion-update
 
-Returns to an open expansion tracker and updates item status based on what
-has happened since the last session. Recalculates what is now unblocked,
-flags anything overdue, and surfaces the next priorities.
+返回到打开的扩展追踪器并根据上次会话后发生的情况更新项目状态。重新计算现在已解除阻止的项目，标记任何逾期项目，并 surfaced 下一个优先事项。
 
-## Instructions
+## 说明
 
-1. Load `~/.claude/plugins/config/claude-for-legal/employment-legal/CLAUDE.md`.
+1. 加载 `~/.claude/plugins/config/claude-for-legal/employment-legal/CLAUDE.md`。
 
-2. Identify the tracker file: `~/.claude/plugins/config/claude-for-legal/employment-legal/expansion-[slug].yaml`. If it doesn't
-   exist, respond: "No expansion tracker found for [country]. Run
-   `/employment-legal:expansion-kickoff [country]` to start one."
+2. 识别追踪器文件：`~/.claude/plugins/config/claude-for-legal/employment-legal/expansion-[slug].yaml`。如果不存在，响应："未找到 [国家] 的扩展追踪器。运行 `/employment-legal:expansion-kickoff [国家]` 来启动一个。"
 
-3. Read the tracker. Show the current state:
+3. 读取追踪器。显示当前状态：
 
 ```
-[Country] Expansion — last updated [date]
-Open: [N] | In progress: [N] | Done: [N] | Blocked: [N]
+[国家] 扩展 — 最后更新于 [日期]
+待处理：[N] | 进行中：[N] | 已完成：[N] | 受阻：[N]
 
-Next priorities (open items with earliest due dates or highest-dependency):
-  [item] — owner: [owner]
-  [item] — owner: [owner]
-  [item] — owner: [owner]
+下一个优先事项（截止日期最早或依赖性最高的待处理项目）：
+  [项目] — 负责人：[负责人]
+  [项目] — 负责人：[负责人]
+  [项目] — 负责人：[负责人]
 ```
 
-4. Ask for updates in a single prompt — do not ask about each item one by one:
+4. 在单个提示中询问更新——不要逐个询问每个项目：
 
-   > Which items have moved since we last looked? Tell me what's changed
-   > (e.g., "EOR decision made — going with Deel", "outside counsel engaged —
-   > call scheduled for Thursday", "PE analysis still open, waiting on tax").
-   > You can also add new items or change due dates.
+   > 自上次查看以来哪些项目发生了变化？告诉我发生了什么变化（例如，"EOR 决策已做出——选择 Deel"，"外部律师已介入——电话安排在周四"，"PE 分析仍然开放，等待税务"）。你也可以添加新项目或更改截止日期。
 
-5. Apply updates to the tracker file. For any item newly marked `done`,
-   check whether it unblocks other items and flag those as now actionable.
+5. 将更新应用于追踪器文件。对于任何新标记为 `done` 的项目，检查它是否解除了其他项目的阻止并将这些项目标记为现在可执行。
 
-6. If any item has a due date that has passed and is still `open` or
-   `in-progress`, flag it:
+6. 如果任何项目的截止日期已过且仍然为 `open` 或 `in-progress`，标记它：
 
 ```
-⚠️ Overdue: [item] — was due [date], owner: [owner]
+⚠️ 逾期：[项目] — 截止日期 [日期]，负责人：[负责人]
 ```
 
-7. Write the updated tracker. Confirm:
+7. 写入更新后的追踪器。确认：
 
 ```
-Tracker updated — [N] items closed, [N] still open.
-Next priority: [top open item].
+追踪器已更新 — [N] 个项目已关闭，[N] 个仍待处理。
+下一个优先事项：[顶级待处理项目]。
 ```
 
-## Examples
+## 示例
 
 ```
 /employment-legal:expansion-update Germany
@@ -66,9 +61,7 @@ Next priority: [top open item].
 
 ```
 /employment-legal:expansion-update
-(will ask which country if multiple trackers exist)
+(如果存在多个追踪器，将询问哪个国家)
 ```
 
-> Detailed tracker schema, item-status rules, and dependency logic live in the
-> `international-expansion` reference skill — load it before doing substantive
-> work.
+> 详细的追踪器架构、项目状态规则和依赖逻辑在 `international-expansion` 参考 skill 中——在进行实质性工作之前加载它。

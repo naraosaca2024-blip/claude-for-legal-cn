@@ -1,104 +1,76 @@
 ---
 name: customize
 description: >
-  Guided customization of your employment practice profile — change one thing
-  without re-running the whole cold-start interview. Adjust jurisdictional
-  footprint, risk posture, escalation contacts, hiring review rules,
-  termination review rules, handbook positions, investigation preferences,
-  or matter workspace paths. Use when the user says "change my [thing]",
-  "add a jurisdiction", "update my profile", "edit my config", or "customize".
-argument-hint: "[section name, or describe what you want to change]"
+  引导式自定义你的雇佣法执业档案——更改一项内容而无需重新运行整个冷启动访谈。调整司法管辖区足迹、风险姿态、升级联系人、招聘审查规则、离职审查规则、手册立场、调查偏好或事项工作空间路径。当用户说"更改我的[某项]"、"添加司法管辖区"、"更新我的档案"、"编辑我的配置"或"自定义"时使用。
+argument-hint: "[部分名称，或描述你想更改什么]"
 ---
+
+<!--
+This file is a Chinese translation of the original by Anthropic PBC.
+Original: https://github.com/anthropics/claude-for-legal
+Licensed under Apache License 2.0
+-->
+
 
 # /customize
 
-## When this runs
+## 何时运行
 
-The user typed `/employment-legal:customize`. They want to change something
-in their practice profile — a jurisdiction, a risk posture, an escalation
-contact, a handbook position — without re-running the whole cold-start
-interview and without hand-editing YAML.
+用户输入了 `/employment-legal:customize`。他们想更改执业档案中的某些内容——一个司法管辖区、一个风险姿态、一个升级联系人、一个手册立场——而无需重新运行整个冷启动访谈，也无需手动编辑 YAML。
 
-## What to do
+## 做什么
 
-1. **Read the config.** Read
+1. **读取配置。** 读取
    `~/.claude/plugins/config/claude-for-legal/employment-legal/CLAUDE.md`
-   (and `~/.claude/plugins/config/claude-for-legal/company-profile.md` one
-   level up). If the plugin config does not exist or still contains
-   `[PLACEHOLDER]` values, say:
+   （以及上一级的 `~/.claude/plugins/config/claude-for-legal/company-profile.md`）。
+   如果插件配置不存在或仍包含
+   `[PLACEHOLDER]` 值，说：
 
-   > You haven't run setup yet. Run `/employment-legal:cold-start-interview`
-   > first — customize is for adjusting a profile you already have.
+   > 你还没有运行设置。先运行 `/employment-legal:cold-start-interview`
+   > — customize 用于调整你已有的档案。
 
-2. **Show the customizable map.** List what's in the profile, grouped, with a
-   one-line summary of the current value:
+2. **显示可自定义的映射。** 列出档案中的内容，分组，附带当前值的一行摘要：
 
-   - **Company / who you are** — name, industry, practice setting, jurisdictions
-     *(shared across all 12 plugins — changes flow through
-     `company-profile.md`)*
-   - **Jurisdictional footprint** — states (and countries) where employees
-     work, single-state vs. multi-state, and any upcoming expansion. This
-     drives state-specific supplement logic.
-   - **Risk posture** — conservative / middle / aggressive, what each means
-     for flagging termination risk, restrictive covenant enforceability, and
-     leave accommodation
-   - **People** — HR partners, people team lead, outside counsel, escalation
-     chain, investigation sponsor
-   - **Hiring review** — offer letter template, restrictive covenants
-     posture, background check vendor, standard at-will language
-   - **Termination review** — severance framework, release language, final
-     pay timing rules per state, high-risk flags
-   - **Handbook** — handbook file path, state supplements approach, review
-     cadence
-   - **Investigation preferences** — privileged labeling, interview protocol,
-     audience-specific summary templates
-   - **Workflow** — matter workspaces, leave tracker cadence, expansion
-     project paths
-   - **Integrations** — HRIS / Slack / document storage status, fallbacks
+   - **公司 / 你是谁** — 名称、行业、执业设置、司法管辖区
+     *（在所有 12 个插件中共享——更改通过
+     `company-profile.md` 传递）*
+   - **司法管辖区足迹** — 员工所在的州（和国家）、单州 vs. 多州，以及任何即将到来的扩张。这驱动州特定补充逻辑。
+   - **风险姿态** — 保守 / 中等 / 激进，每个对离职风险标记、限制性契约可执行性和假期住宿意味着什么
+   - **人员** — HR 合作伙伴、人员团队负责人、外部律师、升级链、调查发起人
+   - **招聘审查** — 录用函模板、限制性契约姿态、背景调查供应商、标准随意雇佣语言
+   - **离职审查** — 遣散费框架、解除语言、按州的最终薪资计时规则、高风险标志
+   - **手册** — 手册文件路径、州补充方法、审查节奏
+   - **调查偏好** — 特权标记、访谈协议、面向受众的摘要模板
+   - **工作流** — 事项工作空间、请假跟踪器节奏、扩张项目路径
+   - **集成** — HRIS / Slack / 文档存储状态、后备方案
 
-3. **Ask what they want to change.**
+3. **询问想更改什么。**
 
-   > What would you like to adjust? Pick a section, or describe the change in
-   > your own words.
+   > 你想调整什么？选择一个部分，或用自己的话描述更改。
 
-4. **Make the change.** Show the current value, ask for the new value, explain
-   what changes downstream, confirm, write it to the config.
+4. **进行更改。** 显示当前值，询问新值，解释下游有什么变化，确认，写入配置。
 
-   Examples:
-   - *Adding Washington to the jurisdictional footprint:* "`/wage-hour-qa`
-     and `/termination-review` will start applying WA rules. `/handbook-
-     updates` will prompt for a WA supplement. `/hiring-review` will now
-     flag non-compete attempts in WA (unenforceable)."
-   - *Severance framework 2 weeks/year → 4 weeks/year:* "`/termination-
-     review` will use the new baseline in severance calculations."
-   - *Risk posture middle → conservative:* "I'll flag more terminations for
-     escalation, recommend more protective release language, and be stricter
-     on restrictive covenants."
+   示例：
+   - *将华盛顿添加到司法管辖区足迹：* "`/wage-hour-qa`
+     和 `/termination-review` 将开始应用 WA 规则。`/handbook-
+     updates` 将提示添加 WA 补充。`/hiring-review` 现在将标记 WA 中的非竞争尝试（不可执行）。"
+   - *遣散费框架 2 周/年 → 4 周/年：* "`/termination-
+     review` 将在遣散费计算中使用新的基准。"
+   - *风险姿态 中等 → 保守：* "我将标记更多离职以供升级，推荐更有保护性的解除语言，并在限制性契约上更严格。"
 
-5. **For shared-profile changes** (company name, industry, jurisdictions,
-   practice setting, stage): write to
-   `~/.claude/plugins/config/claude-for-legal/company-profile.md` and note:
+5. **对于共享档案更改**（公司名称、行业、司法管辖区、执业设置、阶段）：写入
+   `~/.claude/plugins/config/claude-for-legal/company-profile.md` 并说明：
 
-   > This change affects all 12 plugins — any plugin that reads your
-   > jurisdiction footprint now sees [new value].
+   > 此更改影响所有 12 个插件——任何读取你司法管辖区足迹的插件现在都会看到 [新值]。
 
-6. **Close.**
+6. **结束。**
 
-   > Done. Your next output will reflect the change. Anything else? You can
-   > run `/employment-legal:customize` anytime.
+   > 完成。你的下一个输出将反映此更改。还需要什么？你可以随时运行 `/employment-legal:customize`。
 
-## Guardrails
+## 护栏
 
-- **Never delete a section.** If the user wants to "remove" a jurisdiction,
-  offer to mark it `[Not currently staffed — retain rules for re-entry]` and
-  explain that going to `[Not configured]` will drop state-specific
-  flagging.
-- **Flag internal inconsistency.** If the change would make the profile
-  inconsistent (e.g., CA in the footprint + aggressive non-compete posture;
-  or risk posture aggressive + "every termination goes to outside counsel"),
-  flag the tension.
-- **Flag guardrail degradation.** The pre-flight citation check, source
-  attribution tags, and `[verify]` tags on cited statutes are load-bearing —
-  do not remove. The `[review]` flag is load-bearing — explain the trade-off
-  before adjusting.
-- **One change at a time.** Don't re-ask the whole interview.
+- **永远不要删除一个部分。** 如果用户想"移除"一个司法管辖区，
+  提供标记为 `[Not currently staffed — retain rules for re-entry]` 的选项，并解释设为 `[Not configured]` 将放弃州特定标记。
+- **标记内部不一致。** 如果更改会使档案不一致（例如，CA 在足迹中 + 激进的非竞争姿态；或风险姿态激进 + "每个离职都交外部律师"），标记冲突。
+- **标记护栏退化。** 飞行前引用检查、来源归因标签和引用制定法上的 `[verify]` 标签是承重的——不要移除。`[review]` 标志是承重的——在调整之前解释权衡。
+- **一次一个更改。** 不要重新询问整个访谈。

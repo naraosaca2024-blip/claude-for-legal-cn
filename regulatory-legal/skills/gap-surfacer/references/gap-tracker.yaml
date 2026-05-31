@@ -1,13 +1,17 @@
-# Gap Tracker
-# Populated by policy-diff handoffs. Tracks open policy gaps until closed or risk-accepted.
+# This file is a Chinese translation of the original by Anthropic PBC.
+# Original: https://github.com/anthropics/claude-for-legal
+# Licensed under Apache License 2.0
+
+# 差距追踪器
+# 由 policy-diff 交接填充。追踪未结政策差距，直至关闭或接受风险。
 
 gaps: []
 
-# Example:
+# 示例：
 # - id: GAP-001
-#   requirement: "Must disclose X at Y point in the flow"
-#   regulation: "State Privacy Act § 4.2"
-#   policy_affected: "Privacy Policy v3.1"
+#   requirement: "须在流程 Y 时间点披露 X"
+#   regulation: "州隐私法 § 4.2"
+#   policy_affected: "隐私政策 v3.1"
 #   gap_type: "partial"
 #   owner: "privacy-legal@company.com"
 #   opened: 2026-03-01

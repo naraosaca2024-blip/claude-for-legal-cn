@@ -1,269 +1,270 @@
 ---
 name: cold-start-interview
-description: Cold-start interview — builds your watchlist, indexes the policy library, and learns your materiality threshold so the monitor surfaces signal instead of noise. Use on fresh install, when reconfiguring (--redo), or when re-checking what connectors are actually responding (--check-integrations).
+description: Cold-start 面试——构建您的监视列表、索引策略库并了解您的重要性阈值，以便监控器 surfaced 信号而不是噪音。在全新安装时、重新配置时（--redo）或重新检查哪些连接器实际响应时（--check-integrations）使用。
 argument-hint: "[--redo | --check-integrations]"
 ---
 
+<!--
+This file is a Chinese translation of the original by Anthropic PBC.
+Original: https://github.com/anthropics/claude-for-legal
+Licensed under Apache License 2.0
+-->
+
+
 # /cold-start-interview
 
-1. Check `~/.claude/plugins/config/claude-for-legal/regulatory-legal/CLAUDE.md`. If a populated CLAUDE.md (no `[PLACEHOLDER]` markers) exists at `~/.claude/plugins/cache/claude-for-legal/regulatory-legal/*/CLAUDE.md` but not at the config path, copy it to the config path and tell the user what was migrated. If `--check-integrations`, skip the interview — re-run only the Part 0 `What's connected?` check and rewrite the `## Available integrations` table in `~/.claude/plugins/config/claude-for-legal/regulatory-legal/CLAUDE.md`.
-2. Use the interview workflow below. Interview (Part 0 first — role + integrations — then watchlist): which regulators, where policies live, what's material.
-3. Connect policy folder. Index policies.
-4. Write `~/.claude/plugins/config/claude-for-legal/regulatory-legal/CLAUDE.md` (creating parent directories as needed) with watchlist + materiality threshold.
+1. 检查 `~/.claude/plugins/config/claude-for-legal/regulatory-legal/CLAUDE.md`。如果在 `~/.claude/plugins/cache/claude-for-legal/regulatory-legal/*/CLAUDE.md` 存在填充的 CLAUDE.md（没有 `[PLACEHOLDER]` 标记）但在配置路径不存在，将其复制到配置路径并告诉用户迁移了什么。如果 `--check-integrations`，跳过面试——仅重新运行第 0 部分"连接了什么？"检查并重写 `~/.claude/plugins/config/claude-for-legal/regulatory-legal/CLAUDE.md` 中的 `## Available integrations` 表格。
+2. 使用以下面试工作流。面试（第 0 部分优先——角色 + 集成——然后监视列表）：哪些监管机构、策略所在位置、什么重要。
+3. 连接策略文件夹。索引策略。
+4. 编写 `~/.claude/plugins/config/claude-for-legal/regulatory-legal/CLAUDE.md`（根据需要创建父目录），包含监视列表 + 重要性阈值。
 
-When probing integrations: only report ✓ if an MCP tool call actually succeeded. Configured-but-untested connectors should be marked ⚪ with a one-line how-to for confirming. Never report ✓ based on `.mcp.json` declarations alone — that misleads users into thinking something is wired up when it isn't.
+在探测集成时：仅当 MCP 工具调用实际成功时才报告 ✓。已配置但未测试的连接器应标记 ⚪ 并附带单行如何确认。永远不要仅根据 `.mcp.json` 声明报告 ✓——这会误导用户认为某些东西已连接而实际没有。
 
 ---
 
-## Purpose
+## 目的
 
-Every regulator publishes constantly. Most of it doesn't matter to you. This interview learns which regulators to watch and — critically — what "material" means here, so the monitor surfaces signal instead of noise.
+每个监管机构不断发布。大多数对您不重要。此面试了解要监视哪些监管机构以及——关键是——这里的"重要"意味着什么，以便监控器 surfaced 信号而不是噪音。
 
-## Cold-start check
+## Cold-start 检查
 
-Read `~/.claude/plugins/config/claude-for-legal/regulatory-legal/CLAUDE.md`:
-- **Does not exist** → start the interview.
-- **Contains `<!-- SETUP PAUSED AT: -->`** → greet the user and offer to resume from that section.
-- **Contains `[PLACEHOLDER]` markers but no pause comment** → the template was never completed; offer to start fresh or resume from wherever the placeholders begin.
-- **Populated (no placeholders, no pause comment)** → already configured; skip unless `--redo`.
+读取 `~/.claude/plugins/config/claude-for-legal/regulatory-legal/CLAUDE.md`：
+- **不存在** → 开始面试。
+- **包含 `<!-- SETUP PAUSED AT: -->`** → 欢迎用户并提供从该部分恢复。
+- **包含 `[PLACEHOLDER]` 标记但没有暂停注释** → 模板从未完成；提供重新开始或从占位符开始的地方恢复。
+- **已填充（无占位符、无暂停注释）** → 已配置；除非 `--redo` 否则跳过。
 
-The template structure lives at `${CLAUDE_PLUGIN_ROOT}/CLAUDE.md` — use it as the section scaffold. Write the completed practice profile to the config path, creating parent directories as needed.
+模板结构位于 `${CLAUDE_PLUGIN_ROOT}/CLAUDE.md`——将其用作部分支架。将完成的执业档案写入配置路径，根据需要创建父目录。
 
-If a CLAUDE.md exists at the old cache path `~/.claude/plugins/cache/claude-for-legal/regulatory-legal/*/CLAUDE.md` but not at the config path, copy it forward.
+如果在旧缓存路径 `~/.claude/plugins/cache/claude-for-legal/regulatory-legal/*/CLAUDE.md` 存在 CLAUDE.md 但在配置路径不存在，则向前复制。
 
-## Check for the shared company profile
+## 检查共享公司档案
 
-Look for `~/.claude/plugins/config/claude-for-legal/company-profile.md`.
+查找 `~/.claude/plugins/config/claude-for-legal/company-profile.md`。
 
-- **If it exists:** Read it. Show a one-line confirmation: "You're [name], [practice setting], at [company], [industry], operating in [jurisdictions]. Right? (Or say 'update' to change the shared profile.)" If confirmed, skip the company questions — go straight to the plugin-specific ones.
-- **If it doesn't exist:** You'll be the first plugin this user set up. After the orientation and fork, ask the company questions and write them to the shared profile (per the template at `references/company-profile-template.md` in the plugin root), then continue with the plugin-specific questions. Tell the user: "I've saved your company profile — the other legal plugins will read it and skip these questions."
+- **如果存在：** 读取它。显示单行确认："您是 [姓名]，[执业设置]，在 [公司]，[行业]，在 [司法管辖区]运营。对吗？（或说 'update' 以更改共享档案。）"如果确认，跳过公司问题——直接进入插件特定问题。
+- **如果不存在：** 您将是此用户设置的第一个插件。在定向和分支后，询问公司问题并将它们写入共享档案（根据插件根目录中 `references/company-profile-template.md` 的模板），然后继续插件特定问题。告诉用户："我已保存您的公司档案——其他法律插件将读取它并跳过这些问题。"
 
-The company questions that belong in the shared profile (and should NOT be re-asked if it exists): practice setting, company name, industry, what-you-sell, size, jurisdictions, regulators, risk appetite, escalation names. The plugin-specific questions (playbook positions, review framework, house style, supervision model, etc.) stay per-plugin.
+共享档案中的公司问题（如果存在则不应重新询问）：执业设置、公司名称、行业、您销售什么、规模、司法管辖区、监管机构、风险偏好、升级姓名。插件特定问题（剧本位置、审查框架、内部风格、监督模型等）保持每个插件。
 
-## Install scope check
+## 安装范围检查
 
-Before the orientation, if you notice the working directory is inside a project (not the user's home directory), flag it. Say once:
+在定向之前，如果您注意到工作目录在项目内部（而非用户的主目录），标记它。说一次：
 
-> **Heads up — it looks like this plugin may be project-scoped, which means I can only read files in [current directory]. If you'll want me to read documents from elsewhere (Downloads, Documents, Dropbox), install user-scoped instead — see QUICKSTART.md. You can continue with project scope, but you'll need to move files into this folder.**
+> **Heads up — 看起来此插件可能是项目范围的，这意味着我只能读取 [当前目录] 中的文件。如果您想让我从其他地方（下载、文档、Dropbox）读取文档，请改为安装用户范围——参见 QUICKSTART.md。您可以继续项目范围，但需要将文件移动到此文件夹。**
 
-Ask the user to confirm before proceeding: continue with project scope, or pause to reinstall user-scoped. If the working directory *is* the user's home directory, skip this check silently.
+要求用户在继续前确认：继续项目范围，或暂停以重新安装用户范围。如果工作目录*是*用户的主目录，静默跳过此检查。
 
-## Before the interview starts
+## 面试开始前
 
-Show this preamble first (3-4 short lines, nothing more):
+首先显示此前言（3-4 个短行，仅此而已）：
 
-> **`regulatory-legal` is for people who track regulatory developments, assess policy gaps, and manage compliance obligations.** Not your area? `/legal-builder-hub:related-skills-surfacer`.
+> **`regulatory-legal` 适用于跟踪监管发展、评估策略差距和管理合规义务的人员。** 不是您的领域？`/legal-builder-hub:related-skills-surfacer`。
 >
-> **2 minutes** gets you your role, practice setting, and primary regulatory regime. **15 minutes** adds your full watchlist, materiality thresholds, feed cadence, policy library index, and comment-period sources.
+> **2 分钟** 获得您的角色、执业设置和主要监管制度。**15 分钟** 添加您的完整监视列表、重要性阈值、订阅源节奏、策略库索引和评论期来源。
 >
-> Quick or full? (Upgrade any time with `/regulatory-legal:cold-start-interview --full`.)
+> 快速还是完整？（随时使用 `/regulatory-legal:cold-start-interview --full` 升级。）
 
-Do not read the user's home-directory `~/CLAUDE.md`, `~/user.md`, or other personal memory to pre-populate the interview. The only inputs are the user's typed answers and documents they point at or paste in.
+不要读取用户主目录 `~/CLAUDE.md`、`~/user.md` 或其他个人记忆来预填充面试。唯一的输入是用户键入的答案以及他们指向或粘贴的文档。
 
-## After the user picks quick or full
+## 用户选择快速或完整后
 
-Once the user has picked, orient them. Cover, in your own voice:
+一旦用户选择，向他们定向。用自己的声音覆盖：
+- **此插件维护什么：** 您的执业档案（监视列表、重要性阈值、订阅源节奏）、差距跟踪器、策略差异存档和评论期日历。
+- **此设置做什么：** 了解您实际监视哪些监管机构、"重要"对您意味着什么以及您的策略所在位置，并将其写入插件每次读取的纯文本文件。所有回答的都可以稍后更改。完成后，插件的命令将按用户工作的方式工作，而不是按通用模板的方式。
+- **数据来源：** 设置仅根据用户的答案构建新的专业档案。它不读取用户的个人 Claude 历史、其他对话或主目录 CLAUDE.md。如果与此对话早期出现相关内容（例如，用户提到监管机构或其行业），在使用前询问。除非用户键入或批准，否则不会将任何内容折叠到配置中。
 
-- **What this plugin maintains:** your practice profile (watchlist, materiality thresholds, feed cadence), a gap tracker, a policy diff archive, and a comment-period calendar.
-- **What this setup does:** learns which regulators you actually watch, what "material" means to you, and where your policies live, and writes it into a plain-text file the plugin reads from every time. Everything answered can be changed later. Once it's done, the plugin's commands will work the way the user works, not the way a generic template does.
-- **Data sources:** setup builds a fresh professional profile from the user's answers only. It does not read the user's personal Claude history, other conversations, or home-directory CLAUDE.md. If something relevant came up earlier in this conversation (for example, the user mentioned a regulator or their sector), ask before using it. Nothing gets folded into the configuration unless the user types it or approves it.
+**为什么这很重要。** 每个摘要、差异和差距报告都从此面试编写的配置读取。通用配置产生通用输出——默认监视列表、默认重要性阈值、以及将每个机构演讲视为执法行动的摘要。告诉插件用户实际监视哪些监管机构以及这里的"重要"意味着什么，这是"监管 AI 工具"和"发送信号而不是噪音的工具"之间的区别。答案越具体，摘要将越安静和有用。
 
-**Why this matters.** Every digest, diff, and gap report reads from the configuration this interview writes. A generic configuration gives generic output — a default watchlist, a default materiality threshold, and a digest that treats every agency speech like an enforcement action. Telling the plugin which regulators the user actually watches and what "material" means here is what makes the difference between "a regulatory AI tool" and "a tool that sends signal instead of noise." The more specific the answers, the quieter and more useful the digests will be.
+## 面试节奏
 
-## Interview pacing
+- **假设答案存在于某处。** 当问题询问可能写在某处的信息——公司描述、剧本、升级矩阵、风格指南、手册、司法管辖区列表、事项组合——在要求用户从内存键入之前提示链接或粘贴。"粘贴链接或文档，或给我简短版本"是超过一句话的任何内容的默认询问。让人们重新键入已写内容的面试官未能完成面试官的第一项工作。
+- **批量大小——计算子部分。** "一次不要问超过 2-3 个问题"意味着 2-3 个*可回答的提示*，计算子部分。一个带有 5 个子部分的问题是 5 个问题。测试：用户是否可以在不滚动的情况下回答？如果问题不适合一个屏幕，则太多。尽可能使用结构化点击问题——它们不需要滚动或键入。
 
-- **Assume the answer exists somewhere.** When a question asks for information that's probably written down somewhere — company description, playbook, escalation matrix, style guide, handbook, jurisdiction list, matter portfolio — prompt for a link or a paste before asking the user to type it from memory. "Paste a link or a doc, or give me the short version" is the default ask for anything that's more than a sentence. An interviewer who makes people re-type what they've already written has failed the first job of an interviewer.
-- **Batch size — count subparts.** "Never ask more than 2-3 questions in one turn" means 2-3 *answerable prompts*, counting subparts. One question with 5 subparts is 5 questions. The test: can the user answer without scrolling? If the questions don't fit on one screen, it's too many. Prefer structured tap-through questions where possible — they don't require scrolling or typing.
+**暂停等待真实答案。** 有些问题有快速的点击答案。其他需要用户键入列表（哪些监管机构）、描述校准判断或指向策略文件夹。当问题需要超过快速点击时：
+- **提出问题并等待。** 平实地说："这需要键入答案——我会等待。"在他们响应之前不要排队下一个问题。
+- **对于上传或路径指针（策略文件夹、现有监视列表、订阅源 URL）：** "粘贴内容、共享文件路径，或说'暂时跳过'。如果您跳过，我将在您的配置中标记缺口，以便您稍后填充。"然后实际等待。
+- **在编写执业档案之前：** 审查面试。列出跳过或用占位符回答的每个问题。说："在编写您的配置之前，这里仍然开放：[列表]。想现在填充其中任何一个，还是将它们留作占位符？"在编写之前等待答案。
+- **永远不要**用静默缺口编写执业档案。每个占位符都应该是用户故意跳过的选择，而不是滚动过去未回答的问题。
+- **暂停和恢复。** 提前告诉用户："如果您需要停止，说'pause'（或'stop'、或'让我稍后回到这个'），我将保存您的进度。稍后再次运行 `/regulatory-legal:cold-start-interview`，我将在您离开的地方继续。"当用户暂停时，将部分配置写入 `~/.claude/plugins/config/claude-for-legal/regulatory-legal/CLAUDE.md`，顶部带有 `<!-- SETUP PAUSED AT: [section name] — run /regulatory-legal:cold-start-interview to resume -->` 注释，未回答字段上有 `[PENDING]` 标记（与 `[PLACEHOLDER]` 不同）。当设置重新运行并发现暂停的配置时，欢迎用户："欢迎回来。您在 [section] 暂停。您之前的答案已保存。从我们离开的地方继续，还是重新开始？"不要重新询问已回答的问题。
 
-**Pause for real answers.** Some questions have quick tap-through answers. Others need the user to type a list (which regulators), describe calibration judgments, or point you at a policy folder. When a question needs more than a quick tap:
+**在设置中验证用户陈述的法律事实。** 当用户使用特定规则引用、法规编号、案例名称、截止日期、阈值、司法管辖区或注册号回答面试问题时——并且这是您可以健全性检查的内容——在将其写入配置之前进行检查。如果他们所说的与您的理解或他们粘贴的内容冲突，surfaced："您说阈值是 X；我的理解是 Y — 您能确认哪个进入档案吗？`[premise flagged — verify]`"写入 CLAUDE.md 的错误事实会传播到每个未来输出；在这里捕获是产品中最具影响力的时刻之一。
 
-- **Ask the question and wait.** Say it plainly: "This one needs a typed answer — I'll wait." Don't queue the next question until they respond.
-- **For uploads or path pointers (policy folder, existing watchlist, feed URLs):** "Paste the contents, share a file path, or say 'skip for now.' If you skip, I'll flag the gap in your configuration so you can fill it later." Then actually wait.
-- **Before writing the practice profile:** review the interview. List every question that was skipped or answered with a placeholder. Say: "Before I write your configuration, here's what's still open: [list]. Want to fill any of these now, or leave them as placeholders?" Wait for the answer before writing.
-- **Never** write the practice profile with silent gaps. Every placeholder should be a deliberate user choice to skip, not a question that scrolled past unanswered.
-- **Pause and resume.** Tell the user up front: "If you need to stop, say 'pause' (or 'stop', or 'let me come back to this') and I'll save your progress. Run `/regulatory-legal:cold-start-interview` again later and I'll pick up where you left off." When the user pauses, write a partial configuration to `~/.claude/plugins/config/claude-for-legal/regulatory-legal/CLAUDE.md` with a `<!-- SETUP PAUSED AT: [section name] — run /regulatory-legal:cold-start-interview to resume -->` comment at the top and `[PENDING]` markers (distinct from `[PLACEHOLDER]`) on unanswered fields. When setup re-runs and finds a paused config, greet the user: "Welcome back. You paused at [section]. Your earlier answers are saved. Pick up where we left off, or start over?" Do not re-ask questions already answered.
+## 面试
 
-**Verify user-stated legal facts as they come up in setup.** When the user answers an interview question with a specific rule citation, statute number, case name, deadline, threshold, jurisdiction, or registration number — and it's something you can sanity-check — do the check before writing it into the configuration. If what they said conflicts with your understanding or with something they've pasted, surface it: "You said the threshold is X; my understanding is Y — can you confirm which goes in the profile? `[premise flagged — verify]`" A wrong fact written into CLAUDE.md propagates into every future output; catching it here is one of the highest-leverage moments in the product.
+### 开场
 
-## The interview
+> 我将监视您的监管机构并在有变化时告诉您。但"有变化"每天都会发生。我需要知道对您实际上重要什么，这样我才不会误报。
 
-### Opening
+### 快速开始还是完整设置——分支
 
-> I'm going to watch your regulators and tell you when something moves. But "something moves" happens daily. I need to know what actually matters to you so I'm not crying wolf.
+用户在前言中选择了快速或完整。分支：
 
-### Quick start or full setup — branching
+**快速开始路径：** 仅询问第 0 部分（角色、执业设置、集成）和监视列表范围。在其他所有内容上使用 `[DEFAULT]` 标记编写配置。关闭："完成。您现在可以开始使用命令了。我对重要性阈值、摘要节奏和策略库结构使用了合理的默认值。当技能的输出感觉不对时，通常是您应该调整的默认值——它会告诉您哪个。随时运行 `/regulatory-legal:cold-start-interview --full` 进行整个面试，或 `/regulatory-legal:cold-start-interview --redo <section>` 重新做一部分。"
 
-The user picked quick or full in the preamble. Branch:
+**完整设置路径：** 下面的现有面试流程。
 
-**Quick start path:** ask only Part 0 (role, practice setting, integrations) and watchlist scope. Write the config with `[DEFAULT]` markers on everything else. Close with: "Done. You can start using the commands now. I've used sensible defaults for materiality threshold, digest cadence, and policy library structure. When a skill's output feels off, that's usually a default you should tune — it'll tell you which. Run `/regulatory-legal:cold-start-interview --full` anytime to do the whole interview, or `/regulatory-legal:cold-start-interview --redo <section>` to re-do one part."
+### 第 0 部分：谁在使用此，连接了什么
 
-**Full setup path:** the existing interview flow below.
+在进入监管细节之前的两个快速问题。这些塑造插件如何工作，而不是它能做什么。
 
-### Part 0: Who's using this, and what's connected
+#### 谁在使用此？
 
-Two quick questions before we get into regulatory specifics. These shape how the plugin works, not what it can do.
-
-#### Who's using this?
-
-> Who'll be using this plugin day to day? (This feeds every skill's work-product header and output framing — lawyer gets "ATTORNEY WORK PRODUCT," non-lawyer gets research framing and attorney-review checkpoints before regulator-facing steps.)
+> 谁将日常使用此插件？（这填充每个技能的工作产品标题和输出框架——律师获得"ATTORNEY WORK PRODUCT"，非律师获得研究框架以及在监管机构面向步骤前的律师审查检查点。）
 >
-> 1. **Lawyer or legal professional** — attorney, paralegal, legal ops working under attorney oversight.
-> 2. **Non-lawyer with attorney access** — founder, business lead, contracts manager, HR, procurement; you have an in-house or outside attorney you can consult.
-> 3. **Non-lawyer without regular attorney access** — you're handling this yourself.
+> 1. **律师或法律专业人士** — 律师、律师助理、在律师监督下工作的法律运营。
+> 2. **有律师访问权限的非律师** — 创始人、业务负责人、合同经理、人力资源、采购；您可以咨询内部或外部律师。
+> 3. **没有定期律师访问权限的非律师** — 您自己处理。
 
-If the answer is 2 or 3, say this once (don't repeat it on every output):
+如果答案是 2 或 3，说一次（不要在每个输出上重复）：
 
-> You can use every feature here — research, review, drafting, tracking. Two things change in how I work:
+> 您可以使用这里的每个功能——研究、审查、起草、跟踪。两件事在我的工作方式中改变：
 >
-> 1. **I'll frame outputs as research for attorney review, not as verdicts.** Instead of "GREEN — sign it," you'll get "here's what I found and here are the questions to ask before you sign." That's more useful than a green light you can't be sure of.
-> 2. **I'll pause before steps that have legal consequences** — signing a contract, terminating someone, sending a demand, filing something, clearing a launch, responding to a regulator. I'll ask whether you've reviewed with an attorney, and I'll put together a short brief so the conversation with them is fast.
+> 1. **我会将输出框架化为律师审查的研究，而不是裁决。** 而不是"GREEN — 签署它"，您将获得"这是我发现的，以及签署前要问的问题。"这比您不能确定的绿灯更有用。
+> 2. **我会在具有法律后果的步骤之前暂停**——签署合同、终止某人、发送要求、提交某物、清理发布、响应监管机构。我会询问您是否与律师审查过，并整理简短简报以便与他们的对话快速。
 >
-> This isn't a disclaimer. It's the plugin knowing the difference between what it's good at — research, organization, structure — and licensed legal judgment about your specific situation, which a tool can't give you. A few hours of a lawyer's time at the right moment is usually cheaper than the mistake.
+> 这不是免责声明。这是插件知道它擅长什么——研究、组织、结构——与关于您具体情况的法律法律判断之间的区别，这是工具无法给您的。在正确时刻律师的几小时时间通常比错误更便宜。
 
-If the answer is 3, add:
+如果答案是 3，添加：
 
-> If you need to find a lawyer: your professional regulator's referral service is the fastest starting point (state bar in the US; SRA/Bar Standards Board in England & Wales; Law Society in Scotland/NI/Ireland/Canada/Australia; or your jurisdiction's equivalent). Many offer free or low-cost initial consultations. For small businesses, local law school clinics and (in the US) SCORE mentors can point you in the right direction. For individuals, legal aid organizations cover many practice areas.
+> 如果您需要找到律师：您专业监管机构的转介服务是最快的起点（美国的州律师协会；英格兰和威尔士的 SRA/律师标准委员会；苏格兰/北爱尔兰/爱尔兰/加拿大/澳大利亚的律师协会；或您所在司法管辖区的同等机构）。许多提供免费或低成本的初步咨询。对于小企业，当地法学院诊所和（在美国）SCORE 导师可以指向您正确的方向。对于个人，法律援助组织涵盖许多执业领域。
 
-#### What's connected?
+#### 连接了什么？
 
-> This plugin can work with: regulatory feed subscriptions, document storage (Google Drive, SharePoint, Box), and Slack. Let me check which connectors you have configured — features that need them will work, and features that don't have them will fall back to manual gracefully instead of failing silently.
+> 此插件可以与以下内容一起工作：监管订阅源订阅、文档存储（Google Drive、SharePoint、Box）和 Slack。让我检查您配置了哪些连接器——需要它们的功能将工作，没有它们的功能将优雅地回退到手动而不是静默失败。
 
-**Check what's actually connected, not what's configured.** A connector listed in `.mcp.json` is *available*. A connector that's actually responding is *connected*. These are different, and confusing them destroys trust. For each connector this plugin uses:
+**检查实际连接了什么，而不是配置了什么。** `.mcp.json` 中列出的连接器是*可用的*。实际响应的连接器是*已连接的*。这些是不同的，混淆它们会破坏信任。对于此插件使用的每个连接器：
+- 如果您可以测试连接（调用简单的 MCP 工具如列表或搜索），仅在成功响应时报告 ✓。
+- 如果您无法测试（无法从这里探测），报告 ⚪ "已配置但未验证——打开您的 MCP 设置以确认"并附带单行如何操作。
+- 永远不要仅根据配置报告 ✓。
 
-- If you can test the connection (call a simple MCP tool like a list or search), report ✓ only on a successful response.
-- If you can't test (no way to probe from here), report ⚪ "configured but not verified — open your MCP settings to confirm" with a one-line how-to.
-- Never report ✓ based on configuration alone.
+Federal Register API 是免费的公共端点，始终可用——它不需要 MCP 连接器。
 
-The Federal Register API is a free public endpoint and is always available — it does not require an MCP connector.
+对于显示为未连接的连接器，告诉用户如何连接。示例措辞："[Feed provider] 未连接。在 Claude Cowork 中：Settings → Connectors → Add → [provider] → sign in。在 Claude Code 中：将提供商的 MCP 添加到您的配置或通过 `/mcp`。此插件在没有它的情况下工作——Federal Register + 手动粘贴覆盖美国联邦覆盖——但连接它添加丰富层和警报导入。"
 
-For connectors that show as not connected, tell the user how to connect. Example phrasing: "[Feed provider] isn't connected. In Claude Cowork: Settings → Connectors → Add → [provider] → sign in. In Claude Code: add the provider's MCP to your config or via `/mcp`. This plugin works without it — Federal Register + manual paste covers US federal coverage — but connecting it adds enrichment and alert import."
+然后以这种形式报告发现：
 
-Then report findings in this form:
+> - ✓ [Integration] — 已连接（已测试）
+> - ⚪ [Integration] — 已配置但未验证。打开您的 MCP 设置以确认。
+> - ✗ [Integration] — 未找到。[Feature] 将回退到 [手动替代品]。[如何连接。]
 
-> - ✓ [Integration] — connected (tested)
-> - ⚪ [Integration] — configured but not verified. Open your MCP settings to confirm.
-> - ✗ [Integration] — not found. [Feature] will fall back to [manual alternative]. [How to connect.]
+您不需要所有这些。核心功能仅使用免费订阅源（Federal Register API）和文件访问即可工作。付费订阅源添加丰富层；手动粘贴始终有效。如果您稍后设置某些内容，重新运行 `/regulatory-legal:cold-start-interview --check-integrations`。
 
-You don't need all of these. Core features work with free feeds (Federal Register API) and file access alone. Paid feeds add enrichment; manual paste-in always works. If you set something up later, re-run `/regulatory-legal:cold-start-interview --check-integrations`.
+#### 写入配置
 
-#### Write to the config
+在配置的第一部分之后立即编写 `## Who's using this`、`## Available integrations` 和 `## Outputs` 部分，根据模板。`## Outputs` 部分已存在——合并到其中，以便工作产品标题取决于角色。
 
-Write `## Who's using this`, `## Available integrations`, and `## Outputs` sections immediately after the first section of the config, per the template. The `## Outputs` section already exists — merge into it so the work-product header becomes conditional on role.
+#### 执业设置
 
-#### Practice setting
-
-> One more quick one before the watchlist:
+> 在监视列表之前还有一个快速问题：
 >
-> What's the setting? (This shapes the gap-response process and escalation entries — in-house asks about GC routing, solo maps "escalate" to "consult outside counsel," clinic routes to supervising attorney.)
+> 设置是什么？（这塑造差距响应流程和升级条目——内部询问 GC 路由，独立将"升级"映射到"咨询外部律师"，诊所路由到监督律师。）
 >
-> - **Solo / small firm (no hierarchy)** — I'll skip approval-chain questions and ask when you'd loop in a colleague or outside counsel instead.
-> - **Midsize / large firm** — I'll ask about your approval chain, billing thresholds, and who signs off above you.
-> - **In-house** — I'll ask about your escalation matrix, who the GC/CLO is, and when something goes to the business.
-> - **Government / legal aid / clinic** — I'll ask about supervision structure and any restrictions on your practice.
-> - **My practice doesn't fit any of these** — say so. I'll adapt.
+> - **独立 / 小律所（无层级）** — 我将跳过批准链问题并询问您何时循环同事或外部律师。
+> - **中型 / 大型律所** — 我将询问您的批准链、计费阈值以及谁在您上方签署。
+> - **内部** — 我将询问您的升级矩阵、GC/CLO 是谁以及何时事情转到业务。
+> - **政府 / 法律援助 / 诊所** — 我将询问您的监督结构以及对您执业的任何限制。
+> - **我的执业不符合其中任何一种** — 说出。我会适应。
 
-**Practices that don't fit the boxes.** If the user's practice doesn't match the options above (international arbitration, public international law, amicus-only, academic consulting, pro bono panel, tribal court, military justice, maritime, or anything else the standard categories assume away), offer: "It sounds like your practice doesn't fit my usual categories. Tell me about it in your own words — what you do, who for, what jurisdictions and forums, what the work looks like — and I'll build your profile from that instead of forcing you into boxes that don't fit. I'll skip or adapt the questions that don't apply." Then build the profile from the free-form description, flagging which template fields were filled, adapted, or left empty because they don't apply. A profile built from a forced fit is worse than a sparse profile built from what's actually true.
+**不符合框的执业。** 如果用户的执业不符合上述选项（国际仲裁、公法、仅 friend-of-the-court、学术咨询、公益小组、部落法院、军事司法、海事或标准类别假设的任何其他内容），提供："听起来您的执业不符合我的通常类别。用您自己的语言告诉我——您做什么、为谁、什么司法管辖区和论坛、工作是什么样的——我将从中构建您的档案，而不是强迫您进入不合适的框。我将跳过或调整不适用的问题。"然后从自由形式描述构建档案，标记哪些模板字段已填充、调整或留空因为它们不适用。从强制配合构建的档案比从实际真实内容构建的稀疏档案更差。
 
-Use this to shape the gap-response process and the escalation entries in the practice profile:
+使用它来塑造差距响应流程和执业档案中的升级条目：
+- **独立 / 小律所（无层级）：** 跳过升级链问题。重新构建：而不是"谁批准材料差距响应"，询问"何时您引入外部律师或同事进行第二意见"。执业档案的升级字段映射到*咨询*而不是*批准路由*。
+- **中型 / 大型律所：** 询问批准链、计费阈值以及谁在用户上方签署。
+- **内部：** 询问升级矩阵、GC/CLO 是谁以及何时事情转到业务。
+- **政府 / 法律援助 / 诊所：** 替换该设置中使用的监督链（监督律师、主任、监督委员会）。保持结构，重新标记角色。
 
-- **Solo / small firm (no hierarchy):** Skip escalation-chain questions. Reframe: instead of "who approves a material gap response," ask "when do you pull in outside counsel or a colleague for a second opinion." The practice profile's escalation field maps to *consult* not *route for approval*.
-- **Midsize / large firm:** Ask about the approval chain, billing thresholds, and who signs off above the user.
-- **In-house:** Ask about the escalation matrix, who the GC/CLO is, and when something goes to the business.
-- **Government / legal aid / clinic:** Substitute the supervision chain used in that setting (supervising attorney, director, oversight committee). Keep the structure, relabel the roles.
+然后用简单的英语提出升级问题：
 
-Then ask the escalation question in plain English:
+> "当审查发现需要更高级人员签署的内容——需要公司决策的策略差距、代表公司采取立场的评论信、重写执业的材料监管变更或超出您权限的决定——这会找谁？给我姓名或角色（GC、CCO、您的老板），或说'我自己决定。'这是插件如何知道何时说'您可以处理此内容'与'循环 [X]'。"
 
-> "When a review finds something that needs someone more senior to sign off — a policy gap that needs a company decision, a comment letter that takes a position on behalf of the company, a material regulatory change that rewrites practice, or a decision that's above your authority — who does that go to? Give me a name or a role (the GC, the CCO, your boss), or say 'I decide myself.' This is how the plugin knows when to say 'you can handle this' versus 'loop in [X].'"
+在执业档案中的 `## Who's using this` 下记录执业设置。
 
-Record the practice setting in the practice profile under `## Who's using this`.
+### 第 1 部分：监视列表（2-3 分钟）
 
-### Part 1: The watchlist (2-3 min)
+*（这填充 `/regulatory-legal:reg-feed-watcher` 和 `reg-change-monitor` 代理——订阅源仅从此列表上的监管机构拉取。不在列表上的任何内容对插件不可见，直到您通过 `/regulatory-legal:policy-diff` 粘贴它。）*
 
-*(This feeds `/regulatory-legal:reg-feed-watcher` and the `reg-change-monitor` agent — the feed only pulls from regulators on this list. Anything not on the list is invisible to the plugin until you paste it in via `/regulatory-legal:policy-diff`.)*
+**[您的公司] 做什么？** 这是最重要的上下文——SaaS 提供商的剧本、硬件分销商的剧本和服务公司的剧本完全不同。您不必键入：粘贴指向公司网站、"about"页面、维基百科文章或最新 10-K 的链接，我将提取我需要的内容。或者给我一句话版本：您卖什么、卖给谁以及如何（直销 / 渠道 / 市场 / 订阅）。这也告诉我要监视列表中甚至可能有哪些监管机构。
 
-**What does [your company] do?** This is the single most important context — a SaaS vendor's playbook, a hardware distributor's playbook, and a services firm's playbook are completely different. You don't have to type it out: paste a link to your company website, your "about" page, your Wikipedia article, or your latest 10-K, and I'll extract what I need. Or give me the one-sentence version: what you sell, to whom, and how (direct sales / channel / marketplace / subscription). This also tells me which regulators are even plausibly in your watchlist.
+> 在我问之前：您已经有监视列表、监管跟踪电子表格或我可以阅读的先前差距分析备忘录吗？粘贴内容、共享文件路径，或说'no'，我将一次问一个问题。如果您共享一个，我将提取监管机构和重要性标准，而不是让您再次列出它们。
 
-> Before I ask: do you already have a watchlist, a regulatory-tracking spreadsheet, or a prior gap-analysis memo I can read? Paste the contents, share a file path, or say 'no' and I'll ask the questions one at a time. If you share one, I'll extract the regulators and materiality criteria rather than making you list them again.
+如果没有：
+- 哪些监管机构？命名它们。（FTC、SEC、CFPB、州检察长、CPPA、欧盟 DPA、特定行业？）
+  *覆盖说明：此插件对美国联邦机构（Federal Register API）、SEC、FTC 和 CFPB 有结构化订阅源支持。州监管机构和欧盟 DPA 通过用户提供的 RSS URL 或手动输入支持——这些没有自动订阅源。欧盟 DPA 表之外的非美国监管机构需要手动输入或用户提供的订阅源。*
+- 为什么每一个？（"我们是金融科技，CFPB 很明显"与"FTC 因为同意令"）
+- 有哪些您*未*监视可能应该监视的？
 
-If not:
+**如果用户未上传监视列表或先前差距分析：** 在本节结束时，提供："想让我将其编写为独立的监视列表备忘录，您可以共享和维护吗？与我刚刚捕获的内容相同——您的监管机构、您为什么监视每个以及它们背后的订阅源——格式可以流通或交给新员工。"
 
-- Which regulators? Name them. (FTC, SEC, CFPB, state AGs, CPPA, EU DPAs, sector-specific?)
-  *Coverage note: this plugin has structured feed support for US federal agencies (Federal Register API), SEC, FTC, and CFPB. State regulators and EU DPAs are supported via user-provided RSS URLs or manual entry — there is no automatic feed for those. Non-US regulators outside the EU DPA table require manual entry or user-provided feeds.*
-- Why each one? ("We're a fintech, CFPB is obvious" vs. "FTC because of the consent decree")
-- Any you're *not* watching that maybe you should be?
+### 第 2 部分：重要性（关键问题）（3-4 分钟）
 
-**If the user didn't upload a watchlist or prior gap analysis:** at the end of this section, offer: "Want me to write this up as a standalone watchlist memo you can share and maintain? Same content I just captured — your regulators, why you watch each, and the feeds behind them — in a format you can circulate or hand to a new hire."
+*（这填充 `/regulatory-legal:reg-feed-watcher` 和 `reg-change-monitor` 代理——您的重要性阈值是过滤器，决定新开发是立即显示、在每周摘要中还是根本不显示。这里的错误校准 = 您停止阅读的嘈杂摘要。）*
 
-### Part 2: Materiality (the key question) (3-4 min)
+通过示例演练。对于每个，您想立即知道、在每周摘要中还是根本不知道？
+- 来自您监管机构的最终规则
+- 拟议规则（NPRM）——评论期开放
+- 针对您所在行业公司的执法行动
+- 针对不在您所在行业但针对您所做内容的公司执法行动
+- 委员 signaling 优先事项的演讲
+- 机构博客文章
+- 没有不承认错误的和解
+- 新指导（子监管、非约束力）
 
-*(This feeds `/regulatory-legal:reg-feed-watcher` and the `reg-change-monitor` agent — your materiality threshold is the filter that decides whether a new development shows up immediately, in the weekly digest, or not at all. Wrong calibration here = noisy digests you stop reading.)*
+这构建重要性阈值。不同公司校准非常不同——同意令下的公司关心演讲；机构从未听说过的公司可以忽略它们。
 
-Walk through examples. For each, would you want to know immediately, in a weekly digest, or not at all?
+**如果用户未上传重要性标准：** 在本节结束时，提供："想让我将此重要性标准编写为独立文档，您可以共享和维护吗？与我刚刚捕获的内容相同——立即 vs 摘要 vs 仅供参考，以及您的示例——以便团队阅读相同的校准。"
 
-- A final rule from one of your regulators
-- A proposed rule (NPRM) — comment period open
-- An enforcement action against a company in your sector
-- An enforcement action against a company *not* in your sector but for something you do
-- A speech by a commissioner signaling priorities
-- A blog post from the agency
-- A settlement with no admission of wrongdoing
-- New guidance (sub-regulatory, not binding)
+### 第 3 部分：策略库（2-3 分钟）
 
-This builds the materiality threshold. Different companies calibrate very differently — a company under a consent decree cares about speeches; a company the agency has never heard of can ignore them.
+*（这填充 `/regulatory-legal:policy-diff` 和 `/regulatory-legal:gaps`——每个传入的监管更改都与此库进行差异，以找出它触及哪些策略以及谁拥有它们。）*
 
-**If the user didn't upload materiality criteria:** at the end of this section, offer: "Want me to write this materiality rubric up as a standalone doc you can share and maintain? Same content I just captured — immediate vs. digest vs. FYI, with your examples — so the team reads the same calibration."
+> 在我问之前：您是否有现有的策略库索引——电子表格、目录、维基页面——将每个策略映射到其所有者？粘贴内容、共享文件路径，或说'no'，我将一次问一个问题。如果您共享一个，我将导入它而不是让您从内存重建。
 
-### Part 3: The policy library (2-3 min)
+如果没有：
 
-*(This feeds `/regulatory-legal:policy-diff` and `/regulatory-legal:gaps` — every incoming regulatory change is diffed against this library to find which policies it touches and who owns them.)*
+> 指向我的策略文件夹。我将索引那里的内容，以便当法规更改时，我可以告诉您它触及您的哪些策略。
 
-> Before I ask: do you have an existing policy library index — a spreadsheet, a table of contents, a wiki page — mapping each policy to its owner? Paste the contents, share a file path, or say 'no' and I'll ask the questions one at a time. If you share one, I'll import it rather than making you rebuild it from memory.
+- 策略在哪里？（Drive、SharePoint、Confluence、Notion）
+- 是否有命名约定或索引，还是只有文件？
+- 谁拥有哪个策略？（为了将差距路由到正确的人）
 
-If not:
+**如果用户未上传策略索引：** 在本节结束时，提供："想让我将其编写为独立的策略所有权索引，您可以共享和维护吗？与我刚刚捕获的内容相同，格式化以便新 GC 或合规员工在第一天获得格局。"
 
-> Point me at your policy folder. I'll index what's there so when a reg changes, I can tell you which of your policies it touches.
+### 第 4 部分：订阅源（2-3 分钟）
 
-- Where do policies live? (Drive, SharePoint, Confluence, Notion)
-- Is there a naming convention or index, or just files?
-- Who owns which policy? (For routing gaps to the right person)
+免费订阅源是基准——每个团队无论订阅如何都获得监控。
+付费订阅源为拥有它们的团队添加丰富层。
 
-**If the user didn't upload a policy index:** at the end of this section, offer: "Want me to write this up as a standalone policy-ownership index you can share and maintain? Same content I just captured, formatted so a new GC or compliance hire gets the landscape on day one."
+**步骤 1：为命名监视列表映射免费订阅源**
 
-### Part 4: Feed sources (2-3 min)
+Federal Register API (federalregister.gov/api) 是美国联邦机构的稳定主要来源——它按机构、文档类型、生效日期和评论截止日期返回结构化数据。将其用作监视列表中任何联邦监管机构的默认值。
 
-Free feeds are the baseline — every team gets monitoring regardless of subscriptions.
-Paid feeds add enrichment for teams that have them.
+对于每个其他命名监管机构（州检察长、CPPA（加州）、欧盟 DPA、特定行业监管机构、非美国监管机构），询问用户其首选订阅源 URL，或直接他们到机构网站查找当前订阅源。订阅源 URL 更改；不要依赖缓存列表。
 
-**Step 1: Map free feeds for the named watchlist**
+如果命名监管机构没有已知的免费订阅源：标记它，询问用户他们当前如何跟踪该监管机构，并记录手动输入回退（参见下方）。
 
-The Federal Register API (federalregister.gov/api) is the stable primary source for US federal agencies — it returns structured data by agency, document type, effective date, and comment deadlines. Use it as the default for any federal regulator in the watchlist.
+**步骤 2：询问付费订阅（附加，非必需）**
 
-For every other named regulator (state AGs, the CPPA (California), EU DPAs, sector-specific regulators, non-US regulators), ask the user for their preferred feed URL, or direct them to the agency's website to find the current feed. Feed URLs change; don't rely on a cached list.
+- 付费监管订阅源订阅？哪个提供商，配置了哪些警报？
+- CourtListener？哪些跟踪器？
 
-If a named regulator has no known free feed: flag it, ask the user how they currently track that regulator, and record the manual-entry fallback (see below).
+如果是：配置为免费订阅源之上的丰富层。如果否：免费订阅源足以继续。
 
-**Step 2: Ask about paid subscriptions (additive, not required)**
+**步骤 3：手动输入回退**
 
-- Paid regulatory feed subscription? Which provider, and which alerts are configured?
-- CourtListener? Which trackers?
+> 如果您在 Law360、新闻通讯或来自外部律师的任何内容中看到想要通过系统运行的内容——只需粘贴它，我将将其与您的策略进行差异并跟踪任何差距。为此工作，您不需要订阅源订阅。
 
-If yes: configure as enrichment layer on top of free feeds. If no: free feeds are sufficient to proceed.
+在配置中记录启用了手动输入。
 
-**Step 3: Manual entry fallback**
+**步骤 4：评论期跟踪** *（这填充 `/regulatory-legal:comments`——评论期日历记录截止日期并在评论窗口打开时 surfaced 决策。）*
 
-> If you ever see something in Law360, a newsletter, or from outside counsel that you want to run through the system — just paste it in and I'll diff it against your policies and track any gaps. You don't need a feed subscription for that to work.
+> 当我看到来自您监视列表的拟议规则（NPRM）时，我将自动记录评论截止日期。您想让我标记这些，以便您可以决定是否提交评论吗？
 
-Record in the config that manual entry is enabled.
+如果是：启用评论跟踪器。在配置中记录评论决策的默认所有者。
 
-**Step 4: Comment period tracking** *(This feeds `/regulatory-legal:comments` — the comment-period calendar logs deadlines and surfaces decisions when a comment window opens.)*
+## 编写执业档案
 
-> When I see a proposed rule (NPRM) from your watchlist, I'll automatically log the comment deadline. Do you want me to flag these so you can decide whether to file a comment?
-
-If yes: comment-tracker is enabled. Record the default owner for comment decisions in the config.
-
-## Writing the practice profile
-
-Per the template. Key: the materiality threshold table.
+根据模板。关键：重要性阈值表。
 
 ```markdown
 ## Materiality threshold
@@ -283,7 +284,7 @@ Per the template. Key: the materiality threshold table.
 - Settlements with no novel theory
 ```
 
-## Feed configuration block (add to the config)
+## 订阅源配置块（添加到配置）
 
 ```markdown
 ## Feed configuration
@@ -299,60 +300,60 @@ Per the template. Key: the materiality threshold table.
 | [Paid feed provider] | [yes/no] | [alert names] |
 | CourtListener | [yes/no] | [tracker names] |
 
-**Manual entry:** Enabled — paste any regulatory development to trigger diff + gap tracking.
+**Manual entry:** Enabled — 粘贴任何监管发展以触发差异 + 差距跟踪。
 
 **Comment tracking:** [Enabled / Disabled]
 **Default comment decision owner:** [name]
 **Check cadence:** [daily / weekly]
 ```
 
-## After writing
+## 编写后
 
-**Show what this plugin can do.** Before closing, offer:
+**显示此插件可以做什么。** 在关闭之前，提供：
 
-> **Want to see what I can help with?**
+> **想看看我能帮什么？**
 
-If yes, show this tailored list (not a generic template — these are the concrete things this plugin does best):
+如果是，显示此定制列表（不是通用模板——这些是此插件最擅长做的具体事情）：
 
-> **Here's what I'm good at in regulatory practice:**
+> **我在监管实践中擅长：**
 >
-> - **Check regulatory feeds for what's new** — e.g., "Filtered digest of rulemaking, guidance, and enforcement against your watchlist." Try: `/regulatory-legal:reg-feed-watcher`
-> - **Diff a regulatory change against your policy library** — e.g., "See exactly which internal policies a new rule impacts and what needs updating." Try: `/regulatory-legal:policy-diff`
-> - **Open gaps tracker** — e.g., "What's flagged and not yet closed across your portfolio, with owner and deadline." Try: `/regulatory-legal:gaps`
-> - **Track NPRM comment periods** — e.g., "What's open, comment deadlines, and a decision log on whether to file." Try: `/regulatory-legal:comments`
+> - **检查监管订阅源的新内容** — 例如，"针对您的监视列表过滤规则制定、指导和执法的摘要。"尝试：`/regulatory-legal:reg-feed-watcher`
+> - **对您的策略库进行监管更改差异** — 例如，"查看新规则确切影响哪些内部策略以及需要更新什么。"尝试：`/regulatory-legal:policy-diff`
+> - **开放差距跟踪器** — 例如，"整个组合中标记但尚未关闭的内容，包含所有者和截止日期。"尝试：`/regulatory-legal:gaps`
+> - **跟踪 NPRM 评论期** — 例如，"开放的内容、评论截止日期以及是否提交的决策日志。"尝试：`/regulatory-legal:comments`
 >
-> **My suggestion for your first one:** Run `/regulatory-legal:reg-feed-watcher` — it tells you immediately whether the feeds are calibrated to your materiality threshold. Or tell me what's on your plate and I'll pick.
+> **我对第一个的建议：** 运行 `/regulatory-legal:reg-feed-watcher` — 它立即告诉您订阅源是否针对您的重要性阈值校准。或告诉我您手头有什么，我会选择。
 
-This solves the cold-start problem (the supervisor doesn't know what to do first) and the value-prop problem (they don't know what the plugin can do) in one offer. Make the list specific. Skip this step if the supervisor already named a concrete first task during the interview.
+这在一个优惠中解决了冷启动问题（主管不知道首先做什么）和价值主张问题（他们不知道插件能做什么）。使列表具体。如果主管在面试期间已经命名了具体的第一个任务，则跳过此步骤。
 
 
-- "Here's the watchlist and the threshold. The threshold is the part to tune — too tight and you miss things, too loose and you stop reading the digests."
-- Offer to index the policy library now.
-- Offer to run a first feed check: "Want to see what's happened in the last 30 days as a test?"
-- **Before your first digest or gap check, connect a research tool.** Say: "Before your first digest or gap check: connect a research tool. Without one, I'll flag every citation as unverified — with one, I verify them against a current database. In Cowork: Settings → Connectors. In Claude Code: authorize when a skill prompts you."
+- "这是监视列表和阈值。阈值是要调整的部分——太紧您会错过事情，太松您会停止阅读摘要。"
+- 提议现在索引策略库。
+- 提议运行第一次订阅源检查："想看看过去 30 天发生了什么作为测试吗？"
+- **在您的第一个摘要或差距检查之前，连接研究工具。** 说："在您的第一个摘要或差距检查之前：连接研究工具。没有一个，我将每个引用标记为未验证——有一个，我根据当前数据库验证它们。在 Cowork 中：Settings → Connectors。在 Claude Code 中：当技能提示时授权。"
 
-<!-- COLLATERAL LINKS: when onboarding collateral exists, add here:
-     "Want a walkthrough first? [Watch the 3-minute intro](URL) or [read the getting-started guide](URL)." -->
+<!-- COLLATERAL LINKS: 当存在入职宣传材料时在此处添加：
+     "想先看演示吗？[观看 3 分钟介绍](URL) 或 [阅读入门指南](URL)。" -->
 
-- Close with the changeability note:
+- 用可更改性注释关闭：
 
-  > "Done. Your configuration is at `~/.claude/plugins/config/claude-for-legal/regulatory-legal/CLAUDE.md` — a plain-text file you can read and edit directly. Anything you answered can be changed:
+  > "完成。您的配置位于 `~/.claude/plugins/config/claude-for-legal/regulatory-legal/CLAUDE.md` —— 您可以直接阅读和编辑的纯文本文件。您可以更改任何回答的内容：
   >
-  > - Edit the file directly for a quick change
-  > - Run `/regulatory-legal:cold-start-interview --redo` for a full re-interview
-  > - Run `/regulatory-legal:cold-start-interview --check-integrations` to re-check what's connected
+  > - 直接编辑文件以快速更改
+  > - 运行 `/regulatory-legal:cold-start-interview --redo` 进行完整重新面试
+  > - 运行 `/regulatory-legal:cold-start-interview --check-integrations` 重新检查连接了什么
   >
-  > The settings people tune most often: the watchlist (which regulators you actually care about), the materiality threshold (what's immediate vs. digest vs. FYI), and the check cadence. Your configuration will improve as you use the plugin — when a digest feels off (too noisy, too quiet), the fix is usually here."
+  > 人们最常调整的设置：监视列表（您实际关心的监管机构）、重要性阈值（立即 vs 摘要 vs 仅供参考）和检查节奏。当您使用插件时，您的配置将改进——当摘要感觉不对（太嘈杂、太安静）时，修复通常在这里。"
 
-## Your practice profile learns
+## 您的执业档案学习
 
-After writing the practice profile, close with this note:
+编写执业档案后，用此注释关闭：
 
-> **Your practice profile learns.** It gets better as you use the plugins:
+> **您的执业档案学习。** 当您使用插件时，它会变得更好：
 >
-> - When a skill's output feels off, that's usually a position to tune. The output will tell you which one.
-> - The `reg-change-monitor` agent watches the regulatory feeds; when a change matches something in your policy library, it flags it for a gap-check.
-> - You can always say "update my playbook to prefer X" or "change my escalation threshold to Y" and the relevant skill will write the change.
-> - Run `/regulatory-legal:cold-start-interview --redo <section>` to re-interview one part, or edit the config file directly.
+> - 当技能的输出感觉不对时，通常是位置要调整。输出会告诉您哪一个。
+> - `reg-change-monitor` 代理监视监管订阅源；当更改匹配您的策略库中的某些内容时，它会标记它以进行差距检查。
+> - 您始终可以说"更新我的剧本以偏好 X"或"将我的升级阈值更改为 Y"，相关技能将写入更改。
+> - 运行 `/regulatory-legal:cold-start-interview --redo <section>` 重新面试一部分，或直接编辑配置文件。
 >
-> Ten minutes of setup gets you a working profile. A month of use gets you one that reads like you wrote it yourself.
+> 十分钟的设置让您获得可工作的档案。一个月的使用让您获得像您自己编写的档案。

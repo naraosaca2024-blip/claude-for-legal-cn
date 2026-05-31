@@ -1,23 +1,28 @@
 ---
 name: reg-gap-analysis
 description: >
-  Diff a new AI regulation or guidance against your current governance posture —
-  surfaces gaps, priorities, and a remediation plan with owners and deadlines.
-  Use when an AI regulation moves (or you learn about one you missed), or when
-  user says "new reg just dropped", "does [regulation] affect us", "gap analysis
-  for EU AI Act", "compliance check against [AI law or guidance]", or pastes
-  regulatory text.
+  将新的 AI 法规或指导与你当前的治理立场进行比对——浮现差距、优先级和带有负责人及截止日期的补救计划。
+  当 AI 法规发生变化（或你了解到遗漏的法规）时使用，或当用户说"new reg just dropped"、
+  "does [regulation] affect us"、"gap analysis for EU AI Act"、
+  "compliance check against [AI law or guidance]"，或粘贴监管文本时使用。
 argument-hint: "[regulation name, or paste regulatory text, or attach a document]"
 ---
 
+<!--
+This file is a Chinese translation of the original by Anthropic PBC.
+Original: https://github.com/anthropics/claude-for-legal
+Licensed under Apache License 2.0
+-->
+
+
 # /reg-gap-analysis
 
-1. Read `~/.claude/plugins/config/claude-for-legal/ai-governance-legal/CLAUDE.md`. Confirm regulatory footprint and use case registry are populated.
-2. Use the framework below.
-3. Scope: does this regulation apply? (Jurisdiction, threshold, builder/deployer, sector.) If not, one line and done.
-4. Extract requirements. Diff against current state in `~/.claude/plugins/config/claude-for-legal/ai-governance-legal/CLAUDE.md`.
-5. Prioritize gaps. Output: remediation plan with must-do / should-do / already compliant / accepted gaps.
-6. Save as dated markdown doc for the file.
+1. 读取 `~/.claude/plugins/config/claude-for-legal/ai-governance-legal/CLAUDE.md`。确认监管足迹和用例登记册已填充。
+2. 使用以下框架。
+3. 范围：此法规是否适用？（司法管辖区、阈值、构建者/部署者、行业。）如果不适用，一行说明完成。
+4. 提取要求。与 `~/.claude/plugins/config/claude-for-legal/ai-governance-legal/CLAUDE.md` 中的当前状态进行比较。
+5. 优先化差距。输出：带有 must-do/should-do/已合规/已接受差距的补救计划。
+6. 保存为文件的带日期 markdown 文档。
 
 ```
 /ai-governance-legal:reg-gap-analysis "EU AI Act high-risk provisions"
@@ -25,217 +30,191 @@ argument-hint: "[regulation name, or paste regulatory text, or attach a document
 
 ---
 
-## Purpose
+## 目的
 
-The EU AI Act goes live. Colorado passes an AI law. The CFPB issues model risk
-guidance. The FTC publishes an AI enforcement policy. Something moves — and now
-you need to know what, if anything, you have to change.
+EU AI Act 正式生效。科罗拉多州通过了 AI 法律。CFPB 发布了模型风险指导。FTC 发布了 AI 执法政策。有些东西移动了——现在你需要知道你必须更改什么（如果有的话）。
 
-This skill diffs the new requirement against your current AI governance posture
-(per `~/.claude/plugins/config/claude-for-legal/ai-governance-legal/CLAUDE.md` — use case registry, vendor positions, impact assessment practices,
-and AI policy commitments) and produces a gap list with a remediation plan.
+此 skill 将新要求与你当前的 AI 治理立场（根据 `~/.claude/plugins/config/claude-for-legal/ai-governance-legal/CLAUDE.md`——用例登记册、供应商立场、影响评估实践和 AI 政策承诺）进行比对，并生成带有补救计划的差距列表。
 
-The AI regulatory landscape is moving faster than any other area of law right now.
-When a regulation is genuinely ambiguous, say so. Don't paper over uncertainty —
-legal teams need to know when they're on solid ground versus when they're making a
-judgment call.
+AI 监管格局目前比任何其他法律领域都移动得更快。当法规真正模糊时，要说清楚。不要掩盖不确定性——法律团队需要知道他们何时站在坚实的基础上，何时在做判断。
 
-## Load current state
+## 加载当前状态
 
-Read `~/.claude/plugins/config/claude-for-legal/ai-governance-legal/CLAUDE.md`:
-- `## Regulatory footprint` — what already applies
-- `## Use case registry` — what AI you're actually running, and under what conditions
-- `## AI policy commitments` — what you've publicly or contractually committed to
-- `## Vendor AI governance` — what vendor positions are in place
-- `## Impact assessment house style` — what assessment practices exist
+读取 `~/.claude/plugins/config/claude-for-legal/ai-governance-legal/CLAUDE.md`：
+- `## Regulatory footprint` — 已经适用的内容
+- `## Use case registry` — 你实际运行的 AI，以及在什么条件下
+- `## AI policy commitments` — 你公开或合同上承诺了什么
+- `## Vendor AI governance` — 已就位的供应商立场
+- `## Impact assessment house style` — 已存在什么评估实践
 
-If the regulation clearly doesn't apply (wrong jurisdiction, below threshold,
-wrong sector, builder/deployer distinction eliminates you from scope), say so
-directly: "Doesn't apply. Here's why: [reason]. No action needed."
+如果法规明显不适用（错误的司法管辖区、低于阈值、错误的行业、构建者/部署者区分将你排除在外），直接说明："不适用。原因：[reason]。无需行动。"
 
 ---
 
-## Research first, then workflow
+## 先研究，再执行工作流
 
-Before running the gap analysis, research the currently operative AI regulatory regimes for the jurisdictions in the user's footprint. For each regime identify:
+在运行差距分析之前，研究用户足迹中各司法管辖区当前有效的 AI 监管制度。对于每个制度，识别：
 
-- **Scope** — who's covered (provider/builder vs. deployer vs. distributor vs. user; sectoral carve-outs).
-- **Applicability thresholds** — revenue, user count, headcount, compute, model category, affected-population size.
-- **Risk-tier definitions** — how the regime distinguishes tiers (prohibited / high-risk / limited-risk / minimal), what's in each.
-- **Substantive obligations** — transparency, documentation, human oversight, bias testing, registration, incident reporting, vendor flow-down.
-- **Enforcement mechanism** — which regulator, what penalties, any private right of action.
-- **Effective dates** — many AI laws phase in obligations over 2-4 years; note which obligations are live vs. upcoming.
+- **范围** — 谁被涵盖（提供者/构建者 vs. 部署者 vs. 分销商 vs. 用户；行业豁免）。
+- **适用阈值** — 收入、用户数量、人员数量、计算量、模型类别、受影响群体规模。
+- **风险层级定义** — 制度如何区分层级（禁止/高风险/有限风险/最低风险），每个层级中有什么。
+- **实质性义务** — 透明度、文档、人工监督、偏见测试、注册、事件报告、供应商传递。
+- **执法机制** — 哪个监管机构、什么处罚、是否有私人诉权。
+- **生效日期** — 许多 AI 法律分阶段推行 2-4 年的义务；注意哪些义务已生效与即将生效。
 
-Cite the regulatory text with pinpoint references. Flag provisions subject to ongoing interpretation, delegated acts, or pending rulemaking. The AI regulatory landscape changes quickly — verify currency before advising.
+引用监管文本并附精确参考。标记受持续解释、授权法案或待决规则制定约束的条款。AI 监管格局变化迅速——在建议之前验证时效性。
 
-Build the gap analysis from the researched requirements, not from hardcoded reference tables.
+从研究的要求构建差距分析，而不是从硬编码的参考表构建。
 
-## Workflow
+## 工作流
 
-### Step 1: Scope the regulation
+### 第 1 步：确定法规范围
 
-Before diffing, answer:
+在比较之前，回答：
 
-- **Does it apply?** Jurisdiction, threshold, sector carve-outs, builder vs. deployer distinction. Research the specific scoping rules in the regulation — don't assume.
+- **是否适用？** 司法管辖区、阈值、行业豁免、构建者 vs. 部署者区分。研究法规中的具体范围规则——不要假设。
 
-  *Builder/deployer matters a lot here.* Many AI regimes impose different obligations on the entity that develops/provides the AI system versus the entity that deploys/uses it. Research which role the company occupies under each regime's definitions. Scope first; don't gap-analyze a law that doesn't apply.
+  *构建者/部署者在这里非常重要。* 许多 AI 制度对开发/提供 AI 系统的实体与部署/使用它的实体施加不同的义务。研究公司在每个制度的定义下占据什么角色。先确定范围；不要对不适用的法律进行差距分析。
 
-- **When?** Effective date. Enforcement date (often different). Phase-in periods for specific provisions. Verify currency.
+- **何时？** 生效日期。执法日期（通常不同）。特定条款的分阶段期。验证时效性。
 
-- **What's actually new?** Some "new" AI laws largely restate existing legal principles (consumer protection, anti-discrimination, sectoral risk management) applied to AI. Others are genuinely new obligations. Identify the delta from what you already do, not the full text of the law.
+- **实际上有什么新东西？** 一些"新的" AI 法律主要重述了应用于 AI 的现有法律原则（消费者保护、反歧视、行业风险管理）。其他则是真正的新义务。识别与你已经做的事情的差异，而不是法律的全文。
 
-### Step 2: Extract requirements
+### 第 2 步：提取要求
 
-Read the regulation, guidance, or summary. List every substantive requirement:
+阅读法规、指导或摘要。列出每个实质性要求：
 
-| # | Requirement | Citation | Category |
+| # | 要求 | 引用 | 类别 |
 |---|---|---|---|
-| 1 | [requirement] | [section] | [see categories below] |
+| 1 | [要求] | [章节] | [见下面的类别] |
 
-**Categories:**
-- **Transparency** — disclosures to users, employees, or affected parties about AI use
-- **Impact assessment** — required documentation before deployment
-- **Human oversight** — mandatory human review, override, or appeals mechanisms
-- **Accuracy / testing** — bias testing, accuracy documentation, validation
-- **Governance** — registration, record-keeping, designated responsible persons
-- **Vendor flow-down** — obligations to pass down to AI vendors or pass up from AI vendors
-- **Prohibited practices** — outright bans on specific AI capabilities or uses
-- **Rights** — what affected parties can request or invoke
+**类别：**
+- **透明度** — 向用户、员工或受影响方关于 AI 使用的披露
+- **影响评估** — 部署前的必要文档
+- **人工监督** — 强制性的人工审查、覆盖或上诉机制
+- **准确性/测试** — 偏见测试、准确性文档、验证
+- **治理** — 注册、记录保存、指定的责任人
+- **供应商传递** — 向 AI 供应商传递的义务或来自 AI 供应商的传递
+- **禁止实践** — 对特定 AI 能力或用途的直接禁止
+- **权利** — 受影响方可以请求或援用的内容
 
-### Step 3: Diff against current state
+### 第 3 步：与当前状态比较
 
-For each requirement:
+对于每个要求：
 
 ```markdown
-### [Requirement #N]: [short name]
+### [要求 #N]：[简短名称]
 
-**Regulation says:** [requirement, quoted or paraphrased]
+**法规说：** [要求，引用或转述]
 
-**We currently:** [what `~/.claude/plugins/config/claude-for-legal/ai-governance-legal/CLAUDE.md` / AI policy / use case registry / assessment
-practice shows]
+**我们目前：** [`~/.claude/plugins/config/claude-for-legal/ai-governance-legal/CLAUDE.md` / AI 政策 / 用例登记册 / 评估实践显示什么]
 
-**Gap:** [None | Partial | Full]
+**差距：** [无 | 部分 | 全部]
 
-**If partial/full — what's missing:** [specific — not "more documentation" but
-"no human review step is documented for [use case category]"]
+**如果部分/全部——缺少什么：** [具体的——不是"更多文档"，而是
+"[用例类别] 没有记录人工审查步骤"]
 
-**Effort to close:** [Policy update only | Process change | Product/system change |
-New assessment required | Vendor renegotiation | Registration / filing]
+**关闭所需工作：** [仅更新政策 | 流程变更 | 产品/系统变更 |
+需要新评估 | 供应商重新谈判 | 注册/申报]
 
-**Risk of non-compliance:** [penalty range, enforcement likelihood, reputational]
+**不合规风险：** [处罚范围、执法可能性、声誉]
 ```
 
-### Step 4: Prioritize
+### 第 4 步：优先化
 
-Not every gap is equal. Sort by:
+不是所有差距都平等。按以下排序：
 
-1. **Hard deadline with teeth** — effective date + active enforcement + real penalties
-2. **Prohibited practice** — if the gap is a prohibition, not a process requirement,
-   that's the first priority regardless of enforcement date
-3. **Effort-to-impact ratio** — updating policy language is cheap; adding human
-   oversight to a deployed system is not
-4. **Use case overlap** — gaps that affect multiple use cases in the registry are
-   higher priority than single-use-case gaps
+1. **有力的硬性截止日期** — 生效日期 + 积极执法 + 真实处罚
+2. **禁止实践** — 如果差距是禁止，而不是流程要求，无论执法日期如何，这是首要优先级
+3. **工作量与影响比** — 更新政策语言很便宜；向已部署系统添加人工监督则不是
+4. **用例重叠** — 影响登记册中多个用例的差距比单一用例差距优先级更高
 
-### Step 5: Remediation plan
+### 第 5 步：补救计划
 
 ```markdown
 [WORK-PRODUCT HEADER — per plugin config ## Outputs — differs by role; see `## Who's using this`]
 
-## Remediation Plan: [Regulation name]
+## 补救计划：[法规名称]
 
-**Effective date:** [date]
-**Enforcement begins:** [date if different]
-**Applies to us as:** [Builder / Deployer / Both]
+**生效日期：** [date]
+**执法开始：** [如果不同，则为 date]
+**对我们适用为：** [构建者/部署者/两者]
 
-### Must-do before enforcement
+### 执法前必须完成
 
-| Gap | Fix | Owner | Due | Status |
+| 差距 | 修复 | 负责人 | 截止日期 | 状态 |
 |---|---|---|---|---|
-| [gap] | [specific fix] | [name] | [date] | [ ] |
+| [差距] | [具体修复] | [姓名] | [date] | [ ] |
 
-### Should-do (important but not blocking enforcement)
+### 应该做的（重要但不阻塞执法）
 
-[same table]
+[相同表格]
 
-### Already compliant
+### 已合规
 
-[list of requirements where gap = None — useful context for the legal/executive
-summary of where you actually stand]
+[要求为 None 的列表——对于你实际站在哪里的法律/执行摘要有用]
 
-### Accepted gaps (risk accepted, not fixing)
+### 已接受的差距（已接受风险，不修复）
 
-[if any — with documented rationale and who accepted the risk. Documenting accepted
-risk is better governance than leaving it unaddressed silently.]
+[如果有——附有记录的理由和谁接受了风险。记录已接受的风险比静默地不解决它更好的治理。]
 ```
 
 ---
 
-## Research the regulation before building the gap analysis
+## 构建差距分析前先研究法规
 
-Do not rely on hardcoded reference tables for specific regimes. For each regulation in scope, research the currently operative text:
+不要依靠硬编码的特定制度参考表。对于每个范围内的法规，研究当前有效的文本：
 
-- Which obligations apply to the company's role (provider/builder, deployer, importer, distributor)?
-- Which tier does the system fall into under the regime's own classification (prohibited / high-risk / limited-risk / minimal, or the regime's equivalent)?
-- What are the live vs. phase-in dates for each obligation?
-- Are there delegated acts, implementing acts, or regulator guidance that affect interpretation?
-- For builder contexts: are there model-level obligations (technical documentation, training data transparency, copyright compliance, systemic-risk testing)?
-- For prohibited-practice categories: check any use case in the registry that might touch them and flag as critical regardless of enforcement date.
+- 哪些义务适用于公司的角色（提供者/构建者、部署者、进口商、分销商）？
+- 根据制度自己的分类，系统落入哪个层级（禁止/高风险/有限风险/最低风险，或制度的等效项）？
+- 每个义务的生效 vs. 分阶段日期是什么？
+- 是否有影响解释的授权法案、实施法案或监管机构指导？
+- 对于构建者背景：是否有模型级义务（技术文档、训练数据透明度、版权合规、系统性风险测试）？
+- 对于禁止实践类别：检查登记册中任何可能触及这些的用例，无论执法日期如何都标记为关键。
 
-Cite primary sources with pinpoint references. Flag ambiguity for attorney judgment.
+引用具有精确参考的主要来源。标记歧义供律师判断。
 
-> **No silent supplement.** If a research query to the configured legal research tool (Westlaw, EUR-Lex, regulator sites, or firm platform) returns few or no results for a regime's text, delegated act, or guidance, report what was found and stop. Do NOT fill the gap from web search or model knowledge without asking. Say: "The search returned [N] results from [tool]. Coverage appears thin for [regime / topic]. Options: (1) broaden the search query, (2) try a different research tool, (3) search the web — results will be tagged `[web search — verify]` and should be checked against the issuing authority before relying, or (4) flag as unverified and stop. Which would you like?" A lawyer decides whether to accept lower-confidence sources.
+> **无静默补充。** 如果对配置的法律研究工具（Westlaw、EUR-Lex、监管机构网站或律所平台）的研究查询对于制度的文本、授权法案或指导返回很少或没有结果，报告找到的内容并停止。不要未经询问从网络搜索或模型知识填充差距。说："搜索从 [tool] 返回了 [N] 个结果。[制度/主题] 的覆盖范围似乎很薄。选项：(1) 扩大搜索查询，(2) 尝试不同的研究工具，(3) 搜索网络——结果将标记为 `[web search — verify]`，在依赖前应根据发布机构检查，或 (4) 标记为未验证并停止。你想要哪个？"律师决定是否接受较低置信度的来源。
 >
-> **Source attribution tiering.** Tag every citation in the gap analysis with its source. For model-knowledge citations, use one of three tiers rather than a single blanket "verify" tag:
+> **来源归因分层。** 用其来源标记差距分析中的每个引用。对于模型知识引用，使用三个层级之一，而不是单一的笼统"verify"标记：
 >
-> - `[settled]` — stable, well-known statutory and regulatory references unlikely to have changed (e.g., GDPR Art. 22, the existence of Regulation (EU) 2024/1689 as the EU AI Act, Colorado AI Act as C.R.S. § 6-1-1701 et seq.). Still verify before filing, but lower priority.
-> - `[verify]` — model-knowledge citations that are real but should be verified: specific delegated / implementing acts, regulator guidance, standards, enforcement actions, case holdings, thresholds, effective dates, phase-in provisions, harmonized-standards references.
-> - `[verify-pinpoint]` — pinpoint citations (specific article numbers, annex references, subsection letters, paragraph numbers, standard-clause references) carry the highest fabrication risk and should ALWAYS be verified against a primary source. EU AI Act article numbers in particular shifted during consolidation; every pinpoint cite to the Act should be verified against the Official Journal text.
+> - `[settled]` — 稳定的、众所周知的法定和监管参考，不太可能改变（例如，GDPR Art. 22，Regulation (EU) 2024/1689 作为 EU AI Act 的存在，Colorado AI Act 作为 C.R.S. § 6-1-1701 et seq.）。在申报之前仍需验证，但优先级较低。
+> - `[verify]` — 真实但应验证的模型知识引用：具体授权/实施法案、监管机构指导、标准、执法行动、案例裁决、阈值、生效日期、分阶段条款、协调标准参考。
+> - `[verify-pinpoint]` — 精确引用（具体条款号、附录参考、小节字母、段落号、标准条款参考）具有最高的编造风险，应始终根据主要来源进行验证。EU AI Act 条款号在整合期间尤其发生了变化；每个对该法案的精确引用都应根据官方期刊文本进行验证。
 >
-> Tool-retrieved citations keep their source tag (`[Westlaw]`, `[EUR-Lex]`, `[regulator site]`, or the MCP tool name); web-search citations remain `[web search — verify]`; user-supplied citations remain `[user provided]`. The tiering surfaces the real verification work — a reader who verifies everything verifies nothing. Never strip or collapse the tags.
+> 工具检索的引用保留其来源标记（`[Westlaw]`、`[EUR-Lex]`、`[regulator site]` 或 MCP 工具名称）；网络搜索引用保留 `[web search — verify]`；用户提供的引用保留 `[user provided]`。分层显示真正的验证工作——验证一切的读者什么都没有验证。永远不要剥离或折叠标记。
 >
-> **For non-lawyer users, uncertain dates, thresholds, and phase-in provisions go in a confirm-list, not inline.** A `[verify]` tag on "effective February 1, 2026" reads as "effective February 1, 2026" to a non-lawyer who doesn't know what the tag means. Read `## Who's using this` in `~/.claude/plugins/config/claude-for-legal/ai-governance-legal/CLAUDE.md`. If Role is **Non-lawyer** and a date, deadline, phase-in, threshold, or effective-date assertion is uncertain (would carry `[verify]` or `[verify-pinpoint]` if inline), replace the inline assertion with "effective date: confirm with counsel" (or "threshold: confirm with counsel") and collect all uncertain items in a final gap-analysis section titled: "**Things I'm not certain about — ask your attorney to confirm before relying on this:**" with each item listed (what I said, what's uncertain, why it matters to the gap). Lawyer-role users keep the inline `[verify]` treatment.
+> **对于非律师用户，不确定的日期、阈值和分阶段条款进入确认列表，而非内联。** 对"effective February 1, 2026"的 `[verify]` 标记对不知道该标记含义的非律师读起来就是"effective February 1, 2026"。读取 `~/.claude/plugins/config/claude-for-legal/ai-governance-legal/CLAUDE.md` 中的 `## Who's using this`。如果角色是**非律师**，且日期、截止日期、分阶段、阈值或生效日期断言不确定（如果内联会携带 `[verify]` 或 `[verify-pinpoint]`），用"生效日期：与律师确认"（或"阈值：与律师确认"）替换内联断言，并在最终差距分析部分标题为"**我不确定的事情——在依赖之前请你的律师确认：**"中收集所有不确定项目，每项列出内容（我说了什么、什么不确定、为什么对差距分析重要）。律师角色用户保留内联 `[verify]` 处理。
 
 ---
 
-## Integration with other skills
+## 与其他 skill 的集成
 
-**From aia-generation:** AIAs flag regulatory obligations for specific
-systems → those feed here when a regulation is new or coverage is uncertain.
+**来自 aia-generation：** AIA 标记特定系统的监管义务 → 当法规是新的或覆盖范围不确定时，这些会提交到这里。
 
-**From use case triage:** Newly triaged use cases that hit regulatory triggers →
-gap analysis runs on the specific requirement for that use case type.
+**来自用例分类：** 触发监管触发器的新分类用例 → 差距分析针对该用例类型的特定要求运行。
 
-**To regulatory-legal plugin, if the plugin is installed:** This skill is the manual
-version. The monitor plugin watches feeds and triggers this analysis automatically
-when something relevant changes.
+**到监管-法律 plugin（如果安装了该 plugin）：** 此 skill 是手动版本。监控 plugin 监控推送并在相关内容变化时自动触发此分析。
 
 ---
 
-## Output
+## 输出
 
-Save as a dated markdown doc. The remediation plan table becomes a tracker — update
-status as items close.
+保存为带日期的 markdown 文档。补救计划表成为一个跟踪器——随着项目关闭更新状态。
 
-If the gap analysis concludes "no gaps, we're compliant," still write the doc. It's
-useful evidence that you looked, and useful baseline when the regulation is amended.
+如果差距分析得出"没有差距，我们合规"，仍然写文档。它是你查看过的有用证据，也是法规修订时的有用基准。
 
-**Cite check before relying on this.** Citations here were generated by an AI model and have not been verified against primary sources. Before relying on any citation — statute, regulation, delegated act, guidance, or case — run a verification pass against a legal research tool (Westlaw, CourtListener, or your firm's platform) for accuracy, currency, and subsequent history. Fabricated or misquoted citations in filed materials have resulted in sanctions. Source tags on each citation (e.g., `[EUR-Lex]`, `[web search — verify]`) show where it came from; `verify` tags carry higher fabrication risk and should be checked first.
+**在依赖此内容之前检查引用。** 这里的引用由 AI 模型生成，尚未根据主要来源验证。在依赖任何引用——法规、条例、授权法案、指导或案例——之前，根据法律研究工具（Westlaw、CourtListener 或你律所的平台）运行验证，检查准确性、时效性和后续历史。在提交材料中出现虚假或引用错误的引用已导致制裁。每个引用上的来源标记（例如，`[EUR-Lex]`、`[web search — verify]`）显示它来自哪里；`verify` 标记携带更高的编造风险，应首先检查。
 
 ---
 
-## Close with the next-steps decision tree
+## 以下一步决策树结束
 
-End with the next-steps decision tree per CLAUDE.md `## Outputs`. Customize the options to what this skill just produced — the five default branches (draft the X, escalate, get more facts, watch and wait, something else) are a starting point, not a lock-in. The tree is the output; the lawyer picks.
+根据 CLAUDE.md `## Outputs` 的下一步决策树结束。根据此 skill 刚刚生成的内容自定义选项——五个默认分支（起草 X、升级、获取更多事实、观察等待、其他）是起点，而不是锁定。树就是输出；律师选择。
 
-## What this skill does not do
+## 此 skill 不做什么
 
-- It doesn't interpret ambiguous regulatory language authoritatively. The EU AI Act
-  in particular has significant interpretive questions that aren't resolved yet.
-  When the reg is genuinely ambiguous: say so, state the conservative read, and
-  flag for outside counsel if the issue is material.
-- It doesn't track regulatory changes proactively. It runs when you point it at a
-  change. For proactive monitoring, see the `regulatory-legal` plugin, if the plugin is installed.
-- It doesn't implement fixes. It plans them.
-- It doesn't substitute for sector-specific legal counsel where specialized knowledge
-  is required (healthcare AI, financial services model risk management, etc.).
+- 它不权威地解释模糊的监管语言。EU AI Act 尤其存在尚未解决的重大解释性问题。当法规真正模糊时：说清楚，说明保守解读，如果问题重要则标记给外部律师。
+- 它不主动跟踪监管变化。它在你指向某个变化时运行。对于主动监控，如果安装了该 plugin，参见 `regulatory-legal` plugin。
+- 它不实施修复。它计划修复。
+- 它不替代需要专业知识的行业特定法律顾问（医疗 AI、金融服务模型风险管理等）。

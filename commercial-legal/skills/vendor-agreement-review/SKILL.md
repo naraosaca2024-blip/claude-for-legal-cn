@@ -1,343 +1,341 @@
 ---
 name: vendor-agreement-review
 description: >
-  Reference: review of an inbound vendor agreement against the team playbook in
-  `~/.claude/plugins/config/claude-for-legal/commercial-legal/CLAUDE.md`. Flags deviations, assesses risk, generates
-  specific redline language, and routes to the right approver. Loaded by
-  /commercial-legal:review when a vendor MSA, services agreement, or similar is detected.
+  参考：根据 `~/.claude/plugins/config/claude-for-legal/commercial-legal/CLAUDE.md` 中的团队剧本审查传入的供应商协议。标记偏差，评估风险，生成具体的红线语言，并路由给正确的审批人。当检测到供应商 MSA、服务协议或类似协议时，由 `/commercial-legal:review` 加载。
 user-invocable: false
 ---
 
-# Vendor Agreement Review
+<!--
+This file is a Chinese translation of the original by Anthropic PBC.
+Original: https://github.com/anthropics/claude-for-legal
+Licensed under Apache License 2.0
+-->
 
-## Matter context
 
-**Matter context.** Check `## Matter workspaces` in the practice-level CLAUDE.md. If `Enabled` is `✗` (the default for in-house users), skip the rest of this paragraph — skills use practice-level context and the matter machinery is invisible. If enabled and there is no active matter, ask: "Which matter is this for? Run `/commercial-legal:matter-workspace switch <slug>` or say `practice-level`." Load the active matter's `matter.md` for matter-specific context and overrides. Write outputs to the matter folder at `~/.claude/plugins/config/claude-for-legal/commercial-legal/matters/<matter-slug>/`. Never read another matter's files unless `Cross-matter context` is `on`.
+# 供应商协议审查
+
+## 事项上下文
+
+**事项上下文。** 检查执业级 CLAUDE.md 中的 `## Matter workspaces`。如果 `Enabled` 是 ✗（内部用户的默认设置），跳过此段的其余部分——skills 使用执业级上下文，事项机制不可见。如果已启用且没有活跃事项，询问："Which matter is this for? Run `/commercial-legal:matter-workspace switch <slug>` or say `practice-level`." 加载活跃事项的 `matter.md` 以获取事项特定上下文和覆盖。将输出写入事项文件夹 `~/.claude/plugins/config/claude-for-legal/commercial-legal/matters/<matter-slug>/`。除非 `Cross-matter context` 是 on，否则永远不要阅读另一个事项的文件。
 
 ---
 
-## Destination check
+## 目的地检查
 
-Before producing output, check where it's going. If the user has named a destination (a channel, a distribution list, a counterparty, "everyone"), ask whether it's inside the privilege circle. Public channels, company-wide lists, counterparty/opposing counsel, vendors, and clients (for work product) waive the protection. When the destination looks outside the circle, flag it and offer (a) the privileged version for legal only, (b) a sanitized version for the broader channel, or (c) both — don't silently apply a privileged header and then help paste it somewhere the header won't protect it. See the canonical `## Shared guardrails → Destination check` in this plugin's CLAUDE.md.
+在生成输出之前，检查它要去哪里。如果用户命名了目的地（频道、分发列表、对手方、"每个人"），询问这是否在特权圈内。公共频道、公司范围列表、对手方/对方律师、供应商、客户（对于工作产品）会放弃保护。当目的地看起来在圈外时，标记它并提供 (a) 仅用于法律的特权版本，(b) 用于更广泛频道的净化版本，或 (c) 两者——不要默默地应用特权标题，然后帮助将其粘贴到标题不保护它的地方。请参阅此 plugin 的 CLAUDE.md 中的规范 `## Shared guardrails → Destination check`。
 
-## Purpose
+## 目的
 
-Read a vendor agreement against the playbook this team actually uses (in `~/.claude/plugins/config/claude-for-legal/commercial-legal/CLAUDE.md`), find every term that deviates, and tell the lawyer what to do about each one — with specific redline language, not vague "consider revising."
+根据该团队实际使用的剧本（在 `~/.claude/plugins/config/claude-for-legal/commercial-legal/CLAUDE.md` 中）阅读供应商协议，找到每个偏离的条款，并告诉律师对每个条款做什么——使用具体的红线语言，而不是模糊的"考虑修改"。
 
-The output is a review memo the lawyer can act on in one pass. Every issue has a severity, a business-impact explanation, a proposed fix, and an escalation call if one is needed.
+输出是律师可以一次通过的审查备忘录。每个问题都有严重性、业务影响解释、提议的修复，以及如果需要的升级调用。
 
-## Precondition: load the playbook
+## 前提条件：加载剧本
 
-**Before reading the contract, read `~/.claude/plugins/config/claude-for-legal/commercial-legal/CLAUDE.md`.** If it's missing or still has placeholders, surface this bounce:
+**在阅读合同之前，阅读 `~/.claude/plugins/config/claude-for-legal/commercial-legal/CLAUDE.md`。** 如果它缺失或仍有占位符，显示此反弹：
 
-> I notice you haven't configured your practice profile yet — that's how I tailor playbook positions, escalation, and house style to your practice.
+> 我注意到你尚未配置你的执业档案——这是我根据你的执业定制剧本立场、升级和内部风格的方式。
 >
-> **Two choices:**
-> - Run `/commercial-legal:cold-start-interview` (2 minutes) to configure your profile, then I'll review tailored to YOUR playbook.
-> - Say **"provisional"** and I'll review against generic defaults — US jurisdiction, middle risk appetite, lawyer role, no playbook (flag all common vendor-contract risks from first principles) — and tag every output `[PROVISIONAL — configure your profile for tailored output]` so you can see what I do before committing.
+> **两个选择：**
+> - 运行 `/commercial-legal:cold-start-interview`（2 分钟）来配置你的档案，然后我会根据你的剧本进行定制审查。
+> - 说 **"provisional"** 并且我会根据通用默认值进行审查——美国司法管辖区、中等风险偏好、律师角色、无剧本（从第一原则标记所有常见的供应商合同风险）——并标记每个输出 `[PROVISIONAL — configure your profile for tailored output]`，以便你可以在提交之前看到我做了什么。
 
-### Provisional mode
+### 临时模式
 
-If the user says "provisional," run the review normally using these generic defaults: middle risk appetite, lawyer role, US jurisdiction, no playbook (flag the common vendor-side risks from first principles — unlimited liability, no data-breach carveout, uncapped indemnity, auto-renewal without notice, etc. — rather than matching to configured positions). Tag the reviewer note and every finding block with `[PROVISIONAL]`. At the end of the output, append:
+如果用户说"provisional"，使用这些通用默认值正常运行审查：中等风险偏好、律师角色、美国司法管辖区、无剧本（从第一原则标记常见的供应商风险——无限责任、无数据违约例外、无上限赔偿、无通知的自动续约等）——而不是匹配配置的立场。用 `[PROVISIONAL]` 标记审阅者注释和每个发现块。在输出末尾，附加：
 
-> "That was a generic run against default assumptions. Run `/commercial-legal:cold-start-interview` to get output calibrated to YOUR practice — your playbook, your jurisdiction, your risk appetite. 2 minutes."
+> "这是针对默认假设的通用运行。运行 `/commercial-legal:cold-start-interview` 以获得针对你的执业校准的输出——你的剧本、你的司法管辖区、你的风险偏好。2 分钟。"
 
-**Which side?** Before applying the playbook, determine which side the company is on for this contract. Usually obvious: if the counterparty is a vendor/supplier providing goods or services, you're purchasing-side. If the counterparty is a customer buying your product/service, you're sales-side. If it's not obvious (a reseller agreement, a partnership, a revenue share), ask: "Which side is [company] on for this agreement — vendor or customer?" Read the matching playbook section (`### Sales-side playbook` or `### Purchasing-side playbook`) from the config. Note which side in the output so the reviewer knows which playbook was applied. If the matching side is `[Not configured]`, stop and tell the user to run `/commercial-legal:cold-start-interview --side <side>` before this review can proceed.
+**哪一方？** 在应用剧本之前，确定公司在此合同的哪一方。通常很明显：如果对手方是提供商品或服务的供应商/供应商，你是采购方。如果对手方是购买你产品/服务的客户，你是销售方。如果不明显（转售协议、合作伙伴关系、收入分成），询问："Which side is [company] on for this agreement — vendor or customer?" 从配置中阅读匹配的剧本部分（`### Sales-side playbook` 或 `### Purchasing-side playbook`）。在输出中注明哪一方，以便审阅者知道应用了哪个剧本。如果匹配方是 `[Not configured]`，停止并告诉用户在此审查可以继续之前运行 `/commercial-legal:cold-start-interview --side <side>`。
 
-This skill is typically used for purchasing-side contracts (vendors supplying you), but the side check still applies — a "vendor agreement" could be your own template sent to a vendor as part of a reseller arrangement (sales-side).
+此 skill 通常用于采购方合同（向你供应的供应商），但方检查仍然适用——"供应商协议"可能是你作为转售安排的一部分发送给供应商的自己的模板（销售方）。
 
-The playbook in `~/.claude/plugins/config/claude-for-legal/commercial-legal/CLAUDE.md` is the source of truth. It tells you:
-- What this team's standard positions are (not market standard — *their* standard)
-- What fallbacks they've accepted before
-- What they never accept
-- Who approves what
-- The one deal-breaker to check first
+`~/.claude/plugins/config/claude-for-legal/commercial-legal/CLAUDE.md` 中的剧本是真实来源。它告诉你：
+- 该团队的标准立场是什么（不是市场标准——*他们的*标准）
+- 他们之前接受过哪些备用方案
+- 他们永远不接受什么
+- 谁审批什么
+- 首先要检查的那个交易破坏者
 
-If the contract has the deal-breaker, flag it at the top of the memo and stop the detailed review. There's no point spending 30 minutes on liability caps if the agreement gives the vendor rights to use customer data for training.
+如果合同有交易破坏者，在备忘录顶部标记它并停止详细审查。如果协议授予供应商使用客户数据进行训练的权利，花 30 分钟在责任限额上是没有意义的。
 
-## Workflow
+## 工作流
 
-### Step 1: Orient
+### 步骤 1：定位
 
-Read the whole agreement once, fast. Answer:
+快速阅读整个协议。回答：
 
-| Question | Answer |
+| 问题 | 答案 |
 |---|---|
-| What kind of agreement is this? | MSA / SaaS subscription / Professional services / License / Other |
-| Who are we? | Customer / Vendor (this plugin assumes customer — flag if not) |
-| Counterparty | Name, and are they a BigCo (won't negotiate) or a startup (will)? |
-| Dollar value | Annual / total contract value if stated |
-| Term | Length, renewal mechanics |
-| Is there a DPA? | Attached / referenced by URL / missing |
-| Is there an order form? | Separate doc or integrated |
+| 这是什么类型的协议？ | MSA / SaaS 订阅 / 专业服务 / 许可证 / 其他 |
+| 我们是谁？ | 客户 / 供应商（此 plugin 假设客户——如果不是则标记） |
+| 对手方 | 名称，以及他们是大公司（不会谈判）还是初创公司（会） |
+| 美元价值 | 每年 / 合同总价值（如果说明） |
+| 期限 | 长度，续约机制 |
+| 有 DPA 吗？ | 已附加 / 通过 URL 引用 / 缺失 |
+| 有订单表单吗？ | 单独的文档或集成的 |
 
-**Dollar-value handling.** If the main agreement does not state a dollar value (the MSA sets terms but the Order Form carries price, which is typical), **stop and ask** before running escalation math or applying dollar thresholds:
+**美元价值处理。** 如果主协议未说明美元价值（MSA 设定条款，但订单表单包含价格，这很典型），**停止并询问**，然后再运行升级计算或应用美元阈值：
 
-> The MSA itself doesn't state an annual contract value. The Order Form carries the price. Your escalation threshold is $[X from the matrix]. Before I route this, I need the ACV. Options:
-> 1. Paste the Order Form value (preferred — I'll use it for routing and the memo).
-> 2. Tell me if this is above or below $[threshold] and I'll route accordingly; the memo will flag that the routing assumed [above/below threshold] without an ACV in hand.
-> 3. Route conservatively to the higher approver regardless — safer for a review you haven't priced.
+> MSA 本身未说明年度合同价值。订单表单包含价格。你的升级阈值是 $[来自矩阵的 X]。在我路由这个之前，我需要 ACV。选项：
+> 1. 粘贴订单表单值（首选——我会将其用于路由和备忘录）。
+> 2. 告诉我这是高于还是低于 $[阈值] 并且我会相应地路由；备忘录会标记路由假设 [高于/低于阈值] 而没有实际的 ACV。
+> 3. 无论如何保守地路由给更高级别的审批人——对于你尚未定价的审查更安全。
 
-Do NOT silently assume a value and then use the assumed value to drive routing. The assumption propagates into the approval call, which is a place the review shouldn't be guessing.
+不要默默地假设一个价值，然后使用假设的价值来驱动路由。假设会传播到审批调用中，这是审查不应该猜测的地方。
 
-**DPA-by-reference handling.** If the main agreement incorporates a DPA "available at [URL]" or "as set forth at [URL]" or similar by reference, the DPA is part of the contract but is not in front of you. Note it explicitly in the Orient table and in the review memo:
+**DPA 引用处理。** 如果主协议通过 URL 引用包含 DPA（"在 [URL] 可用"或"在 [URL] 中规定"或类似内容），则 DPA 是合同的一部分，但不在你面前。在定位表和审查备忘录中明确注明：
 
-> This agreement incorporates a DPA by URL reference at `[URL]`. The DPA carries the real data terms — subprocessor rights, breach-notification timing, data-return mechanics, standard contractual clauses, audit rights. Without reading it, the data-protection analysis below is partial. Offer to route the DPA to `/privacy-legal:dpa-review` (if installed) for a separate review, or fetch and read it inline before completing Step 3's data-protection analysis.
+> 此协议通过 URL 引用在 `[URL]` 处包含 DPA。DPA 承载真正的数据条款——subprocessor 权利、违约通知时间、数据返还机制、标准合同条款、审计权利。如果不阅读它，下面的数据保护分析是不完整的。提议一旦准备好将 DPA 交给 `/privacy-legal:dpa-review`（如果已安装）进行单独审查，或者在完成步骤 3 的数据保护分析之前获取并内联阅读它。
 
-If the user is installed with `privacy-legal`, explicitly offer:
+如果用户安装了 `privacy-legal`，明确提议：
 
-> Want me to hand the DPA URL to `/privacy-legal:dpa-review` once you're ready? That skill is built for the DPA work and will catch subprocessor / SCC / breach-notification issues that this skill only flags at the gate.
+> 一旦你准备好，要我将 DPA URL 交给 `/privacy-legal:dpa-review` 吗？该 skill 是为 DPA 工作构建的，并且会捕获此 skill 仅在门口标记的 subprocessor / SCC / 违约通知问题。
 
-Do not silently proceed as if the DPA were absent when it is incorporated by reference. A missing DPA and an unread DPA are different gaps — label them differently.
+不要默默地继续，就像 DPA 不存在一样，当它被引用包含时。缺失的 DPA 和未阅读的 DPA 是不同的差距——不同地标记它们。
 
-### Step 2: Deal-breaker check
+### 步骤 2：交易破坏者检查
 
-Check the "one thing" from `~/.claude/plugins/config/claude-for-legal/commercial-legal/CLAUDE.md` first. If present:
-
-```markdown
-## ⛔ DEAL-BREAKER PRESENT
-
-**Section [X.X]** contains [the deal-breaker]. Per the team playbook, this is a
-hard no. Recommend:
-
-- [ ] Push back — propose [specific alternative language]
-- [ ] Walk — if counterparty won't move, we don't sign
-
-Detailed review below is provided for completeness but is moot unless this is
-resolved.
-```
-
-### Step 3: Term-by-term comparison
-
-For each playbook category in `~/.claude/plugins/config/claude-for-legal/commercial-legal/CLAUDE.md`, find the corresponding contract section and compare.
-
-**For each deviation, produce:**
+首先检查 `~/.claude/plugins/config/claude-for-legal/commercial-legal/CLAUDE.md` 中的"那件事"。如果存在：
 
 ```markdown
-### [Section X.X]: [Issue name]
+## ⛔ 存在交易破坏者
 
-**Playbook says:** [our standard position, quoted from `~/.claude/plugins/config/claude-for-legal/commercial-legal/CLAUDE.md`]
+**第 [X.X] 节** 包含 [交易破坏者]。根据团队剧本，这是坚决反对的。建议：
 
-**Contract says:**
-> "[exact quote from the contract]"
+- [ ] 反驳——提议 [具体替代语言]
+- [ ] 离开——如果对手方不让步，我们不签署
 
-**Gap:** [Missing term | Weaker than standard | Weaker than fallback | Non-standard structure | Unacceptable]
-
-**Legal risk:** 🔴 Critical | 🟠 High | 🟡 Medium | 🟢 Low
-**Business friction:** 🔴 Blocks deals | 🟠 Slows deals | 🟡 Confuses customers | 🟢 Invisible
-
-**Why it matters:** [one or two sentences in plain English — what goes wrong
-for the business if this term stays as-is]
-
-**Proposed redline:**
-> "[the specific replacement language — ready to paste into a markup]"
-
-**If they won't move:** [the fallback from `~/.claude/plugins/config/claude-for-legal/commercial-legal/CLAUDE.md`, or "escalate to [person]"
-if no fallback exists]
+下面的详细审查为完整起见提供，但除非此问题解决，否则没有意义。
 ```
 
-**Severity calibration:**
+### 步骤 3：逐条款比较
 
-| Level | Means |
+对于 `~/.claude/plugins/config/claude-for-legal/commercial-legal/CLAUDE.md` 中的每个剧本类别，找到相应的合同章节并进行比较。
+
+**对于每个偏差，生成：**
+
+```markdown
+### 第 [X.X] 节：[问题名称]
+
+**剧本说：** [我们的标准立场，引用自 `~/.claude/plugins/config/claude-for-legal/commercial-legal/CLAUDE.md`]
+
+**合同说：**
+> "[合同中的精确引用]"
+
+**差距：** [缺失条款 / 弱于标准 / 弱于备用方案 / 非标准结构 / 不可接受]
+
+**法律风险：** 🔴 Critical / 🟠 High / 🟡 Medium / 🟢 Low
+**业务摩擦：** 🔴 Blocks deals / 🟠 Slows deals / 🟡 Confuses customers / 🟢 Invisible
+
+**为什么这很重要：** [一两句话用简单英语——如果这个条款保持原样，业务会出什么问题]
+
+**提议的红线：**
+> "[具体的替换语言——准备好粘贴到标记中]"
+
+**如果他们不让步：** [来自 `~/.claude/plugins/config/claude-for-legal/commercial-legal/CLAUDE.md` 的备用方案，或"升级给[某人]"如果没有备用方案]
+```
+
+**严重性校准：**
+
+| 级别 | 含义 |
 |---|---|
-| 🔴 Critical | Don't sign without fixing. A term on the team's "never accept" list in `~/.claude/plugins/config/claude-for-legal/commercial-legal/CLAUDE.md`, or a deal-breaker. |
-| 🟠 High | Strongly push; escalate if they won't move. A term outside the playbook's stated fallback range. |
-| 🟡 Medium | Push in first round; accept if it's the last open item. A term inside the fallback range but short of the standard position. |
-| 🟢 Low | Note it, don't spend capital. A term the playbook explicitly tolerates, or a purely stylistic deviation. |
+| 🔴 Critical | 不修复就不签署。`~/.claude/plugins/config/claude-for-legal/commercial-legal/CLAUDE.md` 中团队"永远不接受"列表中的条款，或交易破坏者。 |
+| 🟠 High | 强烈反驳；如果他们不让步则升级。超出剧本说明的备用方案范围的条款。 |
+| 🟡 Medium | 第一轮反驳；如果这是最后一个未解决的问题则接受。在备用方案范围内但不符合标准立场的条款。 |
+| 🟢 Low | 注意它，不要花费精力。剧本明确容忍的条款，或纯粹的风格偏差。 |
 
-Severity is always applied *against `~/.claude/plugins/config/claude-for-legal/commercial-legal/CLAUDE.md`*. If a term doesn't map cleanly to a playbook position, ask the user which bucket it belongs in and offer to record the answer in `~/.claude/plugins/config/claude-for-legal/commercial-legal/CLAUDE.md`.
+严重性总是针对 `~/.claude/plugins/config/claude-for-legal/commercial-legal/CLAUDE.md` 应用。如果条款未清晰映射到剧本立场，询问用户它属于哪个桶并提议将答案记录在 `~/.claude/plugins/config/claude-for-legal/commercial-legal/CLAUDE.md` 中。
 
-#### Liability cap decision procedure
+#### 责任限额决策程序
 
-**The cap amount is the least important part of the cap.** When reviewing the limitation-of-liability clause, do not produce a single "check liability cap against playbook" line item. Work through the four dimensions below and state each one explicitly in the finding:
+**限额金额是限额中最不重要的部分。** 在审查责任限制条款时，不要生成单一的"对照剧本检查责任限额"行项。按照下面的四个维度进行工作，并在发现中明确说明每个维度：
 
-1. **Direct vs. indirect/consequential damages.** Does the cap apply to ALL liability, or only direct damages? A 12-month cap on direct damages with uncapped consequential damages is a completely different position than a 12-month aggregate cap. State both treatments explicitly.
+1. **直接与间接/后果性损害赔偿。** 限额适用于所有责任，还是仅适用于直接损害？对直接损害赔偿有 12 个月限额但对后果性损害赔偿无上限，与 12 个月总限额是完全不同的立场。明确说明两种处理方式。
 
-2. **The cap base — quote it verbatim.** "12-month cap" could mean: (a) fees paid in the 12 months preceding the claim, (b) fees payable in the current 12-month period, (c) fees over the last 12 months of usage, (d) fees under the current order form, (e) total fees ever paid. These can differ by an order of magnitude. Quote the exact language. If ambiguous, flag it: "Cap base is ambiguous — `[the quoted language]` — could mean [X] or [Y]. Confirm before signing."
+2. **限额基数——逐字引用。** "12 个月限额"可能意味着：(a) 索赔前 12 个月支付的费用，(b) 当前 12 个月期间应付的费用，(c) 过去 12 个月使用的费用，(d) 当前订单表单下的费用，(e) 曾经支付的总费用。这些可能相差一个数量级。引用精确的语言。如果模糊，标记它："限额基数是模糊的——`[引用的语言]`——可能意味着 [X] 或 [Y]。在签署之前确认。"
 
-3. **Cap-carveout interaction.** A $100K cap with uncapped indemnity for data breach, IP, and confidentiality is functionally uncapped for the claims that actually arise in SaaS disputes. Enumerate what sits ABOVE the cap (the carveouts), what sits BELOW (what's actually capped), and assess whether the capped surface is meaningful: "The cap covers [general contract breach]. Data breach, IP indemnity, and confidentiality are carved out and uncapped. For this vendor's risk profile, the capped surface is [meaningful / nominal]."
+3. **限额-例外相互作用。** 对数据违约、IP 和保密有无上限赔偿的 10 万美元限额，对于 SaaS 争议中实际出现的索赔实际上是无上限的。列出限额之上的内容（例外）、限额之下的内容（实际受限的内容），并评估受限表面是否有意义："限额涵盖 [一般合同违约]。数据违约、IP 赔偿和保密被排除且无上限。对于此供应商的风险状况，受限表面是 [有意义的 / 名义上的]。"
 
-4. **Your playbook position per dimension.** The practice profile should have positions for: direct cap (multiple of fees), indirect damages (excluded / capped / uncapped), carveout list (what's acceptable above the cap), and cap base (which definition you'll accept). If the playbook has one "standard position" field, note: "Your playbook has a single cap position — consider splitting into direct/indirect/carveouts/base for more precise review."
+4. **每个维度的你的剧本立场。** 执业档案应该有这些立场：直接限额（费用倍数）、间接损害赔偿（排除 / 上限 / 无上限）、例外列表（限额之上可接受什么）、限额基数（你将接受哪个定义）。如果剧本有一个"标准立场"字段，说明："你的剧本有一个单一的限额立场——考虑拆分为直接/间接/例外/基数以进行更精确的审查。"
 
-#### Jurisdiction delta check
+#### 司法管辖区增量检查
 
-**The playbook applies one governing-law preference globally. Enforceability varies materially.** Check the contract's actual governing law against the top divergences before accepting playbook positions at face value:
+**剧本全球应用一个适用法律偏好。可执行性差异很大。** 在表面上接受剧本立场之前，对照主要差异检查合同的实际适用法律：
 
-- **Non-solicits/non-competes:** Unenforceable in CA (Bus. & Prof. Code §16600). Restricted in many EU jurisdictions. Enforceable with limitations elsewhere. `[jurisdiction — verify]`
-- **Auto-renewal:** CA GBL §17600-17606, NY GBL §527-a, IL 815 ILCS 601 have specific consumer/B2B notice requirements. Other states vary. `[jurisdiction — verify]`
-- **Liability exclusions:** EU and UK unfair contract terms rules (UCTA 1977, Consumer Rights Act 2015) constrain consumer exclusions. Some US states limit exclusion of gross negligence or willful misconduct. `[jurisdiction — verify]`
-- **Indemnification:** Some states void indemnification for the indemnitee's own negligence. `[jurisdiction — verify]`
-- **Confidentiality term:** Some jurisdictions limit "perpetual" confidentiality to a reasonable period. `[jurisdiction — verify]`
+- **非招揽/非竞争：** 在加州不可执行（Bus. & Prof. Code §16600）。在许多欧盟司法管辖区受到限制。在其他地方有条件可执行。`[jurisdiction — verify]`
+- **自动续约：** 加州 GBL §17600-17606、纽约 GBL §527-a、伊利诺伊州 815 ILCS 601 有特定的消费者/B2B 通知要求。其他州有所不同。`[jurisdiction — verify]`
+- **责任排除：** 欧盟和英国不公平合同条款规则（UCTA 1977、消费者权利法案 2015）限制消费者排除。一些美国州限制排除重大过失或故意不当行为。`[jurisdiction — verify]`
+- **赔偿：** 一些州使赔偿者自己的过失的赔偿无效。`[jurisdiction — verify]`
+- **保密期限：** 一些司法管辖区将"永久"保密限制在合理期限内。`[jurisdiction — verify]`
 
-When the playbook position conflicts with the contract's governing-law enforceability, flag: "Your playbook prefers [X], but this contract is governed by [Y] law where [X] is [unenforceable / restricted / subject to statutory override]. `[jurisdiction — verify]`"
+当剧本立场与合同的适用法律可执行性冲突时，标记："你的剧本偏爱 [X]，但此合同受 [Y] 法律管辖，其中 [X] 是 [不可执行的 / 受限制的 / 受法规覆盖的]。`[jurisdiction — verify]`"
 
-### Step 4: Favorable terms and gaps
+### 步骤 4：有利条款和差距
 
-Two short lists:
+两个简短列表：
 
-**Better than our standard:** Terms where the vendor gave us more than we'd ask for. Note these — they're trade bait if you need to give something up elsewhere.
+**好于我们标准的条款：** 供应商给我们超过我们要求的条款。注意这些——如果你需要在其他地方放弃一些东西，它们是交易筹码。
 
-**Missing entirely:** Standard provisions that just aren't there. Most common: assignment restrictions, audit rights (if we want them), force majeure, insurance requirements.
+**完全缺失的：** 根本不存在的标准条款。最常见的：转让限制、审计权利（如果我们想要它们）、不可抗力、保险要求。
 
-### Step 5: Escalation routing
+### 步骤 5：升级路由
 
-Check the escalation matrix in `~/.claude/plugins/config/claude-for-legal/commercial-legal/CLAUDE.md` against:
-- Contract dollar value
-- Presence of any 🔴 critical issues
-- Any automatic-escalation triggers (unlimited liability, IP assignment, etc.)
+对照 `~/.claude/plugins/config/claude-for-legal/commercial-legal/CLAUDE.md` 中的升级矩阵检查：
+- 合同美元价值
+- 任何 🔴 关键问题的存在
+- 任何自动升级触发器（无限责任、IP 转让等）
 
-State clearly who needs to approve this:
+明确说明谁需要审批：
 
 ```markdown
-## Approval routing
+## 审批路由
 
-Based on [dollar value / issue severity], this agreement requires:
+基于 [美元价值 / 问题严重性]，此协议需要：
 
-- [ ] **[Name/role]** approval — [reason]
-- [ ] **Business owner sign-off** on [specific commercial term they should weigh in on]
+- [ ] **[姓名/角色]** 审批——[原因]
+- [ ] **业务所有者签署** 关于 [他们应该权衡的具体商业条款]
 
-**Recommended next step:** [Send redlines to counterparty | Escalate to GC before
-responding | Get business input on commercial term X before legal responds]
+**建议的下一步：** [向对手方发送红线 / 在响应之前升级给 GC / 在法律响应之前获取关于商业条款 X 的业务输入]
 ```
 
-**Before proceeding to send redlines to the counterparty:** Read `## Who's using this` in `~/.claude/plugins/config/claude-for-legal/commercial-legal/CLAUDE.md`. If the Role is Non-lawyer:
+**在继续向对手方发送红线之前：** 阅读 `~/.claude/plugins/config/claude-for-legal/commercial-legal/CLAUDE.md` 中的 `## Who's using this`。如果角色是非律师：
 
-> Sending redlines is a legal act — the counterparty will treat every edit as our negotiating position. Have you reviewed this with an attorney? If yes, proceed. If no, here's a brief to bring to them:
+> 发送红线是一种法律行为——对手方会将每个编辑视为我们的谈判立场。你是否与律师一起审查过这个？如果是，请继续。如果不是，这里有一个简报可以带给他们：
 >
-> [Generate a 1-page summary: counterparty, agreement type, the specific redlines proposed, the playbook positions behind each, the fallbacks, and what to ask the attorney before the package leaves.]
+> [生成 1 页摘要：对手方、协议类型、提议的具体红线、每个背后的剧本立场、备用方案，以及在包裹发出之前询问律师什么。]
 >
-> If you need to find an attorney, solicitor, barrister, or other authorised legal professional: contact your professional regulator (state bar in the US, SRA/Bar Standards Board in England & Wales, Law Society in Scotland/NI/Ireland/Canada/Australia, or your jurisdiction's equivalent) for a referral service.
+> 如果你需要找律师、律师、出庭律师或其他授权的法律专业人士：联系你的专业监管机构（美国的州律师协会、英格兰和威尔士的 SRA/律师标准委员会、苏格兰/北爱尔兰/爱尔兰/加拿大/澳大利亚的律师协会，或你司法管辖区的同等机构）获取推荐服务。
 
-Do not proceed past this gate without an explicit yes.
+没有明确的肯定，不要越过这个门口。
 
-## Redline granularity
+## 红线粒度
 
-**Edit at the smallest possible granularity.** A redline is a negotiation artifact, not a rewrite. Wholesale clause replacement signals "we threw out your drafting" — it's aggressive, it forces the counterparty to re-read the whole clause, and it discards the parts of their drafting that were fine. Surgical redlines — strike a word, insert a phrase, restructure a subclause — signal "we have specific asks" and are faster to read, understand, and accept.
+**以最小可能的粒度进行编辑。** 红线是谈判工件，不是重写。整体条款替换表示"我们扔掉了你的起草"——这是激进的，迫使对手方重新阅读整个条款，并丢弃了他们起草中没问题的部分。精确的红线——删除一个词，插入一个短语，重组一个子条款——表示"我们有具体要求"，并且更快阅读、理解和接受。
 
-Default to the smallest edit that achieves the playbook position:
-- Replace a **word** before a phrase. ("twelve (12)" → "twenty-four (24)")
-- Replace a **phrase** before a sentence. ("paid by the Buyer" → "paid and payable by the Buyer")
-- Restructure a **subclause** before replacing the sentence. (Add "(a)" and "(b)" to split a compound condition.)
-- Replace a **sentence** before replacing the clause.
-- Only replace a **whole clause** when the counterparty's version is so far from your position that surgical edits would be harder to read than a fresh draft — and when you do, say so in the transmittal: "We've replaced §8.2 rather than marking it up because the changes were extensive. Happy to walk you through the delta."
+默认使用实现剧本立场的最小编辑：
+- 在短语之前替换一个**词**。（"twelve (12)" → "twenty-four (24)"）
+- 在句子之前替换一个**短语**。（"paid by the Buyer" → "paid and payable by the Buyer"）
+- 在替换句子之前重组一个**子条款**。（添加 (a) 和 (b) 以拆分复合条件。）
+- 在替换条款之前替换一个**句子**。
+- 只有当对手方的版本与你的立场相差太远，以至于精确编辑比新草案更难阅读时，才替换**整个条款**——当你这样做时，在转发中说明："我们替换了第 8.2 节而不是标记它，因为更改很广泛。乐意带你了解差异。"
 
-When in doubt, smaller. A client who receives a surgical redline trusts that you read carefully. A client who receives a wholesale replacement wonders whether you read at all.
+如有疑问，越小越好。收到精确红线的客户相信你仔细阅读了。收到整体替换的客户想知道你是否阅读过。
 
-### Step 6: Assemble the memo
+### 步骤 6：组装备忘录
 
-Prepend the work-product header from `~/.claude/plugins/config/claude-for-legal/commercial-legal/CLAUDE.md` `## Outputs` (it differs by user role — see `## Who's using this`).
+前置来自 `~/.claude/plugins/config/claude-for-legal/commercial-legal/CLAUDE.md` `## Outputs` 的工作产品标题（它因用户角色而异——请参阅 `## Who's using this`）。
 
-This memo and the underlying agreement may be privileged, confidential, or both. The output inherits that status from the source. Distribute only within the privilege circle; mark and store it where privileged materials live; strip the work-product header before any external delivery (e.g., counterparty redlines, stakeholder summaries).
+此备忘录和底层协议可能是特权的、机密的，或两者兼而有之。输出从源继承该状态。仅在特权圈内分发；标记并将其存储在特权材料所在的位置；在任何外部交付（对手方红线、利益相关者摘要）之前删除工作产品标题。
 
-The playbook positions applied below reflect the jurisdiction recorded in `~/.claude/plugins/config/claude-for-legal/commercial-legal/CLAUDE.md` → `Governing law and venue`. Legal rules and enforceability vary materially by jurisdiction. If this deal implicates a different governing law or a choice-of-law question, flag it in the memo — the analysis may not transfer as written.
+下面应用的剧本立场反映了 `~/.claude/plugins/config/claude-for-legal/commercial-legal/CLAUDE.md` → `Governing law and venue` 中记录的司法管辖区。法律规则和可执行性因司法管辖区而异。如果此交易涉及不同的适用法律或法律选择问题，请在备忘录中标记它——分析可能不会按书面转移。
 
-> **No silent supplement.** If a research query to the configured legal research tool returns few or no results for a rule the memo needs (enforceability of a limitation clause, indemnity scope, governing-law choice), report what was found and stop. Do NOT fill the gap from web search or model knowledge without asking. Say: "The search returned [N] results from [tool]. Coverage appears thin for [rule / jurisdiction]. Options: (1) broaden the search query, (2) try a different research tool, (3) search the web — results will be tagged `[web search — verify]` and should be checked against a primary source before relying, or (4) flag as unverified and stop. Which would you like?" A lawyer decides whether to accept lower-confidence sources.
+> **没有静默补充。** 如果对配置的法律研究工具的研究查询返回很少或没有关于备忘录需要的规则的结果（限制条款的可执行性、赔偿范围、法律选择），报告发现的内容并停止。不要在未询问的情况下从网络搜索或模型知识中填补空白。说："搜索从 [工具] 返回了 [N] 个结果。对于 [规则 / 司法管辖区] 的覆盖似乎很薄。选项：(1) 扩大搜索查询，(2) 尝试不同的研究工具，(3) 搜索网络——结果将标记为 `[web search — verify]` 并且在依赖之前应根据主要来源检查，或 (4) 标记为未验证并停止。你想要哪个？"律师决定是否接受低置信度的来源。
 >
-> **Source attribution.** Where the memo cites a statute, regulation, or case, tag the citation: `[Westlaw]`, `[statute / regulator site]`, or the MCP tool name for citations retrieved from a legal research connector; `[web search — verify]` for web-search citations; `[model knowledge — verify]` for citations recalled from training data; `[user provided]` for citations from the counterparty draft or house files. Citations tagged `verify` carry higher fabrication risk and should be checked first. Never strip or collapse the tags.
+> **来源归因。** 当备忘录引用法规、条例或案例时，标记引用：`[Westlaw]`、`[statute / regulator site]`，或从法律研究连接器检索的引用的 MCP 工具名称；`[web search — verify]` 用于网络搜索引用；`[model knowledge — verify]` 用于从训练知识中回忆的引用；`[user provided]` 用于来自对手方草案或内部文件的引用。标记为 `verify` 的引用具有更高的捏造风险，应首先检查。永远不要删除或折叠标记。
 
 ```markdown
 [WORK-PRODUCT HEADER — per plugin config ## Outputs]
 
-# Vendor Agreement Review: [Counterparty] [Agreement Type]
+# 供应商协议审查：[对手方] [协议类型]
 
-**Reviewed:** [date]
-**Contract value:** $[amount] / [term]
-**Our role:** Customer
-
----
-
-## Bottom line
-
-[Two sentences. Can we sign this? What has to change first?]
-
-**Issues (legal risk):** [N]🔴 [N]🟠 [N]🟡 [N]🟢
-**Issues (business friction):** [N]🔴 [N]🟠 [N]🟡 [N]🟢
-
-**Approval needed from:** [name]
+**已审查：** [日期]
+**合同价值：** $[金额] / [期限]
+**我们的角色：** 客户
 
 ---
 
-## Deal-breaker check
+## 底线
 
-[✅ Clear | ⛔ Present — see above]
+[两句话。我们可以签署吗？首先需要更改什么？]
 
----
+**问题（法律风险）：** [N]🔴 [N]🟠 [N]🟡 [N]🟢
+**问题（业务摩擦）：** [N]🔴 [N]🟠 [N]🟡 [N]🟢
 
-## Issues by severity
-
-[All the deviation blocks from Step 3, grouped Critical → Low]
-
----
-
-## Favorable terms
-
-[list]
-
-## Missing provisions
-
-[list]
+**需要审批来自：** [姓名]
 
 ---
 
-## Approval routing
+## 交易破坏者检查
 
-[from Step 5]
+[✅ 通过 / ⛔ 存在——见上文]
 
 ---
 
-## Redline package
+## 按严重性列出的问题
 
-[If requested: consolidated markup-ready language for all proposed changes]
+[步骤 3 中的所有偏差块，从关键到低分组]
+
+---
+
+## 有利条款
+
+[列表]
+
+## 缺失条款
+
+[列表]
+
+---
+
+## 审批路由
+
+[来自步骤 5]
+
+---
+
+## 红线包裹
+
+[如果需要：所有提议更改的合并标记就绪语言]
 ```
 
-## Integration: [CLM]
+## 集成：[CLM]
 
-If a [CLM] MCP is connected, after the review:
+如果连接了 [CLM] MCP，在审查之后：
 
-- Check if this counterparty already has agreements with us (may inform negotiating posture — "we already gave them 24-month cap on the last deal")
-- Pull the workflow template that matches this agreement type
-- Offer to create the [CLM] record with the review memo attached and approvers pre-routed
+- 检查此对手方是否已经与我们有协议（可能会告知谈判姿态——"我们在上一笔交易中已经给了他们 24 个月限额"）
+- 提取与此协议类型匹配的工作流模板
+- 提议创建 [CLM] 记录并附加审查备忘录和预先路由的审批人
 
-## Integration: DocuSign
+## 集成：DocuSign
 
-If DocuSign MCP is connected and the agreement is ready to sign (all greens or all issues accepted), offer to:
-- Generate the envelope
-- Route to signers in the right order per the escalation matrix
+如果连接了 DocuSign MCP 且协议准备好签署（所有绿色或所有问题都已接受），提议：
+- 生成信封
+- 根据升级矩阵按正确顺序路由给签署人
 
-Do **not** send anything for signature without explicit instruction. "Ready to sign" is the lawyer's call, not yours.
+**不要**在没有明确指示的情况下发送任何内容以供签署。"准备好签署"是律师的决定，不是你的。
 
-**Before generating a signature envelope or routing for countersignature:** Read `## Who's using this` in `~/.claude/plugins/config/claude-for-legal/commercial-legal/CLAUDE.md`. If the Role is Non-lawyer:
+**在生成签名信封或路由供会签之前：** 阅读 `~/.claude/plugins/config/claude-for-legal/commercial-legal/CLAUDE.md` 中的 `## Who's using this`。如果角色是非律师：
 
-> This step has legal consequences (signing binds the company to the whole agreement). Have you reviewed this with an attorney? If yes, proceed. If no, here's a brief to bring to them:
+> 此步骤具有法律后果（签署使公司受整个协议约束）。你是否与律师一起审查过这个？如果是，请继续。如果不是，这里有一个简报可以带给他们：
 >
-> [Generate a 1-page summary: counterparty, contract value, the issues found and how they resolved, any risk the lawyer accepted, and what to ask the attorney before envelope goes out.]
+> [生成 1 页摘要：对手方、合同价值、发现的问题以及它们如何解决、律师接受的任何风险，以及在信封发出之前询问律师什么。]
 >
-> If you need to find an attorney, solicitor, barrister, or other authorised legal professional: contact your professional regulator (state bar in the US, SRA/Bar Standards Board in England & Wales, Law Society in Scotland/NI/Ireland/Canada/Australia, or your jurisdiction's equivalent) for a referral service.
+> 如果你需要找律师、律师、出庭律师或其他授权的法律专业人士：联系你的专业监管机构（美国的州律师协会、英格兰和威尔士的 SRA/律师标准委员会、苏格兰/北爱尔兰/爱尔兰/加拿大/澳大利亚的律师协会，或你司法管辖区的同等机构）获取推荐服务。
 
-Do not proceed past this gate without an explicit yes.
+没有明确的肯定，不要越过这个门口。
 
-## Output formats
+## 输出格式
 
-**Full memo (default):** As above. Goes in the [CLM] record or the Drive folder from `~/.claude/plugins/config/claude-for-legal/commercial-legal/CLAUDE.md` house-style section.
+**完整备忘录（默认）：** 如上所述。进入 `~/.claude/plugins/config/claude-for-legal/commercial-legal/CLAUDE.md` 内部风格部分中的 [CLM] 记录或 Drive 文件夹。
 
-**Slack-sized summary:** Two lines and a link. For when someone asks "is this okay?" in a channel.
+**Slack 大小摘要：** 两行和一个链接。当有人在频道中问"这个可以吗"时使用。
 
 ```
-[Counterparty] [type] — NEEDS WORK. 1🔴 (uncapped liability §8.2), 2🟠. Full review: [link]. Needs [GC] approval.
+[对手方] [类型] — 需要工作。1🔴（第 8.2 节无限责任），2🟠。完整审查：[链接]。需要 [GC] 审批。
 ```
 
-**Redline doc:** If the user asks for it, output a .docx with tracked changes. Use the docx skill. Comments on each change cite the playbook position.
+**红线文档：** 如果用户要求它，输出一个带有跟踪更改的 .docx。使用 docx skill。每个更改的注释引用剧本立场。
 
-## Quality checks before delivering
+## 交付前的质量检查
 
-- [ ] `~/.claude/plugins/config/claude-for-legal/commercial-legal/CLAUDE.md` was loaded and quoted — not generic market positions
-- [ ] Deal-breaker checked first
-- [ ] Every issue has specific replacement language
-- [ ] Risk levels are calibrated (not everything is Critical)
-- [ ] Approver is named, not "escalate to legal"
-- [ ] Counterparty context considered (BigCo vs. startup — affects what's worth fighting over)
+- [ ] 已加载并引用 `~/.claude/plugins/config/claude-for-legal/commercial-legal/CLAUDE.md`——不是通用市场立场
+- [ ] 首先检查了交易破坏者
+- [ ] 每个问题都有具体的替换语言
+- [ ] 风险级别已校准（不是所有内容都是关键的）
+- [ ] 命名了审批人，不是"升级给法律"
+- [ ] 考虑了对手方上下文（大公司 vs 初创公司——影响什么值得争论）
 
-## Close with the next-steps decision tree
+## 以决策树结束
 
-End with the next-steps decision tree per CLAUDE.md `## Outputs`. Customize the options to what this skill just produced — the five default branches (draft the X, escalate, get more facts, watch and wait, something else) are a starting point, not a lock-in. The tree is the output; the lawyer picks.
-
+根据 CLAUDE.md `## Outputs` 以决策树结束。自定义选项以匹配此 skill 刚刚生成的内容——五个默认分支（起草 X、升级、获取更多事实、观察等待、其他内容）是起点，不是锁定。树就是输出；律师选择。

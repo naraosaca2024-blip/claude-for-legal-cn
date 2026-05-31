@@ -1,44 +1,42 @@
 ---
 name: investigation-query
 description: >
-  Ask questions against an open investigation log — what witnesses said, where
-  accounts conflict, what gaps exist, what the strongest evidence is on each
-  issue. Use when the attorney needs to query the investigation record without
-  re-reading every entry.
-argument-hint: "[matter name] [question]"
+  针对开放调查日志提问——证人说了什么、账户在哪里冲突、存在什么差距、每个问题上最强证据是什么。当律师需要查询调查记录而无需重新阅读每个条目时使用。
+argument-hint: "[事项名称] [问题]"
 ---
+
+<!--
+This file is a Chinese translation of the original by Anthropic PBC.
+Original: https://github.com/anthropics/claude-for-legal
+Licensed under Apache License 2.0
+-->
+
 
 # /investigation-query
 
-Answers questions against the investigation log — what witnesses said,
-where accounts conflict, what gaps exist, what the strongest evidence is
-on each issue.
+针对调查日志回答问题——证人说了什么、账户在哪里冲突、存在什么差距、每个问题上最强证据是什么。
 
-## Instructions
+## 说明
 
-1. Load the `internal-investigation` reference skill and run Mode 3 (Query).
-2. Always cite log entry IDs in the answer.
-3. If the log contains nothing relevant to the question, say so explicitly —
-   "I have not seen any information on [topic] in this investigation log
-   ([N] entries reviewed)" — and offer to flag it as a gap.
+1. 加载 `internal-investigation` 参考 skill 并运行模式 3（查询）。
+2. 始终在答案中引用日志条目 ID。
+3. 如果日志中没有任何与问题相关的内容，明确说明——"我在此调查日志中没有看到任何关于 [主题] 的信息（已审查 [N] 个条目）"——并提供将其标记为差距的选项。
 
-## Examples
+## 示例
 
 ```
-/employment-legal:investigation-query [matter name]
-What did the respondent say about the December team dinner?
+/employment-legal:investigation-query [事项名称]
+被申诉人关于十二月团队晚餐说了什么？
 ```
 
 ```
-/employment-legal:investigation-query [matter name]
-Where do the complainant's and respondent's accounts conflict?
+/employment-legal:investigation-query [事项名称]
+申诉人和被申诉人的账户在哪里冲突？
 ```
 
 ```
-/employment-legal:investigation-query [matter name]
-What do we still need?
+/employment-legal:investigation-query [事项名称]
+我们还需要什么？
 ```
 
-> Detailed log-query process, citation rules, and gap-flagging templates live
-> in the `internal-investigation` reference skill — load it before doing
-> substantive work.
+> 详细的日志查询流程、引用规则和差距标记模板位于 `internal-investigation` 参考 skill 中——在进行实质性工作之前加载它。

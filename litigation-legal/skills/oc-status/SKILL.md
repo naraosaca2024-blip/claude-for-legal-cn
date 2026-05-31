@@ -1,159 +1,166 @@
 ---
 name: oc-status
-description: Generate weekly status-request email drafts to outside counsel across the active portfolio — markdown per matter, plus Gmail drafts when the MCP is available. Use when the user asks for OC status requests, weekly outside counsel check-ins, or wants per-matter status emails drafted from the portfolio log.
+description: 为活跃投资组合生成每周状态请求电子邮件草稿——每个事项一个 markdown，以及 Gmail 草稿（当 MCP 可用时）。当用户要求外部律师状态请求、每周外部律师签到或想要从投资组合日志起草每个事项的状态电子邮件时使用。
 argument-hint: "[--all | --slug=foo | --no-gmail]"
 ---
 
+<!--
+This file is a Chinese translation of the original by Anthropic PBC.
+Original: https://github.com/anthropics/claude-for-legal
+Licensed under Apache License 2.0
+-->
+
+
 # /oc-status
 
-To run weekly, set a recurring reminder to invoke `/litigation-legal:oc-status`. Automated scheduling requires a scheduled-tasks integration, which is not bundled.
+要每周运行，请设置循环提醒来调用 `/litigation-legal:oc-status`。自动调度需要计划任务集成，未包含在内。
 
-1. Load `~/.claude/plugins/config/claude-for-legal/litigation-legal/matters/_log.yaml`, filter per default rules (or per flags).
-2. Load `~/.claude/plugins/config/claude-for-legal/litigation-legal/CLAUDE.md` → outside counsel directive style, signer defaults, budget posture.
-3. Follow the workflow and reference below.
-4. For each matter in scope: read `matter.md` + `history.md`, draft per-matter email.
-5. Write markdown to `~/.claude/plugins/config/claude-for-legal/litigation-legal/oc-status/[YYYY-MM-DD]/[slug].md`.
-6. If Gmail MCP authenticated: create Gmail drafts. Else: markdown-only, note in summary.
-7. Write `~/.claude/plugins/config/claude-for-legal/litigation-legal/oc-status/[YYYY-MM-DD]/_summary.md` — what ran, what was skipped and why.
+1. 加载 `~/.claude/plugins/config/claude-for-legal/litigation-legal/matters/_log.yaml`，按默认规则（或按标志）过滤。
+2. 加载 `~/.claude/plugins/config/claude-for-legal/litigation-legal/CLAUDE.md` → 外部律师指令风格、签署人默认值、预算立场。
+3. 遵循以下工作流和参考。
+4. 对于范围内的每个事项：阅读 `matter.md` + `history.md`，起草每个事项的电子邮件。
+5. 将 markdown 写入 `~/.claude/plugins/config/claude-for-legal/litigation-legal/oc-status/[YYYY-MM-DD]/[slug].md`。
+6. 如果 Gmail MCP 已认证：创建 Gmail 草稿。否则：仅 markdown，在摘要中注明。
+7. 写入 `~/.claude/plugins/config/claude-for-legal/litigation-legal/oc-status/[YYYY-MM-DD]/_summary.md`——运行了什么、跳过了什么以及原因。
 
 ---
 
-# OC Status
+# 外部律师状态
 
-## Purpose
+## 目的
 
-Writing the same status-request email to outside counsel every week across 5–15 matters is mechanical cognitive tax. The content is consistent per matter (status, decisions pending, budget check). The audience is consistent (OC lead partner). The tone is consistent (per house outside-counsel-directive style). A scheduled task drafts all of them; counsel reviews and sends.
+每周为 5-15 个事项写同样的状态请求电子邮件是机械性认知负担。内容按事项一致（状态、待决决定、预算检查）。受众一致（外部律师主办合伙人）。语气一致（根据内部外部律师指令风格）。计划任务起草所有这些；律师审查并发送。
 
-## Load context
+## 加载上下文
 
-- `~/.claude/plugins/config/claude-for-legal/litigation-legal/matters/_log.yaml` — the filtering and field source
-- `~/.claude/plugins/config/claude-for-legal/litigation-legal/matters/[slug]/matter.md` — matter context (current posture, open questions)
-- `~/.claude/plugins/config/claude-for-legal/litigation-legal/matters/[slug]/history.md` — recent events to inform what to ask about
-- `~/.claude/plugins/config/claude-for-legal/litigation-legal/CLAUDE.md` → outside counsel directive style, signer name/email, budget posture
+- `~/.claude/plugins/config/claude-for-legal/litigation-legal/matters/_log.yaml` — 过滤和字段来源
+- `~/.claude/plugins/config/claude-for-legal/litigation-legal/matters/[slug]/matter.md` — 事项上下文（当前姿态、未决问题）
+- `~/.claude/plugins/config/claude-for-legal/litigation-legal/matters/[slug]/history.md` — 近期事件以提供询问内容的参考
+- `~/.claude/plugins/config/claude-for-legal/litigation-legal/CLAUDE.md` → 外部律师指令风格、签署人姓名/电子邮件、预算立场
 
-## Filtering — which matters?
+## 过滤——哪些事项？
 
-Default filter:
+默认过滤器：
 
 - `status != closed`
-- `outside_counsel.firm != null` AND `outside_counsel.lead != null`
-- Either: last update more than 10 days old (time for something to have happened) OR has a `next_deadline` within 21 days
+- `outside_counsel.firm != null` 且 `outside_counsel.lead != null`
+- 要么：上次更新超过 10 天（有时间发生些什么）或有 `next_deadline` 在 21 天内
 
-Skip matters that just had a status update in the last 10 days (no need to re-ping) and matters where `outside_counsel.email` is null (email addresses needed for Gmail draft; still produce markdown).
+跳过最近 10 天内有状态更新的事项（无需重新催促）和 `outside_counsel.email` 为 null 的事项（Gmail 草稿需要电子邮件地址；仍然生成 markdown）。
 
-Flags:
-- `--all` → draft for every active matter regardless of recency
-- `--slug=[slug]` → draft for one matter only (ad-hoc request)
-- `--no-gmail` → skip Gmail draft creation even if MCP is available
+标志：
+- `--all` → 无论时效如何为每个活跃事项起草
+- `--slug=[slug]` → 仅为一个事项起草（临时请求）
+- `--no-gmail` → 即使 MCP 可用也跳过 Gmail 草稿创建
 
-## Per-matter email draft
+## 每个事项的电子邮件草稿
 
-Each email has the same skeleton; content is matter-specific.
+每封电子邮件有相同的骨架；内容按事项特定。
 
-**Subject:** per house convention (from `~/.claude/plugins/config/claude-for-legal/litigation-legal/CLAUDE.md` outside counsel directive style; fallback: `[Matter: [matter name]] — Weekly status update`)
+**主题行：** 按内部惯例（来自 `~/.claude/plugins/config/claude-for-legal/litigation-legal/CLAUDE.md` 外部律师指令风格；后备：`[事项：[事项名称]] — 每周状态更新`）
 
-**Body skeleton:**
+**正文骨架：**
 
 ```
-[lead partner first name],
+[主办合伙人名字]，
 
-[One sentence opener — natural, matches house tone.]
+[一句开场白——自然，匹配内部语气。]
 
-Checking in on [matter name]. A few items:
+跟进 [事项名称]。几个事项：
 
-1. **Status since [date of last update captured in history.md]** — what's moved, what's pending? Any filings, hearings, correspondence, or calls since we last touched base?
+1. **自 [history.md 中捕获的上次更新日期] 以来的状态** — 有什么进展、什么待决？自我们上次联系以来是否有任何提交、听证、通信或通话？
 
-2. **Upcoming deadlines** — I show [next_deadline from log + any deadlines in matter.md]. Confirm coverage plan and any dates we should add.
+2. **即将到来的截止日期** — 我看到 [日志中的 next_deadline + matter.md 中的任何截止日期]。确认覆盖计划和任何我们应该添加的日期。
 
-3. **Decisions pending** — [pull open questions from matter.md that require OC input; if none, omit this numbered item and renumber]
+3. **待决决定** — [从 matter.md 中提取需要外部律师输入的未决问题；如果没有，省略此编号项并重新编号]
 
-4. **Budget** — [monthly / quarterly / on-request per `~/.claude/plugins/config/claude-for-legal/litigation-legal/CLAUDE.md` budget posture]. Where are we against [budget authorization from matter.md]? Any variance to flag?
+4. **预算** — [按 `~/.claude/plugins/config/claude-for-legal/litigation-legal/CLAUDE.md` 预算立场为月度/季度/按请求]。相对于 [matter.md 中的预算授权] 我们在什么位置？有什么差异要标记？
 
-[If material and relevant: 5. Specific ask — e.g., "Please send me the latest draft of the motion to dismiss before [date]" — drawn from matter.md open questions.]
+[如果重要且相关：5. 具体要求——例如，"请在 [日期] 之前发送驳回动议的最新草稿"——从 matter.md 未决问题中提取。]
 
-[Signoff — name, role, contact. From `~/.claude/plugins/config/claude-for-legal/litigation-legal/CLAUDE.md` signer default for OC directives.]
+[签名——姓名、角色、联系方式。来自 `~/.claude/plugins/config/claude-for-legal/litigation-legal/CLAUDE.md` 外部律师指令的签署人默认值。]
 ```
 
-Adapt tone per `~/.claude/plugins/config/claude-for-legal/litigation-legal/CLAUDE.md` outside counsel directive style — some shops are "dear counsel" formal; others are first-name-and-bullets. Match.
+按 `~/.claude/plugins/config/claude-for-legal/litigation-legal/CLAUDE.md` 外部律师指令风格调整语气——有些律所用"尊敬的律师"正式风格；有些用名字加要点。匹配。
 
-## Output
+## 输出
 
-### Markdown drafts
+### Markdown 草稿
 
-Write to: `~/.claude/plugins/config/claude-for-legal/litigation-legal/oc-status/[YYYY-MM-DD]/[slug].md`
+写入：`~/.claude/plugins/config/claude-for-legal/litigation-legal/oc-status/[YYYY-MM-DD]/[slug].md`
 
-Each file is one email, formatted as:
+每个文件是一封电子邮件，格式为：
 
 ```markdown
-[WORK-PRODUCT HEADER — per plugin config ## Outputs — differs by role; see `## Who's using this`]
+[工作产品标题——根据插件配置 ## Outputs——因角色而异；见 `## 谁在使用这个`]
 
-# [Matter name] — OC status request — [YYYY-MM-DD]
+# [事项名称] — 外部律师状态请求 — [YYYY-MM-DD]
 
-**To:** [outside_counsel.email from log] ([outside_counsel.lead], [outside_counsel.firm])
-**From:** [signer name / email from `~/.claude/plugins/config/claude-for-legal/litigation-legal/CLAUDE.md`]
-**Subject:** [subject line]
+**收件：** [日志中的 outside_counsel.email]（[outside_counsel.lead]，[outside_counsel.firm]）
+**发件：** [来自 `~/.claude/plugins/config/claude-for-legal/litigation-legal/CLAUDE.md` 的签署人姓名/电子邮件]
+**主题：** [主题行]
 
-> The work-product header above applies to this internal record. The outgoing email body below goes to outside counsel on a retained matter, which is itself a privileged communication — apply the house privilege marking (`~/.claude/plugins/config/claude-for-legal/litigation-legal/CLAUDE.md` privilege conventions) at the top of the email sent, typically `Privileged & Confidential — Attorney-Client Communication / Attorney Work Product`, not this internal work-product header.
+> 上方的工作产品标题适用于此内部记录。下方的外发电子邮件正文发送给已聘用的外部律师，这本身是特权通信——在发送的电子邮件顶部应用内部特权标记（`~/.claude/plugins/config/claude-for-legal/litigation-legal/CLAUDE.md` 特权惯例），通常是 `Privileged & Confidential — Attorney-Client Communication / Attorney Work Product`，不是此内部工作产品标题。
 
 ---
 
-[body per skeleton]
+[按骨架的正文]
 ```
 
-### Send gate (closing note on every draft)
+### 发送门槛（每个草稿的结束说明）
 
-Append the following to each markdown draft, immediately below the body and above the run metadata — strip before sending:
+在每个 markdown 草稿的正文下方和运行元数据上方附加以下内容——发送前删除：
 
-> This is a draft status email for attorney review before sending to outside counsel. Check for privileged content you did not intend to share outside the engagement circle, factual accuracy, tone, and budget posture. Do not send unreviewed — even routine weekly check-ins can surface theory, strategy, or concessions the sender didn't mean to put in writing.
+> 这是供律师审查的草稿状态电子邮件，在发送给外部律师之前。检查是否包含您无意在聘用范围外分享的特权内容、事实准确性、语气和预算立场。不要未经审查发送——即使常规每周签到也可能浮出理论、策略或让发件人无意中写下的让步。
 
-### Gmail drafts (if MCP available)
+### Gmail 草稿（如果 MCP 可用）
 
-If the Gmail draft-creation MCP is authenticated:
+如果 Gmail 草稿创建 MCP 已认证：
 
-- Create a draft in the user's Gmail per matter with `to`, `from`, `subject`, `body` populated
-- The draft sits in Drafts folder; user reviews and sends Monday morning
-- If Gmail MCP is NOT available or fails: fall back to markdown-only and tell the user
+- 为每个事项在用户的 Gmail 中创建草稿，填充 `to`、`from`、`subject`、`body`
+- 草稿在草稿文件夹中；用户审查并在周一早上发送
+- 如果 Gmail MCP 不可用或失败：退回到仅 markdown 并告知用户
 
-### Run summary
+### 运行摘要
 
-After processing all matters, write `~/.claude/plugins/config/claude-for-legal/litigation-legal/oc-status/[YYYY-MM-DD]/_summary.md`:
+处理所有事项后，写入 `~/.claude/plugins/config/claude-for-legal/litigation-legal/oc-status/[YYYY-MM-DD]/_summary.md`：
 
 ```markdown
-# OC Status Run — [YYYY-MM-DD]
+# 外部律师状态运行 — [YYYY-MM-DD]
 
-**Matters processed:** [N]
-**Drafts created:** [N]
-**Gmail drafts:** [created / skipped — reason]
+**处理的事项：** [N]
+**创建的草稿：** [N]
+**Gmail 草稿：** [已创建 / 已跳过——原因]
 
-## Drafted for
+## 起草对象
 
-| Matter | OC lead | Last updated | Reason for inclusion |
+| 事项 | 外部律师主办 | 最后更新 | 包含原因 |
 |---|---|---|---|
-| [slug] | [lead] | [date] | [stale / upcoming deadline / --all / --slug] |
+| [slug] | [lead] | [date] | [过期 / 即将截止 / --all / --slug] |
 
-## Skipped
+## 已跳过
 
-| Matter | Reason |
+| 事项 | 原因 |
 |---|---|
-| [slug] | recent update (last touched [date]) |
-| [slug] | no OC email in log — update with `/matter-update [slug]` |
+| [slug] | 最近更新（最后触碰 [date]） |
+| [slug] | 日志中无外部律师电子邮件——使用 `/matter-update [slug]` 更新 |
 
-## Anomalies
+## 异常
 
-- Matters without outside counsel assigned: [list — if any are high/critical risk, flagged]
-- Matters with outside counsel but no email in log: [list]
+- 未分配外部律师的事项：[列表——如有高/关键风险则标记]
+- 有外部律师但日志中无电子邮件的事项：[列表]
 ```
 
-## Scheduling
+## 调度
 
-This skill is designed to run weekly. Automated scheduling requires a scheduled-tasks integration that is not bundled with the plugin. To run weekly, set a recurring reminder to invoke `/litigation-legal:oc-status` — e.g., Monday morning on your calendar.
+此 skill 设计为每周运行。自动调度需要未随插件提供的计划任务集成。要每周运行，请设置循环提醒来调用 `/litigation-legal:oc-status`——例如，周一早上在您的日历上。
 
-Ad-hoc: `/oc-status` any time. `/oc-status --slug=foo` for a single matter.
+临时：随时 `/oc-status`。`/oc-status --slug=foo` 用于单个事项。
 
-## What this skill does not do
+## 此 skill 不做什么
 
-- **Send the emails.** Drafts only. Counsel reviews and sends.
-- **Generate content it doesn't have.** If `matter.md` is thin, the email is short and asks broad-status questions. The skill doesn't invent specific questions from nothing.
-- **Retry failures.** If Gmail draft creation fails mid-run, the skill logs the failure and continues with markdown. User can retry after fixing auth.
-- **Rewrite history.md.** Reads it for context; doesn't modify. (If OC's response surfaces new events, use `/matter-update [slug]` to log them.)
-- **Enforce a minimum template.** If the house tone is "one line, first name, done," the draft honors that and skips the bulleted structure. Match `~/.claude/plugins/config/claude-for-legal/litigation-legal/CLAUDE.md`.
+- **发送电子邮件。** 仅草稿。律师审查并发送。
+- **生成它没有的内容。** 如果 `matter.md` 很薄，电子邮件就短，询问广泛的状态问题。skill 不会凭空发明具体问题。
+- **重试失败。** 如果 Gmail 草稿创建在运行中途失败，skill 记录失败并继续使用 markdown。用户可以在修复认证后重试。
+- **重写 history.md。** 读取它获取上下文；不修改。（如果外部律师的回复浮出新事件，使用 `/matter-update [slug]` 记录。）
+- **强制最低模板。** 如果内部语气是"一行，名字，结束"，草稿遵守这一点并跳过要点结构。匹配 `~/.claude/plugins/config/claude-for-legal/litigation-legal/CLAUDE.md`。

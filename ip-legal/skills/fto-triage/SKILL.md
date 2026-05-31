@@ -1,53 +1,41 @@
 ---
 name: fto-triage
 description: >
-  Freedom-to-operate triage — a structured first look at potentially blocking
-  patents, not an FTO opinion. Use when a product, process, or feature is
-  being evaluated for blocking patents, when asked whether anything stops a
-  launch, or to build a claim-chart first pass against the most plausible
-  patents before patent counsel review. This skill never concludes a product
-  is clear to launch.
-argument-hint: "[describe the product / process / feature and jurisdictions — or just the subject and I'll ask]"
+  自由实施分流——对可能阻塞专利的结构化初步审视，而非 FTO 意见书。当评估产品、
+  工艺或功能是否存在阻塞性专利时、当被询问是否有什么阻止发布时，或在专利律师
+  审查前对最可能的专利进行权利要求图表第一遍时使用。此 skill 绝不得出产品可以
+  自由实施的结论。
+argument-hint: "[描述产品/工艺/功能和司法管辖区——或只说主题，我会询问]"
 ---
+
+<!--
+This file is a Chinese translation of the original by Anthropic PBC.
+Original: https://github.com/anthropics/claude-for-legal
+Licensed under Apache License 2.0
+-->
+
 
 # /fto-triage
 
-**This is not a freedom-to-operate opinion.** A formal FTO opinion requires a
-comprehensive search, full claim construction, and element-by-element
-infringement analysis by registered patent counsel. Patent infringement is
-strict liability; willful infringement triples damages. A "no obvious blocking
-patents" result from this skill means the triage didn't find one — it does
-not mean the product is clear.
+**这不是自由实施意见书。** 正式的 FTO 意见书需要全面搜索、完整权利要求解释，以及由注册专利律师进行的逐要素侵权分析。专利侵权是严格责任；故意侵权使损害赔偿增至三倍。此 skill 的"未发现明显阻塞专利"结果意味着分流未找到任何内容——并不意味着产品是自由实施的。
 
-## Instructions
+## 说明
 
-1. Read `~/.claude/plugins/config/claude-for-legal/ip-legal/CLAUDE.md`. If it
-   contains `[PLACEHOLDER]`, stop and direct to `/ip-legal:cold-start-interview`.
-2. Follow the workflow below.
-3. Run intake (product/process, technical detail, jurisdictions, known patents,
-   timing).
-4. Run a preliminary patent search if a connector is available (Solve
-   Intelligence Patents, or other patent-research MCP). Otherwise say
-   so in the output and proceed with the patents the user has supplied.
-5. For the 2–5 most plausible patents, build a claim-chart first pass against
-   each independent claim — element by element. Literal read first; flag
-   doctrine-of-equivalents separately; flag indirect / divided infringement.
-6. List open questions a real FTO study would resolve (enforceability,
-   prosecution history, IPR outcomes, license availability, enforcement
-   history of the assignee).
-7. Write the triage memo to the matter folder or practice outputs folder. Apply
-   the work-product header per role.
-8. End with recommended next steps, a willfulness note (knowledge of specific
-   patents factors into willfulness if the company proceeds without further
-   counsel review), and the non-lawyer gate if the role is non-lawyer.
+1. 读取 `~/.claude/plugins/config/claude-for-legal/ip-legal/CLAUDE.md`。如果包含 `[PLACEHOLDER]`，停止并指向 `/ip-legal:cold-start-interview`。
+2. 遵循以下工作流。
+3. 运行 intake（产品/工艺、技术细节、司法管辖区、已知专利、时间）。
+4. 如果连接器可用（Solve Intelligence 专利，或其他专利研究 MCP），运行初步专利搜索。否则在输出中说明，并继续使用用户提供的专利。
+5. 对 2-5 个最可能的专利，针对每项独立权利要求逐要素进行权利要求图表第一遍。先字面解读；等效原则单独标记；标记间接侵权/分散侵权。
+6. 列出真正的 FTO 研究会解决的悬疑问题（可执行性、申请历史、IPR 结果、许可证可用性、权利受让人的执法历史）。
+7. 将分流备忘录写入事项文件夹或执业输出文件夹。按角色应用工作产品标题。
+8. 以推荐的下一步、故意侵权注释（了解特定专利在某些情况下可能影响公司继续进行时的故意侵权分析），以及如果角色是非律师的非律师关卡结束。
 
-This skill never concludes that a product is clear to launch. If uncertain,
-flag — patent counsel decides.
+此 skill 绝不得出产品可以自由实施的结论。如果不确定，标记——专利律师决定。
 
-## Examples
+## 示例
 
 ```
-/ip-legal:fto-triage "an on-device speech recognition model for consumer wearables, US launch first"
+/ip-legal:fto-triage "用于消费类可穿戴设备的设备端语音识别模型，首先在美国发布"
 ```
 
 ```
@@ -56,482 +44,320 @@ flag — patent counsel decides.
 
 ---
 
-## THIS IS NOT A FREEDOM-TO-OPERATE OPINION
+## 这不是自由实施意见书
 
-**The loudest guardrail in the plugin. Say this at the top of every output. Do
-not drop it. Do not soften it. Do not let the reader skim past it.**
+**plugin 中最醒目的护栏。在每次输出顶部说这些。不要删除。不要软化。不要让读者略过。**
 
-> **This is not a freedom-to-operate opinion.** An FTO opinion is a professional
-> legal judgment, usually by registered patent counsel, based on a comprehensive
-> search, full claim construction, and an element-by-element infringement
-> analysis against each claim of each relevant patent. This triage is a
-> structured first look at what might be out there. A "no obvious blocking
-> patents" result means the triage didn't find one — it does not mean the
-> product is clear. Patent infringement is strict liability; willful
-> infringement (which can follow from knowing about a patent and proceeding
-> anyway) triples damages under 35 U.S.C. § 284. The decision to launch, make,
-> use, sell, or import is a business decision informed by a formal FTO study
-> and counsel's judgment — not by this triage. A registered patent attorney or
-> agent evaluates before anyone relies on this for a product decision.
+> **这不是自由实施意见书。** FTO 意见书是专业法律判断，通常由注册专利律师基于全面搜索、完整权利要求解释，以及对每项相关专利每项权利要求的逐要素侵权分析做出。此分流是对可能存在什么的结构化初步审视。"未发现明显阻塞专利"结果意味着分流未找到任何内容——并不意味着产品是自由实施的。专利侵权是严格责任；故意侵权（在了解专利后继续进行可能导致）使 35 U.S.C. § 284 下的损害赔偿增至三倍。发布、制造、使用、销售或进口的决定是由正式 FTO 研究和律师判断告知的商业决策——而非此分流。注册专利律师或代理人在任何人将此用于产品决策之前进行评估。
 
-Under-flagging a blocking patent is a one-way door — a product launched, a
-deposition a year later, treble damages on the table. Over-flagging is a
-two-way door — the attorney narrows the list in a read-through. Stay on the
-two-way door side. Always.
+低报阻塞性专利是单向门——发布的产品、一年后的庭审取证、三倍损害赔偿摆在面前。高报是双向门——律师在通读中缩小列表。始终留在双向门侧。
 
-### A note on willfulness
+### 关于故意侵权的注释
 
-Reading this triage is reading something about patents. Reading something about
-patents can, in some circumstances, factor into a willfulness analysis down the
-road. This is one reason the output is marked as privileged when a lawyer is
-using it, and why the non-lawyer output is framed as research to take to
-counsel. Do not discuss specific patents surfaced by this triage outside
-privileged channels.
+阅读此分流就是在阅读关于专利的内容。在某些情况下，阅读关于专利的内容可能在将来的故意侵权分析中发挥作用。这是当律师使用此分流时输出被标记为特权的原因之一，也是为什么非律师输出被框架为带给律师的研究的原因。不要在特权渠道之外讨论此分流浮出的具体专利。
 
 ---
 
-## Matter context
+## 事项上下文
 
-**Matter context.** Check `## Matter workspaces` in the practice-level CLAUDE.md. If `Enabled` is `✗` (the default for in-house users), skip the rest of this paragraph — skills use practice-level context and the matter machinery is invisible. If enabled and there is no active matter, ask: "Which matter is this for? Run `/ip-legal:matter-workspace switch <slug>` or say `practice-level`." Load the active matter's `matter.md` for matter-specific context and overrides. Write outputs to the matter folder at `~/.claude/plugins/config/claude-for-legal/ip-legal/matters/<matter-slug>/`. Never read another matter's files unless `Cross-matter context` is `on`.
+**事项上下文。** 检查执业级 CLAUDE.md 中的 `## 事项工作区`。如果 `已启用` 为 `✗`（内部用户的默认值），跳过本段其余内容——skill 使用执业级上下文，事项机制不可见。如果已启用且没有活跃事项，询问："这是哪个事项的？运行 `/ip-legal:matter-workspace switch <slug>` 或说 `practice-level`。"加载活跃事项的 `matter.md` 以获取事项特定上下文和覆盖。将输出写入 `~/.claude/plugins/config/claude-for-legal/ip-legal/matters/<matter-slug>/` 的事项文件夹。除非 `Cross-matter context` 为 `on`，否则永远不要读取另一个事项的文件。
 
-Patent FTO matters are particularly common candidates for **clean-team** or
-**heightened** confidentiality at matter-open. Respect the matter's confidentiality
-marking from `matter.md`.
+专利 FTO 事项特别常见的情况是在事项开启时采用**保密团队**或**加强**保密级别。遵守 `matter.md` 中的事项保密标记。
 
 ---
 
-## Load the practice profile first
+## 首先加载执业档案
 
-Before running triage, read `~/.claude/plugins/config/claude-for-legal/ip-legal/CLAUDE.md`. Pull:
+在运行分流之前，读取 `~/.claude/plugins/config/claude-for-legal/ip-legal/CLAUDE.md`。提取：
 
-- **Role** from `## Who's using this` (lawyer vs. non-lawyer changes the
-  work-product header and the non-lawyer gate below).
-- **Registered in** and **enforce where** from `## IP practice profile` and
-  `## Enforcement posture` (useful for defensive-portfolio cross-check and for
-  jurisdiction defaults).
-- **Patent OC** from `## IP practice profile` → `Outside counsel roster` for
-  the routing step.
-- **Integrations** from `## Available integrations` — specifically Solve
-  Intelligence, or any patent-research MCP. Determines what searches
-  are available.
-- **Decision posture** from `## Decision posture on subjective legal calls` —
-  this skill never concludes "does not infringe."
+- **角色**，来自 `## 谁在使用这个`（律师 vs. 非律师改变工作产品标题和下面的非律师关卡）。
+- **已注册于**和**执法于**，来自 `## IP 执业档案`和`## 执法立场`（对防御性投资组合交叉检查和司法管辖区默认值有用）。
+- **专利外部律师**，来自 `## IP 执业档案` → `外部律师名册`，用于路由步骤。
+- **集成**，来自 `## 可用集成` — 特别是 Solve Intelligence，或任何专利研究 MCP。决定有哪些搜索可用。
+- **决策立场**，来自 `## 主观法律裁决的决策立场` — 此 skill 永远不得出"不侵权"的结论。
 
-If `~/.claude/plugins/config/claude-for-legal/ip-legal/CLAUDE.md` contains `[PLACEHOLDER]` or `[Your Company Name]`, surface this bounce:
+如果 `~/.claude/plugins/config/claude-for-legal/ip-legal/CLAUDE.md` 包含 `[PLACEHOLDER]` 或 `[Your Company Name]`，呈现此反馈：
 
-> I notice you haven't configured your practice profile yet — that's how I tailor posture, jurisdictions, and approval chain to your practice.
+> 我注意到您尚未配置执业档案——那是我如何为您的执业定制立场、司法管辖区和审批链的方式。
 >
-> **Two choices:**
-> - Run `/ip-legal:cold-start-interview` (2 minutes) to configure your profile, then I'll run this tailored to YOUR practice.
-> - Say **"provisional"** and I'll run this against generic defaults — US jurisdiction, middle risk appetite, lawyer role, no playbook — and tag every output `[PROVISIONAL — configure your profile for tailored output]` so you can see what I do before committing.
+> **两个选择：**
+> - 运行 `/ip-legal:cold-start-interview`（2 分钟）以配置您的档案，然后我会为您的执业定制运行此分流。
+> - 说 **"provisional"**，我会用通用默认值运行此分流——美国司法管辖区、中等风险偏好、律师角色、无手册——并为每个输出标注 `[PROVISIONAL — configure your profile for tailored output]`，以便您在承诺前看到我能做什么。
 
-### Provisional mode
+### 临时模式
 
-If the user says "provisional," run the FTO triage normally using these generic defaults: middle risk appetite, lawyer role, US jurisdiction, no playbook (do the full analysis rather than matching against a position list). Tag the reviewer note and every finding block with `[PROVISIONAL]`. At the end of the output, append:
+如果用户说"provisional"，使用这些通用默认值正常运行 FTO 分流：中等风险偏好、律师角色、美国司法管辖区、无手册（做完整分析而不是匹配立场列表）。用 `[PROVISIONAL]` 标记审阅者注释和每个发现块。在输出末尾附加：
 
-> "That was a generic run against default assumptions. Run `/ip-legal:cold-start-interview` to get output calibrated to YOUR practice — your playbook, your jurisdiction, your risk appetite. 2 minutes."
+> "这是针对默认假设的通用运行。运行 `/ip-legal:cold-start-interview` 以获得针对您执业校准的输出——您的手册、您的司法管辖区、您的风险偏好。2 分钟。"
 
 ---
 
 ## Intake
 
-Ask in a single batch:
+在一个批次中询问：
 
-> I'll run an FTO triage. A few questions first:
+> 我将运行 FTO 分流。先几个问题：
 >
-> 1. **Product, process, or feature.** What's being made, used, offered for
->    sale, sold, or imported? Describe it plainly — the technical essence, not
->    the marketing pitch.
-> 2. **Technical detail.** Any architectural diagrams, claim-relevant specs, a
->    public product page, or a spec document you can share? (The more detail,
->    the more real the triage.)
-> 3. **Jurisdictions.** Where will it be made, used, sold, offered for sale,
->    imported? (Each is a separate infringing act under 35 U.S.C. § 271. I'll
->    default to the US if you don't specify.)
-> 4. **Known patents.** Are there patents already on your radar — a competitor's
->    portfolio, a known SEP pool, an NPE letter, something an engineer
->    mentioned?
-> 5. **Timing.** How close is this to launch? If it's months out, the triage
->    is early and design-around is on the table. If it's already shipping,
->    we're in cover-our-downside mode.
+> 1. **产品、工艺或功能。** 正在制造、使用、要约销售、销售或进口什么？用简单语言描述——技术本质，而非营销口号。
+> 2. **技术细节。** 任何架构图、权利要求相关规格、公开的产品页面，或您可以共享的规格文档？（细节越多，分流越真实。）
+> 3. **司法管辖区。** 它将在哪里制造、使用、销售、要约销售、进口？（每个都是 35 U.S.C. § 271 下的独立侵权行为。如果您不指定，我将默认美国。）
+> 4. **已知专利。** 是否有您已经注意到的专利——竞争对手的投资组合、已知的 SEP 池、NPE 函件、工程师提到的内容？
+> 5. **时间。** 距发布有多近？如果还有几个月，分流是早期的，设计规避在考虑之列。如果已经在发货，我们处于覆盖下行风险模式。
 
-Wait for the answer. If the description is vague ("an AI agent," "a database"),
-push once:
+等待回答。如果描述模糊（"一个 AI 代理"、"一个数据库"），推动一次：
 
-> Give me the technical essence — what does the thing do, how does it do it,
-> and what's the piece you think might be novel? Patent claims live at that
-> level.
+> 给我技术本质——这个东西做什么、怎么做，以及您认为可能新颖的部分是什么？专利权利要求就在那个层面。
 
 ---
 
-## Scope — utility patents only
+## 范围——仅实用专利
 
-**This skill analyzes utility patents.** If a patent on the radar has a `D`,
-`RE`, or `PP` prefix, flag it and route out, do not claim-chart it:
+**此 skill 分析实用专利。** 如果雷达上的专利有 `D`、`RE` 或 `PP` 前缀，标记并路由出去，不要对其制作权利要求图表：
 
-- **`D` (design patent).** Different test entirely — ordinary observer under
-  *Egyptian Goddess, Inc. v. Swisa, Inc.*, 543 F.3d 665 (Fed. Cir. 2008) (en
-  banc), overall ornamental appearance, no claim chart. Route to the
-  `infringement-triage` design patent branch and to design patent counsel.
-  **Design patents are not analyzed in this FTO triage** — a design-patent
-  overlap must be flagged as a separate workstream.
-- **`RE` (reissue).** Treat as a utility patent with added §252 intervening-
-  rights and recapture-rule flags.
-- **`PP` (plant patent).** Route to plant-patent counsel; out of scope.
+- **`D`（外观设计专利）。** 完全不同的测试——*Egyptian Goddess, Inc. v. Swisa, Inc.*, 543 F.3d 665（Fed. Cir. 2008）（全席判决）下的普通观察者测试，整体装饰外观，无权利要求图表。路由到 `infringement-triage` 外观设计专利分支和外观设计专利律师。**外观设计专利不在此 FTO 分流中分析**——外观设计专利重叠必须作为独立工作流标记。
+- **`RE`（再颁专利）。** 作为其再颁的实用专利处理，但增加 §252 介入权和夺回规则标记。
+- **`PP`（植物专利）。** 路由给植物专利律师；超出范围。
 
-Also cross-flag **trade dress**: if the product's appearance is the risk,
-the same facts may be a §43(a) product-configuration claim that requires
-secondary meaning (*Wal-Mart Stores, Inc. v. Samara Bros., Inc.*, 529 U.S.
-205 (2000)) and non-functionality (*TrafFix Devices, Inc. v. Marketing
-Displays, Inc.*, 532 U.S. 23 (2001)). Flag as a parallel track.
+还要交叉标记**商业外观**：如果产品外观是风险，相同的事实可能是 §43(a) 产品构型主张，需要第二含义（*Wal-Mart Stores, Inc. v. Samara Bros., Inc.*, 529 U.S. 205（2000））和非功能性（*TrafFix Devices, Inc. v. Marketing Displays, Inc.*, 532 U.S. 23（2001））。标记为平行途径。
 
 ---
 
-## Search
+## 搜索
 
-### What the user has connected
+### 用户连接了什么
 
-Read `## Available integrations`:
+读取 `## 可用集成`：
 
-- **Solve Intelligence connected:** run a preliminary search across the
-  technical description. Note the date of the search, the query used, the
-  jurisdictions covered, and any date window (current in-force patents; recent
-  published applications).
-- **Patent-research MCP (Google Patents Public Datasets, PatSnap
-  export): available:** use it.
-- **None of the above:** explicitly say so. Do not infer patents from model
-  knowledge and present them as search results.
+- **Solve Intelligence 已连接：** 跨技术描述运行初步搜索。注意搜索日期、使用的查询、覆盖的司法管辖区，以及任何日期窗口（当前有效专利；最近发布的申请）。
+- **专利研究 MCP（Google Patents 公共数据集、PatSnap 导出）：可用：** 使用它。
+- **以上都没有：** 明确说明。不要从模型知识推断专利并将其作为搜索结果呈现。
 
-### Fallback when no patent database is connected
+### 无专利数据库连接时的后备
 
-Write this exact statement in the output:
+在输出中写出这个确切声明：
 
-> **No patent database search was run.** This triage did not hit Solve
-> Intelligence Patents, USPTO Patents Full-Text, EPO Espacenet,
-> Google Patents, PatSnap, or any other patent corpus. A structured search
-> across the jurisdictions in scope is required before relying on this triage
-> for any launch decision. The analysis below is limited to patents and
-> applications the user has named or that come up in the conversation.
+> **未运行专利数据库搜索。** 此分流未命中 Solve Intelligence 专利、USPTO 专利全文、EPO Espacenet、Google Patents、PatSnap 或任何其他专利语料库。在将此分流用于任何发布决策之前，需要跨范围内司法管辖区进行结构化搜索。以下分析仅限于用户命名的或在对话中出现的专利和申请。
 
-Then proceed. The claim-chart-first-pass work below is still valuable — just
-label the scope honestly.
+然后继续。权利要求图表第一遍工作仍然有价值——只是诚实标记范围。
 
-### Supplementary signals (not a substitute)
+### 补充信号（不是替代）
 
-If available and the user allows, sweep for non-patent signals that flag a
-patent concern:
+如果可用且用户允许，扫描标记专利关注的非专利信号：
 
-- **Competitor patent filings** around the product area.
-- **Known NPE targeting** of the technology class (e.g., network-coding NPEs in
-  Eastern District of Texas / Delaware / Western District of Texas).
-- **Standards-essential declarations** (IEEE, ETSI, 3GPP) if the product touches
-  a relevant standard.
-- **Reported litigation** in the technology space (CourtListener / RECAP, Unified
-  Patents, Lex Machina).
+- 产品领域的**竞争对手专利申请**。
+- 对该技术类别的**已知 NPE 针对**（例如，德克萨斯州东区/特拉华区/德克萨斯州西区的网络编码 NPE）。
+- 如果产品涉及相关标准的**标准必要声明**（IEEE、ETSI、3GPP）。
+- 技术领域的**报告诉讼**（CourtListener/RECAP、Unified Patents、Lex Machina）。
 
-Each signal is a reason to look harder, not a patent hit. Mark them as signals
-in the output, not as identified patents.
+每个信号是更深入查找的理由，而非专利命中。在输出中将其标记为信号，而非识别出的专利。
 
 ---
 
-## For each relevant patent found or supplied
+## 对于每个找到或提供的相关专利
 
-Capture:
+捕获：
 
-- **Patent number** (with application number if different) and **jurisdiction**
-- **Title**
-- **Assignee and inventors**
-- **Priority date and issue date**
-- **Expiration date** (per USPTO PAIR / PatentCenter / foreign equivalent —
-  check term adjustments, term extensions, and terminal disclaimers)
-- **Maintenance fee status / in-force status** — if a US patent has failed a
-  3.5/7.5/11.5-year maintenance fee, it's expired and not a bar
-- **Claim count — independent and dependent**
-- **Independent claims as issued** (and any relevant amended claims from
-  post-grant proceedings)
-- **Related proceedings** — IPRs, PGRs, reexaminations, litigation history,
-  PTAB outcomes
-- **File wrapper highlights** — prosecution disclaimers, amendments that
-  narrowed the claims, statements about scope
+- **专利号**（如与申请号不同）和**司法管辖区**
+- **标题**
+- **受让人和发明人**
+- **优先日期和颁发日期**
+- **到期日期**（按 USPTO PAIR/PatentCenter/外国等效物——检查期限调整、期限延伸和终止免责声明）
+- **维护费状态/有效状态** — 如果美国专利未支付 3.5/7.5/11.5 年维护费，则已到期，不构成障碍
+- **权利要求数——独立和从属**
+- **颁发时的独立权利要求**（以及任何申请后程序的修订权利要求）
+- **相关程序** — IPR、PGR、再审、诉讼历史、PTAB 结果
+- **文件包装亮点** — 申请过程中限制范围的申请历史免责声明、修正案、陈述
 
-**Do not supplement silently.** If a search surfaces a patent, attribute the
-result. If the user mentioned a patent, say that. Never invent a patent
-number, never "fill in" a claim element the file doesn't support, never
-imagine an expiration date. If maintenance fee status isn't available, write
-"maintenance fee status not verified from search result — confirm in PAIR
-before relying on in-force status."
+**不得静默补充。** 如果搜索浮出了专利，归因结果。如果用户提到了专利，如实说明。永远不要捏造专利号，永远不要"填充"文件不支持的权利要求要素，永远不要凭空想象到期日期。如果维护费状态不可用，写"维护费状态未从搜索结果中验证——依赖有效状态前在 PAIR 中确认"。
 
 ---
 
-## Claim-chart first pass
+## 权利要求图表第一遍
 
-This is the core of the triage. Pick the patents with the most plausible read
-on the product — usually the 2–5 with the closest technical mapping — and walk
-each independent claim element-by-element.
+这是分流的核心。选择对产品读取最可能的专利——通常是 2-5 个技术映射最接近的——并逐要素遍历每项独立权利要求。
 
-**For each selected patent, write out one claim chart per independent claim:**
+**对于每个选定的专利，为每项独立权利要求写出一张权利要求图表：**
 
-| Claim element | Does the product practice this? | Basis |
+| 权利要求要素 | 产品是否实施此要素？ | 依据 |
 |---|---|---|
-| "A [preamble phrase]" | [yes / no / possibly / depends on construction] | [one sentence — what in the product maps; what doesn't; what's ambiguous] |
-| "comprising [element 1]" | [yes / no / possibly] | [mapping or gap] |
-| "wherein [element 2]" | [yes / no / possibly] | [mapping or gap] |
-| [continue for every element] | | |
+| "一个 [前序部分]" | [是/否/可能/取决于解释] | [一句话——产品中的什么映射；什么不映射；什么是模糊的] |
+| "包含 [要素 1]" | [是/否/可能] | [映射或差距] |
+| "其中 [要素 2]" | [是/否/可能] | [映射或差距] |
+| [继续每个要素] | | |
 
-**Rules for the chart:**
+**图表规则：**
 
-- **Every element matters.** A claim is infringed only if the accused product
-  practices every element of at least one claim (all-elements rule). Missing one
-  element literally means no literal infringement on that claim. Do not skip.
-- **Doctrine of equivalents is a separate pass.** First chart literal
-  infringement. Then, for any "no" elements, note whether a DOE read is
-  plausible (insubstantial differences / function-way-result). Flag DOE
-  analysis as requiring attorney judgment — prosecution history estoppel and
-  claim vitiation are common bars and the triage does not adjudicate them.
-- **Claim construction is the attorney's job.** Where a term could be
-  construed narrowly or broadly and the answer changes the infringement read,
-  flag the term and note both constructions. Do not pick one silently.
-- **Indirect infringement (induced, contributory) and divided infringement**
-  are flags only. Do not attempt a full analysis; note that these may apply and
-  require patent counsel.
+- **每个要素都重要。** 只有被指控产品实施至少一项权利要求的每个要素时，权利要求才被侵权（全要素规则）。字面上缺少一个要素意味着对该权利要求没有字面侵权。不要跳过。
+- **等效原则是单独的一遍。** 先图表字面侵权。然后，对于任何"否"要素，注意 DOE 解读是否合理（实质性差异不显著/功能-方式-结果）。将 DOE 分析标记为需要律师判断——申请历史禁反言和权利要求虚化是常见障碍，分流不裁定它们。
+- **权利要求解释是律师的工作。** 当一个术语可以被狭义或广义解释且答案改变侵权解读时，标记该术语并注明两种解释。不要静默选择一种。
+- **间接侵权（诱导侵权、协助侵权）和分散侵权**仅作为标记。不要尝试完整分析；注意这些可能适用并需要专利律师。
 
-> **Patent systems differ by jurisdiction.** The US claim chart (all-elements rule, doctrine of equivalents, prosecution history estoppel, §284/§289 damages) does not transfer to other systems:
-> - **Germany:** Utility models (Gebrauchsmuster), the Schneidmesser/Kunststoffrohrteil questions for DOE, bifurcated validity/infringement proceedings.
-> - **China:** Utility models (shiyong xinxing), CNIPA examination, different claim construction.
-> - **Japan:** Utility models, JPO examination, a narrower DOE.
-> - **Europe (unified patent court):** UPC procedure as of 2023.
+> **专利制度因司法管辖区而异。** 美国权利要求图表（全要素规则、等效原则、申请历史禁反言、§284/§289 损害赔偿）不适用于其他制度：
+> - **德国：** 实用新型（Gebrauchsmuster）、等效原则的 Schneidmesser/Kunststoffrohrteil 问题、分叉的有效性/侵权程序。
+> - **中国：** 实用新型（实用新型），CNIPA 审查，不同的权利要求解释。
+> - **日本：** 实用新型、JPO 审查、较窄的等效原则。
+> - **欧洲（统一专利法院）：** 2023 年起的 UPC 程序。
 >
-> When non-US jurisdictions are in scope: "This analysis uses the US claim-charting framework. A product manufactured in China and sold in the EU needs CNIPA and EP analysis, not a US claim chart. I can flag the issues a US analysis surfaces, but the infringement and validity calls require [jurisdiction]-specific review."
+> 当非美国司法管辖区在范围内时："此分析使用美国权利要求图表框架。在中国制造并在欧盟销售的产品需要 CNIPA 和 EP 分析，而非美国权利要求图表。我可以标记美国分析浮出的问题，但侵权和有效性判断需要 [司法管辖区] 特定审查。"
 
-**Decision posture:** per the practice profile, this skill never concludes "no
-infringement." Either:
+**决策立场：** 按照执业档案，此 skill 永远不得出"不侵权"的结论。要么：
 
-- "Product practices every element of Claim X as written; attorney review
-  required before proceeding."
-- "One or more elements are not clearly present; attorney review required to
-  assess literal infringement and doctrine of equivalents."
-- "Claim construction is dispositive on element [Y]; attorney construction
-  required before proceeding."
+- "产品实施按书面含义的权利要求 X 的每个要素；在继续之前需要律师审查。"
+- "一个或多个要素在被指控产品中不明确存在；需要律师审查以评估字面侵权和等效原则。"
+- "权利要求解释对要素 [Y] 具有决定性；在继续之前需要律师解释。"
 
 ---
 
-## Open questions
+## 悬疑问题
 
-Every patent surfaced in the triage should produce a list of open questions
-that a real FTO study would answer. Examples:
+分流中浮出的每项专利都应产生真正的 FTO 研究会回答的悬疑问题列表。示例：
 
-- Is the patent enforceable — has the assignee been named, any standing issues,
-  any inventorship defects, any recorded assignments?
-- What did the applicant say about term [X] in prosecution, and does that
-  limit the claim?
-- Has this claim been the subject of an IPR or reexamination — what did the
-  PTAB say about scope or validity?
-- Is there a license already available (standards pool, patent marking, open
-  patent non-assertion commitment)?
-- What's the real-world enforcement history of this assignee?
+- 专利是否可执行——受让人是否已命名，是否有任何诉权问题，是否有任何发明人瑕疵，是否有任何记录的转让？
+- 申请人在申请过程中关于术语 [X] 说了什么，这是否限制了权利要求？
+- 这项权利要求是否曾是 IPR 或再审的主题——PTAB 对范围或有效性说了什么？
+- 是否已有可用许可证（标准池、专利标记、开放专利不主张承诺）？
+- 此受让人的现实执法历史是什么？
 
-List them plainly.
+直接列出。
 
 ---
 
-## Recommended next steps
+## 推荐的下一步
 
-Bucket by what the triage found:
+按分流发现的内容分组：
 
-- **If every element of an independent claim maps to the product (literal read):**
-  *Stop and get patent counsel.* Options typically include formal FTO opinion,
-  design-around, license, challenge validity (IPR/PGR), or (rarely) proceed at
-  risk. The choice is a business decision informed by counsel.
-- **If elements cut both ways or claim construction is dispositive:**
-  Full FTO study by registered patent counsel. Do not launch on this triage.
-- **If the patent appears expired, abandoned, or unenforceable:** Attorney
-  confirms the in-force status — the triage does not.
-- **If no patents were identified in the search but no database access
-  existed:** Formal search is the next step, not a launch decision.
-- **Always:** flag a willfulness risk. If the triage surfaces a specific
-  patent, the company now has knowledge of it. Proceeding without further
-  analysis can support a willfulness finding. Counsel should document the
-  path forward.
+- **如果独立权利要求的每个要素映射到产品（字面解读）：**
+  *停止并聘请专利律师。* 选项通常包括正式 FTO 意见书、设计规避、许可、质疑有效性（IPR/PGR），或（罕见地）承担风险继续。选择是由律师告知的商业决策。
+- **如果要素双方各切割或权利要求解释具有决定性：**
+  由注册专利律师进行完整 FTO 研究。不要凭此分流做出发布决策。
+- **如果专利似乎已到期、放弃或不可执行：** 律师确认有效状态——分流不做确认。
+- **如果搜索中未发现专利但没有数据库访问：** 正式搜索是下一步，而非发布决策。
+- **始终：** 标记故意侵权风险。如果分流浮出了特定专利，公司现在已了解它。在没有进一步分析的情况下继续进行可能支持故意侵权认定。律师应记录前进路径；发布、设计规避或许可的商业决策由正式 FTO 意见书和律师判断告知，而非此分流。
 
 ---
 
-## Output format
+## 输出格式
 
-Prepend the work-product header from `~/.claude/plugins/config/claude-for-legal/ip-legal/CLAUDE.md` `## Outputs`. Mark the document as privileged if the role is lawyer; see the non-lawyer gate below if not.
+在前面附上 `~/.claude/plugins/config/claude-for-legal/ip-legal/CLAUDE.md` `## 输出` 中的工作产品标题。如果角色是律师，将文件标记为特权；如果不是律师，参阅下面的非律师关卡。
 
 ```markdown
-[WORK-PRODUCT HEADER]
+[工作产品标题]
 
-# FTO Triage — First Pass (NOT AN OPINION)
+# FTO 分流——第一遍（非意见书）
 
-**This is not a freedom-to-operate opinion.** A formal FTO opinion requires a
-comprehensive search, full claim construction, and element-by-element
-infringement analysis by registered patent counsel. Patent infringement is
-strict liability; willful infringement triples damages. A "no obvious blocking
-patents" result means the triage didn't find one — it does not mean the product
-is clear. A registered patent attorney or agent evaluates before anyone relies
-on this for a product decision.
+**这不是自由实施意见书。** 正式的 FTO 意见书需要全面搜索、完整权利要求解释，以及由注册专利律师进行的逐要素侵权分析。专利侵权是严格责任；故意侵权使损害赔偿增至三倍。"未发现明显阻塞专利"结果意味着分流未找到任何内容——并不意味着产品是自由实施的。注册专利律师或代理人在任何人将此用于产品决策之前进行评估。
 
-**Triage result:** [GREEN / YELLOW / RED — one sentence why]
+**分流结果：** [绿色/黄色/红色——一句话原因]
 
-## Subject
+## 主题
 
-- **Product / process / feature:** [description, technical essence]
-- **Technical detail relied on:** [what was reviewed — spec, diagram, public
-  page, code, engineer's description]
-- **Jurisdictions in scope:** [make / use / sell / offer / import — per § 271]
-- **Timing:** [pre-launch / near-launch / shipping]
+- **产品/工艺/功能：** [描述，技术本质]
+- **依赖的技术细节：** [已审阅的内容——规格、图表、公开页面、代码、工程师描述]
+- **范围内的司法管辖区：** [按 § 271 制造/使用/销售/要约/进口]
+- **时间：** [发布前/近发布/正在发货]
 
-## Search scope
+## 搜索范围
 
-- **Databases searched:** [Solve Intelligence / Google Patents /
-  Espacenet / PatSnap — or "no database search run"]
-- **Query / approach:** [query text, technology classes, keywords, classifications]
-- **Date / date window:** [search date; in-force patents + applications
-  published since YYYY-MM-DD]
-- **Jurisdictions covered by the search:** [list]
-- **What wasn't searched:** [named-assignee sweeps, SEP declarations, NPE
-  portfolios, design patents, foreign equivalents — as applicable]
+- **已搜索的数据库：** [Solve Intelligence/Google Patents/Espacenet/PatSnap——或"未运行数据库搜索"]
+- **查询/方法：** [查询文本、技术分类、关键词、分类]
+- **日期/日期窗口：** [搜索日期；有效专利 + 自 YYYY-MM-DD 以来发布的申请]
+- **搜索覆盖的司法管辖区：** [列表]
+- **未搜索的内容：** [指定受让人扫描、SEP 声明、NPE 投资组合、外观设计专利、外国等效物——如适用]
 
-*If no database search was run:* **No patent database search was run.** This
-triage did not hit Solve Intelligence Patents, USPTO Patents Full-Text,
-EPO Espacenet, Google Patents, PatSnap, or any other patent corpus. A
-structured search across the jurisdictions in scope is required before
-relying on this triage for any launch decision.
+*如果未运行数据库搜索：* **未运行专利数据库搜索。** 此分流未命中 Solve Intelligence 专利、USPTO 专利全文、EPO Espacenet、Google Patents、PatSnap 或任何其他专利语料库。在将此分流用于任何发布决策之前，需要跨范围内司法管辖区进行结构化搜索。
 
-## Patents identified
+## 识别的专利
 
-| Patent | Jurisdiction | Assignee | Priority / Issue | Expiration | In-force? | Source |
+| 专利 | 司法管辖区 | 受让人 | 优先日/颁发日 | 到期日 | 有效？ | 来源 |
 |---|---|---|---|---|---|---|
-| [number] | [US/EP/...] | [assignee] | [dates] | [date] | [yes/no/unverified] | [search result link or "user-supplied"] |
+| [号码] | [美国/EP/...] | [受让人] | [日期] | [日期] | [是/否/未验证] | [搜索结果链接或"用户提供"] |
 
-## Claim charts — first pass
+## 权利要求图表——第一遍
 
-### [Patent number] — independent Claim [N]
+### [专利号] — 独立权利要求 [N]
 
-> "[Exact text of Claim N]"
+> "[权利要求 N 的确切文本]"
 
-| Element | Practiced by the product? | Basis |
+| 要素 | 产品是否实施？ | 依据 |
 |---|---|---|
-| [element 1] | [yes/no/possibly] | [mapping or gap] |
-| [element 2] | [yes/no/possibly] | [mapping or gap] |
+| [要素 1] | [是/否/可能] | [映射或差距] |
+| [要素 2] | [是/否/可能] | [映射或差距] |
 
-**Literal read:** [every element maps / one or more elements do not clearly
-map / claim construction is dispositive on element [Y]]
+**字面解读：** [每个要素映射/一个或多个要素不明确映射/权利要求解释对要素 [Y] 具有决定性]
 
-**Doctrine of equivalents (flag only):** [DOE read plausible on element [Y] —
-attorney construction required / not plausible on the surfaced elements /
-prosecution history suggests estoppel]
+**等效原则（仅标记）：** [要素 [Y] 上的 DOE 解读合理——需要律师解释/浮出要素上不合理/申请历史建议禁反言]
 
-**Indirect / divided infringement (flag only):** [note if any read depends on
-induced, contributory, or divided infringement theories — attorney analysis
-required]
+**间接/分散侵权（仅标记）：** [注意任何解读依赖诱导侵权、协助侵权或分散侵权理论的情况——需要律师分析]
 
-*(Repeat for each independent claim of each selected patent.)*
+*（对每个选定专利的每项独立权利要求重复。）*
 
-## Open questions
+## 悬疑问题
 
-- [question 1]
-- [question 2]
+- [问题 1]
+- [问题 2]
 
-## Signals (not confirmed patents)
+## 信号（非确认专利）
 
-- [competitor filings / NPE activity / SEP declarations / litigation in the
-  technology space — each a reason to search harder, not an identified patent]
+- [竞争对手申请/NPE 活动/SEP 声明/技术领域诉讼——各是深入搜索的理由，而非已识别的专利]
 
-## Recommended next steps
+## 推荐的下一步
 
-- [full FTO study by patent counsel — first-line recommendation unless the
-  search found nothing and comprehensive search already ran]
-- [design-around options if a literal read was found]
-- [license / IPR / PGR / at-risk analysis as counsel directs]
-- [routing per `~/.claude/plugins/config/claude-for-legal/ip-legal/CLAUDE.md` —
-  patent OC named in the practice profile]
+- [由专利律师进行完整 FTO 研究——第一选择建议，除非搜索未发现任何内容且已运行全面搜索]
+- [如果发现字面解读，设计规避选项]
+- [律师指导的许可/IPR/PGR/承担风险分析]
+- [按 `~/.claude/plugins/config/claude-for-legal/ip-legal/CLAUDE.md` 路由——执业档案中命名的专利外部律师]
 
-## Willfulness note
+## 故意侵权注释
 
-This triage surfaces specific patents. Proceeding with the product without
-further counsel review after this knowledge can support a willfulness finding
-and enhanced damages under § 284. The path forward should be documented by
-patent counsel; the business decision to launch, design around, or license is
-informed by a formal FTO opinion and counsel's judgment, not by this triage.
+此分流浮出了特定专利。在了解这些专利后不经进一步律师分析继续进行产品可以支持故意侵权认定和 § 284 下的增强损害赔偿。前进路径应由专利律师记录；发布、设计规避或许可的商业决策由正式 FTO 意见书和律师判断告知，而非此分流。
 
-## Citation verification
+## 引用验证
 
-Every patent number, claim quote, date, and prosecution fact in this memo must
-be verified against the authoritative source (USPTO PatentCenter / PAIR, EPO
-register, national equivalent) before relying on it. Claim quotes are the
-most common error site — a single word changes the analysis. Do not cite a
-result you cannot open.
+此备忘录中的每个专利号、权利要求引用、日期和申请历史事实都必须在依赖之前对照权威来源（USPTO PatentCenter/PAIR、EPO 注册处、国家等效物）进行验证。权利要求引用是最常见的错误点——一个单词就会改变分析。不要引用您无法打开的结果。
 ```
 
 ---
 
-## Non-lawyer gate
+## 非律师关卡
 
-Before issuing the output, read `## Who's using this`. If the Role is Non-lawyer:
+在发出输出之前，读取 `## 谁在使用这个`。如果角色是非律师：
 
-> This output is a research triage, not legal advice. Launching, continuing to
-> sell, or investing in this product based on this triage alone has legal
-> consequences — including strict liability for patent infringement, with
-> enhanced damages for willfulness. Patent counsel needs to evaluate before
-> you move.
+> 此输出是研究分流，而非法律建议。仅基于此分流发布、继续销售或投资此产品有法律后果——包括严格责任专利侵权，以及故意侵权的增强损害赔偿。专利律师需要在您行动之前进行评估。
 >
-> Here's a brief to bring to an attorney — it'll cut the time the conversation
-> takes:
+> 这里有一份带给律师的简报——它会缩短对话时间：
 >
-> [Generate a 1-page summary: the product description, the jurisdictions in
-> scope, the search run (and what wasn't searched), the patents surfaced and
-> the claim-chart-first-pass reads, the open questions, and the three
-> questions to ask the attorney.]
+> [生成 1 页摘要：产品描述、范围内司法管辖区、运行的搜索（以及未搜索的内容）、浮出的专利和权利要求图表第一遍解读、悬疑问题，以及要问律师的三个问题。]
 >
-> If you need to find a licensed attorney, solicitor, barrister, or other authorised legal professional in your jurisdiction: for US patent work, a registered patent attorney or patent agent is required (not every lawyer is registered — the USPTO
-> Office of Enrollment and Discipline maintains a directory). For other jurisdictions, use the relevant patent office register (EPO, UK IPO, etc.). Your professional regulator's referral service is a starting point (state bar in the US, SRA/Bar Standards Board in England & Wales, Law Society in Scotland/NI/Ireland/Canada/Australia, or your jurisdiction's equivalent); specifically ask for registered
-> patent counsel.
+> 如果您需要在您所在的司法管辖区寻找持牌律师、事务律师、大律师或其他授权法律专业人士：对于美国专利工作，需要注册专利律师或专利代理人（不是每个律师都有注册——USPTO 注册和纪律办公室维护目录）。对于其他司法管辖区，使用相关专利局注册处（EPO、UK IPO 等）。您所在专业监管机构的转介服务是起点（美国的州律师协会、英格兰和威尔士的 SRA/Bar Standards Board、苏格兰/北爱尔兰/爱尔兰/加拿大/澳大利亚的法律协会，或您司法管辖区的同等机构）；特别要求注册专利律师。
 
-Deliver the full triage memo alongside the brief. Do not withhold the analysis.
-Flag that the triage itself is a privileged research document and should not
-be forwarded to non-attorney third parties.
+将完整分流备忘录与简报一起交付。不要扣留分析。标记分流本身是特权研究文件，不应转发给非律师第三方。
 
 ---
 
-## Output location
+## 输出位置
 
-If matter workspaces are enabled and a matter is active, write the output to
-`~/.claude/plugins/config/claude-for-legal/ip-legal/matters/<matter-slug>/outputs/fto-triage-<subject-slug>-YYYY-MM-DD.md`.
-Otherwise write to
-`~/.claude/plugins/config/claude-for-legal/ip-legal/outputs/fto-triage-<subject-slug>-YYYY-MM-DD.md`
-and surface the path.
+如果事项工作区已启用且事项处于活跃状态，将输出写入 `~/.claude/plugins/config/claude-for-legal/ip-legal/matters/<matter-slug>/outputs/fto-triage-<subject-slug>-YYYY-MM-DD.md`。否则写入 `~/.claude/plugins/config/claude-for-legal/ip-legal/outputs/fto-triage-<subject-slug>-YYYY-MM-DD.md` 并显示路径。
 
-Append a one-line entry to the matter's `history.md` if a matter is active.
+如果事项处于活跃状态，向事项的 `history.md` 追加一行。
 
 ---
 
-## Close with the next-steps decision tree
+## 以下一步决策树结束
 
-End with the next-steps decision tree per CLAUDE.md `## Outputs`. Customize the options to what this skill just produced — the five default branches (draft the X, escalate, get more facts, watch and wait, something else) are a starting point, not a lock-in. The tree is the output; the lawyer picks.
+根据 CLAUDE.md `## 输出` 以下一步决策树结束。根据此 skill 刚刚生成的内容定制选项——五个默认分支（起草 X、升级、获取更多事实、观察等待、其他）是起点，而非锁定。树就是输出；律师选择。
 
-## What this skill does not do
+## 此 skill 不做什么
 
-- **Issue an FTO opinion.** Ever. The loudest guardrail in the plugin.
-- **Construe claims.** Where construction is dispositive, it flags the term and
-  both plausible constructions. It does not pick one.
-- **Adjudicate validity.** It may note known PTAB proceedings; it does not
-  opine on novelty, obviousness, § 112, § 101, or enablement.
-- **Draft patent claims.** This plugin does not go there; route to prosecution
-  counsel.
-- **Assess damages exposure.** Damages modeling is an expert's job.
-- **Handle trade-secret or trademark analysis** — use `/ip-legal:infringement-triage`
-  with the right mode.
-- **Quote outputs to counterparties or non-privileged audiences.** This is a
-  privileged research document.
+- **发出 FTO 意见书。** 永远。plugin 中最醒目的护栏。
+- **解释权利要求。** 当解释具有决定性时，标记术语和两种合理解释。不要静默选择一种。
+- **裁定有效性。** 可能注意到已知的 PTAB 程序；不对新颖性、非显而易见性、§ 112、§ 101 或可实施性发表意见。
+- **起草专利权利要求。** 此 plugin 不涉及这个；路由给申请律师。
+- **评估损害赔偿风险敞口。** 损害赔偿建模是专家的工作。
+- **处理商业秘密或商标分析** — 使用 `/ip-legal:infringement-triage` 选择正确的模式。
+- **向对方或非特权受众引用输出。** 这是特权研究文件。
 
 ---
 
-## Tone
+## 语气
 
-Technically precise. Element-by-element. Every flag is specific to a claim
-element or a known patent. No hedging prose in the body — the guardrails at
-the top and bottom do the scope work, and the analysis does the analysis. The
-reader should leave knowing what the triage looked at, what it didn't, and
-what the next step is.
+技术精确。逐要素。每个标记都针对特定权利要求要素或已知专利。正文中没有对冲散文——顶部和底部的护栏做范围工作，分析做分析。读者应该在离开时知道分流查看了什么、没查看什么，以及下一步是什么。

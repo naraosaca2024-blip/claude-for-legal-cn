@@ -1,17 +1,23 @@
-# Reg Monitor — managed-agent template
+<!--
+This file is a Chinese translation of the original by Anthropic PBC.
+Original: https://github.com/anthropics/claude-for-legal
+Licensed under Apache License 2.0
+-->
 
-## Overview
+# Reg Monitor — 托管 Agent 模板
 
-Checks regulatory feeds on a schedule, filters by the deploying team's materiality threshold, runs a quick gap check against the policy library for always-material items, and writes a digest. Same source as the [`reg-change-monitor`](../../regulatory-legal/agents/reg-change-monitor.md) Claude Code agent and the [`reg-feed-watcher`](../../regulatory-legal/skills/reg-feed-watcher) / [`policy-diff`](../../regulatory-legal/skills/policy-diff) skills — this directory is the Managed Agent cookbook for `POST /v1/agents`.
+## 概述
 
-## ⚠️ Before you deploy
+按计划检查监管信息源，按部署团队的重要性阈值进行筛选，对始终重要的条目执行快速政策库差距检查，并生成摘要。与监管法律 Claude Code Agent [`reg-change-monitor`](../../regulatory-legal/agents/reg-change-monitor.md) 以及 [`reg-feed-watcher`](../../regulatory-legal/skills/reg-feed-watcher) / [`policy-diff`](../../regulatory-legal/skills/policy-diff) skill 同源——本目录是 `POST /v1/agents` 的托管 Agent Cookbook。
 
-- **Digest items are screened leads, not legal conclusions.** The materiality filter applies a configurable threshold, not legal judgment. A regulatory change the agent classifies as "informational" may still be material to your business. A change it flags as "material" may turn out not to apply. Review every digest; a licensed attorney decides whether an item requires action, disclosure, policy change, or escalation.
-- **The policy gap check is a first pass, not a legal assessment of applicability.** The gap surface compares new regulatory text against your policy library using heuristics. A "gap" is a lead for a lawyer to evaluate; an "aligned" result does not certify compliance.
-- **The materiality threshold is your calibration, not law.** If your `## Materiality threshold` section is stale or was tuned for a different risk posture, the triage is stale. Recheck before enabling scheduled runs.
-- **The watchlist is a coverage assertion you made.** A regulator not on the watchlist may still publish something material. Missing a regulator is a configuration bug, not a feed bug.
+## ⚠️ 部署前须知
 
-## Deploy
+- **摘要条目是经筛选的线索，不是法律结论。** 重要性筛选器应用可配置的阈值，而非法律判断。Agent 分类为"信息性"的监管变化，对您的业务仍可能是实质性的；Agent 标记为"重要"的变化，最终可能并不适用于您。请审查每份摘要；由执照律师决定某条目是否需要行动、披露、政策修订或上报。
+- **政策差距检查是初步审查，不是适用性的法律评估。** 差距界面使用启发式规则对照您的政策库比较新监管文本。"差距"是供律师评估的线索；"对齐"的结果不等于合规认证。
+- **重要性阈值是您的校准，不是法律规定。** 如果您的 `## Materiality threshold` 部分过时或是针对不同风险状态调整的，分诊结果也会过时。启用定时运行前请重新确认。
+- **监控名单是您声明的覆盖范围。** 不在监控名单上的监管机构仍可能发布对您有实质影响的内容。遗漏一个监管机构是配置缺陷，不是信息源缺陷。
+
+## 部署
 
 ```bash
 export ANTHROPIC_API_KEY=sk-ant-...
@@ -19,33 +25,33 @@ export GDRIVE_MCP_URL=...
 ../../scripts/deploy-managed-agent.sh reg-monitor
 ```
 
-## Steering events
+## 引导事件
 
-See [`steering-examples.json`](./steering-examples.json). The default weekly sweep uses the first example. The other two cover targeted deep checks on a specific development and gap analysis on a flagged item.
+参见 [`steering-examples.json`](./steering-examples.json)。默认每周扫描使用第一个示例。其他两个示例分别覆盖对特定进展的定向深度检查，以及对已标记条目的差距分析。
 
-## Security & handoffs
+## 安全与交接
 
-Regulatory feed content (Federal Register entries, agency RSS posts, paid feed alerts) is **untrusted input.** Three-tier isolation:
+监管信息源内容（联邦公报条目、机构 RSS 推送、付费信息源告警）是**不可信输入**。三层隔离机制：
 
-| Tier | Touches untrusted docs? | Tools | Connectors |
+| 层级 | 接触不可信文档？ | 工具 | 连接器 |
 |---|---|---|---|
-| **`feed-reader`** | **Yes** | `Read`, `Grep`, `WebFetch` only | None |
-| `materiality-filter` / Orchestrator | No | `Read`, `Grep`, `Glob`, `Agent` | gdrive (orchestrator only) |
-| **`digest-writer`** (Write-holder) | No | `Read`, `Write`, `Edit` | None |
+| **`feed-reader`** | **是** | 仅 `Read`、`Grep`、`WebFetch` | 无 |
+| `materiality-filter` / 编排器 | 否 | `Read`、`Grep`、`Glob`、`Agent` | gdrive（仅编排器） |
+| **`digest-writer`**（写入端） | 否 | `Read`、`Write`、`Edit` | 无 |
 
-`feed-reader` returns length-capped, schema-validated JSON. `materiality-filter` is pure computation over that JSON plus the regulatory-legal configuration on disk — no MCP, no web. `digest-writer` produces `./out/reg-digest-<YYYY-MM-DD>.md` and emits a `handoff_request` for Slack delivery.
+`feed-reader` 返回长度受限、经 schema 验证的 JSON。`materiality-filter` 是对该 JSON 和磁盘上的监管法律配置进行纯计算——无 MCP、无网络。`digest-writer` 生成 `./out/reg-digest-<YYYY-MM-DD>.md` 并发出 `handoff_request` 用于 Slack 投递。
 
-**Handoffs:** the orchestrator routes the `handoff_request` from `digest-writer` to a Slack send worker using the channel from the deploying team's House style configuration. The agent never sends Slack messages itself.
+**交接：** 编排器将 `digest-writer` 发出的 `handoff_request` 路由到 Slack 发送 worker，使用部署团队团队风格配置中指定的频道。Agent 本身不直接发送 Slack 消息。
 
-**Not guaranteed:** this agent surfaces changes and flags potential policy gaps; a lawyer decides whether a regulatory change requires action and who owns the response.
+**不提供保证：** 本 Agent 呈现变化并标记潜在政策差距；由律师决定某项监管变化是否需要采取行动以及由谁负责响应。
 
-## Adaptation notes
+## 适配说明
 
-Before you trust the output on your workflow:
+在将输出接入您的工作流之前：
 
-- **Point `feed-reader` at your sources.** The default target is the Federal Register (free public API, no MCP needed). If your firm subscribes to a paid regulatory feed (e.g., Bloomberg Law) or uses direct agency RSS, add the endpoints to the feed-reader's web_fetch allowlist and adjust the orchestrator's scan plan. If you only have free sources, the Federal Register API alone is workable.
-- **Configure the digest delivery channel.** The digest-writer emits a `handoff_request` that names a Slack channel. The orchestrator reads that channel from your regulatory-legal configuration's **House style → Reg digest** field. Set it before the first scheduled run or the handoff will dead-letter. Teams that want the digest by email or in a Confluence page instead should swap the handoff target in the orchestrator allowlist.
-- **Tune the materiality threshold.** The materiality-filter reads your configuration's `## Materiality threshold` section — always material / review-worthy / FYI. Confirm the tiers reflect your current risk posture before enabling scheduled runs; a threshold set too low floods the digest, too high and you miss obligations with deadlines.
-- **Update the watchlist.** The materiality-filter also reads the `## Regulators we watch` table. Add or remove regulators as your footprint changes.
-- **Confirm the work-product header.** The headless append in `agent.yaml` instructs the agent to prepend your configuration's work-product header. Verify the header language with your GC before turning this on.
-- **Cadence.** Weekly is the default. Active regulatory environments (financial services rulemaking cycles, cross-border AI regulation) may warrant daily. The cadence lives in your own workflow engine — the cookbook does not schedule itself.
+- **将 `feed-reader` 指向您的信息源。** 默认目标是联邦公报（免费公共 API，无需 MCP）。如果您的机构订阅了付费监管信息源（如 Bloomberg Law）或使用直接机构 RSS，请将端点添加到 feed-reader 的 web_fetch 允许列表，并调整编排器的扫描计划。如果您只有免费来源，仅使用联邦公报 API 也是可行的。
+- **配置摘要交付频道。** digest-writer 发出的 `handoff_request` 会指定一个 Slack 频道。编排器从您的监管法律配置的**团队风格 → 监管摘要**字段中读取该频道。请在首次定时运行前设置，否则交接会失效。希望通过邮件接收摘要或保存到 Confluence 页面的团队，应在编排器允许列表中替换交接目标。
+- **调整重要性阈值。** materiality-filter 读取您配置中的 `## Materiality threshold` 部分——始终重要 / 值得审查 / 仅供参考。启用定时运行前请确认各层级反映您当前的风险状态；阈值设置过低会导致摘要充斥大量条目，过高则会遗漏有截止日期的义务。
+- **更新监控名单。** materiality-filter 还会读取 `## Regulators we watch` 表。随着您的业务范围变化，相应增减监管机构。
+- **确认工作成果抬头。** `agent.yaml` 中的无头追加指令会让 Agent 在报告前添加您配置中的工作成果抬头。启用前请与您的总法律顾问核实抬头措辞。
+- **执行周期。** 默认每周一次。活跃的监管环境（金融服务规则制定周期、跨境 AI 监管）可能需要每天执行。执行周期在您自己的工作流引擎中设置——Cookbook 不自行调度。

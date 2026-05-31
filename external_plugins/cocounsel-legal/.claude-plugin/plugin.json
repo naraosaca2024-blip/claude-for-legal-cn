@@ -1,7 +1,7 @@
 {
   "name": "cocounsel-legal",
   "version": "0.1.0",
-  "description": "CoCounsel Legal delivers comprehensive Westlaw Deep Research reports with inline, linked citations to Westlaw and Practical Law sources.",
+  "description": "CoCounsel Legal 提供全面的 Westlaw 深度研究报告，带有指向 Westlaw 和 Practical Law 来源的内联链接引用。",
   "author": {
     "name": "Thomson Reuters",
     "email": "cocounselsupport@tr.com"

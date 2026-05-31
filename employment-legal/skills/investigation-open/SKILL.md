@@ -1,25 +1,28 @@
 ---
 name: investigation-open
 description: >
-  Open a new internal investigation matter — runs intake, generates the sources
-  checklist, and creates the persistent investigation log. Use when a complaint
-  or allegation comes in and the attorney needs to stand up a privileged
-  investigation workspace.
-argument-hint: "[brief description of the allegation]"
+  打开新的内部调查事项——运行接收、生成来源检查清单、创建持久调查日志。当投诉或指控出现且律师需要建立特权调查工作空间时使用。
+argument-hint: "[指控的简要描述]"
 ---
+
+<!--
+This file is a Chinese translation of the original by Anthropic PBC.
+Original: https://github.com/anthropics/claude-for-legal
+Licensed under Apache License 2.0
+-->
+
 
 # /investigation-open
 
-Opens a new investigation matter — runs intake, generates the sources
-checklist, and creates the persistent investigation log.
+打开新的调查事项——运行接收、生成来源检查清单、创建持久调查日志。
 
-## Instructions
+## 说明
 
-1. Load `~/.claude/plugins/config/claude-for-legal/employment-legal/CLAUDE.md`.
-2. Load the `internal-investigation` reference skill and run Mode 1 (Open).
-3. If a matter with the same slug already exists, warn before overwriting.
+1. 加载 `~/.claude/plugins/config/claude-for-legal/employment-legal/CLAUDE.md`。
+2. 加载 `internal-investigation` 参考 skill 并运行模式 1（打开）。
+3. 如果具有相同 slug 的事项已存在，在覆盖前发出警告。
 
-## Examples
+## 示例
 
 ```
 /employment-legal:investigation-open
@@ -28,9 +31,7 @@ Harassment complaint filed against a manager in the Austin office.
 
 ```
 /employment-legal:investigation-open
-(skill will ask for details)
+(skill 将询问详情)
 ```
 
-> Detailed intake, privilege-formation requirements, sources checklist, and log
-> templates live in the `internal-investigation` reference skill — load it
-> before doing substantive work.
+> 详细的接收、特权形成要求、来源检查清单和日志模板位于 `internal-investigation` 参考 skill 中——在进行实质性工作之前加载它。

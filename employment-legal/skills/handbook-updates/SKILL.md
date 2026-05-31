@@ -1,107 +1,111 @@
 ---
 name: handbook-updates
 description: >
-  Diff a proposed handbook change against the current version, flag ripple
-  effects and state supplement impacts. Use when user says "update the
-  handbook", "add this to the handbook", "handbook change", or has a policy
-  ready for insertion.
+  将拟议的手册更改与当前版本进行差异比较，标记连锁效应和州补充影响。当用户说"更新手册"、"把这个添加到手册"、"手册更改"或准备好了要插入的政策时使用。
 ---
 
-# Handbook Updates
+<!--
+This file is a Chinese translation of the original by Anthropic PBC.
+Original: https://github.com/anthropics/claude-for-legal
+Licensed under Apache License 2.0
+-->
 
-## Matter context
 
-**Matter context.** Check `## Matter workspaces` in the practice-level CLAUDE.md. If `Enabled` is `✗` (the default for in-house users), skip the rest of this paragraph — skills use practice-level context and the matter machinery is invisible. If enabled and there is no active matter, ask: "Which matter is this for? Run `/employment-legal:matter-workspace switch <slug>` or say `practice-level`." Load the active matter's `matter.md` for matter-specific context and overrides. Write outputs to the matter folder at `~/.claude/plugins/config/claude-for-legal/employment-legal/matters/<matter-slug>/`. Never read another matter's files unless `Cross-matter context` is `on`.
+# 手册更新
+
+## 事项上下文
+
+**事项上下文。** 检查执业级 CLAUDE.md 中的 `## Matter workspaces`。如果 `Enabled` 为 `✗`（内部用户的默认值），跳过本段的其余部分——skills 使用执业级上下文，事项机制不可见。如果已启用且没有活跃事项，询问："这是哪个事项的？Run `/employment-legal:matter-workspace switch <slug>` 或说 `practice-level`。"加载活跃事项的 `matter.md` 以获取事项特定上下文和覆盖。将输出写入事项文件夹 `~/.claude/plugins/config/claude-for-legal/employment-legal/matters/<matter-slug>/`。除非 `Cross-matter context` 为 `on`，否则永远不要阅读另一个事项的文件。
 
 ---
 
-## Purpose
+## 目的
 
-Handbook changes have ripple effects. Change the PTO policy and you've affected the final pay calculation, the leave policy cross-reference, and three state supplements. This skill finds the ripples before they become inconsistencies.
+手册更改有连锁效应。更改 PTO 政策，你就影响了最终薪资计算、请假政策交叉引用和三个州补充。此 skill 在连锁效应变成不一致之前找到它们。
 
-## Load context
+## 加载上下文
 
-`~/.claude/plugins/config/claude-for-legal/employment-legal/CLAUDE.md` → handbook location, state supplements list, update cadence.
+`~/.claude/plugins/config/claude-for-legal/employment-legal/CLAUDE.md` → 手册位置、州补充列表、更新节奏。
 
-## Workflow
+## 工作流
 
-### Step 1: Get the change
+### 步骤 1：获取更改
 
-- What section is changing?
-- What's the new language?
-- Why? (Legal requirement, policy decision, cleanup)
+- 哪个部分正在更改？
+- 新语言是什么？
+- 为什么？（法律要求、政策决策、清理）
 
-### Step 2: Diff against current
+### 步骤 2：与当前版本差异比较
 
-Read the current handbook section. Show the diff:
+读取当前手册部分。显示差异：
 
 ```diff
-- [old language]
-+ [new language]
+- [旧语言]
++ [新语言]
 ```
 
-### Step 3: Find cross-references
+### 步骤 3：查找交叉引用
 
-Search the handbook for references to the changed section:
+在手册中搜索对已更改部分的引用：
 
-- Other policies that cite this one ("see the PTO policy for accrual rates")
-- Defined terms that this section uses or defines
-- State supplements that modify this section
+- 引用此部分的其他政策（"参见 PTO 政策了解累计比率"）
+- 此部分使用或定义的定义术语
+- 修改此部分的州补充
 
-Each cross-reference: does it still make sense after the change? Flag any that break.
+每个交叉引用：更改后是否仍然合理？标记任何断裂的引用。
 
-### Step 4: State supplement impact
+### 步骤 4：州补充影响
 
-For each state supplement in `~/.claude/plugins/config/claude-for-legal/employment-legal/CLAUDE.md`:
+对于 `~/.claude/plugins/config/claude-for-legal/employment-legal/CLAUDE.md` 中的每个州补充：
 
-- Does this supplement modify the section being changed?
-- Does the change make the supplement obsolete, wrong, or incomplete?
-- Does the change create a need for a *new* supplement in a state that didn't need one before?
+- 此补充是否修改正在更改的部分？
+- 更改是否使补充过时、错误或不完整？
+- 更改是否在以前不需要的州产生了新补充的需求？
 
-### Step 5: Promise check
+### 步骤 5：承诺检查
 
-Is the change reducing something the old version promised?
+更改是否减少了旧版本承诺的内容？
 
-If yes: that's a risk. Some states treat handbook policies as contractual. Reducing a benefit may need more than just updating the document — advance notice, consideration, or in some cases it can't be done retroactively.
+如果是：这是风险。一些州将手册政策视为合同。减少福利可能需要的不仅仅是更新文档——提前通知、对价，或在某些情况下不能追溯适用。
 
-Flag this. Don't block it — but flag it.
+标记它。不要阻止——但标记它。
 
-## Output
+## 输出
 
 ```markdown
-## Handbook Update: [Section name]
+## 手册更新：[部分名称]
 
-### Change
+### 更改
 
-[diff]
+[差异]
 
-### Cross-reference impact
+### 交叉引用影响
 
-| Section | References changed section | Still accurate? | Fix needed |
+| 部分 | 引用了被更改部分 | 仍然准确？ | 需要修复 |
 |---|---|---|---|
-| [name] | [how] | ✅/⚠️ | [what] |
+| [名称] | [如何引用] | ✅/⚠️ | [什么] |
 
-### State supplement impact
+### 州补充影响
 
-| State | Current supplement | After change | Action |
+| 州 | 当前补充 | 更改后 | 行动 |
 |---|---|---|---|
-| [state] | [what it says] | [still valid / obsolete / needs update] | [none / update / new supplement needed] |
+| [州] | [写了什么] | [仍然有效 / 过时 / 需要更新] | [无 / 更新 / 需要新补充] |
 
-### Promise check
+### 承诺检查
 
-[If reducing a benefit: flag + jurisdictional risk note]
+[如果减少了福利：标记 + 司法管辖区风险说明]
 
-### Ready to publish
+### 准备发布
 
-- [ ] Cross-references updated
-- [ ] State supplements updated
-- [ ] [If benefit reduction: notice/consideration addressed]
-- [ ] Version number and date updated
-- [ ] Acknowledgment process (if required)
+- [ ] 交叉引用已更新
+- [ ] 州补充已更新
+- [ ] [如果福利减少：通知/对价已处理]
+- [ ] 版本号和日期已更新
+- [ ] 确认流程（如需要）
 ```
 
-## What this skill does not do
+## 此 skill 不做什么
 
-- Approve handbook changes. HR/legal leadership does.
-- Communicate changes to employees.
-- Track acknowledgments.
+- 批准手册更改。HR/法律领导层做这件事。
+- 向员工传达更改。
+- 跟踪确认回执。

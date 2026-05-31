@@ -1,126 +1,133 @@
 ---
 name: portfolio-status
-description: Roll up the portfolio from _log.yaml — risk distribution, upcoming deadlines, stale matters, materiality totals, stage distribution, and flagged anomalies. Use when the user asks "where do we stand", "how many open matters", or wants a portfolio rollup or status across all active matters.
+description: 从 _log.yaml 汇总投资组合——风险分布、即将到来的截止日期、过期事项、重大性汇总、阶段分布和标记的异常。当用户问"我们进展如何"、"有多少个活跃事项"或想要跨所有活跃事项的投资组合汇总或状态时使用。
 argument-hint: "[--all | --risk=high | --stale]"
 ---
 
+<!--
+This file is a Chinese translation of the original by Anthropic PBC.
+Original: https://github.com/anthropics/claude-for-legal
+Licensed under Apache License 2.0
+-->
+
+
 # /portfolio-status
 
-1. Load `~/.claude/plugins/config/claude-for-legal/litigation-legal/CLAUDE.md` → risk calibration (defines how to read the `risk:` field).
-2. Follow the workflow and reference below.
-3. Parse `~/.claude/plugins/config/claude-for-legal/litigation-legal/matters/_log.yaml`. Filter closed matters by default (include with `--all`).
-4. Produce rollup: risk distribution, deadlines in next 14/30/60 days, matters with no update in >30 days, materiality totals, stage distribution.
-5. Flag anomalies — everything marked critical, overdue next_deadline, matters without outside counsel assigned where risk is medium or high.
+1. 加载 `~/.claude/plugins/config/claude-for-legal/litigation-legal/CLAUDE.md` → 风险校准（定义如何读取 `risk:` 字段）。
+2. 遵循以下工作流和参考。
+3. 解析 `~/.claude/plugins/config/claude-for-legal/litigation-legal/matters/_log.yaml`。默认过滤关闭的事项（使用 `--all` 包含）。
+4. 生成汇总：风险分布、14/30/60 天内的截止日期、超过 30 天无更新的事项、重大性汇总、阶段分布。
+5. 标记异常——所有标记为关键的、逾期的 next_deadline、没有分配外部律师但风险为中或高的事项。
 
 ---
 
-# Portfolio Status
+# 投资组合状态
 
-## Purpose
+## 目的
 
-One read that answers: what do I own right now, what needs attention, and what's slipping? Output is scannable — designed for a counsel who has three minutes before their next call.
+一次阅读回答：我现在拥有什么，什么需要关注，什么正在滑落？输出可扫描——为有三分钟直到下一个电话的律师设计。
 
-## Load context
+## 加载上下文
 
-- `~/.claude/plugins/config/claude-for-legal/litigation-legal/matters/_log.yaml` — source of truth
-- `~/.claude/plugins/config/claude-for-legal/litigation-legal/CLAUDE.md` — risk calibration (to interpret risk/materiality fields correctly)
+- `~/.claude/plugins/config/claude-for-legal/litigation-legal/matters/_log.yaml` — 事实来源
+- `~/.claude/plugins/config/claude-for-legal/litigation-legal/CLAUDE.md` — 风险校准（正确解读 risk/materiality 字段）
 
-## Flags & filters
+## 标志和过滤器
 
-Default: active matters only (exclude `status: closed`).
+默认：仅活跃事项（排除 `status: closed`）。
 
-Flags:
-- `--all` — include closed
-- `--risk=high` (or `critical` / `medium` / `low`) — filter by risk band
-- `--stale` — only matters with `last_updated` > 30 days
-- `--type=employment` — filter by matter type
-- `--owner=[name]` — filter by business/HR/comms owner
+标志：
+- `--all` — 包含关闭的
+- `--risk=high`（或 `critical` / `medium` / `low`）— 按风险区间过滤
+- `--stale` — 仅 `last_updated` 超过 30 天的事项
+- `--type=employment` — 按事项类型过滤
+- `--owner=[name]` — 按业务/HR/通讯负责人过滤
 
-## The rollup
+## 汇总
 
 ```markdown
-[WORK-PRODUCT HEADER — per plugin config ## Outputs — differs by role; see `## Who's using this`]
+[工作产品标题——根据插件配置 ## Outputs——因角色而异；见 `## 谁在使用这个`]
 
-# Portfolio Status — [today]
+# 投资组合状态 — [今天]
 
-**Active matters:** [N]
-**Closed (ytd):** [N] *(shown only with --all)*
+**活跃事项：** [N]
+**已关闭（年初至今）：** [N] *（仅在使用 --all 时显示）*
 
 ---
 
-## By risk
+## 按风险
 
-| Risk | Count | Matters |
+| 风险 | 数量 | 事项 |
 |---|---|---|
-| Critical | [N] | [slugs] |
-| High | [N] | [slugs] |
-| Medium | [N] | [count only — expand with `--risk=medium`] |
-| Low | [N] | [count only] |
+| 关键 | [N] | [slugs] |
+| 高 | [N] | [slugs] |
+| 中 | [N] | [仅计数——使用 `--risk=medium` 展开] |
+| 低 | [N] | [仅计数] |
 
-## Upcoming deadlines
+## 即将到来的截止日期
 
-| Within | Matters |
+| 时间范围 | 事项 |
 |---|---|
-| 14 days | [slug — deadline — brief] |
-| 15–30 days | [...] |
-| 31–60 days | [...] |
+| 14 天内 | [slug — 截止日期 — 摘要] |
+| 15–30 天 | [...] |
+| 31–60 天 | [...] |
 
-*Overdue `next_deadline` flagged separately below.*
+*逾期的 `next_deadline` 在下方单独标记。*
 
-## Materiality
+## 重大性
 
-| Category | Count | Total exposure (midpoint) |
+| 类别 | 数量 | 总敞口（中点） |
 |---|---|---|
-| Reserved | [N] | [$X] |
-| Disclosed | [N] | [$X] |
-| Monitored | [N] | — |
-| None | [N] | — |
+| 已计提准备金 | [N] | [$X] |
+| 已披露 | [N] | [$X] |
+| 监控中 | [N] | — |
+| 无 | [N] | — |
 
-## By stage
+## 按阶段
 
-[table: pleadings / discovery / dispositive motions / trial prep / settlement / appeal]
-
----
-
-## ⚠️ Anomalies & flags
-
-- **Overdue deadlines:** [list slugs where next_deadline has passed]
-- **Stale (>30d no update):** [list]
-- **Conflicts unresolved:** [list slugs with `conflicts.status in [pending, not-run]`]
-- **Conflicts bypassed (override active):** [list slugs where `conflicts.override.by` is populated — permanent flag until manually cleared]
-- **High/critical risk without outside counsel:** [list]
-- **Reserved without last_updated in >60d:** [list] — reserve recalibration likely overdue
-- **Hold not issued on active litigation:** [list]
-- **Missing fields:** [slug → field]
+[表格：诉答 / 发现 / 实体动议 / 庭审准备 / 和解 / 上诉]
 
 ---
 
-## Closing advice
+## ⚠️ 异常和标记
 
-[One or two sentences on what to look at first, if anything stands out. Not boilerplate — only if something truly stands out.]
+- **逾期截止日期：** [列出 next_deadline 已过的 slug]
+- **过期（>30 天无更新）：** [列表]
+- **冲突未解决：** [列出 `conflicts.status in [pending, not-run]` 的 slug]
+- **冲突已绕过（覆盖活跃）：** [列出 `conflicts.override.by` 已填充的 slug——永久标记直到手动清除]
+- **高/关键风险无外部律师：** [列表]
+- **已计提准备金但 last_updated 超过 60 天：** [列表] — 准备金重新校准可能过期
+- **活跃诉讼未发布保留：** [列表]
+- **缺失字段：** [slug → 字段]
+
+---
+
+## 结束建议
+
+[一两句关于首先看什么的话，如果有任何突出的内容。不是套话——仅当确实有突出内容时。]
 ```
 
-## Anomaly rules
+## 异常规则
 
-These are the checks that make the skill useful rather than decorative:
+这些是使 skill 有用而非装饰性的检查：
 
-1. **Overdue deadline:** `next_deadline < today` and `status != closed`
-2. **Stale:** `last_updated < today - 30d` and `status != closed`
-3. **Conflicts unresolved:** `conflicts.status in [pending, not-run]` and `status != closed`
-3b. **Conflicts override active:** `conflicts.override.by != null` (never auto-clears)
-4. **High-risk uncovered:** `risk in [high, critical]` and `outside_counsel.firm == null`
-5. **Stale reserve:** `materiality == reserved` and `last_updated < today - 60d`
-6. **Hold gap:** `status in [threatened, active, discovery, trial, appeal]` and `legal_hold.issued == false` — preservation duty attaches at reasonable anticipation, so `threatened` matters are in scope.
-7. **Missing fields:** any required field null — `risk`, `materiality`, `status`, `opened`, `conflicts.status`
+1. **逾期截止日期：** `next_deadline < today` 且 `status != closed`
+2. **过期：** `last_updated < today - 30d` 且 `status != closed`
+3. **冲突未解决：** `conflicts.status in [pending, not-run]` 且 `status != closed`
+3b. **冲突覆盖活跃：** `conflicts.override.by != null`（永不自动清除）
+4. **高风险无外部律师：** `risk in [high, critical]` 且 `outside_counsel.firm == null`
+5. **过期准备金：** `materiality == reserved` 且 `last_updated < today - 60d`
+6. **保留缺口：** `status in [threatened, active, discovery, trial, appeal]` 且 `legal_hold.issued == false` — 保全义务在合理预期时即附加，因此 `threatened` 事项也在范围内。
+7. **缺失字段：** 任何必需字段为 null——`risk`、`materiality`、`status`、`opened`、`conflicts.status`
 
-## Close with the next-steps decision tree
+## 以下一步决策树结束
 
-End with the next-steps decision tree per CLAUDE.md `## Outputs`. Customize the options to what this skill just produced — the five default branches (draft the X, escalate, get more facts, watch and wait, something else) are a starting point, not a lock-in. The tree is the output; the lawyer picks.
+根据 CLAUDE.md `## Outputs` 以下一步决策树结束。根据此 skill 刚生成的内容自定义选项——五个默认分支（起草 X、升级、获取更多事实、观察等待、其他）是起点，不是锁定。树就是输出；律师选择。
 
-If the portfolio has more than ~10 matters, or any time the user asks: offer the dashboard (see CLAUDE.md `## Outputs → Dashboard offer for data-heavy outputs`). Shape the offer for this output — counts by risk tier, a timeline of upcoming deadlines, and a sortable matter ledger with status, conflicts check, and last-touched date.
+如果投资组合有超过约 10 个事项，或用户任何时候要求：提供仪表板（见 CLAUDE.md `## Outputs → 数据密集型输出的仪表板提议`）。为此输出定制提议——按风险层级计数、即将到来的截止日期时间线，以及带有状态、冲突检查和最后触碰日期的可排序事项分类账。
 
-## What this skill does not do
+## 此 skill 不做什么
 
-- Make decisions. It surfaces what needs attention; the user decides priority.
-- Pretend precision it doesn't have. Exposure midpoints are rough and should be labeled so.
-- Replace a real MMS. This is a working-memory rollup, not a system of record.
+- 做决定。它浮出需要关注的内容；用户决定优先级。
+- 假装不拥有的精确度。敞口中点是粗略的，应该这样标记。
+- 替代真正的 MMS。这是工作记忆汇总，不是记录系统。

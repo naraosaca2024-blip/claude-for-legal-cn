@@ -1,628 +1,426 @@
 ---
 name: infringement-triage
 description: >
-  Infringement triage across trademark, copyright, patent, and trade secret —
-  a flag list with the factors cutting each way, not a finding. Use when
-  assessing whether someone is infringing your IP or whether you might be
-  infringing theirs, when a knockoff or copycat surfaces, or when deciding
-  whether a matter is worth pursuing and how.
-argument-hint: "[describe the facts and which right — or just the facts and I'll ask which right]"
+  跨商标、版权、专利和商业秘密的侵权分流——
+  列出双方切割因素的标志清单，而非最终裁定。当评估他人是否侵犯您的 IP
+  或您是否可能侵犯他人权利时、当发现仿冒品或山寨品时，或在决定是否值得追诉
+  及如何追诉时使用。
+argument-hint: "[描述事实和涉及的权利——或只说事实，我会询问哪项权利]"
 ---
+
+<!--
+This file is a Chinese translation of the original by Anthropic PBC.
+Original: https://github.com/anthropics/claude-for-legal
+Licensed under Apache License 2.0
+-->
+
 
 # /infringement-triage
 
-**This is a triage, not a finding of infringement or non-infringement.**
-Infringement analysis is fact-intensive and legally complex. Acting on a
-triage — sending a cease-and-desist, refusing to stop, filing suit, or
-deciding not to — without attorney review is how companies end up on the
-wrong side of fee awards, Rule 11 sanctions, declaratory-judgment actions,
-and (for patents) treble damages.
+**这是分流，而非侵权或不侵权的裁定。**
+侵权分析是事实密集型的，法律上复杂。在没有律师审查的情况下根据分流采取行动——发送停止侵权函、拒绝停止、提起诉讼，或决定不起诉——正是公司最终面临律师费裁决、第 11 条规则制裁、宣告性判决诉讼，以及（对于专利）三倍损害赔偿的原因。
 
-## Instructions
+## 说明
 
-1. Read `~/.claude/plugins/config/claude-for-legal/ip-legal/CLAUDE.md`. If it
-   contains `[PLACEHOLDER]`, stop and direct to `/ip-legal:cold-start-interview`.
-2. Follow the workflow below.
-3. Ask which right is at issue — trademark / copyright / patent / trade secret
-   / mixed. If mixed, run each separately; do not blend.
-4. Run common intake (party posture — senior or accused, jurisdiction, timing,
-   exhibits).
-5. Walk the mode-specific factors:
-   - **Trademark** — circuit's confusion test + dilution (if famous) +
-     false advertising (if a comparative claim).
-   - **Copyright** — ownership + registration + access + substantial
-     similarity + fair use + DMCA safe harbor (if applicable).
-   - **Patent** — claim-chart first pass (route to `fto-triage` output
-     structure); literal + DOE; indirect + divided; invalidity defenses to
-     consider.
-   - **Trade secret** — secrecy + reasonable measures + misappropriation;
-     preemption + reverse-engineering flags.
-6. Produce a flag list with direction — what cuts toward the senior party,
-   what cuts toward the accused, what's mixed. Never conclude.
-7. Write the triage memo to the matter folder or practice outputs folder. Apply
-   the work-product header per role.
-8. End with recommended next steps, the non-lawyer gate if the role is
-   non-lawyer, and — if the practice posture supports assertion — an offer to
-   draft the C&D via `/ip-legal:cease-desist` or the takedown via
-   `/ip-legal:takedown`. Do not draft automatically.
+1. 读取 `~/.claude/plugins/config/claude-for-legal/ip-legal/CLAUDE.md`。如果包含 `[PLACEHOLDER]`，停止并指向 `/ip-legal:cold-start-interview`。
+2. 遵循以下工作流。
+3. 询问涉及哪项权利——商标/版权/专利/商业秘密/混合。如果混合，分别运行每项；不要合并。
+4. 运行通用 intake（当事方立场——先用权利方或被指控方、司法管辖区、时间、证据）。
+5. 遍历特定模式的因素：
+   - **商标** — 该电路的混淆测试 + 淡化（如果是知名商标）+ 虚假广告（如果是比较声明）。
+   - **版权** — 所有权 + 注册 + 接触 + 实质相似 + 合理使用 + DMCA 安全港（如适用）。
+   - **专利** — 权利要求图表第一遍（路由到 `fto-triage` 输出结构）；字面解读 + 等效原则；间接侵权 + 分散侵权；需要考虑的无效抗辩。
+   - **商业秘密** — 秘密性 + 合理措施 + 侵用；抢先 + 逆向工程标志。
+6. 产出列出方向的标志清单——什么对先用权利方切割、什么对被指控方切割、什么是混合的。永远不得出结论。
+7. 将分流备忘录写入事项文件夹或执业输出文件夹。按角色应用工作产品标题。
+8. 以推荐的下一步、非律师关卡（如果角色是非律师），以及——如果执业立场支持主张——通过 `/ip-legal:cease-desist` 起草停止侵权函或通过 `/ip-legal:takedown` 提交版权通知的提议结束。不要自动起草。
 
-This skill never concludes. If uncertain, flag — the attorney decides.
+此 skill 永远不得出结论。如果不确定，标记——律师决定。
 
-## Examples
+## 示例
 
 ```
-/ip-legal:infringement-triage "competitor launched a tool called APEXSEED in class 9 — we have APEXLEAF registered in class 9; likely confusion?"
+/ip-legal:infringement-triage "竞争对手在 9 类推出了叫 APEXSEED 的工具——我们在 9 类有注册的 APEXLEAF；可能混淆？"
 ```
 
 ```
-/ip-legal:infringement-triage "former engineer took notes on our model architecture to a competitor — possible trade secret?"
+/ip-legal:infringement-triage "前工程师将我们模型架构的笔记带到了竞争对手那里——可能是商业秘密？"
 ```
 
 ```
 /ip-legal:infringement-triage
 ```
 
-(And the skill will ask which right and for the facts.)
+（然后 skill 会询问涉及哪项权利及事实。）
 
 ---
 
-## THIS IS A TRIAGE, NOT A FINDING
+## 这是分流，而非裁定
 
-**The loudest guardrail in the plugin. Say this at the top of every output. Do
-not drop it. Do not soften it.**
+**plugin 中最醒目的护栏。在每次输出顶部说这些。不要删除。不要软化。**
 
-> **This is a triage, not a finding of infringement or non-infringement.**
-> Infringement analysis is fact-intensive and legally complex. The triage
-> identifies the factors and flags the ones that matter most; it does not
-> conclude. A conclusion that something does or does not infringe is a legal
-> opinion that requires an attorney's judgment on the facts, the claim or
-> right scope, the relevant jurisdiction's law, and the likely defenses.
-> Acting on a triage — sending a cease-and-desist, refusing to stop, filing
-> suit, or deciding not to — without attorney review is how companies end up
-> on the wrong side of fee awards, Rule 11 sanctions, declaratory-judgment
-> actions, and (for patents) treble damages.
+> **这是分流，而非侵权或不侵权的裁定。**
+> 分流识别因素并标记最重要的；它不得出结论。关于某事是否侵权的结论是需要律师对事实、权利或主张范围、相关司法管辖区法律和可能抗辩进行判断的法律意见。
+> 在没有律师审查的情况下根据分流采取行动——发送停止侵权函、拒绝停止、提起诉讼，或决定不起诉——正是公司最终面临律师费裁决、第 11 条规则制裁、宣告性判决诉讼，以及（对于专利）三倍损害赔偿的原因。
 
-Under-calling a conflict is a one-way door — a C&D not sent and a mark goes
-generic in the market; a claim not chased and the statute of limitations runs;
-a copied copyrighted work kept on the site. Over-calling is a two-way door —
-the attorney narrows. Stay on the two-way door side.
+低报冲突是单向门——停止侵权函未发送，商标在市场上变成通用词；索赔未追诉，诉讼时效结束；复制的版权作品留在网站上。高报是双向门——律师在审查中缩小范围。留在双向门侧。
 
 ---
 
-## Matter context
+## 事项上下文
 
-**Matter context.** Check `## Matter workspaces` in the practice-level CLAUDE.md. If `Enabled` is `✗` (the default for in-house users), skip the rest of this paragraph — skills use practice-level context and the matter machinery is invisible. If enabled and there is no active matter, ask: "Which matter is this for? Run `/ip-legal:matter-workspace switch <slug>` or say `practice-level`." Load the active matter's `matter.md` for matter-specific context and overrides. Write outputs to the matter folder at `~/.claude/plugins/config/claude-for-legal/ip-legal/matters/<matter-slug>/`. Never read another matter's files unless `Cross-matter context` is `on`.
+**事项上下文。** 检查执业级 CLAUDE.md 中的 `## 事项工作区`。如果 `已启用` 为 `✗`（内部用户的默认值），跳过本段其余内容——skill 使用执业级上下文，事项机制不可见。如果已启用且没有活跃事项，询问："这是哪个事项的？运行 `/ip-legal:matter-workspace switch <slug>` 或说 `practice-level`。"加载活跃事项的 `matter.md` 以获取事项特定上下文和覆盖。将输出写入 `~/.claude/plugins/config/claude-for-legal/ip-legal/matters/<matter-slug>/` 的事项文件夹。除非 `Cross-matter context` 为 `on`，否则永远不要读取另一个事项的文件。
 
-Infringement triages often lead into cease-and-desist drafting or takedown
-routing. Open a matter if one isn't active and the practice is private — the
-triage, the C&D, and any downstream response belong in one workspace.
+侵权分流通常导致起草停止侵权函或路由版权通知。如果执业是私人执业且还没有活跃事项，开启一个——分流、停止侵权函和任何后续回应都应该在一个工作区中。
 
 ---
 
-## Load the practice profile first
+## 首先加载执业档案
 
-Read `~/.claude/plugins/config/claude-for-legal/ip-legal/CLAUDE.md`. Pull:
+在运行分流之前，读取 `~/.claude/plugins/config/claude-for-legal/ip-legal/CLAUDE.md`。提取：
 
-- **Role** from `## Who's using this`.
-- **Enforcement posture** from `## Enforcement posture` — the triage output
-  should end with a routing suggestion consistent with the stated posture
-  (aggressive / measured / conservative) and the named approver for the
-  relevant letter type.
-- **Registered in / enforce where** from `## IP practice profile` — determines
-  which circuit / jurisdiction test to apply by default.
-- **Integrations** from `## Available integrations` — CourtListener,
-  Solve Intelligence each affects whether the triage can cite to case law,
-  prior rulings, or prior art.
-- **Decision posture** from `## Decision posture on subjective legal calls` —
-  this skill never concludes on a subjective threshold.
+- **角色**，来自 `## 谁在使用这个`。
+- **执法立场**，来自 `## 执法立场` — 分流输出应以与声明立场（激进/稳健/保守）和相关函件类型的指定审批人一致的路由建议结束。
+- **已注册于/执法于**，来自 `## IP 执业档案` — 决定默认应用哪个电路/司法管辖区测试。
+- **集成**，来自 `## 可用集成` — CourtListener、Solve Intelligence 各影响分流是否可以引用案例法、先前裁决或现有技术。
+- **决策立场**，来自 `## 主观法律裁决的决策立场` — 此 skill 永远不就主观阈值得出结论。
 
-If the config has `[PLACEHOLDER]`, surface this bounce:
+如果配置包含 `[PLACEHOLDER]`，呈现此反馈：
 
-> I notice you haven't configured your practice profile yet — that's how I tailor posture, jurisdictions, and approval chain to your practice.
+> 我注意到您尚未配置执业档案——那是我如何为您的执业定制立场、司法管辖区和审批链的方式。
 >
-> **Two choices:**
-> - Run `/ip-legal:cold-start-interview` (2 minutes) to configure your profile, then I'll run this tailored to YOUR practice.
-> - Say **"provisional"** and I'll run this against generic defaults — US jurisdiction, middle risk appetite, lawyer role, no playbook — and tag every output `[PROVISIONAL — configure your profile for tailored output]` so you can see what I do before committing.
+> **两个选择：**
+> - 运行 `/ip-legal:cold-start-interview`（2 分钟）以配置您的档案，然后我会为您的执业定制运行此分流。
+> - 说 **"provisional"**，我会用通用默认值运行此分流——美国司法管辖区、中等风险偏好、律师角色、无手册——并为每个输出标注 `[PROVISIONAL — configure your profile for tailored output]`，以便您在承诺前看到我能做什么。
 
-### Provisional mode
+### 临时模式
 
-If the user says "provisional," run the infringement triage normally using these generic defaults: middle risk appetite, lawyer role, US jurisdiction, no playbook (do the full analysis rather than matching against a position list). Tag the reviewer note and every finding block with `[PROVISIONAL]`. At the end of the output, append:
+如果用户说"provisional"，使用这些通用默认值正常运行侵权分流：中等风险偏好、律师角色、美国司法管辖区、无手册（做完整分析而不是匹配立场列表）。用 `[PROVISIONAL]` 标记审阅者注释和每个发现块。在输出末尾附加：
 
-> "That was a generic run against default assumptions. Run `/ip-legal:cold-start-interview` to get output calibrated to YOUR practice — your playbook, your jurisdiction, your risk appetite. 2 minutes."
+> "这是针对默认假设的通用运行。运行 `/ip-legal:cold-start-interview` 以获得针对您执业校准的输出——您的手册、您的司法管辖区、您的风险偏好。2 分钟。"
 
 ---
 
-## Mode selection
+## 模式选择
 
-Ask at the top, before anything else:
+在顶部，在其他任何事情之前询问：
 
-> Which right are we triaging?
+> 我们在分流哪项权利？
 >
-> 1. **Trademark** — confusion, dilution, or false advertising
-> 2. **Copyright** — substantial similarity, fair use, DMCA safe harbor
-> 3. **Patent** — claim-chart first pass, literal read + doctrine of equivalents
-> 4. **Trade secret** — secrecy, reasonable measures, misappropriation
-> 5. **Mixed / not sure** — describe the facts and I'll pick
+> 1. **商标** — 混淆、淡化或虚假广告
+> 2. **版权** — 实质相似、合理使用、DMCA 安全港
+> 3. **专利** — 权利要求图表第一遍、字面解读 + 等效原则
+> 4. **商业秘密** — 秘密性、合理措施、侵用
+> 5. **混合/不确定** — 描述事实，我来选择
 
-If the user picks "not sure," help them sort. The same facts can implicate
-multiple rights (e.g., a competitor's product uses our logo — trademark; and
-the product is a near-copy of ours — possible patent, copyright on packaging,
-possible trade dress; and a former employee launched it — trade secret).
+如果用户选择"不确定"，帮助他们分类。相同的事实可能涉及多项权利（例如，竞争对手的产品使用了我们的标志——商标；产品是我们产品的近乎复制——可能的专利、包装版权、可能的商业外观；前员工推出了它——商业秘密）。
 
-**If more than one right is in play, run the triage for each, separately.**
-Don't mash them together. Each right has different factors, different
-jurisdictional rules, and different remedies.
+**如果不止一项权利涉及，分别运行每项分流，不合并。** 不要把它们混在一起。每项权利有不同的因素、不同的司法管辖区规则和不同的救济。
 
 ---
 
-## Intake (common to all modes)
+## 通用 Intake（所有模式）
 
-> Before I walk factors:
+> 在我遍历因素之前：
 >
-> 1. **Posture.** Are you the potentially senior party (they're taking
->    yours) or the potentially accused party (we're the ones being looked at)?
->    The factors are symmetric but the output differs — a "mine's being
->    copied" triage routes toward an assertion letter; a "we might be
->    exposed" triage routes toward a risk memo.
-> 2. **Jurisdiction.** Which country / circuit / court? US federal default if
->    not specified. Flag if foreign law may apply.
-> 3. **Timing.** Is a statute of limitations or laches clock running?
-> 4. **What exhibits / evidence / source documents do you have?** A screenshot,
->    a URL, a packaging photo, a code excerpt, an ex-employee contract.
+> 1. **立场。** 您是潜在的先用权利方（他们在拿我们的），还是潜在的被指控方（我们是被审视的那方）？因素是对称的，但输出不同——"我的东西被复制了"分流路由到主张函件；"我们可能面临风险敞口"分流路由到风险备忘录。
+> 2. **司法管辖区。** 哪个国家/电路/法院？如果未指定则默认美国联邦。如果可能适用外国法律则标记。
+> 3. **时间。** 诉讼时效或延误时效时钟是否在走？
+> 4. **您有什么证据/证据/源文档？** 截图、URL、包装照片、代码摘录、前员工合同。
 
-Wait for the answer before walking factors.
+在遍历因素之前等待回答。
 
 ---
 
-## Trademark mode
+## 商标模式
 
-### Confusion
+### 混淆
 
-Use the applicable circuit's multi-factor test. Cite the test (du Pont /
-Polaroid / Sleekcraft / other — see the `clearance` skill for the case
-citations and pick logic). Walk each factor and flag what cuts each way.
+使用适用电路的多因素测试。引用测试（du Pont/Polaroid/Sleekcraft/其他——参阅 `clearance` skill 的案件引用和选取逻辑）。遍历每个因素并标记双方切割内容。
 
-- **Similarity of marks** — sight / sound / meaning / commercial impression.
-- **Similarity of goods or services** — expected-source test, not identity.
-- **Channels of trade.**
-- **Consumer sophistication.**
-- **Strength of the senior mark** — fanciful / arbitrary / suggestive /
-  descriptive with secondary meaning / generic.
-- **Intent** — evidence of copying, knock-off trade dress, near-miss mark.
-- **Actual confusion** — any evidence (surveys, misdirected inquiries, social).
-- **Likelihood of expansion / bridge-the-gap** — whether the zones overlap
-  commercially.
+- **商标相似性** — 外观/声音/含义/商业印象。
+- **商品或服务的相似性** — 期望来源测试，而非同一性。
+- **贸易渠道。**
+- **消费者成熟度。**
+- **先用商标的强度** — 造词/任意/暗示/具有第二含义的描述性/通用。
+- **意图** — 利用商誉的证据、仿冒商业外观、近乎仿冒的商标。
+- **实际混淆** — 任何证据（调查、错误询问、社交媒体）。
+- **扩张可能性/跨越差距** — 双方商业区域是否重叠。
 
-### Dilution
+### 淡化
 
-Apply the federal TDRA (15 U.S.C. § 1125(c)) and any applicable state statute.
+适用联邦商标淡化修订法（15 U.S.C. § 1125(c)）和任何适用的州法规。
 
-- **Fame threshold.** The senior mark must be famous to the general consuming
-  public — a niche-famous mark is not enough. *Starbucks Corp. v. Wolfe's
-  Borough Coffee, Inc.*, 588 F.3d 97 (2d Cir. 2009) is representative.
-- **Blurring vs. tarnishment.** Blurring = distinctiveness harm; tarnishment
-  = reputation harm.
-- **Defenses** — comparative advertising, news reporting, fair use,
-  non-commercial use.
+- **知名度阈值。** 先用商标必须对普通消费者知名——仅在小圈子内知名的商标不够。*Starbucks Corp. v. Wolfe's Borough Coffee, Inc.*, 588 F.3d 97（2d Cir. 2009）具有代表性。
+- **模糊对比贬损。** 模糊 = 显著性损害；贬损 = 声誉损害。
+- **抗辩** — 比较广告、新闻报道、合理使用、非商业使用。
 
-If the senior mark is not plainly famous nationally, flag dilution as a
-stretch.
+如果先用商标明显不在全国范围内知名，将淡化标记为牵强。
 
-### False advertising / comparative claims
+### 虚假广告/比较声明
 
-If the triage is prompted by a competitor's comparative ad or a claim about
-product attributes:
+如果分流是由竞争对手的比较广告或关于产品属性的声明引发的：
 
-- Apply Lanham Act § 43(a) / 15 U.S.C. § 1125(a) for the materiality,
-  falsity-or-misleading, deception, commercial-speech, and injury elements.
-- Flag whether the statement is literally false, implicitly false, or
-  puffery. Puffery is not actionable.
-- Substantiation evidence the claimant has or needs.
+- 适用 Lanham Act § 43(a) / 15 U.S.C. § 1125(a)，关于重要性、虚假或误导性、欺骗、商业言论和损害要素。
+- 标记声明是字面虚假、隐含虚假还是吹嘘。吹嘘不可诉。
+- 索赔方拥有或需要的实质性证据。
 
-### Output
+### 输出
 
-Factors table; what cuts each way; a "not a finding" conclusion line. End with
-a routing suggestion against the enforcement posture in the practice profile.
+因素表；双方切割内容；"非裁定"结论行。以执业档案中执法立场的路由建议结束。
 
 ---
 
-## Copyright mode
+## 版权模式
 
-### Ownership
+### 所有权
 
-Is the claimant the owner (or exclusive licensee with standing)? Work-for-hire
-issues; joint authorship; assignments; and termination rights all flag.
+索赔方是所有者（或有诉权的独占被许可人）吗？雇佣作品问题；共同作者；转让；终止权利均需标记。
 
-### Registration
+### 注册
 
-17 U.S.C. § 411 requires registration (or preregistration) as a precondition
-to filing an infringement action in US federal court. *Fourth Estate Public
-Benefit Corp. v. Wall-Street.com, LLC*, 586 U.S. 296 (2019) — registration
-means actually issued, not just applied for. Flag registration status; if
-not registered, flag the practical bar on filing.
+17 U.S.C. § 411 要求注册（或预注册）作为在美国联邦法院提起侵权诉讼的前提条件。*Fourth Estate Public Benefit Corp. v. Wall-Street.com, LLC*, 586 U.S. 296（2019）——注册意味着实际颁发，而非仅仅申请。标记注册状态；如果未注册，标记提起诉讼的实际障碍。
 
-### Access + substantial similarity
+### 接触 + 实质相似
 
-Two paths to proving copying:
+证明复制的两条路径：
 
-- **Access + probative similarity** — defendant had access and the works share
-  features probative of copying.
-- **Striking similarity** — even absent proof of access, the similarity is so
-  striking that independent creation is unlikely.
+- **接触 + 证明性相似** — 被告有接触机会，作品共享能证明复制的特征。
+- **惊人相似** — 即使无法证明接触，相似性如此惊人以至于独立创作不可能。
 
-For substantial similarity, apply the circuit's test (Second Circuit's
-ordinary-observer; Ninth Circuit's extrinsic / intrinsic under *Krofft* and
-*Swirsky*; Fourth / Seventh / Eleventh circuits' variations). Flag which
-test applies.
+对于实质相似，适用该电路的测试（第二巡回法院的普通观察者测试；第九巡回法院的 *Krofft* 和 *Swirsky* 下的外在/内在测试；第四/第七/第十一巡回法院的变体）。标记哪个测试适用。
 
-### Fair use
+### 合理使用
 
-17 U.S.C. § 107 four factors, analyzed as a whole:
+17 U.S.C. § 107 四个因素，整体分析：
 
-1. Purpose and character of the use (transformativeness; commercial vs.
-   non-commercial).
-2. Nature of the copyrighted work (factual / functional vs. creative).
-3. Amount and substantiality of the portion used.
-4. Effect on the market for the original.
+1. 使用的目的和性质（转换性；商业 vs. 非商业）。
+2. 受版权保护作品的性质（事实性/功能性 vs. 创造性）。
+3. 使用的数量和实质性。
+4. 对原作品市场的影响。
 
-Recent touchstones: *Google LLC v. Oracle America, Inc.*, 593 U.S. 1 (2021);
-*Andy Warhol Found. for the Visual Arts, Inc. v. Goldsmith*, 598 U.S. 508
-(2023). Flag the transformativeness analysis carefully — *Warhol* narrowed
-the scope of transformative use and is still being applied by lower courts.
+近期里程碑：*Google LLC v. Oracle America, Inc.*, 593 U.S. 1（2021）；*Andy Warhol Found. for the Visual Arts, Inc. v. Goldsmith*, 598 U.S. 508（2023）。仔细标记转换性使用分析——*Warhol* 收窄了转换性使用的范围，下级法院仍在适用。
 
-### DMCA safe harbor
+### DMCA 安全港
 
-17 U.S.C. § 512. If the accused is a service provider hosting user content,
-flag whether § 512(c) applies: designated agent, notice-and-takedown
-procedure, no actual or red-flag knowledge, no financial benefit
-attributable to infringement the provider could control, expeditious
-takedown on valid notice. Repeat-infringer policy required. Safe harbor does
-not cover direct infringement by the service provider itself.
+17 U.S.C. § 512。如果被指控方是托管用户内容的服务提供商，标记 § 512(c) 是否适用：指定代理人、通知-撤除程序、无实际知晓或显眼知晓、无可控制且从中获益的侵权行为的财务收益、在有效通知后迅速撤除。需要惯常侵权者政策。安全港不适用于服务提供商本身的直接侵权。
 
-### Output
+### 输出
 
-Factors flagged; fair-use balance with "the triage does not conclude";
-ownership / registration / safe-harbor threshold notes. Routing per posture.
+标记的因素；"分流不得出结论"的合理使用平衡；所有权/注册/安全港阈值注意事项。按立场路由。
 
 ---
 
-## Patent mode
+## 专利模式
 
-**Route to `/ip-legal:fto-triage` for the detailed framework.** This mode is the
-mirror image of the FTO skill — same claim charts, same doctrine-of-equivalents
-flag, same all-elements rule — applied to an accused product instead of one's
-own.
+**路由到 `/ip-legal:fto-triage` 获取详细框架。** 此模式是 FTO skill 的镜像——相同的权利要求图表、相同的等效原则标记、相同的全要素规则——适用于被指控产品而非自己的产品。
 
-### Design patent (D-number) — branch before the workflow
+### 外观设计专利（D 编号）——工作流前先分支
 
-**Check the asserted patent's registration number FIRST.** If it has a `D`,
-`RE`, or `PP` prefix (e.g., `D712,345`), it's not a utility patent and the
-workflow below does NOT apply. Branch per prefix:
+**首先检查主张专利的注册号。** 如果有 `D`、`RE` 或 `PP` 前缀（例如，`D712,345`），它不是实用专利，以下工作流不适用。按前缀分支：
 
-- **`D` prefix — design patent (35 U.S.C. §171).** Different test, different
-  claim structure, different damages. Do NOT build a claim chart, do NOT run
-  doctrine of equivalents, do NOT do element-by-element mapping. Design
-  patents have a single claim defined by the drawings; charting a figure as
-  if it were a utility claim element list is wrong doctrine.
-- **`RE` prefix — reissue patent.** Treat as the utility patent it reissued,
-  but flag reissue-specific defenses (intervening rights under §252,
-  recapture rule, original-patent requirement).
-- **`PP` prefix — plant patent.** Separate regime (35 U.S.C. §161). Asexually
-  reproduced plant varieties. Route to plant-patent counsel; this skill does
-  not analyze plant patents.
+- **`D` 前缀——外观设计专利（35 U.S.C. §171）。** 不同的测试、不同的权利要求结构、不同的损害赔偿。不要制作权利要求图表，不要运行等效原则，不要进行逐要素映射。外观设计专利有一个由图纸定义的单一权利要求；将图形作为实用权利要求要素列表进行图表化是错误的教义。
+- **`RE` 前缀——再颁专利。** 作为它再颁的实用专利处理，但标记再颁特定抗辩（§252 下的介入权、夺回规则、原始专利要求）。
+- **`PP` 前缀——植物专利。** 独立制度（35 U.S.C. §161）。无性繁殖植物品种。路由给植物专利律师；此 skill 不分析植物专利。
 
-**Design patent infringement test — ordinary observer.** *Egyptian Goddess,
-Inc. v. Swisa, Inc.*, 543 F.3d 665 (Fed. Cir. 2008) (en banc). The question
-is whether an ordinary observer, **familiar with the prior art designs**,
-would be deceived into thinking the accused design is the same as the
-patented design. Compare **overall ornamental appearance**, not individual
-elements. The accused product must appropriate the **novelty** that
-distinguishes the patented design from the prior art (the "point of novelty"
-survives as a guidepost inside the ordinary-observer test, not as a separate
-test).
+**外观设计专利侵权测试——普通观察者。** *Egyptian Goddess, Inc. v. Swisa, Inc.*, 543 F.3d 665（Fed. Cir. 2008）（全席判决）。问题是一个**熟悉现有技术设计**的普通观察者是否会被欺骗认为被指控设计与受专利保护的设计相同。比较**整体装饰外观**，而非单个要素。被指控产品必须挪用使受专利保护的设计区别于现有技术的**新颖性**（"新颖点"在普通观察者测试内作为指导原则保留，而非作为独立测试）。
 
-**Functional-vs-ornamental filter.** Design patents protect ornamental
-features only; functional features are not protected. If the accused
-similarity is in features dictated by function, flag that the overlap may
-fall outside the patented scope.
+**功能性 vs. 装饰性过滤。** 外观设计专利仅保护装饰性特征；功能性特征不受保护。如果被指控的相似性在于功能决定的特征，标记重叠可能超出受专利保护的范围。
 
-**§289 total-profit damages flag.** Design patent damages under 35 U.S.C.
-§289 are the infringer's **total profits on the "article of manufacture,"**
-which can be the whole product or a component. *Samsung Electronics Co. v.
-Apple Inc.*, 580 U.S. 53 (2016). This is a separate analysis from utility
-patent reasonable-royalty / lost-profits and is specialist work — do not
-compute.
+**§289 全利润损害赔偿标记。** 35 U.S.C. §289 下的外观设计专利损害赔偿是侵权人在"制造物品"上的**全部利润**，可以是整个产品或一个组件。*Samsung Electronics Co. v. Apple Inc.*, 580 U.S. 53（2016）。这是与实用专利合理许可费/失去利润不同的独立分析，属于专业工作——不要计算。
 
-**Trade dress cross-flag.** The same ornamental-shape facts are usually also
-a **trade dress** question under Lanham Act §43(a) (15 U.S.C. §1125(a)).
-Product configuration trade dress requires **secondary meaning** (*Wal-Mart
-Stores, Inc. v. Samara Bros., Inc.*, 529 U.S. 205 (2000)) and must be
-**non-functional** (*TrafFix Devices, Inc. v. Marketing Displays, Inc.*,
-532 U.S. 23 (2001)). Flag trade dress as a parallel track; the tests are
-different but the evidence overlaps.
+**商业外观交叉标记。** 相同的装饰形状事实通常也是 Lanham Act §43(a)（15 U.S.C. §1125(a)）下的**商业外观**问题。产品构型商业外观需要**第二含义**（*Wal-Mart Stores, Inc. v. Samara Bros., Inc.*, 529 U.S. 205（2000））且必须**非功能性**（*TrafFix Devices, Inc. v. Marketing Displays, Inc.*, 532 U.S. 23（2001））。将商业外观标记为平行途径；测试不同但证据重叠。
 
-### Design patent triage — output
+### 外观设计专利分流——输出
 
-Because you cannot see the patent drawings or the accused product directly,
-the design patent triage is mostly a request for the materials and a frame
-for the analysis:
+因为您无法直接看到专利图纸或被指控产品，外观设计专利分流主要是索取材料和分析框架的请求：
 
-- **Ask for the drawings.** "I can't run the ordinary-observer test without
-  seeing the patent figures and the accused product. Paste or attach: (a)
-  the patent drawings (all figures, including any broken-line disclaimers),
-  (b) photos of the accused product from comparable angles, (c) any prior
-  art designs you're aware of."
-- **Prior-art landscape.** Ordinary observer is a *comparison* test — the
-  observer is "familiar with the prior art," so the scope of the patented
-  design narrows as the prior-art field crowds. Flag what prior art is
-  known and what's missing.
-- **Functional-vs-ornamental analysis.** Walk the features and flag which
-  look functional (and therefore unprotected) vs. ornamental.
-- **Broken lines.** Design patents use solid lines for claimed features and
-  broken lines for unclaimed environmental context. Flag whether the
-  alleged copying is in claimed (solid-line) or unclaimed (broken-line)
-  territory.
-- **§289 damages flag** as above.
-- **Trade dress cross-flag** as above.
+- **索取图纸。** "我无法在不看专利图纸和被指控产品的情况下运行普通观察者测试。请粘贴或附上：(a) 专利图纸（所有图形，包括任何虚线免责声明），(b) 被指控产品从可比角度拍摄的照片，(c) 您知道的任何现有技术设计。"
+- **现有技术全景。** 普通观察者是一个*比较*测试——观察者"熟悉现有技术"，因此受专利保护设计的范围随现有技术领域的拥挤而收窄。标记已知的现有技术和缺失的内容。
+- **功能性 vs. 装饰性分析。** 遍历特征，标记哪些看起来是功能性的（因此不受保护）vs. 装饰性的。
+- **虚线。** 外观设计专利用实线表示受权利保护的特征，用虚线表示未受权利保护的环境背景。标记被指控复制是否在受权利保护（实线）还是不受权利保护（虚线）的区域。
+- **§289 损害赔偿标记**，如上。
+- **商业外观交叉标记**，如上。
 
-**Route to a design patent specialist for anything beyond first-pass triage.**
-Design patent litigation is a subspecialty (Perkins Coie, Sterne Kessler,
-Desmarais, Kirkland's design team, Gibson Dunn's design group are
-representative; use your practice profile's IP litigation OC as the starting
-point). This skill flags issues; it does not assess infringement.
+**对于第一遍分流之外的任何内容，路由给外观设计专利专家。** 外观设计专利诉讼是一个子专业（Perkins Coie、Sterne Kessler、Desmarais、Kirkland 的外观设计团队、Gibson Dunn 的外观设计组是代表性律所；使用执业档案中的 IP 诉讼外部律师作为起点）。此 skill 标记问题；它不评估侵权。
 
-### Utility patent workflow
+### 实用专利工作流
 
-The rest of this mode assumes the asserted patent is a **utility patent**
-(no `D`/`RE`/`PP` prefix). If the D-number branch above applies, stop here.
+本模式的其余部分假设主张专利是**实用专利**（无 `D`/`RE`/`PP` 前缀）。如果上述 D 编号分支适用，在这里停止。
 
-> **Patent systems differ by jurisdiction.** The US claim chart (all-elements rule, doctrine of equivalents, prosecution history estoppel, §284/§289 damages) does not transfer to other systems:
-> - **Germany:** Utility models (Gebrauchsmuster), the Schneidmesser/Kunststoffrohrteil questions for DOE, bifurcated validity/infringement proceedings.
-> - **China:** Utility models (shiyong xinxing), CNIPA examination, different claim construction.
-> - **Japan:** Utility models, JPO examination, a narrower DOE.
-> - **Europe (unified patent court):** UPC procedure as of 2023.
+> **专利制度因司法管辖区而异。** 美国权利要求图表（全要素规则、等效原则、申请历史禁反言、§284/§289 损害赔偿）不适用于其他制度：
+> - **德国：** 实用新型（Gebrauchsmuster）、等效原则的 Schneidmesser/Kunststoffrohrteil 问题、分叉的有效性/侵权程序。
+> - **中国：** 实用新型（实用新型），CNIPA 审查，不同的权利要求解释。
+> - **日本：** 实用新型、JPO 审查、较窄的等效原则。
+> - **欧洲（统一专利法院）：** 2023 年起的 UPC 程序。
 >
-> When non-US jurisdictions are in scope: "This analysis uses the US claim-charting framework. A product manufactured in China and sold in the EU needs CNIPA and EP analysis, not a US claim chart. I can flag the issues a US analysis surfaces, but the infringement and validity calls require [jurisdiction]-specific review."
+> 当非美国司法管辖区在范围内时："此分析使用美国权利要求图表框架。在中国制造并在欧盟销售的产品需要 CNIPA 和 EP 分析，而非美国权利要求图表。我可以标记美国分析浮出的问题，但侵权和有效性判断需要 [司法管辖区] 特定审查。"
 
-### Workflow
+### 工作流
 
-- Accused product / process / method — described in technical detail.
-- Identified patent(s) at issue.
-- Claim chart for each independent claim: element-by-element mapping to the
-  accused product.
-- Literal infringement first. DOE as a flag.
-- Indirect (induced, contributory) and divided infringement as flags.
-- **Invalidity defenses to consider** — anticipation (§ 102), obviousness
-  (§ 103), § 112 written-description / enablement / definiteness, § 101
-  subject-matter eligibility (*Alice* / *Mayo*). Known IPR or PGR outcomes,
-  known prior art, known prosecution history. Flag each; do not opine.
-- **Unenforceability defenses** — inequitable conduct flag, prosecution
-  laches flag, assignor / licensee estoppel flag. Each is attorney-only.
-- **Damages posture** — lost profits vs. reasonable royalty (Georgia-Pacific
-  factors), marking, pre-suit notice, willfulness (reading this triage may
-  factor into willfulness — see the FTO skill's willfulness note).
+- 被指控产品/方法/工艺——技术上的详细描述。
+- 涉及的确定专利。
+- 每项独立权利要求的权利要求图表：被指控产品的逐要素映射。
+- 先字面侵权。等效原则作为标记。
+- 间接侵权（诱导侵权、协助侵权）和分散侵权作为标记。
+- **需要考虑的无效抗辩** — 新颖性（§ 102）、非显而易见性（§ 103）、§ 112 书面描述/可实施性/确定性、§ 101 主题资格（*Alice*/*Mayo*）。已知的 IPR 或 PGR 结果、已知现有技术、已知申请历史。各自标记；不发表意见。
+- **不可执行性抗辩** — 不公平行为标记、申请拖延标记、转让人/被许可人禁反言标记。各属律师专项。
+- **损害赔偿立场** — 失去利润 vs. 合理许可费（Georgia-Pacific 因素）、标记、诉讼前通知、故意侵权（阅读此分流可能影响故意侵权分析——参阅 FTO skill 的故意侵权注释）。
 
-### Output
+### 输出
 
-Claim charts. Element flags. Defense flags. Routing to patent counsel. See
-the `fto-triage` skill for the full output structure — the infringement-triage
-patent mode uses the same format with "accused product" substituted for
-"own product."
+权利要求图表。要素标记。抗辩标记。路由给专利律师。完整输出结构参阅 `fto-triage` skill——侵权分流专利模式使用相同格式，以"被指控产品"代替"自己的产品"。
 
-### Handoff to the full claim chart
+### 交接到完整权利要求图表
 
-For a detailed element-by-element claim chart suitable for infringement or
-invalidity contentions, run `/litigation-legal:claim-chart`. This triage's
-claim chart is a first pass to identify the strongest and weakest mappings;
-the litigation claim chart builds the full chart with pin cites, claim
-construction flags, dependent claims, and the verification workflow that
-contentions require.
+对于适合侵权或无效主张的详细逐要素权利要求图表，运行 `/litigation-legal:claim-chart`。此分流的权利要求图表是识别最强和最弱映射的第一遍；诉讼权利要求图表构建完整图表，附精确定位引用、权利要求解释标记、从属权利要求和主张所需的验证工作流。
 
 ---
 
-## Trade secret mode
+## 商业秘密模式
 
-### Was it a secret?
+### 是否属于秘密？
 
-Apply the Defend Trade Secrets Act (18 U.S.C. § 1836 et seq.) for federal
-purposes and the applicable state UTSA (or, in New York / Massachusetts /
-other non-UTSA jurisdictions, the state's common-law test). Flag:
+适用联邦商业秘密保护法（18 U.S.C. § 1836 等）用于联邦目的，以及适用的州 UTSA（或在纽约/马萨诸塞州/其他非 UTSA 司法管辖区，州的普通法测试）。标记：
 
-- **Not generally known** — to the public or to others in the industry who can
-  obtain economic value from disclosure.
-- **Economic value from secrecy** — independent economic value actual or
-  potential, derived from not being generally known.
-- **Combinations and compilations** — a combination of public elements can
-  be a trade secret (*Altavion v. Konica Minolta*, and the Restatement view).
+- **不被普遍知晓** — 对公众或可以从披露中获得经济价值的业内其他人。
+- **从保密中获得的经济价值** — 来自不被普遍知晓的实际或潜在独立经济价值。
+- **组合和汇编** — 公开要素的组合可以是商业秘密（*Altavion v. Konica Minolta* 和《重述》的观点）。
 
-### Reasonable measures
+### 合理措施
 
-- NDAs with employees, contractors, counterparties. Scope, signed, enforced?
-- Access controls — technical (role-based), physical (doors, badges),
-  organizational (need-to-know).
-- Marking — confidentiality legends on documents, code, data.
-- Exit interviews / return of materials on termination.
-- Trade-secret policy / training.
+- 与员工、承包商、对方签订的保密协议。范围、已签署、已执行？
+- 访问控制——技术性（基于角色）、物理性（门、徽章）、组织性（知情必要）。
+- 标记——文件、代码、数据上的保密标注。
+- 离职访谈/终止时归还材料。
+- 商业秘密政策/培训。
 
-Flag what's in place and what's missing. *Reasonable* is fact-specific; the
-triage does not decide whether the measures were reasonable — it lists them.
+标记已有的和缺失的。*合理*是事实特定的——分流不决定措施是否合理，而是列举它们。
 
-### Misappropriation
+### 侵用
 
-Acquisition by improper means, or disclosure / use in breach of duty.
-Improper means includes theft, bribery, misrepresentation, breach or
-inducement of breach of a duty to maintain secrecy, or espionage (electronic
-or otherwise). 18 U.S.C. § 1839(6).
+通过不正当手段获取，或违反保密义务披露/使用。不正当手段包括盗窃、贿赂、欺骗、违反或诱导违反保密义务，或间谍活动（电子或其他）。18 U.S.C. § 1839(6)。
 
-- **Former employee fact pattern:** new employer, overlapping work,
-  departure timing, documents taken (and returned?), access logs, recruiting
-  channels, assignment and invention-assignment agreements.
-- **Inadvertent disclosure:** Was disclosure made by a person with a duty? Did
-  the recipient know or have reason to know of the breach?
-- **Reverse engineering** — a defense if the means were lawful. Flag whether
-  reverse engineering is plausible on the facts.
+- **前员工事实模式：** 新雇主、重叠工作、离职时间、带走的文件（和归还的？）、访问日志、招聘渠道、转让和发明转让协议。
+- **无意披露：** 披露是否由负有义务的人做出？接收方知道或有理由知道违反吗？
+- **逆向工程** — 如果手段合法，是一种抗辩。标记逆向工程在事实上是否合理。
 
-### Preemption
+### 抢先
 
-Where state tort claims (unfair competition, conversion, breach of confidence)
-might be preempted by the UTSA, flag preemption. Some jurisdictions preserve
-contract claims; others preempt most tort claims addressing the same facts.
+当州侵权主张（不正当竞争、转换、违反信任）可能被 UTSA 抢先时，标记抢先。一些司法管辖区保留合同主张；其他司法管辖区抢先了大多数处理相同事实的侵权主张。
 
-### Output
+### 输出
 
-Three flag groups — secrecy, measures, misappropriation — each with what cuts
-each way. Routing per posture.
+三组标记——秘密性、措施、侵用——各列出双方切割内容。按立场路由。
 
 ---
 
-## Output format (all modes)
+## 输出格式（所有模式）
 
-Prepend the work-product header from `~/.claude/plugins/config/claude-for-legal/ip-legal/CLAUDE.md` `## Outputs`.
+在前面附上 `~/.claude/plugins/config/claude-for-legal/ip-legal/CLAUDE.md` `## 输出` 中的工作产品标题。
 
 ```markdown
-[WORK-PRODUCT HEADER]
+[工作产品标题]
 
-# Infringement Triage — [Trademark | Copyright | Patent | Trade Secret] (NOT A FINDING)
+# 侵权分流 — [商标 | 版权 | 专利 | 商业秘密]（非裁定）
 
-**This is a triage, not a finding of infringement or non-infringement.** The
-triage identifies factors and flags what matters most; it does not conclude.
-A conclusion requires an attorney's judgment on the facts, the right scope,
-jurisdiction, and defenses. Acting on a triage without attorney review is
-how companies end up on the wrong side of fee awards, Rule 11 sanctions,
-declaratory-judgment actions, and enhanced damages.
+**这是分流，而非侵权或不侵权的裁定。**
+分流识别因素并标记最重要的；它不得出结论。关于某事是否侵权的结论需要律师对事实、权利范围、司法管辖区和抗辩进行判断。在没有律师审查的情况下根据分流采取行动——发送停止侵权函、拒绝停止、提起诉讼，或决定不起诉——正是公司最终面临律师费裁决、第 11 条规则制裁、宣告性判决诉讼和增强损害赔偿的原因。
 
-**Triage result:** [GREEN / YELLOW / RED — one sentence why]
+**分流结果：** [绿色/黄色/红色——一句话原因]
 
-## Posture and scope
+## 立场和范围
 
-- **Party posture:** [senior / accused]
-- **Right at issue:** [trademark / copyright / patent / trade secret]
-- **Jurisdiction:** [US federal — specific circuit / state / foreign]
-- **Legal framework applied:** [cite the governing test and statute]
-- **Statute of limitations / laches posture:** [clock status]
-- **Exhibits / evidence reviewed:** [list]
+- **当事方立场：** [先用权利方/被指控方]
+- **涉及的权利：** [商标/版权/专利/商业秘密]
+- **司法管辖区：** [美国联邦——具体电路/州/外国]
+- **适用的法律框架：** [引用适用的测试和法规]
+- **诉讼时效/延误立场：** [时钟状态]
+- **已审阅的证据/源文档：** [列表]
 
-## Factor analysis
+## 因素分析
 
-[Mode-specific factor table — confusion factors / fair-use factors / claim chart
-/ trade-secret elements. Each factor has a flag and a direction. This is
-a flag list, not a verdict.]
+[特定模式的因素表——混淆因素/合理使用因素/权利要求图表/商业秘密要素。每个因素有一个标记和方向。这是标记清单，不是裁决。]
 
-## Defenses and thresholds
+## 抗辩和阈值
 
-[Mode-specific: dilution fame threshold / registration prerequisite /
-§ 512 safe harbor / invalidity / inequitable conduct / preemption /
-reverse-engineering / consent / license / laches / statute of limitations.
-Flag each.]
+[特定模式：淡化知名度阈值/注册前提/§ 512 安全港/无效/不公平行为/抢先/逆向工程/同意/许可/延误/诉讼时效。各自标记。]
 
-## What cuts which way — summary
+## 双方切割内容——摘要
 
-| Factor | Flag | Direction (senior / accused / mixed) |
+| 因素 | 标记 | 方向（先用权利方/被指控方/混合） |
 |---|---|---|
-| [factor 1] | [note] | [direction] |
+| [因素 1] | [注释] | [方向] |
 
-**Conclusion:** *This skill does not conclude.* Attorney judgment required
-before acting. The factors cutting [direction] are [brief summary]; the
-factors cutting [direction] are [brief summary].
+**结论：** *此 skill 不得出结论。* 需要律师判断才能采取行动。对 [方向] 切割的因素是 [简要摘要]；对 [方向] 切割的因素是 [简要摘要]。
 
-## Recommended next steps
+## 推荐的下一步
 
-- [formal opinion from counsel / route to IP OC named in the practice profile]
-- [evidence preservation and hold — if a litigation clock is running]
-- [fact development needed before a decision — e.g., access logs, prosecution
-  history, market studies, survey evidence]
-- [routing per `~/.claude/plugins/config/claude-for-legal/ip-legal/CLAUDE.md`
-  `## Enforcement posture`, if the posture is to assert]
+- [来自律师的正式意见/按执业档案路由给 IP 外部律师]
+- [证据保全和保留——如果诉讼时效时钟在走]
+- [做出决定前需要发展的事实——例如，访问日志、申请历史、市场调查、调查证据]
+- [按照 `~/.claude/plugins/config/claude-for-legal/ip-legal/CLAUDE.md` `## 执法立场` 路由，如果立场是主张]
 
-## Citation verification
+## 引用验证
 
-Every case, statute, registration number, claim quote, and exhibit cited here
-must be verified against the authoritative source before relying on it.
-Jurisdictional tests vary by circuit and change over time — confirm the
-current controlling authority.
+这里引用的每个案件、法规、注册号、权利要求引用和证据都必须在依赖之前对照权威来源进行验证。司法管辖区测试因电路而异，随时间变化——确认当前的控制性权威。
 ```
 
 ---
 
-## Non-lawyer gate
+## 非律师关卡
 
-Before issuing the output, read `## Who's using this`. If the Role is Non-lawyer:
+在发出输出之前，读取 `## 谁在使用这个`。如果角色是非律师：
 
-> This output is a research triage, not legal advice. Sending a C&D, deciding
-> not to stop, filing suit, or relying on "it's fair use" based on this triage
-> alone has legal consequences — including Rule 11 sanctions for a baseless
-> assertion, declaratory-judgment exposure for a threatening letter, treble
-> damages on the patent side, and fee awards in unfair-competition cases.
-> An attorney needs to evaluate before you move.
+> 此输出是研究分流，而非法律建议。仅基于此分流发送停止侵权函、决定不停止、提起诉讼，或依赖"这是合理使用"有法律后果——包括第 11 条规则制裁（无根据的主张）、威胁函件的宣告性判决风险敞口、专利方面的三倍损害赔偿，以及不正当竞争案件中的律师费裁决。在您行动之前，律师需要进行评估。
 >
-> Here's a brief to bring to an attorney:
+> 这里有一份带给律师的简报——它会缩短对话时间：
 >
-> [Generate a 1-page summary: the right at issue, the posture, the facts and
-> evidence, the factors surfaced, the defenses flagged, and the three
-> questions to ask the attorney.]
+> [生成 1 页摘要：涉及的权利、立场、事实和证据、浮出的因素、标记的抗辩，以及要问律师的三个问题。]
 >
-> If you need to find a licensed attorney, solicitor, barrister, or other authorised legal professional in your jurisdiction: your professional regulator's referral service is
-> the starting point (state bar in the US, SRA/Bar Standards Board in England & Wales, Law Society in Scotland/NI/Ireland/Canada/Australia, or your jurisdiction's equivalent). For patents in the US, the attorney must be registered before the
-> USPTO; for other jurisdictions, use the relevant patent office register. For trademarks, INTA maintains a directory of practitioners worldwide.
+> 如果您需要在您所在的司法管辖区寻找持牌律师、事务律师、大律师或其他授权法律专业人士：您所在专业监管机构的转介服务是起点（美国的州律师协会、英格兰和威尔士的 SRA/Bar Standards Board、苏格兰/北爱尔兰/爱尔兰/加拿大/澳大利亚的法律协会，或您司法管辖区的同等机构）。对于美国的专利工作，律师必须在 USPTO 注册；对于其他司法管辖区，使用相关专利局注册处（EPO、UK IPO 等）。对于商标，INTA（国际商标协会）在全球范围内维护执业律师目录。
 
-Deliver the triage alongside the brief.
+将分流与简报一起交付。
 
 ---
 
-## Output location
+## 输出位置
 
-If matter workspaces are enabled and a matter is active, write to
-`~/.claude/plugins/config/claude-for-legal/ip-legal/matters/<matter-slug>/outputs/infringe-<mode>-<subject-slug>-YYYY-MM-DD.md`.
-Otherwise write to
-`~/.claude/plugins/config/claude-for-legal/ip-legal/outputs/infringe-<mode>-<subject-slug>-YYYY-MM-DD.md`
-and surface the path.
+如果事项工作区已启用且事项处于活跃状态，写入 `~/.claude/plugins/config/claude-for-legal/ip-legal/matters/<matter-slug>/outputs/infringe-<mode>-<subject-slug>-YYYY-MM-DD.md`。否则写入 `~/.claude/plugins/config/claude-for-legal/ip-legal/outputs/infringe-<mode>-<subject-slug>-YYYY-MM-DD.md` 并显示路径。
 
-Append a one-line entry to the matter's `history.md` if a matter is active.
+如果事项处于活跃状态，向事项的 `history.md` 追加一行。
 
 ---
 
-## Handoff to enforcement skills
+## 交接给执法 skill
 
-If the triage output points toward an assertion and the practice profile's
-posture supports it, offer:
+如果分流输出指向主张，且执业档案的立场支持它，提供：
 
-> Want me to draft a cease-and-desist on this? Run `/ip-legal:cease-desist`.
-> I'll use the flag list from this triage as the factual basis and apply the
-> approval chain from your practice profile — the letter won't go anywhere
-> without the approver signing off.
+> 想让我就此起草停止侵权函吗？运行 `/ip-legal:cease-desist`。我会使用此分流的标记清单作为事实依据，并应用执业档案中的审批链——函件在审批人签字之前不会去任何地方。
 
-Or, if the mode is copyright and the accused is hosted content:
+或者，如果模式是版权且被指控方是托管内容：
 
-> Want me to prepare a DMCA takedown? Run `/ip-legal:takedown`.
+> 想让我准备 DMCA 版权通知吗？运行 `/ip-legal:takedown`。
 
-Do not draft the letter automatically from the triage. The decision to assert
-is the approver's, not the triage's.
+不要从分流自动起草函件。主张决定属于审批人，而非分流。
 
 ---
 
-## Close with the next-steps decision tree
+## 以下一步决策树结束
 
-End with the next-steps decision tree per CLAUDE.md `## Outputs`. Customize the options to what this skill just produced — the five default branches (draft the X, escalate, get more facts, watch and wait, something else) are a starting point, not a lock-in. The tree is the output; the lawyer picks.
+根据 CLAUDE.md `## 输出` 以下一步决策树结束。根据此 skill 刚刚生成的内容定制选项——五个默认分支（起草 X、升级、获取更多事实、观察等待、其他）是起点，而非锁定。树就是输出；律师选择。
 
-## What this skill does not do
+## 此 skill 不做什么
 
-- **Conclude infringement or non-infringement.** Ever. The loudest guardrail.
-- **Substitute for survey evidence, damages experts, or claim construction.**
-- **Evaluate jurisdiction-specific defenses outside the triage's jurisdiction
-  scope.** If the facts cross borders, flag that foreign-law analysis is
-  required.
-- **Decide fair use as a matter of law.** Fair use is fact-intensive and
-  reserved for the attorney and, ultimately, the court.
-- **Draft the C&D, takedown, or complaint.** Those are separate skills
-  (`/ip-legal:cease-desist`, `/ip-legal:takedown`) gated by the approval
-  chain in the practice profile.
-- **Quote outputs to counterparties.** Privileged if the header applies.
+- **得出侵权或不侵权的结论。** 永远。最醒目的护栏。
+- **替代调查证据、损害赔偿专家或权利要求解释。**
+- **评估分流司法管辖区范围之外的特定司法管辖区抗辩。** 如果事实跨越边界，标记需要外国法律分析。
+- **作为法律决定合理使用。** 合理使用是事实密集型的，保留给律师，最终保留给法院。
+- **起草停止侵权函、版权通知或投诉书。** 这些是独立的 skill（`/ip-legal:cease-desist`、`/ip-legal:takedown`），由执业档案中的审批链把关。
+- **向对方引用输出。** 如果标题适用则享有特权。
 
 ---
 
-## Tone
+## 语气
 
-Factor-by-factor, flag-by-flag. No hedging prose. The guardrail at the top
-does the scope work; the analysis does the analysis. A lawyer should leave
-the output knowing exactly which factors are flagged, which defenses apply,
-and what they need to do next to either assert or stand down.
+逐因素、逐标记。没有对冲散文。顶部的护栏做范围工作；分析做分析。律师应该离开时知道哪些因素被标记，哪些抗辩适用，以及他们接下来需要做什么以便主张或撤退。

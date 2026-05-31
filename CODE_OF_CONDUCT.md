@@ -1,37 +1,43 @@
-# Code of Conduct
+<!--
+This file is a Chinese translation of the original by Anthropic PBC.
+Original: https://github.com/anthropics/claude-for-legal
+Licensed under Apache License 2.0
+-->
 
-## Our commitment
+# 行为准则
 
-We are committed to providing a welcoming and respectful environment for everyone who participates in this project, regardless of age, body size, disability, ethnicity, gender identity and expression, level of experience, nationality, personal appearance, race, religion, or sexual identity and orientation.
+## 我们的承诺
 
-## Expected behavior
+我们致力于为所有参与本项目的人提供一个友好、相互尊重的环境，无论其年龄、体型、残障状况、族裔、性别认同与表达、经验水平、国籍、个人外貌、种族、宗教信仰或性取向如何。
 
-* Use welcoming and inclusive language.
-* Respect differing viewpoints and experiences.
-* Accept constructive criticism gracefully.
-* Focus on what is best for the community and the project.
-* Show empathy toward other community members.
+## 期望的行为
 
-## Unacceptable behavior
+* 使用友好、包容的语言。
+* 尊重不同的观点和经历。
+* 大度地接受建设性批评。
+* 专注于对社区和项目最有利的事情。
+* 对其他社区成员展现同理心。
 
-* Harassment, intimidation, or discrimination in any form.
-* Trolling, insulting or derogatory comments, and personal or political attacks.
-* Public or private harassment.
-* Publishing others' private information without explicit permission.
-* Other conduct that could reasonably be considered inappropriate in a professional setting.
+## 不可接受的行为
 
-## Scope
+* 任何形式的骚扰、恐吓或歧视。
+* 挑衅、侮辱性或贬低性评论，以及针对个人或政治的攻击。
+* 公开或私下的骚扰。
+* 未经明确许可发布他人的私人信息。
+* 在专业场合中任何可被合理认定为不当的其他行为。
 
-This Code of Conduct applies to all project spaces, including issues, pull requests, discussions, and any other communication channels associated with this project. It also applies when an individual is representing the project in public spaces.
+## 适用范围
 
-## Reporting
+本行为准则适用于本项目的所有空间，包括 issue、pull request、讨论区，以及与本项目相关的任何其他沟通渠道。当个人代表本项目出现在公开场合时，本准则同样适用。
 
-If you experience or witness unacceptable behavior, contact a project maintainer directly through GitHub, or open an issue if the report does not need to be private. All reports will be reviewed promptly and treated as confidentially as the reporting channel allows.
+## 举报
 
-## Enforcement
+如果你遭遇或目睹了不可接受的行为，请通过 GitHub 直接联系项目维护者，或在无需保密的情况下提交 issue。所有举报将被及时审查，并在举报渠道允许的范围内予以保密处理。
 
-Participants who violate this Code of Conduct may be warned, temporarily banned, or permanently removed from project participation, as determined by the project maintainers. Maintainers who do not follow or enforce this Code of Conduct may face the same consequences.
+## 执行
 
-## Attribution
+违反本行为准则的参与者可能受到警告、临时封禁或永久取消参与资格，具体由项目维护者决定。未能遵守或执行本行为准则的维护者同样可能面临相同后果。
 
-This Code of Conduct is adapted from the Contributor Covenant, version 2.1.
+## 来源说明
+
+本行为准则改编自 Contributor Covenant 2.1 版本。

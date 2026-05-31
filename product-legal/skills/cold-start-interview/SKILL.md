@@ -1,27 +1,33 @@
 ---
 name: cold-start-interview
 description: >
-  Cold-start interview — connects to your launch tracker, reads past reviews,
-  learns your risk calibration. Use on fresh install, when onboarding product
-  counsel, or when the plugin config has placeholders. Run with --redo to
-  re-interview, or --check-integrations to re-probe connectors only.
+  冷启动访谈——连接你的发布跟踪器、阅读过往审查、学习你的风险校准。在全新安装时、
+  引导产品法律顾问时或插件配置含占位符时使用。使用 --redo 重新访谈，
+  或 --check-integrations 仅重新检查连接器。
 argument-hint: "[--redo] [--check-integrations to re-probe integrations only]"
 ---
 
+<!--
+This file is a Chinese translation of the original by Anthropic PBC.
+Original: https://github.com/anthropics/claude-for-legal
+Licensed under Apache License 2.0
+-->
+
+
 # /cold-start-interview
 
-1. Check `~/.claude/plugins/config/claude-for-legal/product-legal/CLAUDE.md` state.
-2. Run the cold-start interview below.
-3. Seed docs: 10 past launch review docs (from tracker or Drive). Read them all.
-4. Build risk calibration table from what actually blocked vs. shipped.
-5. Migration: if a populated CLAUDE.md (no `[PLACEHOLDER]` markers) exists at `~/.claude/plugins/cache/claude-for-legal/product-legal/*/CLAUDE.md` but not at the config path, copy it to the config path and show the user what was migrated.
-6. Write `~/.claude/plugins/config/claude-for-legal/product-legal/CLAUDE.md` (create parent directories as needed). Show calibration table for confirmation.
+1. 检查 `~/.claude/plugins/config/claude-for-legal/product-legal/CLAUDE.md` 状态。
+2. 运行以下冷启动访谈。
+3. 种子文档：10 份过往发布审查文档（来自跟踪器或 Drive）。阅读全部。
+4. 从实际阻塞与发布的对比中构建风险校准表。
+5. 迁移：如果在 `~/.claude/plugins/cache/claude-for-legal/product-legal/*/CLAUDE.md` 存在已填充的 CLAUDE.md（无 `[PLACEHOLDER]` 标记）但在配置路径不存在，复制到配置路径并向用户展示迁移内容。
+6. 写入 `~/.claude/plugins/config/claude-for-legal/product-legal/CLAUDE.md`（根据需要创建父目录）。显示校准表以供确认。
 
 ## `--check-integrations`
 
-Re-runs the integration availability check (launch tracker, document storage, Slack) and updates `## Available integrations` in `~/.claude/plugins/config/claude-for-legal/product-legal/CLAUDE.md`. Does not re-interview. Use when you connect or disconnect an MCP and want the plugin to notice without rerunning the full setup.
+重新运行集成可用性检查（发布跟踪器、文档存储、Slack）并更新 `~/.claude/plugins/config/claude-for-legal/product-legal/CLAUDE.md` 中的 `## Available integrations`。不重新访谈。在连接或断开 MCP 且希望插件注意到而不重新运行完整设置时使用。
 
-When probing: only report ✓ if an MCP tool call actually succeeded. Configured-but-untested connectors should be marked ⚪ with a one-line how-to for confirming. Never report ✓ based on `.mcp.json` declarations alone — that misleads users into thinking something is wired up when it isn't.
+探测时：仅当 MCP 工具调用实际成功时报告 ✓。已配置但未测试的连接器应标记 ⚪ 并附一行如何确认。永远不要仅根据 `.mcp.json` 声明报告 ✓——这会误导用户认为某些东西已连接而实际没有。
 
 ```
 /product-legal:cold-start-interview
@@ -33,460 +39,456 @@ When probing: only report ✓ if an MCP tool call actually succeeded. Configured
 
 ---
 
-# Cold-Start Interview: Product Counsel
+# 冷启动访谈：产品法律顾问
 
-## Purpose
+## 目的
 
-Product counsel is company-specific in a way other legal practices aren't. What counts as a launch blocker at a fintech is an FYI at an ad-tech company. The same feature is high-risk for a company under a consent decree and routine for a company the FTC has never heard of.
+产品法律顾问在其他法律实践中以公司特定方式运作。在金融科技公司算作发布阻塞的事情，在广告技术公司是 FYI。同一功能在同意令下的公司是高风险的，在 FTC 从未听说过的公司是常规的。
 
-This interview learns *your* company's risk calibration by reading your actual launch review docs — where you blocked, where you waved through, and what you spent time on.
+此访谈通过阅读你实际的发布审查文档——你在哪里阻塞、在哪里放行、在哪里花了时间——来学习*你*公司的风险校准。
 
-## Cold-start check
+## 冷启动检查
 
-Read `~/.claude/plugins/config/claude-for-legal/product-legal/CLAUDE.md`:
-- **Does not exist** → start the interview.
-- **Contains `<!-- SETUP PAUSED AT: -->`** → greet the user and offer to resume from that section.
-- **Contains `[PLACEHOLDER]` markers but no pause comment** → the template was never completed; offer to start fresh or resume from wherever the placeholders begin.
-- **Populated (no placeholders, no pause comment)** → already configured; skip unless `--redo`.
+读取 `~/.claude/plugins/config/claude-for-legal/product-legal/CLAUDE.md`：
+- **不存在** → 开始访谈。
+- **包含 `<!-- SETUP PAUSED AT: -->`** → 欢迎用户并提供从该部分恢复。
+- **包含 `[PLACEHOLDER]` 标记但没有暂停注释** → 模板从未完成；提供重新开始或从占位符开始的地方恢复。
+- **已填充（无占位符、无暂停注释）** → 已配置；除非 `--redo` 否则跳过。
 
-The template structure lives at `${CLAUDE_PLUGIN_ROOT}/CLAUDE.md` — use it as the section scaffold. Write the completed practice profile to the config path, creating parent directories as needed.
+模板结构位于 `${CLAUDE_PLUGIN_ROOT}/CLAUDE.md`——将其用作章节支架。将完成的执业档案写入配置路径，根据需要创建父目录。
 
-If a CLAUDE.md exists at the old cache path `~/.claude/plugins/cache/claude-for-legal/product-legal/*/CLAUDE.md` but not at the config path, copy it forward.
+如果在旧缓存路径 `~/.claude/plugins/cache/claude-for-legal/product-legal/*/CLAUDE.md` 存在 CLAUDE.md 但在配置路径不存在，向前复制。
 
-## Check for the shared company profile
+## 检查共享公司档案
 
-Look for `~/.claude/plugins/config/claude-for-legal/company-profile.md`.
+查找 `~/.claude/plugins/config/claude-for-legal/company-profile.md`。
 
-- **If it exists:** Read it. Show a one-line confirmation: "You're [name], [practice setting], at [company], [industry], operating in [jurisdictions]. Right? (Or say 'update' to change the shared profile.)" If confirmed, skip the company questions — go straight to the plugin-specific ones.
-- **If it doesn't exist:** You'll be the first plugin this user set up. After the orientation and fork, ask the company questions and write them to the shared profile (per the template at `references/company-profile-template.md` in the plugin root), then continue with the plugin-specific questions. Tell the user: "I've saved your company profile — the other legal plugins will read it and skip these questions."
+- **如果存在：** 读取它。显示一行确认："你是 [姓名]，[执业设置]，在 [公司]，[行业]，在 [司法管辖区]运营。对吗？（或说 'update' 更改共享档案。）"如果确认，跳过公司问题——直接进入插件特定问题。
+- **如果不存在：** 你将是此用户设置的第一个插件。在定向和分支后，询问公司问题并将它们写入共享档案（根据插件根目录中 `references/company-profile-template.md` 的模板），然后继续插件特定问题。告诉用户："我已保存你的公司档案——其他法律插件将读取它并跳过这些问题。"
 
-The company questions that belong in the shared profile (and should NOT be re-asked if it exists): practice setting, company name, industry, what-you-sell, size, jurisdictions, regulators, risk appetite, escalation names. The plugin-specific questions (playbook positions, review framework, house style, supervision model, etc.) stay per-plugin.
+共享档案中的公司问题（如果存在则不应重新询问）：执业设置、公司名称、行业、你销售什么、规模、司法管辖区、监管机构、风险偏好、升级姓名。插件特定问题（剧本立场、审查框架、内部风格、监督模型等）保持每个插件。
 
-## Install scope check
+## 安装范围检查
 
-Before the orientation, if you notice the working directory is inside a project (not the user's home directory), flag it. Say once:
+在定向之前，如果你注意到工作目录在项目内部（而非用户的主目录），标记它。说一次：
 
-> **Heads up — it looks like this plugin may be project-scoped, which means I can only read files in [current directory]. If you'll want me to read documents from elsewhere (Downloads, Documents, Dropbox), install user-scoped instead — see QUICKSTART.md. You can continue with project scope, but you'll need to move files into this folder.**
+> **注意——看起来此插件可能是项目范围的，这意味着我只能读取 [当前目录] 中的文件。如果你想让我从其他地方（下载、文档、Dropbox）读取文档，改为安装用户范围——参见 QUICKSTART.md。你可以继续项目范围，但需要将文件移到此文件夹。**
 
-Ask the user to confirm before proceeding: continue with project scope, or pause to reinstall user-scoped. If the working directory *is* the user's home directory, skip this check silently.
+要求用户在继续前确认：继续项目范围，或暂停以重新安装用户范围。如果工作目录*是*用户的主目录，静默跳过此检查。
 
-## Before the interview starts
+## 访谈开始前
 
-Before asking anything else, show the fork-first preamble — 3-4 short lines, no longer:
+在询问其他任何内容之前，首先显示分支前言——3-4 个短行，仅此而已：
 
-> **`product-legal` is for people who review product launches, marketing claims, and feature risk — the legal side of shipping.** Not your area? `/legal-builder-hub:related-skills-surfacer`.
+> **`product-legal` 面向审查产品发布、营销声明和功能风险的人员——发布的法律侧。** 不是你的领域？`/legal-builder-hub:related-skills-surfacer`。
 >
-> **2 minutes** gets you your role, your review framework level (formal gate vs. advisory), and product/practice context (consumer, enterprise, both), with sensible defaults everywhere else. **15 minutes** adds your risk calibration table (what blocks vs. what ships here), your escalation matrix, your review framework categories, your house memo format, and your launch tracker integration.
+> **2 分钟**获得你的角色、你的审查框架级别（正式门控 vs. 咨询）和产品/执业上下文（消费者、企业、两者），其他所有地方使用合理默认值。**15 分钟**添加你的风险校准表（这里什么阻塞 vs. 什么发布）、你的升级矩阵、你的审查框架类别、你的内部备忘录格式和你的发布跟踪器集成。
 >
-> Quick or full? (Upgrade any time with `/cold-start-interview --full`.)
+> 快速还是完整？（随时使用 `/cold-start-interview --full` 升级。）
 
-Wait for the user's pick before showing anything else.
+在显示其他任何内容之前等待用户选择。
 
 <!-- COLLATERAL LINKS: when onboarding collateral exists, prepend a line above the preamble:
      "Want a walkthrough first? [Watch the 3-minute intro](URL) or [read the getting-started guide](URL), then come back and run /cold-start-interview." -->
 
-## After the user picks quick or full
+## 用户选择快速或完整后
 
-Once the user has chosen, orient them before the first interview question:
+一旦用户选择了，在第一个访谈问题之前向他们定向：
 
-> "This plugin maintains your practice profile (review framework, risk calibration, escalation matrix), a launch review archive, and a marketing claims log. It acts as product counsel — launch reviews, feature risk assessments, marketing claim checks — against your company's risk calibration and house framework. This setup interview learns how you actually work — your risk calibration, what your company treats as a P0 vs. an FYI, your review framework, your house conventions — and writes it into a plain-text file the plugin reads from every time. Everything you answer can be changed later. Once it's done, the plugin's commands will work the way you work, not the way a generic template does."
+> "此插件维护你的执业档案（审查框架、风险校准、升级矩阵）、一个发布审查存档和一个营销声明日志。它作为产品法律顾问——发布审查、功能风险评估、营销声明检查——针对你公司的风险校准和内部框架。此设置访谈学习你实际如何工作——你的风险校准、你的公司把什么视为 P0 vs. FYI、你的审查框架、你的内部约定——并写入插件每次读取的纯文本文件。你回答的所有内容都可以稍后更改。完成后，插件的命令将按你工作的方式工作，而非按通用模板的方式。"
 >
-> Then: "Setup builds a fresh professional profile from your answers. It does not read your personal Claude history, other conversations, or your home-directory CLAUDE.md. If something relevant has come up earlier in this conversation (for example, you mentioned your company), I'll ask before using it. Nothing gets folded into your configuration unless you type it or approve it."
+> 然后："设置从你的回答构建全新的专业档案。它不读取你的个人 Claude 历史、其他对话或你的主目录 CLAUDE.md。如果此对话中早些时候出现了相关内容（例如，你提到了你的公司），我会在使用前询问。除非你键入或批准，否则不会将任何内容折叠到你的配置中。"
 >
-> Then: "Ready? A few quick questions first, then we'll go deeper."
+> 然后："准备好了吗？先回答几个快速问题，然后我们深入。"
 
-**Why this matters.** Every command in this plugin reads from the configuration this interview writes. A generic configuration gives you generic output — a default risk calibration, a default review framework, a default escalation matrix, and a launch review that treats your company like every other company. Telling the plugin how your company actually calibrates risk — what counts as a P0 blocker here versus an FYI — is what makes the difference between "a product-legal AI tool" and "a tool that knows your house framework." The more specific your answers, the more the outputs will feel like yours.
+**为什么这很重要。** 此插件中的每个命令都从此访谈编写的配置中读取。通用配置给你通用输出——默认风险校准、默认审查框架、默认升级矩阵，以及将你的公司像其他每个公司一样对待的发布审查。告诉插件你的公司实际如何校准风险——在这里什么算作 P0 阻塞 vs. FYI——是"一个产品法律 AI 工具"和"一个知道你内部框架的工具"之间的区别。你的答案越具体，输出就越像你的。
 
-Do not read the user's home-directory `~/CLAUDE.md`, `~/user.md`, or other personal memory to pre-populate the interview. The only inputs are the user's typed answers and documents they point at or paste in.
+不要读取用户主目录 `~/CLAUDE.md`、`~/user.md` 或其他个人记忆来预填充访谈。唯一输入是用户键入的答案和他们指向或粘贴的文档。
 
-**Quick start path:** ask only Part 0 (role, practice setting, integrations) and product area. Write the config with `[DEFAULT]` markers on everything else. Close with: "Done. You can start using the commands now. I've used sensible defaults for launch review framework, risk calibration, and marketing claims posture. When a skill's output feels off, that's usually a default you should tune — it'll tell you which. Run `/product-legal:cold-start-interview --full` anytime to do the whole interview, or `/product-legal:cold-start-interview --redo <section>` to re-do one part."
+**快速开始路径：** 仅询问第 0 部分（角色、执业设置、集成）和产品领域。在其他所有内容上使用 `[DEFAULT]` 标记写入配置。关闭："完成。你现在可以开始使用命令了。我对发布审查框架、风险校准和营销声明姿态使用了合理默认值。当 skill 的输出感觉不对时，那通常是你应该调整的默认值——它会告诉你哪个。随时运行 `/product-legal:cold-start-interview --full` 做完整访谈，或 `/product-legal:cold-start-interview --redo <section>` 重做一部分。"
 
-**Full setup path:** the existing interview flow below.
+**完整设置路径：** 以下现有访谈流程。
 
-## Interview pacing
+## 访谈节奏
 
-- **Assume the answer exists somewhere.** When a question asks for information that's probably written down somewhere — company description, playbook, escalation matrix, style guide, handbook, jurisdiction list, matter portfolio — prompt for a link or a paste before asking the user to type it from memory. "Paste a link or a doc, or give me the short version" is the default ask for anything that's more than a sentence. An interviewer who makes people re-type what they've already written has failed the first job of an interviewer.
-- **Batch size — count subparts.** "Never ask more than 2-3 questions in one turn" means 2-3 *answerable prompts*, counting subparts. One question with 5 subparts is 5 questions. The test: can the user answer without scrolling? If the questions don't fit on one screen, it's too many. Prefer structured tap-through questions where possible — they don't require scrolling or typing.
+- **假设答案存在于某处。** 当问题询问可能写在某处的信息——公司描述、剧本、升级矩阵、风格指南、手册、司法管辖区列表、事项组合——在要求用户从内存键入之前提示链接或粘贴。"粘贴链接或文档，或给我简短版本"是超过一句话的任何内容的默认询问。让人们重新键入已写内容的访谈官未能完成访谈官的第一项工作。
+- **批量大小——计算子部分。** "一次不要问超过 2-3 个问题"意味着 2-3 个*可回答的提示*，计算子部分。一个带有 5 个子部分的问题是 5 个问题。测试：用户是否可以在不滚动的情况下回答？如果问题不适合一个屏幕，则太多。尽可能使用结构化点击问题——它们不需要滚动或键入。
 
-**Pause for real answers.** Some questions have quick tap-through answers. Others need the user to type, describe, or upload something. When a question needs more than a quick tap:
+**暂停等待真实答案。** 有些问题有快速的点击答案。其他需要用户键入、描述或上传内容。当问题需要超过快速点击时：
 
-- **Ask the question and wait.** Say it plainly: "This one needs a typed answer — I'll wait." Don't queue the next question until they respond.
-- **For uploads (seed launch review docs, PRDs, links to the tracker):** "Paste the contents, share a file path, or say 'skip for now.' If you skip, I'll flag the gap in your configuration so you can fill it later." Then actually wait.
-- **Before writing the practice profile:** review the interview. List every question that was skipped or answered with a placeholder. Say: "Before I write your configuration, here's what's still open: [list]. Want to fill any of these now, or leave them as placeholders?" Wait for the answer before writing.
-- **Never** write the practice profile with silent gaps. Every placeholder should be a deliberate user choice to skip, not a question that scrolled past unanswered.
-- **Pause and resume.** Tell the user up front: "If you need to stop, say 'pause' (or 'stop', or 'let me come back to this') and I'll save your progress. Run `/product-legal:cold-start-interview` again later and I'll pick up where you left off." When the user pauses, write a partial configuration to `~/.claude/plugins/config/claude-for-legal/product-legal/CLAUDE.md` with a `<!-- SETUP PAUSED AT: [section name] — run /product-legal:cold-start-interview to resume -->` comment at the top and `[PENDING]` markers (distinct from `[PLACEHOLDER]`) on unanswered fields. When setup re-runs and finds a paused config, greet the user: "Welcome back. You paused at [section]. Your earlier answers are saved. Pick up where we left off, or start over?" Do not re-ask questions already answered.
+- **提出问题并等待。** 平实地说："这需要键入答案——我会等待。"在他们响应之前不要排队下一个问题。
+- **对于上传（种子发布审查文档、PRD、跟踪器链接）：** "粘贴内容、共享文件路径，或说'暂时跳过'。如果你跳过，我会在你的配置中标记差距以便稍后填充。"然后实际等待。
+- **在写入执业档案之前：** 审查访谈。列出跳过或用占位符回答的问题。说："在写入你的配置之前，这里仍然开放：[列表]。想现在填充其中任何一个，还是将它们留作占位符？"在写入前等待答案。
+- **永远不要**用静默差距写入执业档案。每个占位符都应该是用户故意跳过的选择，而非滚动过去未回答的问题。
+- **暂停和恢复。** 提前告诉用户："如果你需要停止，说'pause'（或'stop'、'让我稍后回到这个'），我会保存你的进度。稍后再次运行 `/product-legal:cold-start-interview`，我会在你离开的地方继续。"当用户暂停时，将部分配置写入 `~/.claude/plugins/config/claude-for-legal/product-legal/CLAUDE.md`，顶部带有 `<!-- SETUP PAUSED AT: [section name] — run /product-legal:cold-start-interview to resume -->` 注释，未回答字段上有 `[PENDING]` 标记（与 `[PLACEHOLDER]` 不同）。当设置重新运行并发现暂停的配置时，欢迎用户："欢迎回来。你在 [section] 暂停。你之前的答案已保存。从我们离开的地方继续，还是重新开始？"不要重新询问已回答的问题。
 
-**Verify user-stated legal facts as they come up in setup.** When the user answers an interview question with a specific rule citation, statute number, case name, deadline, threshold, jurisdiction, or registration number — and it's something you can sanity-check — do the check before writing it into the configuration. If what they said conflicts with your understanding or with something they've pasted, surface it: "You said the threshold is X; my understanding is Y — can you confirm which goes in the profile? `[premise flagged — verify]`" A wrong fact written into CLAUDE.md propagates into every future output; catching it here is one of the highest-leverage moments in the product.
+**在设置中验证用户陈述的法律事实。** 当用户用具体规则引用、法规编号、案例名称、截止日期、阈值、司法管辖区或注册号回答访谈问题时——并且这是你可以健全性检查的内容——在将其写入配置之前进行检查。如果他们所说的与你的理解或他们粘贴的内容冲突，呈现："你说阈值是 X；我的理解是 Y——你能确认哪个进入档案吗？`[premise flagged — verify]`"写入 CLAUDE.md 的错误事实会传播到每个未来输出；在这里捕获是产品中最具影响力的时刻之一。
 
-## The interview
+## 访谈
 
-### Opening
+### 开场
 
-> Product counsel is the practice where legal is closest to the company — it changes the most from place to place. I need to learn what "risky" means here before I can tell you whether something is risky.
+> 产品法律顾问是法律最贴近公司的实践——它因公司而异最大。在我告诉你某事是否有风险之前，我需要学习"有风险"在这里意味着什么。
 >
-> I'm going to ask about your company, your review process, and what you've blocked before. Then I want to read ten of your past launch reviews. Not the PRDs — *your* reviews. That's where your calibration lives.
+> 我会询问关于你的公司、你的审查流程以及你以前阻塞过什么。然后我想阅读十份你过去的发布审查。不是 PRD——*你的*审查。你的校准就在那里。
 
-### Part 0: Who's using this, and what's connected
+### 第 0 部分：谁在使用此，连接了什么
 
-Two quick questions before we get into product-legal specifics. These shape how the plugin works, not what it can do.
+在进入产品法律细节之前的两个快速问题。这些影响插件如何工作，而非它能做什么。
 
-#### Who's using this?
+#### 谁在使用此？
 
-> Who'll be using this plugin day to day? (This feeds every skill's work-product header and output framing — lawyer gets "ATTORNEY WORK PRODUCT," non-lawyer gets research framing and attorney-review checkpoints before a launch clears.)
+> 谁将日常使用此插件？（这影响每个 skill 的工作产品标题和输出框架——律师获得"ATTORNEY WORK PRODUCT"，非律师获得研究框架和发布清除前的律师审查检查点。）
 >
-> 1. **Lawyer or legal professional** — attorney, paralegal, product-legal ops working under attorney oversight.
-> 2. **Non-lawyer with attorney access** — PM, founder, business lead, marketing ops; you have an in-house or outside attorney you can consult.
-> 3. **Non-lawyer without regular attorney access** — you're handling this yourself.
+> 1. **律师或法律专业人士** — 律师、律师助理、在律师监督下工作的产品法律运营。
+> 2. **有律师访问权限的非律师** — PM、创始人、业务负责人、营销运营；你有内部或外部律师可以咨询。
+> 3. **没有定期律师访问权限的非律师** — 你自己处理。
 
-If the answer is 2 or 3, say this once (don't repeat it on every output):
+如果答案是 2 或 3，说一次（不要在每个输出上重复）：
 
-> You can use every feature here — launch review, feature risk assessment, marketing-claims review, and triage. Two things change in how I work:
+> 你可以使用这里的每个功能——发布审查、功能风险评估、营销声明审查和分流。在我工作方式中有两件事改变：
 >
-> 1. **I'll frame outputs as research for attorney review, not as verdicts.** Instead of "cleared to ship," you'll get "here's what I found and here are the questions to ask before you ship." That's more useful than a green light you can't be sure of.
-> 2. **I'll pause before steps that have legal consequences** — clearing a launch, publishing a marketing claim, approving a claim for external use. I'll ask whether you've reviewed with an attorney, and I'll put together a short brief so the conversation with them is fast.
+> 1. **我会将输出框架化为律师审查的研究，而非裁决。** 而非"可以发布"，你将获得"这是我发现的以及发布前要问的问题。"这比你不能确定的绿灯更有用。
+> 2. **我会在有法律后果的步骤前暂停** — 清除发布、发布营销声明、批准声明用于外部使用。我会询问你是否已与律师审查，并整理简短简报以便与他们的对话快速。
 >
-> This isn't a disclaimer. It's the plugin knowing the difference between what it's good at — research, organization, structure — and licensed legal judgment about your specific situation, which a tool can't give you. A few hours of a lawyer's time at the right moment is usually cheaper than the mistake.
+> 这不是免责声明。这是插件知道它擅长什么——研究、组织、结构——与关于你具体情况的有执照的法律判断之间的区别，这是工具无法给你的。在正确时刻律师的几小时时间通常比错误更便宜。
 
-If the answer is 3, add:
+如果答案是 3，添加：
 
-> If you need to find a lawyer: your professional regulator's referral service is the fastest starting point (state bar in the US; SRA/Bar Standards Board in England & Wales; Law Society in Scotland/NI/Ireland/Canada/Australia; or your jurisdiction's equivalent). Many offer free or low-cost initial consultations. For small businesses, local law school clinics and (in the US) SCORE mentors can point you in the right direction. For individuals, legal aid organizations cover many practice areas.
+> 如果你需要找到律师：你专业监管机构的推荐服务是最快的起点（美国的州律协；英格兰和威尔士的 SRA/律师标准委员会；苏格兰/NI/爱尔兰/加拿大/澳大利亚的 Law Society，或你司法管辖区的同等机构）。许多提供免费或低成本的初步咨询。对于小企业，当地法学院诊所和（在美国）SCORE 导师可以指向正确方向。对于个人，法律援助组织覆盖许多执业领域。
 
-#### What's connected?
+#### 连接了什么？
 
-> This plugin can work with: launch tracker (Jira, Linear, Asana), document storage (Google Drive, SharePoint), and Slack. Let me check which connectors you have configured — features that need them will work, and features that don't have them will fall back to manual gracefully instead of failing silently.
+> 此插件可以与以下内容一起工作：发布跟踪器（Jira、Linear、Asana）、文档存储（Google Drive、SharePoint）和 Slack。让我检查你配置了哪些连接器——需要它们的功能将工作，没有它们的功能将优雅地回退到手动而非静默失败。
 
-**Check what's actually connected, not what's configured.** A connector listed in `.mcp.json` is *available*. A connector that's actually responding is *connected*. These are different, and confusing them destroys trust. For each connector this plugin uses:
+**检查实际连接了什么，而非配置了什么。** `.mcp.json` 中列出的连接器是*可用的*。实际响应的连接器是*已连接的*。这些是不同的，混淆它们会破坏信任。对于此插件使用的每个连接器：
 
-- If you can test the connection (call a simple MCP tool like a list or search), report ✓ only on a successful response.
-- If you can't test (no way to probe from here), report ⚪ "configured but not verified — open your MCP settings to confirm" with a one-line how-to.
-- Never report ✓ based on configuration alone.
+- 如果你可以测试连接（调用简单的 MCP 工具如列表或搜索），仅在成功响应时报告 ✓。
+- 如果你无法测试（无法从这里探测），报告 ⚪ "已配置但未验证——打开你的 MCP 设置以确认"并附一行如何操作。
+- 永远不要仅根据配置报告 ✓。
 
-For connectors that show as not connected, tell the user how to connect. Example phrasing: "Jira isn't connected. In Claude Cowork: Settings → Connectors → Add → Jira → sign in. In Claude Code: add the Jira MCP to your config or via `/mcp`. This plugin works without it — you'll paste PRDs and review docs directly — but connecting it lets the launch-watcher agent pull tickets automatically."
+对于显示为未连接的连接器，告诉用户如何连接。示例措辞："Jira 未连接。在 Claude Cowork 中：Settings → Connectors → Add → Jira → sign in。在 Claude Code 中：将 Jira MCP 添加到你的配置或通过 `/mcp`。此插件在没有它的情况下工作——你会直接粘贴 PRD 和审查文档——但连接它让发布观察 agent 自动拉取工单。"
 
-Then report findings in this form:
+然后以这种形式报告发现：
 
-> - ✓ [Integration] — connected (tested)
-> - ⚪ [Integration] — configured but not verified. Open your MCP settings to confirm.
-> - ✗ [Integration] — not found. [Feature] will fall back to [manual alternative]. [How to connect.]
+> - ✓ [集成] — 已连接（已测试）
+> - ⚪ [集成] — 已配置但未验证。打开你的 MCP 设置以确认。
+> - ✗ [集成] — 未找到。[功能] 将回退到 [手动替代品]。[如何连接。]
 
-You don't need all of these. Core features work with file access alone. If you set something up later, re-run `/product-legal:cold-start-interview --check-integrations`.
+你不需要所有这些。核心功能仅凭文件访问即可工作。如果你稍后设置，重新运行 `/product-legal:cold-start-interview --check-integrations`。
 
-#### Record to the plugin config
+#### 写入插件配置
 
-Write `## Who's using this` and `## Available integrations` sections immediately after `## Who we are`, and update `## Outputs` so the work-product header is conditional on role (see the practice profile template below).
+在 `## Who we are` 之后立即写入 `## Who's using this` 和 `## Available integrations` 部分，并更新 `## Outputs` 以使工作产品标题取决于角色（见下方执业档案模板）。
 
-#### Practice setting
+#### 执业设置
 
-> One more quick one before we go deep:
+> 在深入之前还有最后一个快速问题：
 >
-> What's the setting? (This feeds the escalation matrix every skill uses — in-house asks about GC routing, solo maps "escalate" to "consult outside counsel," clinic routes to supervising attorney.)
+> 你的设置是什么？（这影响每个 skill 使用的升级矩阵——内部询问 GC 路由，独立将"升级"映射到"咨询外部律师"，诊所路由到监督律师。）
 >
-> - **Solo / small firm (no hierarchy)** — I'll skip approval-chain questions and ask when you'd loop in a colleague or outside counsel instead.
-> - **Midsize / large firm** — I'll ask about your approval chain, billing thresholds, and who signs off above you.
-> - **In-house** — I'll ask about your escalation matrix, who the GC/CLO is, and when something goes to the business.
-> - **Government / legal aid / clinic** — I'll ask about supervision structure and any restrictions on your practice.
-> - **My practice doesn't fit any of these** — say so. I'll adapt.
+> - **独立 / 小律所（无层级）** — 我会跳过批准链问题并询问你何时引入同事或外部律师。
+> - **中型 / 大型律所** — 我会询问你的批准链、计费阈值以及谁在你上方签署。
+> - **内部** — 我会询问你的升级矩阵、GC/CLO 是谁以及何时事情转到业务。
+> - **政府 / 法律援助 / 诊所** — 我会询问监督结构和对你的执业的任何限制。
+> - **我的执业不符合其中任何一种** — 说明。我会适应。
 
-**Practices that don't fit the boxes.** If the user's practice doesn't match the options above (international arbitration, public international law, amicus-only, academic consulting, pro bono panel, tribal court, military justice, maritime, or anything else the standard categories assume away), offer: "It sounds like your practice doesn't fit my usual categories. Tell me about it in your own words — what you do, who for, what jurisdictions and forums, what the work looks like — and I'll build your profile from that instead of forcing you into boxes that don't fit. I'll skip or adapt the questions that don't apply." Then build the profile from the free-form description, flagging which template fields were filled, adapted, or left empty because they don't apply. A profile built from a forced fit is worse than a sparse profile built from what's actually true.
+**不符合框的执业。** 如果用户的执业不符合上述选项（国际仲裁、公法、仅法庭之友、学术咨询、公益小组、部落法院、军事司法、海事或标准类别假设的任何其他内容），提供："听起来你的执业不符合我的通常类别。用你自己的语言告诉我——你做什么、为谁、什么司法管辖区和论坛、工作是什么样的——我会从中构建你的档案，而非强迫你进入不合适的框。我会跳过或调整不适用的问题。"然后从自由形式描述构建档案，标记哪些模板字段已填充、调整或留空因为不适用。从强制配合构建的档案比从实际真实内容构建的稀疏档案更差。
 
-Use this to branch later questions:
+使用此来分支后续问题：
 
-- **Solo / small firm (no hierarchy):** Skip escalation-chain questions in Part 1 and elsewhere. Reframe: instead of "who approves above your threshold," ask "when do you call in outside counsel or a colleague for a second opinion." In the practice profile, the escalation matrix maps to *consult* not *route for approval*, and the "GC asks in every review" question becomes "what do you always double-check before shipping."
-- **Midsize / large firm:** Ask about the approval chain, billing thresholds, and who signs off above the user.
-- **In-house:** Ask the escalation matrix, who the GC/CLO is, and when something goes to the business.
-- **Government / legal aid / clinic:** Substitute the supervision chain used in that setting (supervising attorney, director, oversight committee). Ask about any restrictions on practice. Keep the escalation structure but relabel the roles.
+- **独立 / 小律所（无层级）：** 跳过第 1 部分和其他地方的升级链问题。重新框架：而非"谁在你的阈值以上批准"，询问"你何时引入外部律师或同事获取第二意见"。在执业档案中，升级矩阵映射到*咨询*而非*批准路由*，"每次审查中 GC 都问的问题"变为"你在发布前总是复查什么"。
+- **中型 / 大型律所：** 询问批准链、计费阈值以及谁在用户上方签署。
+- **内部：** 询问升级矩阵、GC/CLO 是谁以及何时事情转到业务。
+- **政府 / 法律援助 / 诊所：** 替换该设置中使用的监督链（监督律师、主任、监督委员会）。询问对执业的任何限制。保留升级结构但重新标记角色。
 
-Record the practice setting in the practice profile under `## Who's using this`.
+在 `## Who's using this` 下记录执业设置。
 
-### Part 1: The company (3-4 min)
+### 第 1 部分：公司（3-4 分钟）
 
-**What does [your company] do?** This is the single most important context — a SaaS vendor's playbook, a hardware distributor's playbook, and a services firm's playbook are completely different. You don't have to type it out: paste a link to your company website, your "about" page, your Wikipedia article, or your latest 10-K, and I'll extract what I need. Or give me the one-sentence version: what you sell, to whom, and how (direct sales / channel / marketplace / subscription).
+**[你的公司]做什么？** 这是最重要的上下文——SaaS 供应商的剧本、硬件分销商的剧本和服务公司的剧本完全不同。你不必键入：粘贴公司网站链接、"关于"页面、维基百科文章或最新 10-K，我会提取我需要的内容。或给我一句话版本：你卖什么、卖给谁以及如何（直销 / 渠道 / 市场 / 订阅）。
 
-**What are we?**
-- What does the company make?
-- Who uses it?
-- Is the company consumer, B2B, or both?
-- Are you in a regulated industry?
-- If so, which industry regime(s)?
-- Are there any regulators you're on a first-name basis with?
-- Any active consent decrees?
-- Any active investigations?
-- Is the product international?
-- If so, which countries matter most for legal calibration?
+**我们是什么？**
+- 公司制造什么？
+- 谁使用它？
+- 公司是消费者、B2B 还是两者？
+- 你在受监管行业吗？
+- 如果是，哪个行业制度？
+- 有任何监管机构和你很熟吗？
+- 有任何活跃同意令吗？
+- 有任何活跃调查吗？
+- 产品是国际的吗？
+- 如果是，哪些国家对法律校准最重要？
 
-**Company stage and funding posture:**
-- What stage is the company — pre-seed, Series A-D, pre-IPO, post-IPO / public, PE-owned, other?
-- Any investor-driven risk overlays (board reporting, D&O constraints, public-company disclosure gating) that affect how you calibrate risk?
+**公司阶段和融资姿态：**
+- 公司在什么阶段——种子前、A-D 轮、上市前、上市/公开、PE 持股、其他？
+- 有任何投资者驱动的风险叠加（董事会报告、D&O 约束、上市公司披露门控）影响你如何校准风险吗？
 
-**Jurisdiction footprint (even rough is fine):**
-- Where are the users — US-only, US + EU, global?
-- Where are the employees and data centers?
-- Any markets that drive a disproportionate amount of risk calibration (e.g., heavy EU exposure, a specific state regime you watch, a country with a local regulator you're in dialogue with)?
+**司法管辖区覆盖（粗略即可）：**
+- 用户在哪里——仅美国、美国 + 欧盟、全球？
+- 员工和数据中心在哪里？
+- 有哪些市场驱动不成比例的风险校准（例如，重欧盟暴露、你关注的特定州制度、你正在对话的当地监管机构所在国家）？
 
-**Risk appetite:** *(This feeds `/launch-review` and `/is-this-a-problem` — sets what counts as a P0 blocker at your company vs. an FYI.)*
-- On a "conservative / middle / aggressive" scale, where does leadership sit on product-launch risk? Any specific category where that's different (e.g., aggressive on pricing experiments, conservative on anything children-touching)?
-- Is there a "move fast and defend later" posture or a "get it right before we ship" posture — and does it vary by product area?
+**风险偏好：** *（这影响 `/launch-review` 和 `/is-this-a-problem`——设定你公司什么算作 P0 阻塞 vs. FYI。）*
+- 在"保守 / 中间 / 激进"尺度上，领导层在产品发布风险上处于什么位置？有没有特定类别不同（例如，定价实验激进，任何涉及儿童的保守）？
+- 有"先发布再防御"的姿态还是"先做好再发布"——它是否因产品领域而异？
 
-**What keeps you up at night?** *(This feeds `/launch-review` — the questions the GC always asks become mandatory checks on every launch memo.)*
-- If something went wrong with a product launch, what's the worst case that's actually realistic? (Not "someone sues us" — who, for what, and would it stick?)
-- What's the thing your GC asks about in every launch review?
+**什么让你夜不能寐？** *（这影响 `/launch-review`——GC 每次都问的问题成为每个发布备忘录的强制检查。）*
+- 如果产品发布出了问题，实际可能发生的最坏情况是什么？（不是"有人起诉我们"——谁、因为什么、会成立吗？）
+- 你的 GC 在每次发布审查中问什么？
 
-**Escalation — who signs off above you?** *(This feeds every skill's routing — `/launch-review`, `/is-this-a-problem`, and `/marketing-claims-review` all know when to say "you can handle this" vs. "loop in [X]".)*
+**升级——谁在你上方签署？** *（这影响每个 skill 的路由——`/launch-review`、`/is-this-a-problem` 和 `/marketing-claims-review` 都知道何时说'你可以处理此内容'vs.'引入 [X]'。）*
 
-> "When a review finds something that needs someone more senior to sign off — a launch risk above your policy calibration, a marketing claim that needs scrutiny, a novel issue you haven't seen before, or a decision that's above your authority — who does that go to? Give me a name or a role (the GC, your boss, the head of product counsel), or say 'I decide myself.' This is how the plugin knows when to say 'you can handle this' versus 'loop in [X].'"
+> "当审查发现需要更高级人员签署的内容——超出你政策校准的发布风险、需要审查的营销声明、你未见过的新问题或超出你权限的决定——这找谁？给我姓名或角色（GC、你的老板、产品法律顾问负责人），或说'我自己决定。'这是插件如何知道何时说'你可以处理此内容'vs.'引入 [X]'。"
 
-### Part 2: The review process (3-4 min)
+### 第 2 部分：审查流程（3-4 分钟）
 
-Before the structured questions: "Do you have an existing launch review framework, a risk calibration table, or prior launch review memos you can share? Paste the contents or share a file path, and I'll extract the categories, the P0/FYI cuts, and the house format rather than making you re-type them. If not, say 'no' and I'll ask the questions one at a time."
+在结构化问题之前："你有现有的发布审查框架、风险校准表或过往发布审查备忘录可以共享吗？粘贴内容或共享文件路径，我会提取类别、P0/FYI 切分和内部格式，而非让你重新键入。如果没有，说'no'，我会逐个问。"
 
-If the user uploads: read it, extract the framework, confirm what you found, and skip the corresponding detailed questions.
+如果用户上传：阅读它，提取框架，确认你发现的，跳过相应的详细问题。
 
-**How do launches get to you?**
-- Launch tracker — Jira? Linear? Asana? A spreadsheet?
-- Do PMs know to loop you in, or do you find out from the launch calendar?
-- How much lead time do you usually get? Is it enough?
+**发布如何到达你这里？**
+- 发布跟踪器——Jira？Linear？Asana？一个电子表格？
+- PM 知道要拉你入圈吗，还是你从发布日历上发现？
+- 你通常获得多少提前期？够吗？
 
-**What's your framework?** *(This feeds `/launch-review` — the categories you check here become the section headings of every launch memo.)*
-- Do you have categories you check every launch against? (Contractual, privacy, IP, regulatory, etc.)
-- Formal sign-off, or advisory?
-- What's the output — a memo, a ticket comment, a Slack thread?
+**你的框架是什么？** *（这影响 `/launch-review`——你每次检查的类别成为每个发布备忘录的章节标题。）*
+- 你有每次发布检查的类别吗？（合同、隐私、IP、监管等）
+- 正式签署还是咨询？
+- 输出是什么——备忘录、工单评论、Slack 线程？
 
-**P0 vs. FYI — this is the key question:**
-- What's an example of something you blocked a launch over?
-- What's an example of something that looked scary but you said "ship it"?
-- What's the thing PMs keep asking about that's almost never a problem?
+**P0 vs. FYI——这是关键问题：**
+- 举一个你阻塞了发布的事情的例子？
+- 举一个看起来可怕但你说"发布吧"的事情的例子？
+- PM 不断问的几乎从来不是问题的事情是什么？
 
-**If the user didn't upload a framework or past reviews:** at the end of this section, offer: "Want me to write this up as a standalone launch review framework you can share and maintain? Same content I just captured — your categories, your risk calibration, your house format — in a format you can circulate or hand to a new hire."
+**如果用户没有上传框架或过往审查：** 在本节结束时，提供："想让我将其编写为独立的发布审查框架你可以共享和维护吗？相同内容我刚捕获的——你的类别、你的风险校准、你的内部格式——格式可以分发或交给新员工。"
 
-### Part 3: Marketing and claims (1-2 min)
+### 第 3 部分：营销和声明（1-2 分钟）
 
-*(This feeds `/marketing-claims-review` — substantiation standard and comparative-claims posture drive how the skill flags marketing copy.)*
+*（这影响 `/marketing-claims-review`——证实标准和比较性声明姿态驱动 skill 如何标记营销文案。）*
 
-- Who reviews marketing copy — you, or a separate marketing legal function?
-- Comparative claims ("faster than X") — allowed, discouraged, banned?
-- What's the substantiation standard — do claims need data before they ship, or is "we think so" okay?
+- 谁审查营销文案——你，还是单独的营销法律功能？
+- 比较性声明（"比 X 快"）——允许、不鼓励、禁止？
+- 证实标准是什么——声明发布前需要数据吗，还是"我们认为如此"就可以？
 
-### Part 4: Seed documents (3-4 min)
+### 第 4 部分：种子文档（3-4 分钟）
 
-> I want to read ten of your recent launch reviews. Not ten PRDs — ten of *your* docs. Where you said "here's what I'm worried about" or "this is fine, ship it."
+> 我想阅读十份你最近的发布审查。不是十份 PRD——十份*你的*文档。你在那里说"这是我担心的"或"这没问题，发布吧。"
 >
-> If you have a launch tracker connected, I can find them. Otherwise, point me at a folder or a few docs.
+> 如果你连接了发布跟踪器，我可以找到它们。否则，指向一个文件夹或几份文档。
 
-**If Jira/Linear/Asana is connected:** Query for tickets with legal review comments, or a "legal review" status. Pull the last 10-15.
+**如果 Jira/Linear/Asana 已连接：** 查询带有法律审查评论或"法律审查"状态的工单。拉取最近 10-15 份。
 
-**Read the seed docs and extract:**
+**阅读种子文档并提取：**
 
-1. **Categories used** — do they use a formal framework or freestyle? Either way, note what they actually check.
-2. **Risk calibration** — for each launch, what was raised, what was blocked, what was waved through? Build a table.
-3. **Output format** — memo, ticket comment, checklist? Length, tone, structure.
-4. **Common patterns** — same issue across multiple launches? That's a systemic thing to note.
+1. **使用的类别** — 他们使用正式框架还是自由式？无论哪种方式，注意他们实际检查什么。
+2. **风险校准** — 对于每次发布，提出了什么、阻塞了什么、放行了什么？构建表格。
+3. **输出格式** — 备忘录、工单评论、检查清单？长度、语调、结构。
+4. **常见模式** — 跨多个发布的相同问题？这是需要注意的系统性问题。
 
-**The calibration table (this is the key output):**
+**校准表（这是关键输出）：**
 
-| Issue seen | How often | Typical call | Example |
+| 见过的问题 | 频率 | 通常判断 | 示例 |
 |---|---|---|---|
-| New data collection | 8/10 | PIA required, rarely blocks | "Analytics event added — PIA done, shipped" |
-| Third-party integration | 6/10 | DPA check, rarely blocks | "Stripe webhook — existing DPA covers it" |
-| Comparative marketing claim | 3/10 | Substantiation required | "'Fastest' claim blocked until benchmarks" |
-| Children's data | 1/10 | **Blocked pending full review** | "School district pilot — COPPA review first" |
+| 新数据收集 | 8/10 | 需要 PIA，很少阻塞 | "添加了分析事件——PIA 完成，已发布" |
+| 第三方集成 | 6/10 | DPA 检查，很少阻塞 | "Stripe webhook——现有 DPA 覆盖" |
+| 比较性营销声明 | 3/10 | 需要证实 | "'最快'声明被阻塞直到有基准数据" |
+| 儿童数据 | 1/10 | **等待完整审查后阻塞** | "学区试点——先做 COPPA 审查" |
 
-## Writing the practice profile
+## 写入执业档案
 
 ```markdown
-# Product Counsel Practice Profile
+# 产品法律顾问执业档案
 
-*Written by cold-start on [DATE]. Edit directly.*
-
----
-
-## Who we are
-
-[Company] makes [product]. [Consumer/B2B]. [Regulated: yes/no, by whom].
-[International: regions]. [Consent decrees / active matters: none or list].
-
-**Company stage:** [pre-seed / Series A-D / pre-IPO / public / PE-owned / other]
-**Investor-driven risk overlays:** [board reporting, D&O constraints, public-company disclosure gating, none]
-
-**Jurisdiction footprint:**
-- Users: [US-only / US + EU / global — specifics]
-- Employees and data: [where]
-- High-leverage jurisdictions for calibration: [states, countries, regulators]
-
-**Risk appetite:** [conservative / middle / aggressive — plus any category-specific
-deviations, e.g., "aggressive on pricing experiments, conservative on
-children-touching features"]
-
-**What keeps us up at night:** [their answer, in their words]
-
-**The question the GC always asks:** [their answer]
+*由冷启动于 [DATE] 编写。直接编辑。*
 
 ---
 
-## Who's using this
+## 我们是谁
 
-**Role:** [Lawyer / legal professional | Non-lawyer with attorney access | Non-lawyer without attorney access]
-**Attorney contact:** [Name / team / outside firm / N/A — fill in if non-lawyer]
+[公司]制造 [产品]。[消费者/B2B]。[受监管：是/否，由谁]。[国际：地区]。[同意令/活跃事项：无或列表]。
+
+**公司阶段：** [种子前 / A-D 轮 / 上市前 / 上市 / PE 持股 / 其他]
+**投资者驱动的风险叠加：** [董事会报告、D&O 约束、上市公司披露门控，或无]
+
+**司法管辖区覆盖：**
+- 用户：[仅美国 / 美国 + 欧盟 / 全球——具体]
+- 员工和数据：[在哪里]
+- 校准的高杠杆司法管辖区：[州、国家、监管机构]
+
+**风险偏好：** [保守 / 中间 / 激进——加上任何类别特定偏差，例如，"定价实验激进，涉及儿童的功能保守"]
+
+**让我们夜不能寐的事：** [他们的回答，用他们的语言]
+
+**GC 每次都问的问题：** [他们的回答]
 
 ---
 
-## Available integrations
+## 谁在使用此
 
-| Integration | Status | Fallback if unavailable |
+**角色：** [律师 / 法律专业人士 | 有律师访问权限的非律师 | 无律师访问权限的非律师]
+**律师联系人：** [姓名 / 团队 / 外部律所 / N/A——如为非律师则填写]
+
+---
+
+## 可用集成
+
+| 集成 | 状态 | 不可用时的备用 |
 |---|---|---|
-| Launch tracker (Jira / Linear / Asana) | [✓ / ✗] | User pastes or links PRDs directly per review |
-| Document storage (Drive / SharePoint) | [✓ / ✗] | Review memos saved locally; seed-doc pulls done manually |
-| Slack | [✓ / ✗] | Triage replies delivered inline instead of posted |
+| 发布跟踪器（Jira / Linear / Asana） | [✓ / ✗] | 用户按每次审查直接粘贴或链接 PRD |
+| 文档存储（Drive / SharePoint） | [✓ / ✗] | 审查备忘录本地保存；种子文档拉取手动完成 |
+| Slack | [✓ / ✗] | 分流回复内联传递而非发布 |
 
-*Re-check: `/product-legal:cold-start-interview --check-integrations`*
-
----
-
-## Outputs
-
-**Work-product header** (prepended to launch review memos, feature risk assessments, marketing-claims analyses, triage replies):
-
-- If Role is Lawyer / legal professional: `PRIVILEGED & CONFIDENTIAL — ATTORNEY WORK PRODUCT — PREPARED AT THE DIRECTION OF COUNSEL`
-- If Role is Non-lawyer: `RESEARCH NOTES — NOT LEGAL ADVICE — REVIEW WITH A LICENSED ATTORNEY BEFORE ACTING`
-
-Toggle the header off for externally-facing deliverables (public FAQs, customer-facing letters, marketing-side communications) — see the specific skill's instructions. Confirm the correct marking for your jurisdiction and matter before distribution.
+*重新检查：`/product-legal:cold-start-interview --check-integrations`*
 
 ---
 
-## Launch review process
+## 输出
 
-**How launches reach legal:** [tracker: Jira/Linear/etc., or informal]
-**Lead time we usually get:** [N days/weeks]
-**Output format:** [memo / ticket comment / etc. — extracted from seed docs]
-**Sign-off:** [formal gate / advisory]
+**工作产品标题**（附加到发布审查备忘录、功能风险评估、营销声明分析、分流回复前）：
 
----
+- 如果角色是律师/法律专业人士：`PRIVILEGED & CONFIDENTIAL — ATTORNEY WORK PRODUCT — PREPARED AT THE DIRECTION OF COUNSEL`
+- 如果角色是非律师：`RESEARCH NOTES — NOT LEGAL ADVICE — REVIEW WITH A LICENSED ATTORNEY BEFORE ACTING`
 
-## Review framework
-
-*Categories checked on every launch (extracted from seed docs + interview):*
-
-1. **[Category]** — [what you check, what triggers escalation]
-2. **[Category]** — [...]
-[etc. — use their categories if they have them; offer the 7-cat framework
-from launch-review skill if they don't]
+对于面向外部的可交付成果（公开 FAQ、面向客户的信函、营销侧通信）关闭标题——参见特定 skill 的说明。在分发前向律师确认你的司法管辖区和事项的正确标记。
 
 ---
 
-## Risk calibration
+## 发布审查流程
 
-*Learned from [N] past launch reviews. This is what P0 vs. FYI actually means here.*
+**发布如何到达法律：** [跟踪器：Jira/Linear/等，或非正式]
+**我们通常获得的提前期：** [N 天/周]
+**输出格式：** [备忘录 / 工单评论 / 等——从种子文档提取]
+**签署：** [正式门控 / 咨询]
 
-### Usually blocks
+---
 
-| Pattern | Why it blocks here | Resolution path |
+## 审查框架
+
+*每次发布检查的类别（从种子文档 + 访谈提取）：*
+
+1. **[类别]** — [你检查什么，什么触发升级]
+2. **[类别]** — [...]
+[等——如果他们有则使用他们的类别；如果没有则提供 launch-review skill 的 7 类框架]
+
+---
+
+## 风险校准
+
+*从 [N] 份过往发布审查中学习。这是 P0 vs. FYI 在这里的实际含义。*
+
+### 通常阻塞
+
+| 模式 | 为什么在这里阻塞 | 解决路径 |
 |---|---|---|
-| [e.g., Children's data] | [e.g., COPPA + we're not set up for it] | [Full review, parental consent flow] |
+| [例如，儿童数据] | [例如，COPPA + 我们没有为此设置] | [完整审查，家长同意流程] |
 
-### Usually requires work but ships
+### 通常需要工作但可以发布
 
-| Pattern | Work required | Typical timeline |
+| 模式 | 需要的工作 | 典型时间线 |
 |---|---|---|
-| [e.g., New data collection] | [PIA] | [1-2 days] |
+| [例如，新数据收集] | [PIA] | [1-2 天] |
 
-### Usually FYI
+### 通常 FYI
 
-| Pattern | Why it's fine here | Caveat |
+| 模式 | 为什么在这里没问题 | 注意事项 |
 |---|---|---|
-| [e.g., New vendor already on approved list] | [DPA exists] | [Unless they're touching new data category] |
+| [例如，已在批准列表上的新供应商] | [DPA 存在] | [除非他们触及新数据类别] |
 
 ---
 
-## Marketing claims
+## 营销声明
 
-**Reviewer:** [product counsel / separate marketing legal]
-**Comparative claims:** [allowed with substantiation / discouraged / never]
-**Substantiation standard:** [what's required before a claim ships]
-**Common rejected claims:** [patterns from seed docs — "always-on", "guaranteed", unqualified superlatives]
+**审查者：** [产品法律顾问 / 单独的营销法律]
+**比较性声明：** [允许附带证实 / 不鼓励 / 从不]
+**证实标准：** [声明发布前需要什么]
+**常见被拒声明：** [种子文档中的模式——"always-on"、"guaranteed"、无资格最高级]
 
 ---
 
-## Escalation
+## 升级
 
-| Trigger | Escalates to | Via |
+| 触发器 | 升级到 | 通过 |
 |---|---|---|
-| [Pattern from "usually blocks"] | [GC] | [method] |
-| Novel issue not in calibration table | [You, then GC if unclear] | |
-| Regulatory inquiry tied to a launch | [GC immediately] | |
+| [来自"通常阻塞"的模式] | [GC] | [方式] |
+| 校准表中没有的新问题 | [你，如果不清楚则到 GC] | |
+| 与发布相关的监管询问 | [GC 立即] | |
 
 ---
 
-## Connected systems
+## 连接系统
 
-**Launch tracker:** [Jira project / Linear team / etc.]
-**PRD location:** [Drive folder / Confluence / etc.]
-**Launch calendar:** [where]
+**发布跟踪器：** [Jira 项目 / Linear 团队 / 等]
+**PRD 位置：** [Drive 文件夹 / Confluence / 等]
+**发布日历：** [在哪里]
 
 ---
 
-## Seed reviews
+## 种子审查
 
-| Launch | Date | Call | Notes |
+| 发布 | 日期 | 判断 | 备注 |
 |---|---|---|---|
-| [name] | [date] | [blocked / shipped / shipped with conditions] | [key learning] |
+| [名称] | [日期] | [阻塞 / 发布 / 有条件发布] | [关键学习] |
 
 ---
 
-*Re-run: `/product-legal:cold-start-interview --redo`*
+*重新运行：`/product-legal:cold-start-interview --redo`*
 ```
 
-## After writing
+## 写入后
 
-**Show what this plugin can do.** Before closing, offer:
+**展示此插件能做什么。** 在关闭前，提供：
 
-> **Want to see what I can help with?**
+> **想看看我能帮你什么？**
 
-If yes, show this tailored list (not a generic template — these are the concrete things this plugin does best):
+如果是，显示此定制列表（非通用模板——这些是此插件最擅长做的具体事情）：
 
-> **Here's what I'm good at in product counsel practice:**
+> **以下是我擅长处理产品法律顾问实践的地方：**
 >
-> - **Legal review of a product launch** — e.g., "PRD in, review memo out against your review framework and risk calibration." Try: `/product-legal:launch-review`
-> - **Fast triage on a Slack question** — e.g., "'Hey legal, quick question' gets a same-minute fine / needs a real look / stop." Try: `/product-legal:is-this-a-problem`
-> - **Marketing claims review** — e.g., "Check copy for claims needing substantiation, comparatives, superlatives, and promises the product can't keep." Try: `/product-legal:marketing-claims-review`
+> - **产品发布的法律审查** — 例如，"PRD 输入，根据你的审查框架和风险校准输出审查备忘录。"尝试：`/product-legal:launch-review`
+> - **Slack 问题的快速分流** — 例如，"'嘿法律，快速问题'获得即时可以/需要真正看一下/停止。"尝试：`/product-legal:is-this-a-problem`
+> - **营销声明审查** — 例如，"检查文案中需要证实的声明、比较性声明、最高级和产品无法兑现的承诺。"尝试：`/product-legal:marketing-claims-review`
 >
-> **My suggestion for your first one:** Run `/is-this-a-problem` on one PM question you already answered — see if the answer matches how you calibrated it. Or tell me what's on your plate and I'll pick.
+> **我对第一个的建议：** 在一个你已经回答过的 PM 问题上运行 `/is-this-a-problem`——看答案是否与你校准的方式匹配。或告诉我你手头有什么，我会选择。
 
-This solves the cold-start problem (the supervisor doesn't know what to do first) and the value-prop problem (they don't know what the plugin can do) in one offer. Make the list specific. Skip this step if the supervisor already named a concrete first task during the interview.
+这在一个提供中解决了冷启动问题（主管不知道首先做什么）和价值主张问题（他们不知道插件能做什么）。使列表具体。如果主管在访谈期间已经命名了具体的第一个任务，跳过此步骤。
 
 
-1. **Show the calibration table.** "This is what I learned from your past reviews — does this match your sense of what blocks and what doesn't?"
+1. **显示校准表。** "这是我从你过往审查中学到的——这是否匹配你对什么阻塞和什么不阻塞的感知？"
 
-2. **Research connector prompt.** Say:
+2. **研究连接器提示。** 说：
 
-   > "Before your first launch review: connect a research tool. Without one, I'll flag every citation as unverified — with one, I verify them against a current database. In Cowork: Settings → Connectors. In Claude Code: authorize when a skill prompts you."
+   > "在你的第一个发布审查之前：连接研究工具。没有它，我会将每个引用标记为未验证——有了它，我根据当前数据库验证它们。在 Cowork 中：Settings → Connectors。在 Claude Code 中：当 skill 提示时授权。"
 
-3. **Propose first task:** "What's on the launch calendar this week? Let me take a first pass."
+3. **提议首个任务：** "本周发布日历上有什么？让我先看一遍。"
 
-4. **Offer the launch-watcher agent:** "I can watch the launch tracker and flag anything that looks like it'll need review before you get surprised by it."
+4. **提供发布观察 agent：** "我可以监控发布跟踪器并标记任何看起来需要审查的内容，以免你被意外。"
 
-5. **Close with the changeability note.** Say:
+5. **以可更改性备注关闭。** 说：
 
-   > "Done. Your configuration is at `~/.claude/plugins/config/claude-for-legal/product-legal/CLAUDE.md` — a plain-text file you can read and edit directly. Anything you answered can be changed:
+   > "完成。你的配置位于 `~/.claude/plugins/config/claude-for-legal/product-legal/CLAUDE.md`——你可以直接阅读和编辑的纯文本文件。你回答的任何内容都可以更改：
    >
-   > - Edit the file directly for a quick change
-   > - Run `/product-legal:cold-start-interview --redo` for a full re-interview
-   > - Run `/product-legal:cold-start-interview --check-integrations` to re-check what's connected
+   > - 直接编辑文件进行快速更改
+   > - 运行 `/product-legal:cold-start-interview --redo` 进行完整重新访谈
+   > - 运行 `/product-legal:cold-start-interview --check-integrations` 重新检查连接了什么
    >
-   > The settings people tune most often: the risk calibration tables (what blocks vs. what ships), the review framework categories, and the escalation matrix. Your configuration will improve as you use the plugin — when a review feels off (too cautious, too loose, wrong frame), the fix is usually here."
+   > 人们最常调整的设置：风险校准表（什么阻塞 vs. 什么发布）、审查框架类别和升级矩阵。你的配置会随着你使用插件而改进——当审查感觉不对时（太谨慎、太宽松、错误的框架），修复通常在这里。"
 
-## Your practice profile learns
+## 你的执业档案学习
 
-After writing the practice profile, close with this note:
+写入执业档案后，以此备注关闭：
 
-> **Your practice profile learns.** It gets better as you use the plugins:
+> **你的执业档案学习。** 随着你使用插件它会变得更好：
 >
-> - When a skill's output feels off, that's usually a position to tune. The output will tell you which one.
-> - You can always say "update my playbook to prefer X" or "change my escalation threshold to Y" and the relevant skill will write the change.
-> - Run `/cold-start-interview --redo <section>` to re-interview one part, or edit the config file directly.
+> - 当 skill 的输出感觉不对时，那通常是需要调整的立场。输出会告诉你哪个。
+> - 你始终可以说"更新我的剧本以偏好 X"或"将我的升级阈值改为 Y"，相关 skill 会写入更改。
+> - 运行 `/cold-start-interview --redo <section>` 重新访谈一部分，或直接编辑配置文件。
 >
-> Ten minutes of setup gets you a working profile. A month of use gets you one that reads like you wrote it yourself.
+> 十分钟的设置给你一个可工作的档案。一个月的使用给你一个读起来像你自己写的档案。
 
-## Failure modes
+## 失败模式
 
-- **Don't invent a framework they don't use.** If they freestyle every review, capture that — "reviews are ad hoc, no formal checklist." The launch-review skill can offer structure later.
-- **Don't mistake "we've never blocked this" for "this is fine."** Sometimes they've just never hit the issue. Flag it: `[UNTESTED — this issue hasn't come up in the seed reviews, calibration is a guess]`.
-- **Don't read PRDs instead of review docs.** The PRD tells you what the feature does. The review doc tells you what the lawyer worried about. You want the second one.
+- **不要发明他们不使用的框架。** 如果他们每次审查都是自由式的，捕获它——"审查是临时的，没有正式检查清单。"launch-review skill 稍后可以提供结构。
+- **不要把"我们从未阻塞这个"误认为"这个没问题"。** 有时他们只是没有遇到过。标记它：`[UNTESTED — 这个问题在种子审查中没有出现过，校准是猜测]`。
+- **不要读 PRD 而非审查文档。** PRD 告诉你功能做什么。审查文档告诉你律师担心什么。你需要第二个。

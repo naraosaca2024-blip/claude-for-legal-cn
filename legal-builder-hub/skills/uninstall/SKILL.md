@@ -1,35 +1,30 @@
 ---
 name: uninstall
 description: >
-  Uninstall a community skill that was installed via the hub. Confirms before
-  deleting files, refuses to touch first-party plugin skills, and logs every
-  action. Use when the user wants to fully remove a community skill
-  ("uninstall [skill]", "remove this skill") rather than just disable it.
-argument-hint: "[skill name]"
+  卸载通过中心安装的社区 skill。删除文件前确认，拒绝触碰第一方插件
+  skills，并记录每个操作。当用户想要完全移除社区 skill
+  （"uninstall [skill]"、"remove this skill"）而不是仅仅禁用时使用。
+argument-hint: "[skill 名称]"
 ---
+
+<!--
+This file is a Chinese translation of the original by Anthropic PBC.
+Original: https://github.com/anthropics/claude-for-legal
+Licensed under Apache License 2.0
+-->
+
 
 # /uninstall
 
-Run the `uninstall` workflow from the skill-manager reference skill against
-the named skill.
+对命名 skill 运行 skill-manager 参考 skill 的 `uninstall` 工作流。
 
-Safety rules:
+安全规则：
 
-1. **Only uninstall community skills installed through this hub.** Check
-   `~/.claude/plugins/config/claude-for-legal/legal-builder-hub/install-log.yaml`
-   and the CLAUDE.md installed starter pack table. If the skill is not recorded
-   there, refuse and tell the user.
-2. **Never uninstall a first-party plugin's skill.** The 12 core plugins that
-   ship with claude-for-legal are off-limits from this command. If the named
-   skill resolves to a path inside one of those plugins, refuse.
-3. **Confirm before removing files.** Show the user every path that will be
-   deleted. Proceed only on explicit `yes`.
-4. **Log the uninstall.** Append to `install-log.yaml` with action `uninstall`
-   and timestamp so the audit trail is intact.
+1. **仅卸载通过此中心安装的社区 skills。** 检查 `~/.claude/plugins/config/claude-for-legal/legal-builder-hub/install-log.yaml` 和 CLAUDE.md 已安装入门包表。如果 skill 未记录在那里，拒绝并告诉用户。
+2. **永不卸载第一方插件的 skill。** 随 claude-for-legal 附带的 12 个核心插件不受此命令约束。如果命名的 skill 解析到这些插件之一的路径，拒绝。
+3. **删除文件前确认。** 向用户展示将被删除的每个路径。仅在明确 `yes` 后继续。
+4. **记录卸载。** 以 `action: uninstall` 和时间戳追加到 `install-log.yaml`，以便审计跟踪完整。
 
-If the user wants to stop a skill from running but keep the files (e.g., for
-later re-enable, or to preserve configuration), suggest `/legal-builder-hub:disable`
-instead.
+如果用户想要停止 skill 运行但保留文件（例如，为了日后重新启用，或保留配置），建议改用 `/legal-builder-hub:disable`。
 
-> Detailed uninstall, disable, and re-enable workflows live in the
-> `skill-manager` reference skill — load it before doing substantive work.
+> 详细的卸载、禁用和重新启用工作流位于 `skill-manager` 参考 skill 中——在进行实质性工作之前加载它。

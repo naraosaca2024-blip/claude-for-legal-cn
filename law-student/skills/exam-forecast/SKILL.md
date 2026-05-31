@@ -1,99 +1,104 @@
 ---
 name: exam-forecast
 description: >
-  Analyze past exams from the same professor to surface patterns — subject
-  weighting, recurring issue-spot traps, favored hypo types, policy-vs-doctrine
-  mix — and forecast likely emphases for the upcoming exam. Use when the user
-  says "what's on the exam", "analyze past exams", "predict the exam", or
-  shares past exams.
+  分析同一教授的过去考试以揭示模式——学科权重、反复出现的问题识别陷阱、
+  偏好的假设类型、政策与教义的混合——并预测即将到来的考试的可能重点。
+  当用户说"考试有什么"、"分析过去考试"、"预测考试"或分享过去考试时使用。
 argument-hint: "[class name, with past exams shared or paths to them]"
 ---
 
+<!--
+This file is a Chinese translation of the original by Anthropic PBC.
+Original: https://github.com/anthropics/claude-for-legal
+Licensed under Apache License 2.0
+-->
+
+
 # /exam-forecast
 
-1. Load `~/.claude/plugins/config/claude-for-legal/law-student/CLAUDE.md` → class, professor, exam format, syllabus.
-2. Apply the workflow below.
-3. Intake past exams (PDF, paste, or paths). Confirm sample size.
-4. Analyze each past exam: format, subject coverage, question style, fact-pattern density, recurring traps.
-5. Cross-exam pattern analysis — what's stable, what varies.
-6. Combine with current syllabus to produce forecast: subject weights, format, hobby horses, study emphasis.
-7. Write `~/.claude/plugins/config/claude-for-legal/law-student/exam-forecasts/[class]/forecast-[YYYY-MM-DD].md`. Framed as weighting heuristic, not prediction.
+1. 加载 `~/.claude/plugins/config/claude-for-legal/law-student/CLAUDE.md` → class、professor、exam format、syllabus。
+2. 应用以下工作流。
+3. 接收过去考试（PDF、粘贴或路径）。确认样本量。
+4. 分析每次过去考试：格式、学科覆盖、问题风格、事实模式密度、反复出现的陷阱。
+5. 跨考试模式分析——什么是稳定的，什么是变化的。
+6. 结合当前教学大纲生成预测：学科权重、格式、爱好、学习重点。
+7. 编写 `~/.claude/plugins/config/claude-for-legal/law-student/exam-forecasts/[class]/forecast-[YYYY-MM-DD].md`。构建为加权启发式，而不是预测。
 
 ---
 
 ## Purpose
 
-Every professor's exam has fingerprints. The same hypo structures recur. The same traps come back. The same subject ratios repeat. Students who have prior exams study smarter; students who don't, study harder. This skill analyzes the prior exams you have and surfaces the patterns.
+每个教授的考试都有指纹。相同的假设结构反复出现。相同的陷阱回来。相同的学科比例重复。拥有过去考试的学生更聪明地学习；没有的学生更努力地学习。此 skill 分析你拥有的过去考试并揭示模式。
 
-Not magic. A forecast, not a prediction. The skill cannot tell you what's on the exam — it can tell you what's been on past exams and what's likely to recur based on syllabus coverage.
+不是魔法。预测，不是预言。Skill 不能告诉你考试有什么——它可以告诉你过去考试有什么，以及根据教学大纲覆盖可能反复出现什么。
 
 ## Confidence discipline
 
-- Pattern analysis (what subjects appeared, how many questions per topic, how often policy vs. rule-application) — confident where the exams are clearly in front of me.
-- Inference about likely emphasis on upcoming exam — `[UNCERTAIN]` is the default; these are forecasts, not certainties. Explicitly frame as "based on the [N] past exams you shared, [topic] appeared in [M]. Your upcoming exam may emphasize it, or the professor may rotate — use this as a weighting for review time, not a prediction."
-- If only 1-2 past exams are available, say so explicitly — any pattern inferred from 1 exam is noise.
-- If the professor is new (no past exams available), skill can't forecast. Say so; fall back to syllabus-based "these are the subjects covered" only.
+- 模式分析（出现了哪些学科、每个主题多少问题、政策与规则应用的频率）——在考试清楚在我面前时有信心。
+- 关于即将到来的考试的可能重点的推断——`[UNCERTAIN]` 是默认；这些是预测，不是确定性。明确构建为"基于你分享的 [N] 次过去考试，[主题] 在 [M] 中出现。你即将到来的考试可能强调它，或者教授可能会轮换——将此作为复习时间的权重，而不是预测。"
+- 如果只有 1-2 次过去考试可用，明确说明——从 1 次考试推断的任何模式都是噪音。
+- 如果教授是新（没有过去考试可用），skill 无法预测。这样说；回退到仅基于教学大纲的"这些是涵盖的学科"。
 
 ## Load context
 
-- `~/.claude/plugins/config/claude-for-legal/law-student/CLAUDE.md` → current classes, exam formats, syllabus if captured
-- User-provided past exams (PDF, pasted text, paths)
-- Optional: syllabus for the current class (for "what's been covered to date")
+- `~/.claude/plugins/config/claude-for-legal/law-student/CLAUDE.md` → 当前课程、考试格式、教学大纲（如果捕获）
+- 用户提供的过去考试（PDF、粘贴文本、路径）
+- Optional：当前课程的教学大纲（用于"迄今为止涵盖的内容"）
 
-**If the uploaded past exams have a professor's name, use it to match patterns** (same-professor exams are the highest-signal input). **If not, match on subject and structure.** Don't ask the user to type in the professor's name — use what's in the materials. If the user volunteers it in conversation that's fine; don't prompt for it.
+**如果上传的过去考试有教授姓名，使用它来匹配模式**（同一教授的考试是最高信号输入）。**如果没有，按学科和结构匹配。**不要要求用户输入教授姓名——使用材料中的内容。如果用户在对话中自愿提供，那很好；不要提示。
 
 ## Workflow
 
 ### Step 1: Intake
 
-- Which class are we forecasting for?
-- How many past exams from this professor are available?
-- Are they from the same course, or different courses by the same professor?
-- Are any of them the take-home / open-book / different-format variants, vs. the typical format for your upcoming exam?
-- Syllabus for your current class?
+- 我们为哪个课程预测？
+- 这位教授有多少次过去考试可用？
+- 它们是来自同一课程，还是同一教授的不同课程？
+- 它们中是否有任何是带回家/开卷/不同格式的变体，相对于你即将到来的考试的典型格式？
+- 你当前课程的教学大纲？
 
-If fewer than 3 past exams: flag as thin sample. Pattern inference is weaker.
-If exams are across different courses: some patterns transfer (question style, policy vs. doctrine ratio); subject-specific patterns don't.
+如果少于 3 次过去考试：标记为样本薄弱。模式推断较弱。
+如果考试跨越不同课程：一些模式转移（问题风格、政策与教义比率）；特定学科的模式不转移。
 
 ### Step 2: Read each past exam
 
-For each past exam:
+对于每次过去考试：
 
-- Format (number of questions, length, time limit, open/closed book)
-- Subject coverage (which topics tested, in what proportion)
-- Question style (issue-spotter, single-issue deep, policy essay, short-answer MBE-style, mix)
-- Fact pattern density (fact-heavy hypos, sparse facts with doctrinal focus, or policy prompts with no facts)
-- Recurring traps (e.g., professor always hides the jurisdictional issue in an otherwise-clean fact pattern; professor always asks about the exception rather than the rule)
+- Format（问题数量、长度、时间限制、开卷/闭卷）
+- Subject coverage（测试了哪些主题，以什么比例）
+- Question style（问题识别、单一问题深入、政策论文、简答 MBE 风格、混合）
+- Fact pattern density（事实密集的假设、事实稀疏的教义重点，或没有事实的政策提示）
+- Recurring traps（例如，教授总是将管辖权问题隐藏在否则干净的事实模式中；教授总是问例外而不是规则）
 - Policy vs. doctrine ratio
-- Unusual structures (essays + MBE hybrid, moot court scenario, etc.)
+- Unusual structures（论文 + MBE 混合、模拟法庭情景等）
 
 ### Step 3: Cross-exam pattern analysis
 
-Roll up what's consistent across exams:
+汇总考试中一致的内容：
 
-**Stable patterns (appeared in most/all past exams):**
-- Subject weights (e.g., "consideration and modification account for 30% of exam points consistently")
-- Question style (e.g., "always one long issue-spotter + two short-answer hypos")
-- Professor hobby horses (e.g., "always tests third-party beneficiaries even when it's a minor topic in class")
+**Stable patterns（出现在大多数/所有过去考试中）：**
+- Subject weights（例如，"consideration and modification consistently account for 30% of exam points"）
+- Question style（例如，"always one long issue-spotter + two short-answer hypos"）
+- Professor hobby horses（例如，"always tests third-party beneficiaries even when it's a minor topic in class"）
 
-**Variable patterns (appeared in some but not all):**
-- Policy essays (e.g., "appeared in 2 of 4 past exams — usually when the semester covered a policy-heavy topic late")
+**Variable patterns（出现在一些但不是所有考试中）：**
+- Policy essays（例如，"appeared in 2 of 4 past exams — usually when the semester covered a policy-heavy topic late"）
 - Open-book vs. closed-book differences
 - Take-home vs. in-class differences
 
 **Absent patterns worth noting:**
-- Topics covered in class that have NEVER been tested in past exams — don't skip these, but don't weight them heavily either
-- Topics tested in past exams that aren't in your current syllabus — probably not coming back
+- Topics covered in class that have NEVER been tested in past exams — 不要跳过这些，但也不要过度加权
+- Topics tested in past exams that aren't in your current syllabus — 可能不会再出现
 
 ### Step 4: Forecast for the upcoming exam
 
-**Header — required, first line of the forecast, both in-chat and in the saved file.** Per plugin config `## Outputs`, every study output carries the verbatim study-notes header. The forecast is a study output. Do not omit, rephrase, or relocate the header. The header is not a disclaimer the student can ask to drop; it is the output's identity and prevents the forecast from being mistaken for a predicted exam or for legal advice:
+**Header — required, first line of the forecast, both in-chat and in the saved file.** 根据 plugin config `## Outputs`，每个学习输出都携带逐字学习笔记标题。预测是学习输出。不要省略、改写或重新定位标题。标题不是学生可以要求删除的免责声明；它是输出的身份，防止预测被误认为预测的考试或法律建议：
 
 ```
 STUDY NOTES — NOT LEGAL ADVICE
 ```
 
-Combine pattern analysis with current syllabus:
+结合模式分析与当前教学大纲：
 
 ```markdown
 STUDY NOTES — NOT LEGAL ADVICE
@@ -130,36 +135,36 @@ STUDY NOTES — NOT LEGAL ADVICE
 
 ## Study emphasis recommendation
 
-Based on past exam patterns AND current syllabus coverage:
+基于过去考试模式和当前教学大纲覆盖：
 
-**Heavy:** [topics likely to anchor the exam — 40-50% of study time]
-**Moderate:** [supporting topics — 30-40%]
-**Sanity check:** [topics covered but historically under-represented — 10-20%, just in case]
+**Heavy：** [topics likely to anchor the exam — 40-50% of study time]
+**Moderate：** [supporting topics — 30-40%]
+**Sanity check：** [topics covered but historically under-represented — 10-20%, just in case]
 
 ## [UNCERTAIN — framing]
 
-This forecast is derived from [N] past exams. Professors vary. Professors rotate. Topics that were emphasized in past years can be de-emphasized when the syllabus shifts. Treat this as a weighting heuristic for study time, not a prediction. The exam will include surprises.
+此预测来自 [N] 次过去考试。教授变化。教授轮换。过去几年强调的主题可以在教学大纲转移时被淡化。将此视为学习时间的加权启发式，而不是预测。考试将包括惊喜。
 ```
 
 ### Step 5: Output location
 
-Write to `~/.claude/plugins/config/claude-for-legal/law-student/exam-forecasts/[class]/forecast-[YYYY-MM-DD].md`. Versioned — if the student gets another past exam mid-semester, re-run and append.
+写入 `~/.claude/plugins/config/claude-for-legal/law-student/exam-forecasts/[class]/forecast-[YYYY-MM-DD].md`。版本控制——如果学生在学期中获得另一次过去考试，重新运行并附加。
 
 ## Integration
 
-- **outline-builder:** forecast weights feed into outline depth decisions — weight depth on heavy topics
-- **flashcards:** forecast-heavy topics get more cards generated
-- **bar-prep-questions:** irrelevant for bar prep (that has its own forecast model); exam-forecast is for class-specific finals
-- **irac-practice:** use forecast topics as the subject areas for IRAC practice hypos
+- **outline-builder：** 预测权重输入到大纲深度决策——在重要主题上加权深度
+- **flashcards：** 预测重要主题生成更多卡片
+- **bar-prep-questions：** 与律师考试准备无关（有自己的预测模型）；exam-forecast 用于课程特定的期末考试
+- **irac-practice：** 使用预测主题作为 IRAC 练习假设的学科领域
 
 ## Close with the next-steps decision tree
 
-End with the next-steps decision tree per CLAUDE.md `## Outputs`. Customize the options to what this skill just produced — the five default branches (draft the X, escalate, get more facts, watch and wait, something else) are a starting point, not a lock-in. The tree is the output; the lawyer picks.
+按照 CLAUDE.md `## Outputs` 以下一步决策树结束。根据此 skill 刚刚生成的内容自定义选项——五个默认分支（起草 X、升级、获取更多事实、观察等待、其他事情）是起点，而不是锁定。树就是输出；律师选择。
 
 ## What this skill does not do
 
-- **Predict specific questions.** Past exams show patterns; they don't show you tomorrow's prompt.
-- **Work without past exams.** If you don't have prior exams from this professor, the skill can't forecast — it falls back to "here's what the syllabus covers, study that."
-- **Replace studying everything on the syllabus.** Forecast is weighting, not elimination. Skipping a topic because it's historically under-represented is how students get burned.
-- **Account for changes you don't know about.** If the professor has shifted focus this year (e.g., emphasized a new case in class lectures), the skill doesn't see that unless you tell it.
-- **Work reliably with 1-2 past exams.** Thin sample. Flag as such.
+- **Predict specific questions.** 过去考试显示模式；它们不显示你明天的提示。
+- **Work without past exams.** 如果你没有来自此教授的过去考试，skill 无法预测——它回退到"这里是教学大纲涵盖的内容，学习那个。"
+- **Replace studying everything on the syllabus.** 预测是加权，而不是消除。因为主题历史上代表不足而跳过它是学生被烧伤的方式。
+- **Account for changes you don't know about.** 如果教授今年转移了重点（例如，在课堂讲座中强调新案例），skill 不会看到，除非你告诉它。
+- **Work reliably with 1-2 past exams.** 样本薄弱。标记为这样。

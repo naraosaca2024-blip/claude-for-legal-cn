@@ -1,131 +1,135 @@
 ---
 name: policy-drafting
 description: >
-  Draft an employment policy with state supplements where law differs across
-  the jurisdictional footprint. Use when the user says "draft a [topic]
-  policy", "we need a policy on", "update our [topic] policy", or names a
-  policy gap.
-argument-hint: "[policy topic — e.g., 'remote work', 'parental leave', 'PTO']"
+  起草雇佣政策，在法律因司法管辖区而异时生成州补充。当用户说"起草[主题]政策"、"我们需要关于...的政策"、"更新我们的[主题]政策"或指出政策差距时使用。
+argument-hint: "[政策主题——例如 '远程办公'、'育儿假'、'PTO']"
 ---
+
+<!--
+This file is a Chinese translation of the original by Anthropic PBC.
+Original: https://github.com/anthropics/claude-for-legal
+Licensed under Apache License 2.0
+-->
+
 
 # /policy-drafting
 
-1. Load `~/.claude/plugins/config/claude-for-legal/employment-legal/CLAUDE.md` → jurisdictional footprint, handbook location.
-2. Use the workflow below.
-3. Draft core policy. Check each jurisdiction in footprint for required variants.
-4. Output: core policy + state supplements. Flag where law is currently shifting.
+1. 加载 `~/.claude/plugins/config/claude-for-legal/employment-legal/CLAUDE.md` → 司法管辖区足迹、手册位置。
+2. 使用以下工作流。
+3. 起草核心政策。检查足迹中每个司法管辖区是否需要变体。
+4. 输出：核心政策 + 州补充。标记法律目前正在变化的领域。
 
 ---
 
-## Matter context
+## 事项上下文
 
-**Matter context.** Check `## Matter workspaces` in the practice-level CLAUDE.md. If `Enabled` is `✗` (the default for in-house users), skip the rest of this paragraph — skills use practice-level context and the matter machinery is invisible. If enabled and there is no active matter, ask: "Which matter is this for? Run `/employment-legal:matter-workspace switch <slug>` or say `practice-level`." Load the active matter's `matter.md` for matter-specific context and overrides. Write outputs to the matter folder at `~/.claude/plugins/config/claude-for-legal/employment-legal/matters/<matter-slug>/`. Never read another matter's files unless `Cross-matter context` is `on`.
+**事项上下文。** 检查执业级 CLAUDE.md 中的 `## Matter workspaces`。如果 `Enabled` 为 `✗`（内部用户的默认值），跳过本段的其余部分——skills 使用执业级上下文，事项机制不可见。如果已启用且没有活跃事项，询问："这是哪个事项的？Run `/employment-legal:matter-workspace switch <slug>` 或说 `practice-level`。"加载活跃事项的 `matter.md` 以获取事项特定上下文和覆盖。将输出写入事项文件夹 `~/.claude/plugins/config/claude-for-legal/employment-legal/matters/<matter-slug>/`。除非 `Cross-matter context` 为 `on`，否则永远不要阅读另一个事项的文件。
 
 ---
 
-## Purpose
+## 目的
 
-A policy that's right for California may be wrong (or unnecessary) in Texas. This skill drafts a core policy and generates state supplements where the footprint requires different rules.
+适合加州的政策可能在德克萨斯是错误的（或不必要的）。此 skill 起草核心政策并在足迹要求不同规则时生成州补充。
 
-## Load context
+## 加载上下文
 
-`~/.claude/plugins/config/claude-for-legal/employment-legal/CLAUDE.md` → jurisdictional footprint, handbook location and format.
+`~/.claude/plugins/config/claude-for-legal/employment-legal/CLAUDE.md` → 司法管辖区足迹、手册位置和格式。
 
-## Workflow
+## 工作流
 
-### Step 1: Scope the policy
+### 步骤 1：确定政策范围
 
-- What's the policy for? (Remote work, parental leave, social media, etc.)
-- Why now? (Legal requirement, incident, growth, gap noticed)
-- Who does it apply to? (All employees, certain roles, certain locations)
+- 政策目的是什么？（远程办公、育儿假、社交媒体等）
+- 为什么现在需要？（法律要求、事件、增长、发现差距）
+- 适用于谁？（所有员工、特定角色、特定地点）
 
-### Step 2: Jurisdictional scan
+### 步骤 2：司法管辖区扫描
 
-For each state/country in the footprint, check: does this jurisdiction have a specific rule on this topic?
+对于足迹中的每个州/国家，检查：此司法管辖区是否对此主题有特定规则？
 
-**Common topics with jurisdictional variance:**
+**有司法管辖区差异的常见主题：**
 
-| Topic | Variance |
+| 主题 | 差异 |
 |---|---|
-| Paid leave | State mandates (CA, NY, CO, WA, etc.) with different accrual rates, uses, carryover |
-| Parental leave | State programs layer on top of FMLA (CA PFL, NY PFL, etc.) |
-| Meal and rest breaks | CA is the outlier (penalty pay); most states minimal |
-| Expense reimbursement | CA requires; most states don't |
-| Pay transparency | Growing list of states requiring ranges in postings |
-| Non-competes | See hiring-review skill — unenforceable in some states |
-| Final pay | Timing varies widely |
+| 带薪假期 | 州强制要求（CA、NY、CO、WA 等），不同的累计比率、用途、结转 |
+| 育儿假 | 州项目叠加在 FMLA 之上（CA PFL、NY PFL 等） |
+| 用餐和休息时间 | CA 是例外（惩罚工资）；大多数州最低要求 |
+| 费用报销 | CA 要求；大多数州不要求 |
+| 薪酬透明度 | 越来越多的州要求在发布中包含薪资范围 |
+| 非竞争 | 参见 hiring-review skill——某些州不可执行 |
+| 最终薪资 | 时限差异很大 |
 
-If the topic has no jurisdictional variance (dress code, say), skip this step.
+如果主题没有司法管辖区差异（比如着装规范），跳过此步骤。
 
-### Step 3: Draft the core policy
+### 步骤 3：起草核心政策
 
-One policy. Applies everywhere. Clear and readable — employees should understand it without a lawyer.
+一个政策。适用于所有地方。清晰可读——员工应该不需要律师就能理解。
 
-Structure:
-- Purpose (one sentence — why this policy exists)
-- Scope (who it applies to)
-- The rule (what's required/permitted/prohibited)
-- Process (how to request, who approves, what happens if)
-- Questions (who to ask)
+结构：
+- 目的（一句话——此政策为何存在）
+- 范围（适用于谁）
+- 规则（什么是要求的/允许的/禁止的）
+- 流程（如何申请、谁批准、如果发生什么）
+- 问题（问谁）
 
-Avoid: "heretofore," "notwithstanding," nested exceptions. This is a handbook policy, not a contract.
+避免使用："heretofore"、"notwithstanding"、嵌套例外。这是手册政策，不是合同。
 
-### Step 4: State supplements
+### 步骤 4：州补充
 
-For each jurisdiction where the rule differs, a supplement:
+对于规则不同的每个司法管辖区，一个补充：
 
 ```markdown
-### [State] Supplement
+### [州] 补充
 
-Employees working in [State] are subject to the following in addition to / instead of the core policy:
+在[州]工作的员工除核心政策外，还需遵守以下内容（或替代）：
 
-- [Specific difference]
-- [Cite the state law if helpful]
+- [具体差异]
+- [如有帮助，引用州法律]
 ```
 
-Keep supplements tight. Only what's different — don't repeat the core.
+保持补充简洁。只写不同的部分——不要重复核心内容。
 
-### Step 5: Cross-check
+### 步骤 5：交叉检查
 
-- Does this policy conflict with anything already in the handbook?
-- Does it promise more than the company intends to deliver? (A policy is a promise — courts hold employers to handbook promises.)
-- Does it inadvertently create a contract? (Some states treat handbook policies as contractual — include the standard "this is not a contract" language if the handbook doesn't already.)
+- 此政策是否与手册中已有的内容冲突？
+- 它是否承诺了超过公司打算交付的内容？（政策是承诺——法院按手册承诺约束雇主。）
+- 它是否无意中创建了合同？（一些州将手册政策视为合同——如果手册中还没有标准的"这不是合同"语言，请包含它。）
 
-## Output
+## 输出
 
 ```markdown
-# [Policy Name]
+# [政策名称]
 
-## Core Policy
+## 核心政策
 
-[Full text]
+[全文]
 
-## State Supplements
+## 州补充
 
-### [State 1]
-[Supplement]
+### [州 1]
+[补充]
 
-### [State 2]
-[Supplement]
+### [州 2]
+[补充]
 
 ---
 
-## Drafting Notes (internal — remove before handbook insertion)
+## 起草说明（内部——插入手册前删除）
 
-- **Jurisdictional scan:** [which states checked, which have variance]
-- **Conflicts with existing handbook:** [none | list]
-- **Law currently shifting:** [any state where this is in flux]
-- **Review cadence:** [when to revisit — annual, or when X happens]
+- **司法管辖区扫描：** [检查了哪些州，哪些有差异]
+- **与现有手册冲突：** [无 | 列表]
+- **法律正在变化：** [任何州处于变化中]
+- **审查节奏：** [何时重新审视——年度，或当 X 发生时]
 ```
 
-> **Draft, not a policy in effect.** This is a drafting aid for attorney review, not a policy you can publish. Publishing a handbook policy has legal consequences — in several states it can bind the company as a contractual promise, and wage/leave/accommodation policies are routinely read against the employer. A licensed attorney, solicitor, barrister, or other authorised legal professional in your jurisdiction reviews, edits as needed, and takes professional responsibility before the policy is rolled out. Do not publish or distribute this draft unreviewed.
+> **草稿，不是生效的政策。** 这是供律师审查的起草辅助工具，不是你可以发布的政策。发布手册政策有法律后果——在几个州它可以作为合同承诺约束公司，工资/假期/住宿政策通常被作不利于雇主的解释。由你司法管辖区的持牌律师、事务律师、大律师或其他授权法律专业人士审查、按需编辑，并在政策推出前承担专业责任。不要在未审查的情况下发布或分发此草稿。
 
-## Handoff
+## 交接
 
-To handbook-updates skill: when this policy is approved, it diffs against the current handbook and flags what changes.
+到 handbook-updates skill：当此政策获批准时，它将与当前手册进行差异比较并标记变更。
 
-## What this skill does not do
+## 此 skill 不做什么
 
-- Approve the policy. It drafts; a human approves.
-- Roll out the policy. Communication to employees is an HR workflow.
-- Cover every jurisdiction on earth — only the ones in the footprint. If the footprint expands, re-run.
+- 批准政策。它起草；人批准。
+- 推出政策。向员工传达是 HR 工作流。
+- 覆盖地球上每个司法管辖区——仅覆盖足迹中的。如果足迹扩展，重新运行。

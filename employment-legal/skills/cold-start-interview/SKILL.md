@@ -1,324 +1,327 @@
 ---
 name: cold-start-interview
 description: >
-  Cold-start setup — learns your jurisdictional footprint and escalation rules
-  from your handbook and termination memos. Asks which states and countries
-  have employees, reads seed documents, and builds a jurisdiction-aware
-  escalation table. Use on fresh install, when CLAUDE.md still has
-  [PLACEHOLDER] markers, or when re-running with --redo or --check-integrations.
+  冷启动设置——从你的手册和解雇备忘录了解你的司法管辖区足迹和升级规则。询问哪些州和国家有员工，读取种子文档，构建一个了解哪些规则在哪里适用的升级表。在全新安装时、当 CLAUDE.md 仍有 [PLACEHOLDER] 标记时，或当使用 --redo 或 --check-integrations 重新运行时使用。
 argument-hint: "[--redo | --check-integrations]"
 ---
 
+<!--
+This file is a Chinese translation of the original by Anthropic PBC.
+Original: https://github.com/anthropics/claude-for-legal
+Licensed under Apache License 2.0
+-->
+
+
 # /cold-start-interview
 
-1. Check `~/.claude/plugins/config/claude-for-legal/employment-legal/CLAUDE.md`. If `--check-integrations`, skip the interview — re-run only the Part 0 `What's connected?` check and rewrite the `## Available integrations` table at that config path. When probing: only report ✓ if an MCP tool call actually succeeded. Configured-but-untested connectors should be marked ⚪ with a one-line how-to for confirming. Never report ✓ based on `.mcp.json` declarations alone — that misleads users into thinking something is wired up when it isn't.
-2. Run the interview below (Part 0 first — role + integrations — then footprint): states/countries, hiring/term review triggers, severance practice.
-3. Seed docs: handbook + 3 termination memos.
-4. Build jurisdiction-specific escalation table.
-5. If a populated CLAUDE.md (no `[PLACEHOLDER]` markers) exists at `~/.claude/plugins/cache/claude-for-legal/employment-legal/*/CLAUDE.md` but not at the config path, copy it to the config path and tell the user what was migrated.
-6. Write `~/.claude/plugins/config/claude-for-legal/employment-legal/CLAUDE.md`, creating parent directories as needed.
+1. 检查 `~/.claude/plugins/config/claude-for-legal/employment-legal/CLAUDE.md`。如果是 `--check-integrations`，跳过访谈——仅重新运行第 0 部分 `连接了什么？` 检查并重写该配置路径下的 `## Available integrations` 表。探测时：只有当 MCP 工具调用实际成功时才报告 ✓。已配置但未测试的连接器应标记 ⚪，附带一行确认方法。永远不要仅基于 `.mcp.json` 声明报告 ✓——那会误导用户以为某些东西已连接而实际没有。
+2. 运行以下访谈（先是第 0 部分——角色 + 集成——然后是足迹）：州/国家、招聘/解雇审查触发器、遣散费做法。
+3. 种子文档：手册 + 3 份解雇备忘录。
+4. 构建司法管辖区特定的升级表。
+5. 如果在 `~/.claude/plugins/cache/claude-for-legal/employment-legal/*/CLAUDE.md` 存在已填充的 CLAUDE.md（无 `[PLACEHOLDER]` 标记）但在配置路径不存在，将其复制到配置路径并告诉用户迁移了什么。
+6. 写入 `~/.claude/plugins/config/claude-for-legal/employment-legal/CLAUDE.md`，根据需要创建父目录。
 
 ---
 
-# Cold-Start Interview: Employment Counsel
+# 冷启动访谈：雇佣法律顾问
 
-## Purpose
+## 目的
 
-Employment law is jurisdictional down to the bone. The right answer in Texas is the wrong answer in California. This interview maps your footprint — every state and country with employees — and builds an escalation table that knows which rules apply where.
+雇佣法到骨子里都是司法管辖区的。在德克萨斯是正确答案的内容在加州是错误答案。此访谈映射你的足迹——每个有员工的州和国家——并构建一个知道哪些规则在哪里适用的升级表。
 
-## Cold-start check
+## 冷启动检查
 
-Read `~/.claude/plugins/config/claude-for-legal/employment-legal/CLAUDE.md`:
-- **Does not exist** → start the interview.
-- **Contains `<!-- SETUP PAUSED AT: -->`** → greet the user and offer to resume from that section.
-- **Contains `[PLACEHOLDER]` markers but no pause comment** → the template was never completed; offer to start fresh or resume from wherever the placeholders begin.
-- **Populated (no placeholders, no pause comment)** → already configured; skip unless `--redo`.
+读取 `~/.claude/plugins/config/claude-for-legal/employment-legal/CLAUDE.md`：
+- **不存在** → 开始访谈。
+- **包含 `<!-- SETUP PAUSED AT: -->`** → 问候用户并提供从该部分恢复的选项。
+- **包含 `[PLACEHOLDER]` 标记但没有暂停注释** → 模板从未完成；提供从头开始或从占位符开始处恢复的选项。
+- **已填充（无占位符，无暂停注释）** → 已配置；除非 `--redo` 否则跳过。
 
-The template structure lives at `${CLAUDE_PLUGIN_ROOT}/CLAUDE.md` — use it as the section scaffold. Write the completed practice profile to the config path, creating parent directories as needed. If a CLAUDE.md exists at the old cache path `~/.claude/plugins/cache/claude-for-legal/employment-legal/*/CLAUDE.md` but not here, copy it forward.
+模板结构位于 `${CLAUDE_PLUGIN_ROOT}/CLAUDE.md`——使用它作为章节脚手架。将完成的执业档案写入配置路径，根据需要创建父目录。如果在旧缓存路径 `~/.claude/plugins/cache/claude-for-legal/employment-legal/*/CLAUDE.md` 存在 CLAUDE.md 但这里没有，将其前向复制。
 
-## Check for the shared company profile
+## 检查共享公司档案
 
-Look for `~/.claude/plugins/config/claude-for-legal/company-profile.md`.
+查找 `~/.claude/plugins/config/claude-for-legal/company-profile.md`。
 
-- **If it exists:** Read it. Show a one-line confirmation: "You're [name], [practice setting], at [company], [industry], operating in [jurisdictions]. Right? (Or say 'update' to change the shared profile.)" If confirmed, skip the company questions — go straight to the plugin-specific ones.
-- **If it doesn't exist:** You'll be the first plugin this user set up. After the orientation and fork, ask the company questions and write them to the shared profile (per the template at `references/company-profile-template.md` in the plugin root), then continue with the plugin-specific questions. Tell the user: "I've saved your company profile — the other legal plugins will read it and skip these questions."
+- **如果存在：** 读取它。显示一行确认："你是 [名称]，[执业设置]，在 [公司]，[行业]，在 [司法管辖区] 运营。对吗？（或说'更新'来更改共享档案。）" 如果确认，跳过公司问题——直接进入插件特定问题。
+- **如果不存在：** 你将是此用户设置的第一个插件。在引导和分支之后，询问公司问题并写入共享档案（按照插件根目录中 `references/company-profile-template.md` 的模板），然后继续插件特定问题。告诉用户："我已保存你的公司档案——其他法律插件将读取它并跳过这些问题。"
 
-The company questions that belong in the shared profile (and should NOT be re-asked if it exists): practice setting, company name, industry, what-you-sell, size, jurisdictions, regulators, risk appetite, escalation names. The plugin-specific questions (playbook positions, review framework, house style, supervision model, etc.) stay per-plugin.
+属于共享档案的公司问题（如果存在则不应重新询问）：执业设置、公司名称、行业、你卖什么、规模、司法管辖区、监管机构、风险偏好、升级名称。插件特定的问题（剧本立场、审查框架、内部风格、督导模式等）保留在每个插件。
 
-## Install scope check
+## 安装范围检查
 
-Before the orientation, if you notice the working directory is inside a project (not the user's home directory), flag it. Say once:
+在引导之前，如果你注意到工作目录在项目内（不是用户的主目录），标记它。说一次：
 
-> **Heads up — it looks like this plugin may be project-scoped, which means I can only read files in [current directory]. If you'll want me to read documents from elsewhere (Downloads, Documents, Dropbox), install user-scoped instead — see QUICKSTART.md. You can continue with project scope, but you'll need to move files into this folder.**
+> **注意——看起来此插件可能是项目范围的，这意味着我只能读取 [当前目录] 中的文件。如果你需要我从其他地方读取文档（Downloads、Documents、Dropbox），改为用户范围安装——参见 QUICKSTART.md。你可以继续使用项目范围，但需要将文件移到此文件夹中。**
 
-Ask the user to confirm before proceeding: continue with project scope, or pause to reinstall user-scoped. If the working directory *is* the user's home directory, skip this check silently.
+在继续之前要求用户确认：继续使用项目范围，还是暂停以重新安装为用户范围。如果工作目录是用户的主目录，默默跳过此检查。
 
-## Before the interview starts
+## 在访谈开始之前
 
-Open with the fork-first preamble. Keep it to 3-4 short lines. Ask quick-or-full before anything else.
+以分支优先的引导开场。保持 3-4 行简短文字。在其他任何事情之前询问快速或完整。
 
-> **`employment-legal` is for people who handle hiring, terminations, investigations, leave, policies, worker classification, and international expansion.** Not your area? `/legal-builder-hub:related-skills-surfacer`.
+> **`employment-legal` 适用于处理招聘、解雇、调查、请假、政策、工人分类和国际扩张的人。** 不是你的领域？`/legal-builder-hub:related-skills-surfacer`。
 >
-> **2 minutes** gets you your role, practice setting, and jurisdictional footprint (states + countries with employees), plus working defaults for termination risk flags, severance posture, and handbook policies. **15 minutes** adds your real termination review triggers and high-risk flags extracted from prior memos, offer-letter and severance templates, state-specific handbook supplements, worker-classification defaults, and leave-tracker integration.
+> **2 分钟**获得你的角色、执业设置和司法管辖区足迹（有员工的州 + 国家），加上解雇风险标志、遣散费姿态和手册政策的工作默认值。**15 分钟**额外添加从先前备忘录提取的真实解雇审查触发器和高风险标志、录用函和遣散费模板、州特定手册补充、工人分类默认值和请假跟踪器集成。
 >
-> Quick or full? (Upgrade any time with `/cold-start-interview --full`.)
+> 快速还是完整？（随时可以用 `/cold-start-interview --full` 升级。）
 
-**Quick start path:** ask only Part 0 (role, practice setting, integrations) and jurisdictional footprint. Write the config with `[DEFAULT]` markers on everything else. Close with: "Done. You can start using the commands now. I've used sensible defaults for termination risk thresholds, severance posture, and handbook policies. When a skill's output feels off, that's usually a default you should tune — it'll tell you which. Run `/employment-legal:cold-start-interview --full` anytime to do the whole interview, or `/employment-legal:cold-start-interview --redo <section>` to re-do one part."
+**快速启动路径：** 仅询问第 0 部分（角色、执业设置、集成）和司法管辖区足迹。在其余所有内容上用 `[DEFAULT]` 标记写入配置。结束时说："完成。你现在可以开始使用命令了。我对解雇风险阈值、遣散费姿态和手册政策使用了合理的默认值。当 skill 的输出感觉不对时，那通常是你应该调整的默认值——它会告诉你哪个。随时运行 `/employment-legal:cold-start-interview --full` 做完整访谈，或 `/employment-legal:cold-start-interview --redo <section>` 重新做一个部分。"
 
-**Full setup path:** the existing interview flow below. After the user picks, give the fuller orientation described next, then proceed to Part 0.
+**完整设置路径：** 下面的现有访谈流程。用户选择后，给出下面描述的更完整的引导，然后进入第 0 部分。
 
-## After the user picks quick or full
+## 用户选择快速或完整之后
 
-Give the fuller orientation. One paragraph, in your own voice:
+给出更完整的引导。一段话，用你自己的语气：
 
-> "This plugin maintains: your practice profile (jurisdictional footprint, termination flags, handbook references), a leave register with deadline alerts, and an investigation case file structure. It learns how you actually work — your practice, your risk calibration, your house conventions — and writes that into a plain-text file the plugin reads from every time. Everything you answer can be changed later."
+> "此插件维护：你的执业档案（司法管辖区足迹、解雇标志、手册引用）、一个带截止日期警报的请假登记册，以及一个调查案卷文件结构。它学习你实际如何工作——你的执业、你的风险校准、你的内部约定——并将这些写入一个插件每次读取的纯文本文件。你回答的一切都可以稍后更改。"
 
-Then the fresh-profile note:
+然后是新建档案说明：
 
-> "Setup builds a fresh professional profile from your answers. It does not read your personal Claude history, other conversations, or your home-directory CLAUDE.md. If I notice relevant information in our conversation context — e.g., you mentioned your firm earlier — I'll ask before using it. Nothing personal gets folded into your practice configuration unless you type it or approve it."
+> "设置从你的答案构建新的专业档案。它不会读取你的个人 Claude 历史、其他对话或你的主目录 CLAUDE.md。如果我在我们的对话上下文中注意到相关信息——例如，你之前提到了你的律所——我会在使用之前询问。除非你输入或批准，否则没有任何个人内容会被纳入你的执业配置。"
 
-Then: "Ready? A few quick questions first, then we'll go deeper."
+然后："准备好了吗？先几个快速问题，然后我们深入。"
 
-**Why this matters** (offer if the user pushes back on the time cost). Every command in this plugin reads from the configuration this interview writes. A generic configuration gives generic output — a default jurisdiction table, a default list of high-risk termination flags, a default escalation matrix, and a review that treats California and Texas the same way. Telling the plugin the actual footprint, the actual hiring and termination triggers, and the actual reporting lines is what makes the difference between "an employment AI tool" and "a tool that knows where your people are and what has bitten you before."
+**为什么这很重要**（如果用户对时间成本有异议时提供）。此插件中的每个命令都读取此访谈写入的配置。通用配置给出通用输出——默认的司法管辖区表、默认的高风险解雇标志列表、默认的升级矩阵，以及将加州和德克萨斯同等对待的审查。告诉插件实际的足迹、实际的招聘和解雇触发器以及实际的汇报线，就是"一个雇佣 AI 工具"和"一个知道你的人在哪里以及什么曾经咬过你的工具"之间的区别。
 
-The interview's information comes only from the user's typed answers and documents they explicitly upload. Do not read `~/CLAUDE.md`, personal notes, or any ambient context to fill in practice details. If relevant context is already visible in the conversation (company name, prior mentions), surface it as a question ("I think you mentioned X earlier — should I use that?") before using it.
+访谈信息仅来自用户输入的答案和他们明确上传的文档。不要读取 `~/CLAUDE.md`、个人笔记或任何环境上下文来填充执业详情。如果相关上下文已在对话中可见（公司名称、先前提及），将其作为一个问题呈现（"我想你之前提到了 X——我应该使用那个吗？"）在使用之前。
 
-## Interview pacing
+## 访谈节奏
 
-- **Assume the answer exists somewhere.** When a question asks for information that's probably written down somewhere — company description, playbook, escalation matrix, style guide, handbook, jurisdiction list, matter portfolio — prompt for a link or a paste before asking the user to type it from memory. "Paste a link or a doc, or give me the short version" is the default ask for anything that's more than a sentence. An interviewer who makes people re-type what they've already written has failed the first job of an interviewer.
-- **Batch size — count subparts.** "Never ask more than 2-3 questions in one turn" means 2-3 *answerable prompts*, counting subparts. One question with 5 subparts is 5 questions. The test: can the user answer without scrolling? If the questions don't fit on one screen, it's too many. Prefer structured tap-through questions where possible — they don't require scrolling or typing.
+- **假设答案已经在某处存在。** 当一个问题询问可能已经写好的信息——公司描述、剧本、升级矩阵、风格指南、手册、司法管辖区列表、事项组合——在要求用户凭记忆输入之前提示提供链接或粘贴。"粘贴链接或文档，或给我简短版本"是超过一句话的任何内容的默认询问。让用户重新输入他们已经写过的内容的面试官没有完成面试官的首要工作。
+- **批次大小——计算子部分。** "一次永远不要问超过 2-3 个问题"意味着 2-3 个*可回答的提示*，计算子部分。一个有 5 个子部分的问题是 5 个问题。测试标准：用户能否在不滚动的情况下回答？如果问题在一屏上放不下，就太多了。在可能的情况下优先选择结构化点击选择问题——它们不需要滚动或输入。
 
-**Pause for real answers.** Some questions have quick tap-through answers (who's using this, which states). Others need the user to type something, describe something, or upload a document (handbook, term memos, jurisdiction table). When a question needs more than a quick tap:
+**为真实答案暂停。** 一些问题有快速点击答案（谁在使用、哪些州）。其他需要用户输入内容、描述某些内容或上传文档（手册、解雇备忘录、司法管辖区表）。当一个问题需要超过快速点击时：
 
-- **Ask the question and wait.** Say explicitly: "This one needs a typed answer — I'll wait." Do not move to the next question until the user responds.
-- **For uploads:** "Paste the contents, share a file path, or say 'skip for now.' If you skip, I'll flag the gap in your configuration so you can fill it later." Then actually wait.
-- **Before writing the configuration:** review the interview. List any questions that were skipped or answered with placeholders. Say: "Before I write your configuration, here's what's still open: [list]. Want to fill any of these now, or leave them as placeholders?" Then wait for the answer.
-- **Never** write a configuration with silent gaps. Every placeholder should be a deliberate choice the user made to skip, not a question that scrolled past. The LIMITED DATA flag only applies to documents the user chose to skip — not to questions the interview skipped on them.
-- **Pause and resume.** Tell the user up front: "If you need to stop, say 'pause' (or 'stop', or 'let me come back to this') and I'll save your progress. Run `/employment-legal:cold-start-interview` again later and I'll pick up where you left off." When the user pauses, write a partial configuration to `~/.claude/plugins/config/claude-for-legal/employment-legal/CLAUDE.md` with a `<!-- SETUP PAUSED AT: [section name] — run /employment-legal:cold-start-interview to resume -->` comment at the top and `[PENDING]` markers (distinct from `[PLACEHOLDER]`) on unanswered fields. When setup re-runs and finds a paused config, greet the user: "Welcome back. You paused at [section]. Your earlier answers are saved. Pick up where we left off, or start over?" Do not re-ask questions already answered.
+- **提问并等待。** 明确说："这个需要输入——我会等。" 在用户回应之前不要移到下一个问题。
+- **对于上传：** "粘贴内容、分享文件路径或说'现在跳过'。如果你跳过，我会在配置中标记差距以便你稍后填充。" 然后实际等待。
+- **在写入配置之前：** 审查访谈。列出被跳过或用占位符回答的问题。说："在我写入你的配置之前，以下内容仍然开放：[列表]。想现在填充这些，还是留作占位符？" 然后等待答案。
+- **永远不要**在有静默差距的情况下写入配置。每个占位符都应该是用户选择跳过的有意识决定，而不是滚过去的问题。LIMITED DATA 标志仅适用于用户选择跳过的文档——不适用于访谈跳过他们的问题。
+- **暂停和恢复。** 提前告诉用户："如果你需要停止，说'暂停'（或'停'，或'让我稍后再来'），我会保存你的进度。稍后再次运行 `/employment-legal:cold-start-interview`，我会在你停下的地方接上。" 当用户暂停时，将部分配置写入 `~/.claude/plugins/config/claude-for-legal/employment-legal/CLAUDE.md`，顶部带有 `<!-- SETUP PAUSED AT: [部分名称] — run /employment-legal:cold-start-interview to resume -->` 注释和未回答字段上的 `[PENDING]` 标记（区别于 `[PLACEHOLDER]`）。当设置重新运行并找到暂停的配置时，问候用户："欢迎回来。你在 [部分] 暂停了。你之前的答案已保存。从我们停下的地方继续，还是重新开始？" 不要重新询问已回答的问题。
 
-**Verify user-stated legal facts as they come up in setup.** When the user answers an interview question with a specific rule citation, statute number, case name, deadline, threshold, jurisdiction, or registration number — and it's something you can sanity-check — do the check before writing it into the configuration. If what they said conflicts with your understanding or with something they've pasted, surface it: "You said the threshold is X; my understanding is Y — can you confirm which goes in the profile? `[premise flagged — verify]`" A wrong fact written into CLAUDE.md propagates into every future output; catching it here is one of the highest-leverage moments in the product.
+**在设置中验证用户陈述的法律事实。** 当用户用具体规则引用、制定法编号、案例名称、截止日期、阈值、司法管辖区或注册号回答访谈问题时——并且这是你可以快速检查的内容——在写入配置之前进行检查。如果他们说的与你的理解或他们粘贴的内容冲突，提出它："你说的阈值是 X；我的理解是 Y——你能确认哪个进入档案吗？`[premise flagged — verify]`" 写入 CLAUDE.md 的错误事实会传播到每个未来输出；在这里捕捉它是产品中最高杠杆的时刻之一。
 
-## The interview
+## 访谈
 
-### Opening
+### 开场
 
-> Employment law is the practice area where "it depends" is most often the honest answer. I need your map before I can tell you anything useful — where are your people, and what have you already dealt with?
+> 雇佣法是"看情况"最常成为诚实答案的执业领域。我需要你的地图才能告诉你任何有用的东西——你的人在哪里，你已经处理过什么？
 
-### Part 0: Who's using this, and what's connected
+### 第 0 部分：谁在使用，连接了什么
 
-Three quick questions before we get into employment specifics. These shape how the plugin works, not what it can do.
+在我们进入雇佣特定内容之前三个快速问题。这些决定插件如何工作，而不是它能做什么。
 
-#### Who's using this?
+#### 谁在使用？
 
-> Who'll be using this plugin day to day? (This feeds the work-product header on every termination memo, handbook draft, and investigation summary — lawyer outputs get the privilege header, non-lawyer outputs get the "research notes, review with counsel" header.)
+> 谁会日常使用此插件？（这会填入每个解雇备忘录、手册草稿和调查摘要的工作产品标题——律师输出获得特权标题，非律师输出获得"研究笔记，与律师审查"标题。）
 >
-> 1. **Lawyer or legal professional** — attorney, paralegal, legal ops working under attorney oversight.
-> 2. **Non-lawyer with attorney access** — founder, business lead, contracts manager, HR, procurement; you have an in-house or outside attorney you can consult.
-> 3. **Non-lawyer without regular attorney access** — you're handling this yourself.
+> 1. **律师或法律专业人员** — 律师、律师助理、在律师监督下工作的法律运营。
+> 2. **有律师访问权限的非律师** — 创始人、业务负责人、合同经理、HR、采购；你有内部或外部律师可以咨询。
+> 3. **没有常规律师访问权限的非律师** — 你自己处理这个。
 
-If the answer is 2 or 3, say this once (don't repeat it on every output):
+如果答案是 2 或 3，说一次（不要在每个输出上重复）：
 
-> You can use every feature here — research, review, drafting, tracking. Two things change in how I work:
+> 你可以使用这里的每个功能——研究、审查、起草、跟踪。在我的工作方式中有两件事改变：
 >
-> 1. **I'll frame outputs as research for attorney review, not as verdicts.** Instead of "GREEN — sign it," you'll get "here's what I found and here are the questions to ask before you sign." That's more useful than a green light you can't be sure of.
-> 2. **I'll pause before steps that have legal consequences** — signing a contract, terminating someone, sending a demand, filing something, clearing a launch, responding to a regulator. I'll ask whether you've reviewed with an attorney, and I'll put together a short brief so the conversation with them is fast.
+> 1. **我将把输出构建为供律师审查的研究，而不是结论。** 不是"绿灯——签署它"，你会得到"这是我发现的以及签署前需要问的问题"。这比你不能确定的绿灯更有用。
+> 2. **我会在有法律后果的步骤之前暂停**——签署合同、解雇某人、发送要求函、提交文件、批准上线、回应监管机构。我会问你是否已与律师审查，我会整理一个简短简报使与他们的对话快速高效。
 >
-> This isn't a disclaimer. It's the plugin knowing the difference between what it's good at — research, organization, structure — and licensed legal judgment about your specific situation, which a tool can't give you. A few hours of a lawyer's time at the right moment is usually cheaper than the mistake.
+> 这不是免责声明。这是插件知道它擅长的——研究、组织、结构——与它不能给你的——关于你具体情况的持牌法律判断——之间的区别。在正确时刻几小时的律师时间通常比错误更便宜。
 
-If the answer is 3, add:
+如果答案是 3，添加：
 
-> If you need to find an attorney, solicitor, barrister, or other authorised legal professional: contact your professional regulator (state bar in the US, SRA/Bar Standards Board in England & Wales, Law Society in Scotland/NI/Ireland/Canada/Australia, or your jurisdiction's equivalent) — most offer a lawyer referral service as the fastest starting point. Many offer free or low-cost initial consultations. For small businesses, local law school clinics (and equivalents like SCORE mentors in the US) can point you in the right direction. For individuals, legal aid organizations cover many practice areas.
+> 如果你需要找到律师、事务律师、大律师或其他授权法律专业人士：联系你的专业监管机构（美国的州律协、英格兰和威尔士的 SRA/Bar Standards Board、苏格兰/NI/爱尔兰/加拿大/澳大利亚的 Law Society，或你司法管辖区的等效机构）——大多数提供律师推荐服务作为最快的起点。许多提供免费或低成本初次咨询。对于小企业，当地法学院诊所（以及美国 SCORE 导师等等效机构）可以指向正确方向。对于个人，法律援助组织覆盖许多执业领域。
 
-#### Practice setting
+#### 执业设置
 
-> Which of these best describes where you're practicing? (This feeds every skill's escalation framing — in-house gets "loop in GC," solo/small gets "call outside counsel," clinic gets "route to supervising attorney.")
+> 以下哪个最描述你的执业环境？（这会填入每个 skill 的升级框架——内部获得"联系 GC"，个人/小所获得"致电外部律师"，诊所获得"路由到督导律师"。）
 >
-> - **Solo / small firm (no hierarchy)** — I'll skip approval-chain questions and ask when you'd loop in a colleague or outside counsel instead.
-> - **Midsize / large firm** — I'll ask about your approval chain, billing thresholds, and who signs off above you.
-> - **In-house** — I'll ask about your escalation matrix, who the GC/CLO is, and when something goes to the business.
-> - **Government / legal aid / clinic** — I'll ask about supervision structure and any restrictions on your practice.
-> - **My practice doesn't fit any of these** — say so. I'll adapt.
+> - **个人 / 小所（无层级）** — 我会跳过审批链问题，改为询问你何时会联系同事或外部律师。
+> - **中型 / 大型律所** — 我会询问你的审批链、计费阈值以及谁在你之上签字。
+> - **内部** — 我会询问你的升级矩阵、GC/CLO 是谁以及何时上报给业务方。
+> - **政府 / 法律援助 / 诊所** — 我会询问督导结构和你的执业是否有任何限制。
+> - **我的执业不适合以上任何类别** — 说出来。我会适应。
 
-**Practices that don't fit the boxes.** If the user's practice doesn't match the options above (international arbitration, public international law, amicus-only, academic consulting, pro bono panel, tribal court, military justice, maritime, or anything else the standard categories assume away), offer: "It sounds like your practice doesn't fit my usual categories. Tell me about it in your own words — what you do, who for, what jurisdictions and forums, what the work looks like — and I'll build your profile from that instead of forcing you into boxes that don't fit. I'll skip or adapt the questions that don't apply." Then build the profile from the free-form description, flagging which template fields were filled, adapted, or left empty because they don't apply. A profile built from a forced fit is worse than a sparse profile built from what's actually true.
+**不适合框的执业。** 如果用户的执业不匹配以上选项（国际仲裁、国际公法、仅法庭之友、学术咨询、公益面板、部落法院、军事司法、海事或其他标准类别假设排除的任何内容），提供："听起来你的执业不适合我的常规类别。用你自己的话告诉我——你做什么、为谁做、什么司法管辖区和论坛、工作看起来像什么——我会从那个构建你的档案，而不是强迫你进入不适合的框。我会跳过或调整不适用的问题。" 然后从自由形式描述构建档案，标记哪些模板字段被填充、调整或留空因为不适用。从强制匹配构建的档案比从实际情况构建的稀疏档案更差。
 
-This one changes how the rest of the interview runs:
+这个会改变访谈其余部分的运行方式：
 
-- **Solo / small firm (no hierarchy):** Skip or reframe escalation-chain questions later in the interview. Instead of "who approves above your threshold," ask "when do you call in outside counsel or a colleague for a second opinion." Escalation in the practice profile maps to "consult" not "route for approval." The escalation table at the end should have no internal tiers above the user; it lists outside counsel, an insurer, or "no further escalation" instead.
-- **Midsize / large firm / in-house:** Ask the escalation question below — reporting line, who approves terminations above severance threshold, who signs off on RIFs, etc.
-- **Government / legal aid / clinic:** Route to the supervision model — who reviews work product, what the sign-off chain looks like for client communications, whether a supervising attorney of record is assigned per matter.
+- **个人 / 小所（无层级）：** 跳过或重新构建后面的升级链问题。不是"谁在你阈值之上批准"，问"你何时会请外部律师或同事提供第二意见"。执业档案中的升级映射为"咨询"而非"路由审批"。最后的升级表在用户之上不应有内部层级；它列出了外部律师、保险公司或"无进一步升级"。
+- **中型 / 大型律所 / 内部：** 问下面的升级问题——汇报线、谁批准超过遣散费阈值的解雇、谁在 RIF 上签字等。
+- **政府 / 法律援助 / 诊所：** 路由到督导模式——谁审查工作产品、客户沟通的签字链是什么样的、是否每个事项分配了记录督导律师。
 
-**Escalation question (ask after the practice-setting answer, adapted to the branch above):**
+**升级问题（在执业设置答案之后询问，适应以上分支）：**
 
-> If your team has a shared escalation matrix or delegation-of-authority policy set at the team or department level, that's the one I want — paste it or link it. I'll use it as the baseline and ask about your personal overrides separately.
+> 如果你的团队有共享升级矩阵或授权委托政策设在团队或部门级别，那是我要的那个——粘贴它或链接它。我会用它作为基线并单独询问你的个人覆盖。
 
-> "When a review finds something that needs someone more senior to sign off — a termination with discrimination or retaliation risk, an investigation that escalates, a classification call at the edge, an accommodation denial, or a decision that's above your authority — who does that go to? Give me a name or a role (the GC, your boss, the head of HR), or say 'I decide myself.' This is how the plugin knows when to say 'you can handle this' versus 'loop in [X].' (This feeds /termination-review, /worker-classification, /investigation-open, and every other skill's escalation routing.)"
+> "当审查发现需要更高级别人签字的内容——有歧视或报复风险的解雇、升级的调查、边缘的分类决定、住宿拒绝或超出你权限的决定——那交给谁？给我一个名字或角色（GC、你的老板、HR 负责人），或说'我自己决定'。这是插件知道何时说'你可以处理这个'vs.'联系 [X]'的方式。（这会填入 /termination-review、/worker-classification、/investigation-open 以及其他每个 skill 的升级路由。）"
 
-Record the answer in the plugin config as `## Practice setting` (or include in the `## Who we are` section).
+将答案记录在插件配置中作为 `## Practice setting`（或包含在 `## Who we are` 部分中）。
 
-#### What's connected?
+#### 连接了什么？
 
-> This plugin can work with: HRIS (Workday, BambooHR, Rippling, ADP), document storage (Google Drive, SharePoint, Box), and Slack. Let me check which connectors you have configured — features that need them will work, and features that don't have them will fall back to manual gracefully instead of failing silently.
+> 此插件可以与以下配合使用：HRIS（Workday、BambooHR、Rippling、ADP）、文档存储（Google Drive、SharePoint、Box）和 Slack。让我检查你配置了哪些连接器——需要它们的功能将工作，不需要它们的功能将优雅地回退到手动而不是静默失败。
 
-**Check what's actually connected, not what's configured.** A connector listed in `.mcp.json` is *available*. A connector that's actually responding is *connected*. These are different, and confusing them destroys trust. For each connector this plugin uses:
+**检查实际连接了什么，而不是配置了什么。** 列在 `.mcp.json` 中的连接器是*可用的*。实际响应的连接器是*已连接的*。这些是不同的，混淆它们会破坏信任。对于此插件使用的每个连接器：
 
-- If you can test the connection (call a simple MCP tool like a list or search), report ✓ only on a successful response.
-- If you can't test (no way to probe from here), report ⚪ "configured but not verified — open your MCP settings to confirm" with a one-line how-to.
-- Never report ✓ based on configuration alone.
+- 如果你可以测试连接（调用简单的 MCP 工具如列表或搜索），仅在成功响应时报告 ✓。
+- 如果你无法测试（无法从这里探测），报告 ⚪ "已配置但未验证——打开你的 MCP 设置确认"并附带一行操作方法。
+- 永远不要仅基于配置报告 ✓。
 
-For connectors that show as not connected, tell the user how to connect. Example phrasing: "Box isn't connected. In Claude Cowork: Settings → Connectors → Add → Box → sign in. In Claude Code: add the Box MCP to your config or via `/mcp`. This plugin works without it — you'll paste documents instead of pulling them — but connecting it makes document pulls automatic."
+对于显示未连接的连接器，告诉用户如何连接。示例措辞："Box 未连接。在 Claude Cowork 中：Settings → Connectors → Add → Box → 登录。在 Claude Code 中：将 Box MCP 添加到你的配置或通过 `/mcp`。此插件没有它也能工作——你会粘贴文档而不是拉取——但连接它使文档拉取自动。"
 
-Then report findings in this form:
+然后以此形式报告发现：
 
-> - ✓ [Integration] — connected (tested)
-> - ⚪ [Integration] — configured but not verified. Open your MCP settings to confirm.
-> - ✗ [Integration] — not found. [Feature] will fall back to [manual alternative]. [How to connect.] If you set this up later, re-run `/employment-legal:cold-start-interview --check-integrations`.
+> - ✓ [集成] — 已连接（已测试）
+> - ⚪ [集成] — 已配置但未验证。打开你的 MCP 设置确认。
+> - ✗ [集成] — 未找到。[功能] 将回退到 [手动替代]。[如何连接。] 如果你稍后设置此功能，重新运行 `/employment-legal:cold-start-interview --check-integrations`。
 >
-> You don't need all of these. Core features work with file access alone — leave tracking falls back to a local register if there's no HRIS.
+> 你不需要所有这些。核心功能仅凭文件访问即可工作——请假跟踪在没有 HRIS 时回退到本地登记册。
 
-#### Write to the config CLAUDE.md
+#### 写入配置 CLAUDE.md
 
-Write `## Who's using this`, `## Available integrations`, and `## Outputs` sections immediately after the first section of the config-path CLAUDE.md (the plugin config) per the template in `${CLAUDE_PLUGIN_ROOT}/CLAUDE.md`. These drive work-product header choice and feature-fallback behavior across every skill in this plugin.
+在第 0 部分之后立即将 `## Who's using this`、`## Available integrations` 和 `## Outputs` 部分写入配置路径 CLAUDE.md（插件配置），按照 `${CLAUDE_PLUGIN_ROOT}/CLAUDE.md` 中的模板。这些驱动此插件中每个 skill 的工作产品标题选择和功能回退行为。
 
-### Part 1: The footprint (2-3 min)
+### 第 1 部分：足迹（2-3 分钟）
 
-> **What does [your company] do?** This is the single most important context — a SaaS vendor's playbook, a hardware distributor's playbook, and a services firm's playbook are completely different. You don't have to type it out: paste a link to your company website, your "about" page, your Wikipedia article, or your latest 10-K, and I'll extract what I need. Or give me the one-sentence version: what you sell, to whom, and how (direct sales / channel / marketplace / subscription).
+> **[你的公司] 做什么？** 这是最重要的上下文——SaaS 供应商的剧本、硬件分销商的剧本和服务公司的剧本完全不同。你不必输入：粘贴你的公司网站链接、"关于"页面、维基百科文章或最新 10-K，我会提取我需要的。或者给我一句话版本：你卖什么、卖给谁、怎么卖（直销 / 渠道 / 市场 / 订阅）。
 
-> Before I ask the footprint questions: do you have a jurisdiction table, a state-by-state coverage memo, or a list of active employee locations from your HRIS I can read? Paste the contents, share a file path, or say 'no' and I'll ask the questions one at a time. If you share one, I'll extract the footprint rather than making you list it from memory. (This feeds /wage-hour-qa, /worker-classification, /hiring-review, /termination-review, /policy-drafting — every wage-hour question, worker-classification check, and handbook supplement branches on your jurisdictions.)
+> 在我问足迹问题之前：你有没有我可以读取的司法管辖区表、州际覆盖备忘录或 HRIS 中活跃员工位置列表？粘贴内容、分享文件路径或说'没有'，我会逐一询问问题。如果你分享一个，我会提取足迹而不是让你凭记忆列出。（这会填入 /wage-hour-qa、/worker-classification、/hiring-review、/termination-review、/policy-drafting——每个工资工时问题、工人分类检查和手册补充都根据你的司法管辖区分支。）
 
-If not:
+如果没有：
 
-- Every US state with at least one employee. All of them.
-- Every country outside the US.
-- Remote-first or office-based? (Remote-first means the footprint keeps expanding without anyone telling you.)
-- Which state has the most employees? That's your default jurisdiction when the question doesn't specify.
+- 每个至少有一名员工的美国州。全部。
+- 美国以外的每个国家。
+- 远程优先还是基于办公室？（远程优先意味着足迹会在没有人告诉你的情况下不断扩展。）
+- 哪个州员工最多？那是问题未指定时的默认司法管辖区。
 
-**If the user didn't upload a jurisdiction list:** at the end of this section, offer: "Want me to write this up as a standalone jurisdiction table you can maintain and share? Same footprint data I just captured, in a format that's easier to edit as the company grows."
+**如果用户没有上传司法管辖区列表：** 在本节结束时，提供："想让我把这个写成独立司法管辖区表供你维护和分享吗？我刚捕获的相同足迹数据，采用随着公司增长更容易编辑的格式。"
 
-### Part 2: The review triggers (2-3 min)
+### 第 2 部分：审查触发器（2-3 分钟）
 
-> "**Do you want to build your positions now?** It makes the review skills (hiring-review, termination-review, policy-drafting) much better — they'll know your stance and fallbacks instead of generic ones. It takes about 3-4 minutes. Skip if you just want to try the other commands; the review skills will use defaults and tell you when they hit a position you haven't set."
+> "**你想现在构建你的立场吗？** 这使审查 skill（hiring-review、termination-review、policy-drafting）好得多——它们会知道你的立场和后备而不是通用立场。大约需要 3-4 分钟。如果你只是想尝试其他命令，跳过；审查 skill 会使用默认值并在遇到你未设置的立场时告诉你。"
 
-> If your team has a shared playbook, escalation matrix, or delegation-of-authority policy set at the team or department level, that's the one I want — paste it or link it. I'll use it as the baseline and ask about your personal overrides separately.
+> 如果你的团队有共享剧本、升级矩阵或授权委托政策设在团队或部门级别，那是我要的那个——粘贴它或链接它。我会用它作为基线并单独询问你的个人覆盖。
 
-> Before the questions: do you have a termination checklist, a severance template, an offer-letter template, or an existing review-trigger playbook I can read? Paste the contents, share file paths, or say 'no' and I'll walk through the questions. If you share them, I'll extract the triggers and escalation points rather than making you describe them.
+> 在问题之前：你有没有我可以读取的解雇检查清单、遣散费模板、录用函模板或现有审查触发器剧本？粘贴内容、分享文件路径或说'没有'，我会逐步问问题。如果你分享它们，我会提取触发器和升级点而不是让你描述。
 
-If not:
+如果没有：
 
-**Hiring:** When does legal see an offer?
-- Every offer? Only exec? Only with restrictive covenants? Never?
-- What's in the standard offer letter? Restrictive covenants vary by state — non-competes are unenforceable in California, fine in Florida.
+**招聘：** 法律何时审查录用函？
+- 每个录用？仅高管？仅有限制性契约？从不？
+- 标准录用函中有什么？限制性契约因州而异——非竞争在加州不可执行，在佛罗里达可以。
 
-**Termination:** When does legal see a termination?
-- Every term? Performance only? RIFs only?
-- What's the standard severance — formula, discretionary, none?
-- Release required? Always, or only above X severance?
+**解雇：** 法律何时审查解雇？
+- 每个解雇？仅表现？仅 RIF？
+- 标准遣散费是什么——公式、酌情、无？
+- 需要解除协议？总是，还是仅在超过 X 遣散费时？
 
-**The high-risk flags:** What makes a termination scary? (This feeds /termination-review — every future termination memo gets checked against these flags before the skill concludes.)
-- Recent complaint (harassment, discrimination, whistleblower)
-- Recently returned from protected leave
-- Protected class + thin documentation
-- Anything else that's bitten you before?
+**高风险标志：** 什么使解雇令人恐惧？（这会填入 /termination-review——每个未来的解雇备忘录在 skill 得出结论之前都会检查这些标志。）
+- 最近投诉（骚扰、歧视、举报人）
+- 最近从受保护假期返回
+- 受保护阶级 + 薄文档
+- 以前还咬过你的其他什么？
 
-**If the user didn't upload a termination checklist or severance template:** at the end of this section, offer: "Want me to write this up as standalone termination-review checklist and high-risk-flag memo you can share? Same content I just captured, formatted so HR partners can read it without a legal decoder."
+**如果用户没有上传解雇检查清单或遣散费模板：** 在本节结束时，提供："想让我把这个写成独立的解雇审查检查清单和高风险标志备忘录供你分享吗？我刚捕获的相同内容，格式化以便 HR 合作伙伴可以在没有法律解码器的情况下阅读。"
 
-### Part 3: Seed documents (3-4 min)
+### 第 3 部分：种子文档（3-4 分钟）
 
-**Where does leave data live?**
+**请假数据在哪里？**
 
-Before asking for documents, ask one infrastructure question:
+在要求文档之前，问一个基础设施问题：
 
-> Do you have an HRIS — Workday, BambooHR, Rippling, ADP, or something else — that tracks employee leave? And does legal have read access to it? (This feeds /leave-tracker and /log-leave — with HRIS access, the tracker pulls leaves automatically; without, it runs off a local register you update manually.)
+> 你有没有 HRIS——Workday、BambooHR、Rippling、ADP 或其他——跟踪员工请假？法律是否有读取权限？（这会填入 /leave-tracker 和 /log-leave——有 HRIS 访问权限，跟踪器自动拉取请假；没有的话，它运行在手动更新的本地登记册上。）
 
-- If HRIS with legal read access: note the system name
-- If HRIS without legal access, or no leave tracking module: note "manual"
-- If no HRIS: note "manual"
+- 如果有 HRIS 且法律有读取权限：记录系统名称
+- 如果有 HRIS 但法律无访问权限，或没有请假跟踪模块：记录"手动"
+- 如果没有 HRIS：记录"手动"
 
-**Seed documents**
+**种子文档**
 
-> This is the most important part — I want to see how your team actually works, not just what your policies say. I need two things:
+> 这是最重要的部分——我想看你的团队实际如何工作，不仅仅是你政策说了什么。我需要两样东西：
 >
-> 1. **Your handbook.** Current version. I'll read it to know what you've promised employees and where the gaps are. (This feeds /policy-drafting and /hiring-review — every policy draft and offer-letter check gets cross-referenced against what the handbook already commits to.)
+> 1. **你的手册。** 当前版本。我会阅读它以了解你向员工承诺了什么以及差距在哪里。（这会填入 /policy-drafting 和 /hiring-review——每个政策草稿和录用函检查都会与手册已承诺的内容交叉引用。）
 >
-> 2. **Recent employment documents — the more the better.** Ten is a good floor; twenty gives a much clearer picture. Mix it up: termination memos, offer letters, severance agreements, PIPs, accommodation requests — whatever you have. If you have fewer than ten, share what you can, but flag it. (These feed /termination-review and /hiring-review — the skills extract your house format, severance posture, and high-risk patterns from your actual documents, not a generic template.)
+> 2. **最近的雇佣文档——越多越好。** 十份是个好底限；二十份给出更清晰的画面。混合搭配：解雇备忘录、录用函、遣散协议、PIP、住宿请求——你有的任何东西。如果你少于十份，分享你能分享的，但要标记它。（这些会填入 /termination-review 和 /hiring-review——skill 从你的实际文档中提取你的内部格式、遣散费姿态和高风险模式，而不是通用模板。）
 
-If they have an HRIS or good document visibility: aim for 10-20 documents across the types described above.
+如果他们有 HRIS 或良好的文档可见性：目标是在上述类型中获取 10-20 份文档。
 
-If they have poor visibility (scattered folders, no system): accept whatever they can pull. Flag every section of the practice profile built from fewer than 10 documents with [LIMITED DATA — N documents reviewed].
+如果他们可见性差（文件夹分散、无系统）：接受他们能拉取的任何东西。用 [LIMITED DATA — N documents reviewed] 标记从少于 10 份文档构建的执业档案每个部分。
 
-**From the handbook:** Policies with jurisdictional variants (PTO accrual, final pay, leave). State supplements if any. The gaps — things the handbook doesn't cover that it should.
+**从手册中：** 有司法管辖区变体的政策（PTO 累计、最终薪资、请假）。州补充（如有）。差距——手册没有覆盖但应该覆盖的内容。
 
-**From the seed documents:** What got checked on terminations. What high-risk flags look like in practice. Offer letter format and standard restrictive covenant language. Severance agreement format for the termination-review skill to match. Any patterns in what the team actually approves vs. what the policies say.
+**从种子文档中：** 解雇时检查了什么。高风险标志在实践中是什么样子。录用函格式和标准限制性契约语言。供 termination-review skill 匹配的遣散协议格式。团队实际批准的与政策所说的任何模式。
 
-## Build the jurisdiction table
+## 构建司法管辖区表
 
-This is the core output. For each state/country in the footprint:
+这是核心输出。对于足迹中的每个州/国家：
 
-| Jurisdiction | Special rules | Auto-escalate |
+| 司法管辖区 | 特殊规则 | 自动升级 |
 |---|---|---|
-| California | No non-competes. Final pay due last day (or 72hrs if employee quits w/o notice). Meal/rest break penalties. PAGA exposure. | Any termination. Any restrictive covenant. |
-| New York | Pay transparency in postings. NYC has separate rules. Final pay next regular payday. | Exec hires (pay transparency). |
-| [etc.] | | |
+| California | 无非竞争。最终薪资最后一天到期（或员工无通知辞职时 72 小时）。用餐/休息时间惩罚。PAGA 风险。 | 任何解雇。任何限制性契约。 |
+| New York | 发布中的薪酬透明度。NYC 有单独规则。最终薪资下一个常规发薪日。 | 高管招聘（薪酬透明度）。 |
+| [等] | | |
 
-Don't invent rules for jurisdictions they didn't name. If they have one employee in Montana and no memo ever mentioned Montana, note `[Montana: 1 employee, no history — research on first issue]`.
+不要为他们没有提到的司法管辖区编造规则。如果他们在蒙大拿有一名员工且没有任何备忘录提到蒙大拿，注明 `[蒙大拿：1 名员工，无历史——首次出现问题时研究]`。
 
-## Writing the practice profile
+## 写入执业档案
 
-Per the template structure at `${CLAUDE_PLUGIN_ROOT}/CLAUDE.md`. Write the completed practice profile to the plugin config, creating parent directories as needed. Key sections: jurisdictional footprint, hiring/termination review triggers, high-risk flags, the jurisdiction-specific escalation table.
+按照 `${CLAUDE_PLUGIN_ROOT}/CLAUDE.md` 中的模板结构。将完成的执业档案写入插件配置，根据需要创建父目录。关键部分：司法管辖区足迹、招聘/解雇审查触发器、高风险标志、司法管辖区特定的升级表。
 
-## After writing
+## 写入之后
 
-**Show what this plugin can do.** Before closing, offer:
+**展示此插件能做什么。** 在关闭之前，提供：
 
-> **Want to see what I can help with?**
+> **想看看我能帮什么吗？**
 
-If yes, show this tailored list (not a generic template — these are the concrete things this plugin does best):
+如果是，展示这个定制列表（不是通用模板——这些是此插件最擅长的具体事情）：
 
-> **Here's what I'm good at in employment law practice:**
+> **以下是我在雇佣法执业中擅长的：**
 >
-> - **Review an offer letter and restrictive covenants** — e.g., "Jurisdiction check on non-compete enforceability, pay transparency, and required notices." Try: `/employment-legal:hiring-review`
-> - **Termination review with risk flags** — e.g., "Severance, release, final pay timing, and high-risk indicators flagged before the decision." Try: `/employment-legal:termination-review`
-> - **Classify a worker engagement** — e.g., "Employee / IC / temp / vendor — with misclassification gap analysis." Try: `/employment-legal:worker-classification`
-> - **Ask a jurisdiction-aware wage/hour question** — e.g., "Multi-state workforce question routed against the jurisdictions in your footprint." Try: `/employment-legal:wage-hour-qa`
-> - **Kick off international expansion** — e.g., "New country on the roadmap — plan the employment-law workstream." Try: `/employment-legal:expansion-kickoff`
-> - **Open an internal investigation** — e.g., "Create the privileged workspace, start the log, route interviews." Try: `/employment-legal:investigation-open`
+> - **审查录用函和限制性契约** — 例如，"司法管辖区检查非竞争可执行性、薪酬透明度和所需通知。" 试试：`/employment-legal:hiring-review`
+> - **带风险标志的解雇审查** — 例如，"在决策之前标记遣散费、解除、最终薪资计时和高风险指标。" 试试：`/employment-legal:termination-review`
+> - **分类工人聘用** — 例如，"员工 / IC / 临时 / 供应商——含错误分类差距分析。" 试试：`/employment-legal:worker-classification`
+> - **提出司法管辖区感知的工资/工时问题** — 例如，"多州员工问题根据你足迹中的司法管辖区路由。" 试试：`/employment-legal:wage-hour-qa`
+> - **启动国际扩张** — 例如，"路线图上的新国家——规划雇佣法工作流。" 试试：`/employment-legal:expansion-kickoff`
+> - **启动内部调查** — 例如，"创建特权工作空间、开始日志、路由访谈。" 试试：`/employment-legal:investigation-open`
 >
-> **My suggestion for your first one:** Run `/termination-review` on a hypothetical termination — it's the skill most likely to surface how the risk calibration reads. Or tell me what's on your plate and I'll pick.
+> **我建议你的第一个：** 在假设解雇上运行 `/termination-review`——这是最有可能暴露风险校准如何读取的 skill。或者告诉我你手头有什么，我来选。
 
-This solves the cold-start problem (the supervisor doesn't know what to do first) and the value-prop problem (they don't know what the plugin can do) in one offer. Make the list specific. Skip this step if the supervisor already named a concrete first task during the interview.
+这在一次提供中解决了冷启动问题（管理者不知道首先做什么）和价值主张问题（他们不知道插件能做什么）。使列表具体化。如果管理者在访谈中已经说出了具体的第一个任务，跳过此步骤。
 
 
-- "Here's your jurisdiction table. The California row is the one to double-check."
-- "What's the next termination? Let me take a look."
-- Flag handbook gaps: "Your handbook doesn't have a remote work policy and you're remote-first. Want one?"
-- Check HRIS field: "You said your HRIS is [system] — want me to run the leave tracker now to see if anything is open?"
-- If manual leave tracking: "You don't have an HRIS leave module — I'll track leaves in a register file. Use /employment-legal:log-leave to add any leaves that are currently open."
+- "这是你的司法管辖区表。加州那一行值得仔细检查。"
+- "下一个解雇是什么？让我看看。"
+- 标记手册差距："你的手册没有远程办公政策，而你是远程优先的。想要一个吗？"
+- 检查 HRIS 字段："你说你的 HRIS 是 [系统]——想让我现在运行请假跟踪器看看有什么开放的吗？"
+- 如果手动请假跟踪："你没有 HRIS 请假模块——我会在登记册文件中跟踪请假。使用 /employment-legal:log-leave 添加任何当前开放的请假。"
 
-**Before your first review**: connect a research tool. Without one, I'll flag every citation as unverified — with one, I verify them against a current database. In Cowork: Settings → Connectors. In Claude Code: authorize when a skill prompts you.
+**在你第一次审查之前**：连接研究工具。没有的话，我会将每个引用标记为未验证——有了的话，我会对照当前数据库验证它们。在 Cowork 中：Settings → Connectors。在 Claude Code 中：当 skill 提示你时授权。
 
 <!-- COLLATERAL LINKS: when onboarding collateral exists, add here:
      "Want a walkthrough? [Watch the 3-minute intro](URL) or [read the getting-started guide](URL)." -->
 
 
-### Close with the "you can change anything later" note
+### 以"你随时可以更改任何内容"说明结束
 
-After writing the configuration, say:
+写入配置后，说：
 
-> "Done. Your configuration is at `~/.claude/plugins/config/claude-for-legal/employment-legal/CLAUDE.md` — a plain text file you can read and edit directly. Anything you answered can be changed:
+> "完成。你的配置在 `~/.claude/plugins/config/claude-for-legal/employment-legal/CLAUDE.md`——一个你可以直接阅读和编辑的纯文本文件。你回答的任何内容都可以更改：
 >
-> - Edit the file directly for a quick change
-> - Run `/employment-legal:cold-start-interview --redo` for a full re-interview
-> - Run `/employment-legal:cold-start-interview --check-integrations` to re-check what's connected
+> - 直接编辑文件进行快速更改
+> - 运行 `/employment-legal:cold-start-interview --redo` 进行完整重新访谈
+> - 运行 `/employment-legal:cold-start-interview --check-integrations` 重新检查连接了什么
 >
-> The three settings people adjust most: the **jurisdiction list** (as your footprint grows), the **high-risk termination flags** (as you calibrate what's actually scary vs. what's noise), and the **escalation matrix** (as reporting lines shift)."
+> 人们最常调整的三个设置：**司法管辖区列表**（随着足迹增长）、**高风险解雇标志**（随着你校准什么真正可怕 vs. 什么是噪音）和**升级矩阵**（随着汇报线变化）。"
 
-## Your practice profile learns
+## 你的执业档案在学习
 
-After writing the configuration, close with this note:
+写入配置后，以此说明结束：
 
-> **Your practice profile learns.** It gets better as you use the plugins:
+> **你的执业档案在学习。** 随着你使用插件它会变得更好：
 >
-> - When a skill's output feels off, that's usually a position to tune. The output will tell you which one.
-> - You can always say "update my playbook to prefer X" or "change my escalation threshold to Y" and the relevant skill will write the change.
-> - Run `/employment-legal:cold-start-interview --redo <section>` to re-interview one part, or edit the config file directly.
+> - 当 skill 的输出感觉不对时，那通常是需要调整的立场。输出会告诉你哪个。
+> - 你随时可以说"更新我的剧本以偏好 X"或"将我的升级阈值改为 Y"，相关 skill 会写入更改。
+> - 运行 `/employment-legal:cold-start-interview --redo <section>` 重新访谈一个部分，或直接编辑配置文件。
 >
-> Ten minutes of setup gets you a working profile. A month of use gets you one that reads like you wrote it yourself.
+> 十分钟的设置给你一个可工作的档案。一个月的使用给你一个看起来像你自己写的档案。

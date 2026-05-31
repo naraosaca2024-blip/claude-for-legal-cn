@@ -1,14 +1,18 @@
-# Watched Registries
-# Default set. User adds more via /legal-builder-hub:registry-browser.
+# This file is a Chinese translation of the original by Anthropic PBC.
+# Original: https://github.com/anthropics/claude-for-legal
+# Licensed under Apache License 2.0
+
+# 监控注册表
+# 默认集合。用户可通过 /legal-builder-hub:registry-browser 添加更多。
 
 registries:
   - name: "lpm-skills"
     url: "https://github.com/legalopsconsulting/lpm-skills"
-    description: "14 legal project management skills. Practice-area agnostic. From LegalOps Consulting."
+    description: "14 个法律项目管理 skill，不区分执业领域。来自 LegalOps Consulting。"
     type: "github-repo"
     last_synced: null
 
-  # Add more as the ecosystem grows:
+  # 随着生态系统发展可继续添加：
   # - name: "awesome-legal-skills"
   #   url: "https://github.com/..."
   #   type: "github-repo"

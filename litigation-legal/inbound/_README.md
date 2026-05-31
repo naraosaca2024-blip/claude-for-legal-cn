@@ -1,45 +1,51 @@
-# inbound/ — incoming legal correspondence
+<!--
+This file is a Chinese translation of the original by Anthropic PBC.
+Original: https://github.com/anthropics/claude-for-legal
+Licensed under Apache License 2.0
+-->
 
-This folder holds triage and response work for anything arriving from the outside world: demand letters received, subpoenas served on the company, regulator inquiries, preservation demands, cease-and-desist letters aimed at us.
+# inbound/ — 入站法律函件
 
-Separate from `demand-letters/` (outbound) and `matters/` (tracked portfolio) because inbound items have their own workflow: read → triage → decide → respond (or escalate to matter). Not everything that comes in becomes a tracked matter.
+此文件夹存放来自外部的所有入站项目的分流和应对工作产品：收到的催款函、送达公司的传票、监管机构询问、证据保全要求、针对我们的停止侵权函。
 
-## Layout
+与 `demand-letters/`（出站）和 `matters/`（追踪中的组合）分开，因为入站项目有其自己的工作流：阅读 → 分流 → 决策 → 应对（或升级为事项）。并非所有收到的内容都会成为追踪中的事项。
+
+## 目录结构
 
 ```
 inbound/
 ├── _README.md
 └── [slug]/
-    ├── incoming.pdf              # or .eml / .docx — the original (or link/pointer)
-    ├── triage.md                 # analysis: scope, merit, options, recommendation
-    └── response-v1.docx          # drafted response, if we respond (v2, v3 as iterated)
+    ├── incoming.pdf              # 或 .eml / .docx — 原件（或链接/指针）
+    ├── triage.md                 # 分析：范围、价值、选项、建议
+    └── response-v1.docx          # 起草的应对，如果我们应对（v2、v3 随迭代）
 ```
 
-## Slug conventions
+## Slug 惯例
 
-`[type]-[sender-short]-[yyyy-mm]`. Examples:
+`[类型]-[发件方简称]-[yyyy-mm]`。示例：
 
-- `demand-rec-acme-2026-04` (demand letter received)
-- `subpoena-smith-v-us-2026-04` (third-party subpoena)
+- `demand-rec-acme-2026-04`（收到的催款函）
+- `subpoena-smith-v-us-2026-04`（第三方传票）
 - `regulator-ftc-inquiry-2026-04`
-- `preservation-vendor-2026-04` (preservation letter received)
+- `preservation-vendor-2026-04`（收到的证据保全函）
 
-## Workflow
+## 工作流
 
-| Type | Command | Outputs |
+| 类型 | 命令 | 输出 |
 |---|---|---|
-| Demand letter received | `/litigation-legal:demand-received [path]` | triage.md + optional response draft |
-| Subpoena served | `/litigation-legal:subpoena-triage [path]` | triage.md + objections memo |
-| Regulator inquiry | *future skill* | |
+| 收到的催款函 | `/litigation-legal:demand-received [path]` | triage.md + 可选应对草稿 |
+| 送达的传票 | `/litigation-legal:subpoena-triage [path]` | triage.md + 反对意见备忘录 |
+| 监管询问 | *未来 skill* | |
 
-Each triage cross-checks `matters/_log.yaml` for related matters (same counterparty, overlapping subject). If a related matter exists, the triage flags it and offers to add this as a related_matter entry. If this inbound item should itself become a tracked matter, the triage hands off to `/matter-intake` with fields pre-populated.
+每次分流都会交叉检查 `matters/_log.yaml` 中的相关事项（同一对手方、主题重叠）。如果存在相关事项，分流会标注并提议将此项添加为 `related_matter` 条目。如果此入站项目本身应成为追踪中的事项，分流会移交给 `/matter-intake` 并预填充字段。
 
-## Relationship to matters
+## 与事项的关系
 
-- Inbound + related to existing matter → link via `related_matters` field in `_log.yaml`; file stays in `inbound/`.
-- Inbound + should become a matter → create matter; matter.md cross-links back to `inbound/[slug]/`.
-- Inbound + handled and closed (no matter needed) → stays in `inbound/` as a record.
+- 入站 + 与现有事项相关 → 通过 `_log.yaml` 中的 `related_matters` 字段链接；文件保留在 `inbound/` 中。
+- 入站 + 应成为事项 → 创建事项；matter.md 反向链接到 `inbound/[slug]/`。
+- 入站 + 已处理并关闭（无需创建事项）→ 保留在 `inbound/` 中作为记录。
 
-## Relationship to outbound
+## 与出站的关系
 
-If the response to an inbound demand is itself an outbound demand (a counter-demand), the triage hands off to `/demand-intake` pre-populated. The outbound demand lives in `demand-letters/`, with a cross-link back to this inbound folder.
+如果对入站催款函的应对本身是出站催款函（反催款），分流会移交给预填充的 `/demand-intake`。出站催款函保存在 `demand-letters/` 中，并反向链接到此入站文件夹。

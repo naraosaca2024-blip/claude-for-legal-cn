@@ -1,230 +1,236 @@
 ---
 name: privilege-log-review
-description: First-pass privilege log review — make the obvious privilege calls and flag the hard ones for attorney review without making close calls. Use when the user says "review the privilege log", "priv log", "check privilege on these docs", or has a log to QA before production.
-argument-hint: "[log file, or document set]"
+description: 首次特权日志审查——做出明显的特权判断并为律师审查标记困难判断，不做困难判断。当用户说"审查特权日志"、"priv log"、"检查这些文档的特权"或有日志要在制作前进行质量保证时使用。
+argument-hint: "[日志文件，或文档集]"
 ---
+
+<!--
+This file is a Chinese translation of the original by Anthropic PBC.
+Original: https://github.com/anthropics/claude-for-legal
+Licensed under Apache License 2.0
+-->
+
 
 # /privilege-log-review
 
-1. Load `~/.claude/plugins/config/claude-for-legal/litigation-legal/CLAUDE.md` → review protocol, priv log format.
-2. Follow the workflow and reference below.
-3. For each entry: obvious priv / obvious not priv / needs attorney review. Flag reasons.
-4. Output: reviewed log with flags. Attorney reviews all flags before production.
+1. 加载 `~/.claude/plugins/config/claude-for-legal/litigation-legal/CLAUDE.md` → 审查协议、特权日志格式。
+2. 遵循以下工作流和参考。
+3. 对于每个条目：明显享有特权 / 明显不享有特权 / 需要律师审查。标记原因。
+4. 输出：带标记的审查日志。律师在制作前审查所有标记。
 
 ---
 
-# Privilege Log Review
+# 特权日志审查
 
-## Disclosed-document use restrictions
+## 披露文档使用限制
 
-Before working with a set of litigation documents, ask: "Were any of these documents obtained through disclosure or discovery in legal proceedings?" If yes:
+在处理诉讼文档集之前，询问："这些文档中的任何一份是否通过法律程序中的披露或发现获得？"如果是：
 
-- **England & Wales (CPR 31.22):** Documents obtained through disclosure are subject to the implied undertaking — you may only use them for the purpose of the proceedings in which they were disclosed, unless the court grants permission, the disclosing party consents, or the document has been read in open court. Using them for a different matter, a different claim, or a commercial purpose without permission is a contempt.
-- **US:** Protective orders and Rule 26(c) may impose similar restrictions. Check the order.
-- **Other jurisdictions:** Similar restrictions commonly apply. Check the local rule.
+- **英格兰和威尔士 (CPR 31.22)：** 通过披露获得的文档受默示承诺约束——您只能将它们用于披露它们的程序的目的，除非法院许可、披露方同意，或文档已在公开法庭上阅读。在未经许可的情况下将它们用于不同事项、不同索赔或商业目的是蔑视法庭。
+- **美国：** 保护命令和 Rule 26(c) 可能施加类似的限制。请检查命令。
+- **其他司法管辖区：** 类似的限制通常适用。请检查当地规则。
 
-Confirm: "This use is within the proceedings in which the documents were disclosed, or I have permission / consent, or the documents are now public." If not confirmed, flag it: "⚠️ Disclosed documents may have use restrictions. Confirm this use is permitted before proceeding."
+确认："此使用在披露这些文档的程序范围内，或我有许可/同意，或文档现在公开。"如果未确认，请标记："⚠️ 披露的文档可能有使用限制。在继续之前确认此使用是否允许。"
 
-## Matter context
+## 事项上下文
 
-**Matter context.** Check `## Matter workspaces` in the practice-level CLAUDE.md. For litigation-legal the default is `Enabled: ✓` — every case gets its own matter workspace. If `Enabled` is `✗` (you turned it off because you work one case at a time), skip the rest of this paragraph and use practice-level context. If enabled and there is no active matter, ask: "Which matter is this for? Run `/litigation-legal:matter-workspace switch <slug>` or say `practice-level`." Load the active matter's `matter.md` for matter-specific context and overrides. Write outputs to the matter folder at `~/.claude/plugins/config/claude-for-legal/litigation-legal/matters/<matter-slug>/`. Never read another matter's files unless `Cross-matter context` is `on`.
+**事项上下文。** 检查执业级 CLAUDE.md 中的 `## 事项工作区`。对于 litigation-legal，默认为 `Enabled: ✓`——每个案件有自己的事项工作区。如果 `Enabled` 为 `✗`（您因为一次只处理一个案件而关闭了它），跳过本段的其余部分并使用执业级上下文。如果启用且没有活跃事项，询问："这是哪个事项的？运行 `/litigation-legal:matter-workspace switch <slug>` 或说 `practice-level`。"加载活跃事项的 `matter.md` 获取事项特定上下文和覆盖。将输出写入 `~/.claude/plugins/config/claude-for-legal/litigation-legal/matters/<matter-slug>/` 的事项文件夹。除非 `Cross-matter context` 为 `on`，否则永远不读取另一个事项的文件。
 
 ---
 
-## Purpose
+## 目的
 
-A privilege log has three kinds of entries: obviously privileged, obviously not, and the ones that need thought. This skill sorts the first two kinds so the attorney's time goes entirely to the third.
+特权日志有三种条目：明显享有特权的、明显不享有的、以及需要思考的。此 skill 对前两种进行分类，使律师的时间完全用于第三种。
 
-**This is first pass. Attorney reviews every flag. No exceptions.**
+**这是首次审查。律师审查每个标记。无例外。**
 
-## Record fidelity — pinpoints and citation coverage
+## 记录保真——精确定位和引用覆盖
 
-When this skill cites a rule, local variant, or authority for a privilege call (FRCP 26(b)(5)(A), state rule, local rule, case on waiver scope, case on dominant purpose), two rules apply.
+当此 skill 引用规则、地方法规变体或权威进行特权判断（FRCP 26(b)(5)(A)、州规则、地方法规、关于放弃范围的案例、关于主导目的的案例）时，两条规则适用。
 
-**Pinpoint cites must support the whole proposition.** If the review cites one rule or case to support a multi-part proposition — "the log must describe each document and withhold only materials prepared in anticipation of litigation" — verify the pinpoint covers every element. If it only covers one, split the cite or narrow the proposition. A cite that backs part of a privilege position gets the position rejected when opposing counsel reads the cite and points out it doesn't reach the contested element. This is the "misgrounded citation" failure mode: the cite exists, the passage exists, but it doesn't support the proposition as stated.
+**精确定位引用必须支持整个命题。** 如果审查引用一个规则或案例来支持多部分命题——"日志必须描述每个文档并仅保留为预期诉讼准备的材料"——验证精确定位覆盖每个要素。如果它只覆盖一个，拆分引用或缩小命题。支持特权立场一部分的引用会在对方律师阅读引用并指出它未达到争议要素时被拒绝。这是"引用错位"失败模式：引用存在，段落存在，但它不支持所述命题。
 
-**Extract all citations before checking any.** When this review cites authority — or when a separate citation-check is requested on the log, a related brief, or the supporting motion:
+**在检查任何引用之前提取所有引用。** 当此审查引用权威——或当对日志、相关简报或支持动议请求单独的引用检查时：
 
-1. **First pass: extract.** Read the document and build a list of every citation (rules, cases, statutes, local orders, record cites). Report the count: "Found [N] citations."
-2. **Second pass: check.** Check each against the source. Don't sample. Don't stop at the first five.
-3. **Report coverage.** "Checked [N] of [M] citations. [K] could not be retrieved — verify manually. [J] confirmed. [I] flagged as potential miscitations. [H] flagged as misgrounded (cite exists but doesn't support the proposition)."
-4. **When source text is unavailable, say "could not check," never "confirmed."** A false positive is worse than a "couldn't check" — it lets a bad cite through.
-5. **The hardest errors are partial support.** Read the proposition, read the source, compare element by element.
+1. **首次审查：提取。** 阅读文档并建立每个引用的列表（规则、案例、法规、地方法规、记录引用）。报告计数："找到 [N] 个引用。"
+2. **二次审查：检查。** 根据来源检查每个。不要抽样。不要在第五个时停止。
+3. **报告覆盖。** "检查了 [M] 中的 [N] 个引用。[K] 无法检索——手动验证。[J] 已确认。[I] 标记为潜在错误引用。[H] 标记为引用错位（引用存在但不支持命题）。"
+4. **当源文本不可用时，说"无法检查"，永远不说"已确认"。** 假阳性比"无法检查"更糟糕——它让错误引用通过。
+5. **最难的错误是部分支持。** 阅读命题，阅读来源，逐要素比较。
 
-## Load context
+## 加载上下文
 
-`~/.claude/plugins/config/claude-for-legal/litigation-legal/CLAUDE.md` → privilege log format, review protocol.
+`~/.claude/plugins/config/claude-for-legal/litigation-legal/CLAUDE.md` → 特权日志格式、审查协议。
 
-**Conflicts gate — unbypassable.** Before reviewing a privilege log, check `~/.claude/plugins/config/claude-for-legal/litigation-legal/matters/_log.yaml` for the matter slug. If the matter is not in `_log.yaml`, refuse and route:
+**冲突门槛——不可绕过。** 在审查特权日志之前，检查 `~/.claude/plugins/config/claude-for-legal/litigation-legal/matters/_log.yaml` 中的事项 slug。如果事项不在 `_log.yaml` 中，拒绝并路由：
 
-> "I don't see [matter slug] in the matter log. Run `/litigation-legal:matter-intake` first so the conflicts check runs and the matter workspace is set up. I won't review a privilege log on a matter that hasn't been intaken — the conflicts check is the gate, and a privilege log review is work product that needs to live in the matter file."
+> "我在事项日志中看不到 [matter slug]。首先运行 `/litigation-legal:matter-intake`，以便冲突检查运行并设置事项工作区。我不会对未接收的事项审查特权日志——冲突检查是门槛，特权日志审查是需要存在于事项文件中的工作产品。"
 
-**Jurisdiction matters.** Privilege scope (A/C and work product), waiver doctrine, and log-form requirements vary materially across federal circuits and state courts. This review applies the rules for the forum specified in config. If the matter involves a different forum, a transferred case, multi-jurisdictional production, or a choice-of-law question on privilege, the calls here may not transfer — re-run against the controlling forum.
+**司法管辖区重要。** 特权范围（A/C 和工作产品）、放弃学说和日志格式要求在联邦巡回法院和州法院之间实质不同。此审查应用配置中指定论坛的规则。如果事项涉及不同论坛、转移案件、多司法管辖区制作或特权的法律选择问题，此处的判断可能不适用——针对管辖论坛重新运行。
 
-## Step 0: Research the forum's privilege-log rules
+## 步骤 0：研究论坛的特权日志规则
 
-**Before reviewing entries, research the forum's privilege-log requirements (FRCP 26(b)(5)(A) or state equivalent), any local rule variant, and the judge's standing orders. Identify the required fields, the level of description, and any category-log or metadata-log accommodations. Cite primary sources.**
+**在审查条目之前，研究论坛的特权日志要求（FRCP 26(b)(5)(A) 或州等效）、任何地方法规变体和法官的常设命令。识别必需字段、描述级别和任何类别日志或元数据日志的便利。引用主要来源。**
 
-**No silent supplement.** If a research query to the configured legal research tool (Westlaw, CourtListener, Trellis, Descrybe, or firm platform) returns few or no results for the forum's rule, waiver doctrine, or local variant, report what was found and stop. Do NOT fill the gap from web search or model knowledge without asking. Say: "The search returned [N] results from [tool]. Coverage appears thin for [rule / doctrine]. Options: (1) broaden the search query, (2) try a different research tool, (3) search the web — results will be tagged `[web search — verify]` and should be checked against a primary source before relying, or (4) leave the `[UNCERTAIN]` marker and stop here. Which would you like?" A lawyer decides whether to accept lower-confidence sources; the skill does not decide for them.
+**没有静默补充。** 如果对配置的法律研究工具（Westlaw、CourtListener、Trellis、Descrybe 或律所平台）的研究查询为论坛的规则、放弃学说或地方法规变体返回很少或没有结果，报告发现了什么并停止。不要在未询问的情况下从网络搜索或模型知识填补差距。说："搜索从 [tool] 返回了 [N] 个结果。对于 [rule / doctrine]，覆盖范围似乎很薄。选项：(1) 扩大搜索查询，(2) 尝试不同的研究工具，(3) 搜索网络——结果将标记为 `[web search — verify]`，在依赖前应根据主要来源检查，或 (4) 留下 `[UNCERTAIN]` 标记并在此停止。你想要哪个？"律师决定是否接受较低可信度的来源；skill 不为他们决定。
 
-**Source attribution.** Tag every rule reference and authority in the review output with where it came from: `[Westlaw]`, `[CourtListener]`, `[Trellis]`, `[Descrybe]`, or the MCP tool name for citations retrieved from a legal research connector; `[web search — verify]` for web-search citations; `[model knowledge — verify]` for citations recalled from training data; `[user provided]` for citations the reviewing attorney supplied. Citations tagged `verify` carry higher fabrication risk and should be checked first. Never strip or collapse the tags — they are the reviewing attorney's signal about which authorities to re-confirm before service.
+**来源归因。** 用引用来源标记审查输出中的每个规则引用和权威：`[Westlaw]`、`[CourtListener]`、`[Trellis]`、`[Descrybe]` 或 MCP 工具名称，用于从法律研究连接器检索的引用；`[web search — verify]` 用于网络搜索引用；`[model knowledge — verify]` 用于从训练数据回忆的引用；`[user provided]` 用于审查律师提供的引用。标记为 `verify` 的引用具有更高的编造风险，应首先检查。永远不要剥离或折叠标记——它们是审查律师在提交前最快了解要重新确认哪些权威的信号。
 
-**Waiver doctrine differs by privilege type:**
+**放弃学说因特权类型而异：**
 
-- **Attorney-client privilege waiver** is often broad: subject-matter waiver can sweep in related communications on the same topic.
-- **Work-product waiver** is narrower: courts typically distinguish opinion work product (stronger protection) from fact work product. Waiver of fact work product doesn't automatically waive opinion work product.
+- **律师-客户特权放弃**通常是广泛的：主题事项放弃可能扫入同一主题的相关通信。
+- **工作产品放弃**较窄：法院通常区分意见工作产品（更强保护）和事实工作产品。放弃事实工作产品不自动放弃意见工作产品。
 
-Confirm the forum's waiver doctrine for each privilege claimed before recommending production of anything. `[UNCERTAIN]` flags stay on waiver calls until counsel confirms.
+在推荐制作任何内容之前，确认论坛对每个声称的特权的放弃学说。`[UNCERTAIN]` 标记保留在放弃判断上，直到律师确认。
 
-## The calls
+## 判断
 
-**Three-state rule. The skill never silently decides a subjective threshold isn't met.** On any uncertain call — dominant purpose unclear, litigation contemplation borderline, mixed legal/business content, ambiguous third-party presence — the skill keeps the privilege designation on and adds a ⚠️ flag for the attorney. Under-marking waives privilege (one-way door); over-marking is corrected by the attorney in review (two-way door). Prefer the recoverable error.
+**三态规则。skill 永远不静默决定主观阈值未通过。** 在任何不确定的判断上——主导目的不明确、诉讼考量边界模糊、法律/业务内容混合、第三方存在模糊——skill 保留特权标记并为律师添加 ⚠️ 标记。标记不足放弃特权（单向门）；标记过度由律师在审查中纠正（双向门）。优先选择可恢复的错误。
 
-**In-house counsel privilege is jurisdiction-specific and contested.** Before classifying any communication with in-house counsel as privileged, check the jurisdiction:
+**内部律师特权因司法管辖区而异且有争议。** 在将任何与内部律师的通信分类为享有特权之前，检查司法管辖区：
 
-- **US:** In-house counsel communications are generally privileged when made for the purpose of obtaining or providing legal advice, and the attorney is acting in a legal (not business) capacity. The legal-vs-business distinction is fact-specific and contested.
-- **EU (competition / DG COMP proceedings):** Under *Akzo Nobel Chemicals v. Commission* (C-550/07 P), communications with in-house counsel are NOT privileged in EU competition proceedings. The CJEU held privilege applies only to communications with independent external lawyers. If the matter involves EU competition or state aid, in-house counsel documents are compellable.
-- **Germany (Syndikusanwalt):** The German Syndikusanwalt has a hybrid status. Privilege depends on the capacity in which the lawyer was acting and whether the communication is in the "advocate" or "employee" role. Post-2016 registration rules changed the analysis.
-- **UK:** In-house counsel privilege generally recognized, but the "dominant purpose" test applies, and the legal-vs-commercial advice distinction is scrutinized.
-- **France, Belgium, some other EU:** In-house lawyers may not be members of the bar, and their communications may have no privilege at all.
+- **美国：** 内部律师通信在为获取或提供法律建议目的且律师以法律（非业务）身份行事时通常享有特权。法律 vs. 业务的区分是事实特定且有争议的。
+- **欧盟（竞争 / DG COMP 程序）：** 根据 *Akzo Nobel Chemicals v. Commission*（C-550/07 P），与内部律师的通信在欧盟竞争程序中不享有特权。CJEU 裁定特权仅适用于与独立外部律师的通信。如果事项涉及欧盟竞争或国家援助，内部律师文档可被强制获取。
+- **德国（Syndikusanwalt）：** 德国企业律师具有混合地位。特权取决于律师行事的身份以及通信是"律师"还是"员工"角色。2016 年后的注册规则改变了分析。
+- **英国：** 内部律师特权通常被认可，但适用"主导目的"测试，且法律 vs. 商业建议的区分受到审查。
+- **法国、比利时和其他欧盟国家：** 内部律师可能不是律师协会成员，其通信可能完全没有特权。
 
-**Never classify an in-house counsel communication as "confidently privileged" without stating which privilege regime applies.** If the matter involves non-US jurisdictions, especially EU competition or any EU regulator: "Documents from in-house counsel may have NO privilege in [jurisdiction]. Under *Akzo Nobel*, in-house communications are compellable in EU competition proceedings. Flag for review by a [jurisdiction] litigation specialist before asserting privilege."
+**永远不要在没有声明适用哪个特权制度的情况下将内部律师通信分类为"确信享有特权"。** 如果事项涉及非美国司法管辖区，特别是欧盟竞争或任何欧盟监管机构："来自内部律师的文档在 [司法管辖区] 可能没有特权。根据 *Akzo Nobel*，内部通信在欧盟竞争程序中可被强制获取。在主张特权之前标记由 [司法管辖区] 诉讼专家审查。"
 
-The ✅ "confidently privileged, no flag" tier below is the one designed to bypass attorney review. That's exactly where the *Akzo Nobel* risk lives. When the jurisdiction is non-US or the matter touches EU regulators, there is no ✅ tier for in-house communications — everything goes to 🟡 "flag for attorney review with jurisdiction note."
+下方的 ✅ "确信享有特权，无标记"层级是为绕过律师审查而设计的。这正是 *Akzo Nobel* 风险存在的地方。当司法管辖区为非美国或事项涉及欧盟监管机构时，内部律师通信没有 ✅ 层级——一切都进入 🟡 "标记律师审查附司法管辖区注释"。
 
-### Confidently privileged (✅) — keep designation, no flag
+### 确信享有特权（✅）——保留标记，无标记
 
-- Communication between client and outside counsel seeking/providing legal advice, no third parties copied
-- Communication between client and in-house counsel, clearly legal (not business) advice, no third parties
-- Work product created in anticipation of litigation, by or for counsel
-- Communications within the control group about legal strategy
+- 客户与外部律师之间寻求/提供法律建议的通信，无第三方抄送
+- 客户与内部律师之间的通信，明确是法律（非业务）建议，无第三方
+- 在预期诉讼中由律师或为律师创建的工作产品
+- 控制组内关于法律策略的通信
 
-### Uncertain — keep designation AND flag (✅ + ⚠️)
+### 不确定——保留标记并标记（✅ + ⚠️）
 
-The default for anything that isn't confidently in ✅ or ❌. The skill does not withhold a privilege designation on its own assessment of a subjective test. Examples:
+任何不在 ✅ 或 ❌ 中的内容的默认。skill 不基于自己对主观测试的评估来保留特权标记。示例：
 
-- **In-house counsel doing both legal and business** — was this communication legal advice or business advice? The dominant-purpose call is the attorney's, not the skill's.
-- **Third party present** — is the third party within the privilege (common interest, agent) or does their presence waive? Keep the designation; flag for attorney.
-- **Mixed purpose documents** — part legal, part business. Partial redaction? Full withhold? Produce? Keep the designation; flag for attorney to decide the treatment.
-- **Attachments** — analyze separately and keep each attachment's designation unless confidently ❌; flag the ones where privilege turns on a subjective call.
-- **Pre-litigation work product** — "reasonable contemplation of litigation" is fact-specific; keep the designation; flag.
-- **Waiver risk** — later-share history is ambiguous; keep the designation; flag the waiver question.
+- **内部律师同时做法律和业务** — 此通信是法律建议还是业务建议？主导目的判断是律师的，不是 skill 的。
+- **有第三方在场** — 第三方是否在特权范围内（共同利益、代理人）或他们的存在是否放弃了？保留标记；标记律师。
+- **混合目的文档** — 部分法律，部分业务。部分编辑？全部保留？制作？保留标记；标记律师决定处理方式。
+- **附件** — 单独分析并保留每个附件的标记，除非确信 ❌；标记需要主观判断的那些。
+- **诉前工作产品** — "合理考虑诉讼"是事实特定的；保留标记；标记。
+- **放弃风险** — 后续分享历史模糊；保留标记；标记放弃问题。
 
-Each flag records the specific open question and the evidence cutting each way, so the attorney can decide without re-reading the document cold.
+每个标记记录具体的未决问题和各方向的证据，以便律师无需冷读文档即可决定。
 
-### Confidently not privileged (❌) — recommend remove, but note the assessment
+### 确信不享有特权（❌）——建议移除，但注明评估
 
-Only for the unambiguous cases. The output still records the assessment rationale so the attorney can spot-check; it does not remove the designation from the log on its own.
+仅用于无歧义的情况。输出仍记录评估理由以便律师抽查；它不会基于自己的判断从日志中移除标记。
 
-- No attorney involved anywhere
-- Business advice with a lawyer CC'd (CC'ing legal doesn't make it privileged)
-- Underlying facts (facts aren't privileged — communications *about* facts can be)
-- Third party copied who's clearly outside privilege (breaks confidentiality)
-- Attachments that are independently non-privileged (the email might be privileged; the attached spreadsheet of sales numbers is not)
+- 任何地方都没有律师参与
+- 抄送了律师的业务建议（抄送法律不使之享有特权）
+- 基础事实（事实不享有特权——关于事实的通信可能享有特权）
+- 明确在特权范围外的第三方抄送（破坏保密性）
+- 独立不享有特权的附件（电子邮件可能享有特权；附件中的销售数据电子表格不享有特权）
 
-If any of these is *close* — the third party might be an agent, the lawyer's CC might actually be on a legal request — it's uncertain, not ❌. Route it to the uncertain bucket and flag.
+如果这些中的任何一个是*接近的*——第三方可能是代理人，律师的抄送实际上可能是法律请求——那就是不确定的，不是 ❌。路由到不确定桶并标记。
 
-## Workflow
+## 工作流
 
-### Step 1: Format check
+### 步骤 1：格式检查
 
-Does the log have what it needs?
+日志是否有它需要的？
 
-| Field | Present? |
+| 字段 | 存在？ |
 |---|---|
-| Date | |
-| Author | |
-| Recipients (all — TO, CC, BCC) | |
-| Document type | |
-| Privilege claimed (A/C, WP, both) | |
-| Description (enough to assess without revealing privileged content) | |
+| 日期 | |
+| 作者 | |
+| 收件人（全部——TO, CC, BCC） | |
+| 文档类型 | |
+| 声明的特权（A/C, WP, 两者） | |
+| 描述（足够在不暴露特权内容的情况下评估） | |
 
-Missing fields → flag for completion before substantive review.
+缺失字段 → 在实质性审查之前标记补全。
 
-### Step 2: Entry-by-entry
+### 步骤 2：逐条审查
 
-For each entry:
+对于每个条目：
 
 ```
-Entry [N] ([Bates]): [✅ Priv | ✅ Priv + ⚠️ Flag | ❌ Not priv (assessed)]
-[If ✅ (no flag): one-line reason]
-[If ✅ + ⚠️: keep designation; the specific question the attorney needs to answer; evidence cutting each way]
-[If ❌: one-line reason — but the designation stays on the log until the attorney removes it]
+条目 [N]（[Bates]）：[✅ Priv | ✅ Priv + ⚠️ 标记 | ❌ Not priv（已评估）]
+[如果是 ✅（无标记）：一行原因]
+[如果是 ✅ + ⚠️：保留标记；律师需要回答的具体问题；各方向的证据]
+[如果是 ❌：一行原因——但标记保留在日志上，直到律师移除]
 ```
 
-**Never produce an entry that silently strips a privilege designation based on the skill's own subjective call.** A ❌ is a recommendation logged alongside the flag; the attorney acts on it.
+**永远不产生基于 skill 自己主观判断静默剥离特权标记的条目。** ❌ 是与标记一起记录的建议；律师执行。
 
-### Step 3: Pattern flags
+### 步骤 3：模式标记
 
-Across the log:
+跨日志：
 
-- Same issue repeating? (E.g., same third party on 50 entries — one decision resolves 50 flags)
-- Over-designation pattern? (If everything's designated without differentiation, surface it for the attorney — but the call to narrow the log is the attorney's, not the skill's. Under-designation waives; over-designation is correctable.)
-- Under-description? (Descriptions so vague a court would order in camera review)
+- 同一问题重复？（例如，同一第三方在 50 个条目上——一个决定解决 50 个标记）
+- 过度指定模式？（如果一切都无差别地指定，为律师浮出——但缩窄日志的判断是律师的，不是 skill 的。标记不足会放弃；过度指定可纠正。）
+- 描述不足？（描述如此模糊以至于法院会命令单方审查）
 
-## Output
+## 输出
 
-**Before the privilege log is served on the opposing party (the consequential act — this includes serving the log AND designating documents withheld or produced under a protective-order designation such as Confidential / Highly Confidential / AEO):** Read `## Who's using this` in `~/.claude/plugins/config/claude-for-legal/litigation-legal/CLAUDE.md`. If the Role is Non-lawyer:
+**在特权日志送达对方之前（重大行为——这包括送达日志和在保护令指定（如保密 / 高度保密 / AEO）下保留或制作的文档）：** 阅读 `~/.claude/plugins/config/claude-for-legal/litigation-legal/CLAUDE.md` 中的 `## 谁在使用这个`。如果角色是非律师：
 
-> Submitting a privilege log and designating documents in discovery both have legal consequences — over-designation risks sanctions and loss of credibility; under-designation risks waiver; a misdesignated production may be unrecallable. Have you reviewed this with an attorney? If yes, proceed. If no, here's a brief to bring to them:
+> 提交特权日志和在发现中指定文档都有法律后果——过度指定有制裁和失去可信度的风险；指定不足有放弃特权的风险；错误指定的制作可能无法撤回。你是否与律师审查了此内容？如果是，继续。如果否，这是带给他们的简报：
 >
-> [Generate a 1-page summary: the matter, log entry counts, the ⚠️ flags and close calls, pattern observations (over-designation, vague descriptions), waiver-doctrine posture by privilege type, what could go wrong on service or designation, what to ask the attorney.]
+> [生成一页摘要：事项、日志条目计数、⚠️ 标记和接近判断、模式观察（过度指定、模糊描述）、按特权类型的放弃学说姿态、在送达或指定时可能出什么问题、要问律师什么。]
 >
-> If you need to find a licensed attorney, solicitor, barrister, or other authorised legal professional in your jurisdiction: your professional regulator's referral service is the fastest starting point (state bar in the US, SRA/Bar Standards Board in England & Wales, Law Society in Scotland/NI/Ireland/Canada/Australia, or your jurisdiction's equivalent).
+> 如果你需要在你所在的司法管辖区找到持牌律师、事务律师、大律师或其他授权法律专业人士：你所在专业监管机构的转介服务是最快的起点（美国的州律师协会、英格兰和威尔士的 SRA/律师标准委员会、苏格兰/北爱尔兰/爱尔兰/加拿大/澳大利亚的律师协会，或你所在司法管辖区的同等机构）。
 
-Do not treat the log as service-ready without an explicit yes. First-pass review, sorting, and flagging do not require the gate — service and designation do.
+没有明确的是，不要将日志视为可送达。首次审查、分类和标记不需要门槛——送达和指定需要。
 
 ```markdown
-[WORK-PRODUCT HEADER — per plugin config ## Outputs — differs by role; see `## Who's using this`]
+[工作产品标题——根据插件配置 ## Outputs——因角色而异；见 `## 谁在使用这个`]
 
-## Privilege Log Review: [Matter] — [date]
+## 特权日志审查：[事项] — [date]
 
-**Applicable rule:** [FRCP 26(b)(5)(A) / state rule / local rule / standing order — pinpoint cites] `[UNCERTAIN — verify currency]`
-**Entries reviewed:** [N]
-**Results:** [N] ✅ confident priv / [N] ✅+⚠️ priv kept & flagged / [N] ❌ recommend remove (attorney confirms)
+**适用规则：** [FRCP 26(b)(5)(A) / 州规则 / 地方法规 / 常设命令——精确定位引用] `[UNCERTAIN — verify currency]`
+**审查条目：** [N]
+**结果：** [N] ✅ 确信享有特权 / [N] ✅+⚠️ 保留特权并标记 / [N] ❌ 建议移除（律师确认）
 
-### ✅ + ⚠️ Flagged — designation kept, attorney decides
+### ✅ + ⚠️ 已标记——特权保留，律师决定
 
-| Entry | Bates | Issue | Evidence for priv | Evidence against | Question |
+| 条目 | Bates | 问题 | 支持特权的证据 | 反对证据 | 问题 |
 |---|---|---|---|---|---|
-| [N] | [range] | [what's subjective] | [one line] | [one line] | [the specific call to make] |
+| [N] | [range] | [什么是主观的] | [一行] | [一行] | [要做的具体判断] |
 
-### ❌ Recommend remove designation (attorney confirms before stripping)
+### ❌ 建议移除标记（律师在剥离前确认）
 
-| Entry | Bates | Reason |
+| 条目 | Bates | 原因 |
 |---|---|---|
 
-*Recorded, not executed. The skill does not remove privilege designations from the log — the attorney does, after reviewing the rationale.*
+*已记录，未执行。skill 不从日志中移除特权标记——律师在审查理由后执行。*
 
-### ✅ Privileged (no action)
+### ✅ 享有特权（无需行动）
 
-[Count. List available on request.]
+[计数。按请求提供列表。]
 
-### Pattern observations
+### 模式观察
 
-[Repeating issues, over-designation, description problems]
+[重复问题、过度指定、描述问题]
 
-### Marker discipline
+### 标记纪律
 
-- `[VERIFY: factual assertion about document/custodian/date]`
-- `[UNCERTAIN: close privilege call / waiver scope / doctrine question]`
-- `[CITE NEEDED: rule, local variant, or authority supporting a call]`
+- `[VERIFY: 关于文档/保管人/日期的事实主张]`
+- `[UNCERTAIN: 接近的特权判断 / 放弃范围 / 学说问题]`
+- `[CITE NEEDED: 支持判断的规则、地方法规变体或权威]`
 
 ---
 
-**Attorney must review all ⚠️ and ❌ before any action.**
+**律师必须在采取任何行动前审查所有 ⚠️ 和 ❌。**
 
-**Privileged source material.** This review reads entries and underlying documents that are, by definition, privilege-candidate material. The review output inherits that status — keep it with privileged materials, mark it appropriately, and don't circulate outside the privilege circle. Distributing it can itself waive protection.
+**特权来源材料。** 此审查阅读条目和按定义是特权候选材料的底层文档。审查输出继承该状态——将其与特权材料一起保存，适当标记，不要在特权圈外传播。分发它本身可能放弃保护。
 ```
 
-## What this skill emphatically does not do
+## 此 skill 明确不做什么
 
-- Make close calls. ⚠️ means "a human decides." On any subjective test (dominant purpose, reasonable contemplation, common-interest scope, waiver by later sharing) the skill keeps the privilege designation on and flags.
-- Strip a privilege designation from the log based on its own assessment. ❌ is a *recommendation* recorded for the attorney, not an action taken against the log.
-- Produce or withhold documents. It advises; attorney decides; attorney acts.
-- Guarantee correctness on ✅ calls. The attorney is responsible for the log. This is a first pass.
+- 做困难判断。⚠️ 意味着"由人决定"。在任何主观测试上（主导目的、合理考虑、共同利益范围、通过后续分享放弃），skill 保留特权标记并标记。
+- 基于自己的评估从日志中剥离特权标记。❌ 是为律师记录的*建议*，不是对日志采取的行动。
+- 制作或保留文档。它建议；律师决定；律师执行。
+- 保证 ✅ 判断的正确性。律师对日志负责。这是首次审查。
 
-## Close with the next-steps decision tree
+## 以下一步决策树结束
 
-End with the next-steps decision tree per CLAUDE.md `## Outputs`. Customize the options to what this skill just produced — the five default branches (draft the X, escalate, get more facts, watch and wait, something else) are a starting point, not a lock-in. The tree is the output; the lawyer picks.
-
+根据 CLAUDE.md `## Outputs` 以下一步决策树结束。根据此 skill 刚生成的内容自定义选项——五个默认分支（起草 X、升级、获取更多事实、观察等待、其他）是起点，不是锁定。树就是输出；律师选择。

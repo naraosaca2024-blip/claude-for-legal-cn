@@ -1,27 +1,27 @@
+<!--
+This file is a Chinese translation of the original by Anthropic PBC.
+Original: https://github.com/anthropics/claude-for-legal
+Licensed under Apache License 2.0
+-->
+
 # AI Governance Plugin
 
-In-house AI governance counsel workflows: use case triage, AI impact assessments,
-vendor AI review, and regulation-to-policy gap analysis. Built around a team practice profile
-learned from your AI policy, a reference impact assessment, and your key vendor AI
-agreements.
+内部 AI 治理法律工作流：使用案例分类、AI 影响评估、供应商 AI 审查，以及法规与政策差距分析。围绕从你的 AI 政策、参考影响评估和你的主要供应商 AI 协议中学到的团队执业档案构建。
 
-**Every output is a draft for attorney review — cited, flagged, and gated — not a legal conclusion.** The plugin does the work: reads the documents, applies your playbook, finds the issues, drafts the memo. A lawyer reviews, verifies, and decides. Citations are tagged by source so you know which ones came from a research tool and which ones need checking. Privilege markers are applied conservatively so nothing waives by accident. Consequential actions — filing, sending, executing — are gated behind explicit confirmation.
+**每个输出都是供律师审查的草稿——带引用、标记和把关——而不是法律结论。** plugin 完成工作：阅读文档、应用你的剧本、发现问题、起草备忘录。律师审查、验证并决定。引用按来源标记，以便你知道哪些来自研究工具，哪些需要检查。特权标记保守应用，因此不会意外放弃任何东西。重要行动——提交、发送、执行——在明确确认后进行。
 
 ## Who this is for
 
-| Role | Primary workflows |
+| 角色 | 主要工作流 |
 |---|---|
-| **Privacy counsel / AI governance counsel** | Impact assessments, vendor AI review, reg gap analysis |
-| **Product counsel** | Use case triage, launch review with AI component |
-| **GC / Legal ops** | AI policy governance, escalation, board-level issues |
-| **Procurement / legal** | Vendor AI contract review |
+| **隐私律师 / AI 治理律师** | 影响评估、供应商 AI 审查、法规差距分析 |
+| **产品律师** | 使用案例分类、AI 组件的发布审查 |
+| **GC / 法律 ops** | AI 政策治理、升级、董事会级别问题 |
+| **采购 / 法律** | 供应商 AI 合同审查 |
 
 ## First run: the cold-start interview
 
-The plugin interviews you to learn: are you a builder, deployer, or both — which
-regulations actually apply — what your use case red lines are — and what good impact
-assessment looks like here. Then it reads your seed documents and learns your real
-positions and house style.
+plugin 对你进行访谈以了解：你是构建者、部署者，还是两者都是——哪些法规真正适用——你的使用案例红线是什么——以及这里好的影响评估是什么样子的。然后它阅读你的种子文档并了解你的真实立场和内部风格。
 
 ```
 /ai-governance-legal:cold-start-interview
@@ -29,31 +29,31 @@ positions and house style.
 
 ## Commands
 
-| Command | Does |
+| 命令 | 功能 |
 |---|---|
-| `/ai-governance-legal:cold-start-interview` | Cold-start interview — writes your practice profile |
-| `/ai-governance-legal:ai-inventory [list \| add \| edit \| classify \| show]` | Manage the EU AI Act per-system inventory — track each system's role and risk tier |
-| `/ai-governance-legal:use-case-triage [use case]` | Classify a use case against your registry (approved / conditional / never) |
-| `/ai-governance-legal:aia-generation [use case]` | Run an AI impact assessment (AIA) in your house style |
-| `/ai-governance-legal:vendor-ai-review [vendor/file]` | Review a vendor AI agreement against your positions |
-| `/ai-governance-legal:reg-gap-analysis [regulation]` | Diff a new regulation or guidance against current policy/practice |
-| `/ai-governance-legal:policy-monitor` | Weekly sweep for AI policy drift, or direct query for a proposed new practice |
-| `/ai-governance-legal:policy-starter` | Draft a firm AI usage policy from published model policies, adapted to your practice profile (draft for attorney review) |
-| `/ai-governance-legal:matter-workspace` | Manage matter workspaces (multi-client private practice only) — new, list, switch, close, none |
+| `/ai-governance-legal:cold-start-interview` | 冷启动访谈——编写你的执业档案 |
+| `/ai-governance-legal:ai-inventory [list \| add \| edit \| classify \| show]` | 管理欧盟 AI 法案的系统清单——跟踪每个系统的角色和风险等级 |
+| `/ai-governance-legal:use-case-triage [use case]` | 根据你的注册表对使用案例进行分类（批准 / 有条件 / 从不） |
+| `/ai-governance-legal:aia-generation [use case]` | 以你的内部风格运行 AI 影响评估（AIA） |
+| `/ai-governance-legal:vendor-ai-review [vendor/file]` | 根据你的立场审查供应商 AI 协议 |
+| `/ai-governance-legal:reg-gap-analysis [regulation]` | 将新法规或指南与当前政策/实践进行比较 |
+| `/ai-governance-legal:policy-monitor` | 每周扫描 AI 政策漂移，或直接查询提议的新实践 |
+| `/ai-governance-legal:policy-starter` | 从已发布的模型政策起草坚定的 AI 使用政策，适应你的执业档案（供律师审查的草稿） |
+| `/ai-governance-legal:matter-workspace` | 管理事项工作区（仅多客户私人执业）——新建、列表、切换、关闭、无 |
 
 ## Skills
 
-| Skill | Purpose |
+| Skill | 目的 |
 |---|---|
-| **cold-start-interview** | Writes `~/.claude/plugins/config/claude-for-legal/ai-governance-legal/CLAUDE.md` from interview + seed docs |
-| **ai-inventory** | EU AI Act per-system inventory — role (provider, deployer, importer, distributor, authorized rep, product manufacturer) and risk tier per system |
-| **use-case-triage** | Classifies use cases against the registry; flags missing assessments |
-| **aia-generation** | AI impact assessment (AIA) in house format |
-| **vendor-ai-review** | AI-specific vendor contract review against governance positions |
-| **reg-gap-analysis** | New reg/guidance vs. current state, remediation plan |
-| **policy-monitor** | Crawls outputs for practice drift; drafts AI policy language updates |
-| **policy-starter** | Produces a first-draft AI usage policy sourced from published model policies (ABA, state bars, ILTA, CLOC, NIST, EU AI Act, peer policies), adapted to your practice profile — draft for attorney review, not a finished policy |
-| **matter-workspace** | Create, list, switch, and close matter workspaces for multi-client practices; isolates each client/matter so context does not leak across them |
+| **cold-start-interview** | 从访谈 + 种子文档编写 `~/.claude/plugins/config/claude-for-legal/ai-governance-legal/CLAUDE.md` |
+| **ai-inventory** | 欧盟 AI 法案的系统清单——每个系统的角色（供应商、部署者、进口商、分销商、授权代表、产品制造商）和风险等级 |
+| **use-case-triage** | 根据注册表对使用案例进行分类；标记缺失的评估 |
+| **aia-generation** | 内部格式的 AI 影响评估（AIA） |
+| **vendor-ai-review** | 根据治理立场进行 AI 特定的供应商合同审查 |
+| **reg-gap-analysis** | 新法规/指南与当前状态、补救计划 |
+| **policy-monitor** | 扫描输出以查找实践漂移；起草 AI 政策语言更新 |
+| **policy-starter** | 从已发布的模型政策（ABA、州律师协会、ILTA、CLOC、NIST、欧盟 AI 法案、同行政策）生成第一稿 AI 使用政策，适应你的执业档案——供律师审查的草稿，不是最终政策 |
+| **matter-workspace** | 为多客户执业创建、列表、切换和关闭事项工作区；隔离每个客户/事项，因此上下文不会在它们之间泄露 |
 
 ## Quick start
 
@@ -63,50 +63,43 @@ positions and house style.
 /ai-governance-legal:cold-start-interview
 ```
 
-Have ready (if they exist): your AI or acceptable use policy, one prior impact assessment,
-key vendor AI agreements, model inventory or approved tool list.
+准备好（如果存在）：你的 AI 或可接受使用政策、一份先前的影响评估、主要供应商 AI 协议、模型清单或已批准工具列表。
 
-Your configuration is stored at `~/.claude/plugins/config/claude-for-legal/ai-governance-legal/CLAUDE.md` and survives plugin updates.
+你的配置存储在 `~/.claude/plugins/config/claude-for-legal/ai-governance-legal/CLAUDE.md` 并在 plugin 更新后保留。
 
-### 2. Triage a new use case
-
-```
-/ai-governance-legal:use-case-triage "Sales team wants to use AI to score leads automatically"
-```
-
-Output: risk tier, registry match or gap, required conditions, impact assessment needed
-or not.
-
-### 3. Run an impact assessment
+### 2. 分类新使用案例
 
 ```
-/ai-governance-legal:aia-generation "AI-powered resume screening for HR"
+/ai-governance-legal:use-case-triage "销售团队希望使用 AI 自动对潜在客户进行评分"
 ```
 
-Intake questions → impact assessment in your house format → policy consistency check →
-mitigation conditions.
+输出：风险等级、注册表匹配或差距、所需条件、是否需要影响评估。
 
-### 4. Review a vendor AI agreement
+### 3. 运行影响评估
+
+```
+/ai-governance-legal:aia-generation "用于 HR 的 AI 简历筛选"
+```
+
+收集问题 → 你内部格式的影响评估 → 政策一致性检查 → 缓解条件。
+
+### 4. 审查供应商 AI 协议
 
 ```
 /ai-governance-legal:vendor-ai-review openai-terms.pdf
 ```
 
-Output: term-by-term vs. your positions, proposed redlines, gaps to escalate.
+输出：逐条与你的立场比较、提议的红线、需要升级的差距。
 
 ## Plugin triangle: AI governance ↔ product counsel ↔ privacy
 
-These three plugins are designed to work together. AI governance is the third leg.
+这三个 plugin 设计为协同工作。AI 治理是第三条腿。
 
-- **Product counsel** detects when a launch has an AI component → hands off to
-  `/ai-governance-legal:use-case-triage` and `/ai-governance-legal:aia-generation`
-- **Privacy** detects when an AI use case involves personal data → hands off to
-  `/privacy-legal:pia-generation`, if the plugin is installed
-- **AI governance** detects when an impact assessment raises data protection issues →
-  hands off to `/privacy-legal:pia-generation`, if the plugin is installed
+- **产品律师** 检测发布何时具有 AI 组件 → 移交至 `/ai-governance-legal:use-case-triage` 和 `/ai-governance-legal:aia-generation`
+- **隐私** 检测 AI 使用案例何时涉及个人数据 → 如果 plugin 已安装，移交至 `/privacy-legal:pia-generation`
+- **AI 治理** 检测影响评估何时引发数据保护问题 → 如果 plugin 已安装，移交至 `/privacy-legal:pia-generation`
 
-The handoff is explicit: each plugin flags when the other is needed and states what
-question to answer there.
+交接是明确的：每个 plugin 标记何时需要另一个 plugin，并说明在那里要回答什么问题。
 
 ## File structure
 
@@ -127,20 +120,14 @@ ai-governance-legal/
 
 ## How it learns
 
-Your practice profile at `~/.claude/plugins/config/claude-for-legal/ai-governance-legal/CLAUDE.md` isn't static — it improves as you use the plugin. Skills tell you when an output used a default you should tune. The `policy-monitor` agent watches for drift between your AI governance policy and your practice and proposes updates. You can re-run setup, edit the file directly, or tell a skill to record a new position.
+你在 `~/.claude/plugins/config/claude-for-legal/ai-governance-legal/CLAUDE.md` 的执业档案不是静态的——它会随着你使用 plugin 而改进。Skill 会告诉你何时输出使用了你应该调整的默认值。`policy-monitor` agent 监视你的 AI 治理政策与你的实践之间的漂移，并提议更新。你可以重新运行设置、直接编辑文件，或告诉 skill 记录新立场。
 
 ## Notes
 
-- Gap check (`reg-gap-analysis`) handles incoming regulations. Policy monitor handles internal practice drift. Different tools for different directions of change.
-- Policy monitor requires an outputs folder to be configured (set during setup) for the sweep to work. Direct-query mode works without it.
-- Use case triage is only as good as the registry. Spend the setup interview getting
-  the red lines right — they drive everything.
-- Impact assessment format comes from your seed assessment. If you didn't provide one
-  during setup, it uses a baseline structure — re-run setup with a reference to improve it.
-- Builder and deployer obligations are treated separately. If you're both, the skills
-  ask which hat you're wearing for each task.
-- Gap analysis is manual (you point it at a regulation or guidance doc). For automated
-  monitoring, pair with the `regulatory-legal` plugin, if the plugin is installed.
-- The `## Company profile` section is the first block of `~/.claude/plugins/config/claude-for-legal/ai-governance-legal/CLAUDE.md` by convention. If
-  you run other `-counsel` plugins, you can copy it across rather than re-entering
-  the same context.
+- 差距检查（`reg-gap-analysis`）处理传入的法规。政策监视器处理内部实践漂移。不同的工具应对不同的变化方向。
+- 政策监视器需要配置输出文件夹（在设置期间设置）才能使扫描工作。直接查询模式无需它即可工作。
+- 使用案例分类仅与注册表一样好。花时间在设置访谈中正确获取红线——它们驱动一切。
+- 影响评估格式来自你的种子评估。如果你在设置期间没有提供一个，它会使用基线结构——使用参考重新运行设置以改进它。
+- 构建者和部署者义务被分别对待。如果你两者都是，skill 会询问你为每个任务戴着哪顶帽子。
+- 差距分析是手动的（你将其指向法规或指南文档）。对于自动监视，如果已安装 plugin，可与 `regulatory-legal` plugin 配对。
+- 按照惯例，`## Company profile` 部分是 `~/.claude/plugins/config/claude-for-legal/ai-governance-legal/CLAUDE.md` 的第一个块。如果你运行其他 `-counsel` plugin，你可以跨复制它，而不是重新输入相同的上下文。

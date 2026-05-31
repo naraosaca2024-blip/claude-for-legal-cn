@@ -1,214 +1,131 @@
 ---
 name: wage-hour-qa
 description: >
-  Jurisdiction-aware wage/hour and employment Q&A — classification, overtime,
-  meal/rest breaks, leave, final pay — answered for the specific state/country
-  with the controlling rule researched and cited rather than stated from
-  memory. Use when the user asks any employment law question, or says "what's
-  the rule in [state]", "is this exempt", "do we have to pay overtime for",
-  or "can we classify this as".
-argument-hint: "[question]"
+  司法管辖区感知的工资/工时和就业问答——分类、加班、用餐/休息时间、请假、最终工资——为特定州/国家回答，并通过研究引用控制规则而不是从记忆中陈述。当用户询问任何就业法问题，或说"[州]的规则是什么"、"这是豁免吗"、"我们必须为...付加班费吗"或"我们可以把这个归类为"时使用。
+argument-hint: "[问题]"
 ---
+
+<!--
+This file is a Chinese translation of the original by Anthropic PBC.
+Original: https://github.com/anthropics/claude-for-legal
+Licensed under Apache License 2.0
+-->
+
 
 # /wage-hour-qa
 
-1. Load `~/.claude/plugins/config/claude-for-legal/employment-legal/CLAUDE.md` → jurisdictional footprint.
-2. Use the workflow below.
-3. Identify jurisdiction the question is about. If not specified, ask.
-4. Answer per that jurisdiction's rule. Cite. Flag if it's a close call or law is shifting.
+1. 加载 `~/.claude/plugins/config/claude-for-legal/employment-legal/CLAUDE.md` → 司法管辖区足迹。
+2. 使用以下工作流。
+3. 确定问题涉及的司法管辖区。如果未指定，请询问。
+4. 根据该司法管辖区的规则回答。引用。如果是接近判断或法律正在变化，请标记。
 
 ---
 
-## Matter context
+## 事项上下文
 
-**Matter context.** Check `## Matter workspaces` in the practice-level CLAUDE.md. If `Enabled` is `✗` (the default for in-house users), skip the rest of this paragraph — skills use practice-level context and the matter machinery is invisible. If enabled and there is no active matter, ask: "Which matter is this for? Run `/employment-legal:matter-workspace switch <slug>` or say `practice-level`." Load the active matter's `matter.md` for matter-specific context and overrides. Write outputs to the matter folder at `~/.claude/plugins/config/claude-for-legal/employment-legal/matters/<matter-slug>/`. Never read another matter's files unless `Cross-matter context` is `on`.
+**事项上下文。** 检查执业级 CLAUDE.md 中的 `## Matter workspaces`。如果 `Enabled` 为 `✗`（内部用户的默认值），跳过本段的其余部分——skill 使用执业级上下文，事项机制不可见。如果启用且没有活跃事项，询问："这是哪个事项的？Run `/employment-legal:matter-workspace switch <slug>` 或说 `practice-level`。"加载活跃事项的 `matter.md` 以获取事项特定上下文和覆盖。将输出写入事项文件夹 `~/.claude/plugins/config/claude-for-legal/employment-legal/matters/<matter-slug>/`。除非 `Cross-matter context` 为 `on`，否则永远不要阅读另一个事项的文件。
 
 ---
 
-## Purpose
+## 目的
 
-"It depends" is true but unhelpful. This skill produces a jurisdiction-specific
-answer grounded in researched, cited primary sources — and flags when the
-question is close enough to need human judgment. It does not state rules from
-memory: wage-and-hour thresholds, exemption criteria, and final-pay timing
-change frequently and vary meaningfully by state.
+"这取决于情况"是真实的但没有帮助。此 skill 基于研究的、引用的主要来源生成特定司法管辖区的答案——并在问题足够接近需要人类判断时进行标记。它不从记忆中陈述规则：工资和工时阈值、豁免标准和最终工资时间经常变化，并且在各州之间有重大差异。
 
-## Load context
+## 加载上下文
 
-`~/.claude/plugins/config/claude-for-legal/employment-legal/CLAUDE.md` → jurisdictional footprint. If the question doesn't specify a
-jurisdiction, ask — or answer for the state with the most employees and note
-that.
+`~/.claude/plugins/config/claude-for-legal/employment-legal/CLAUDE.md` → 司法管辖区足迹。如果问题未指定司法管辖区，请询问——或为员工最多的州回答并注明。
 
-## The answer
+## 回答
 
-### Step 1: Jurisdiction
+### 步骤 1：司法管辖区
 
-Which state/country is this about? If not stated:
-- If it's about a specific employee: where do they work?
-- If it's a policy question: identify the jurisdictions in the footprint that
-  are most likely to be the most restrictive on the question at hand, then
-  research those.
+这涉及哪个州/国家？如果未说明：
+- 如果关于特定员工：他们在哪里工作？
+- 如果是政策问题：识别足迹中在当前问题上可能最严格的司法管辖区，然后研究那些。
 
-### Step 2: Research the rule, then state it
+### 步骤 2：研究规则，然后陈述它
 
-> **Research before answering.** For the jurisdiction and question, identify
-> the currently operative rule. Cite the controlling primary source (statute,
-> regulation, wage order, or case) with a pinpoint cite. Note the effective
-> date and whether the rule has been recently amended, indexed, or is in
-> litigation. If you are uncertain or cannot verify the current state of the
-> law, say so and flag for attorney verification — do not state a rule you
-> haven't confirmed.
+> **在回答之前研究。** 对于司法管辖区和问题，识别当前有效的规则。引用控制性主要来源（制定法、法规、工资命令或案例），附精确引用。注意生效日期以及规则是否最近被修订、索引化或处于诉讼中。如果你不确定或无法验证法律的当前状态，说明并标记供律师验证——不要陈述你未确认的规则。
 
-State the rule in one paragraph, tied to the cite. Use your tools (web search,
-legal research integrations, team reference materials) to verify currency —
-especially for:
+用一段话陈述规则，关联引用。使用你的工具（网络搜索、法律研究集成、团队参考材料）验证时效性——特别是：
 
-> **No silent supplement.** If a research query to the configured legal research tool (Westlaw, CourtListener, or firm platform) returns few or no results for the jurisdiction-and-question, report what was found and stop. Do NOT fill the gap from web search or model knowledge without asking. Say: "The search returned [N] results from [tool]. Coverage appears thin for [jurisdiction / question]. Options: (1) broaden the search query, (2) try a different research tool, (3) search the web — results will be tagged `[web search — verify]` and should be checked against a primary source before relying, or (4) flag the question as unverified and stop here. Which would you like?" A lawyer decides whether to accept lower-confidence sources.
+> **没有静默补充。** 如果对配置的法律研究工具（Westlaw、CourtListener 或公司平台）的研究查询对于司法管辖区和问题返回很少或没有结果，报告发现的内容并停止。不要未经询问就从网络搜索或模型知识填充空白。说："搜索从 [工具] 返回了 [N] 个结果。对于 [司法管辖区/问题] 的覆盖范围似乎很薄。选项：(1)扩大搜索查询，(2)尝试不同的研究工具，(3)搜索网络——结果将标记为 `[web search — verify]`，在依赖之前应根据主要来源进行检查，或(4)标记为未验证并在此停止。你想要哪一个？"律师决定是否接受较低置信度的来源。
 >
-> **Source attribution.** Tag every citation in the answer with where it came from: `[Westlaw]`, `[CourtListener]`, or the MCP tool name for citations retrieved from a legal research connector; `[web search — verify]` for web-search citations; `[model knowledge — verify]` for citations recalled from training data; `[user provided]` for citations the user supplied. Citations tagged `verify` carry higher fabrication risk and should be checked first. Never strip or collapse the tags.
+> **来源归因。** 用其来源标记答案中的每个引用：对于从法律研究连接器检索的引用，使用 `[Westlaw]`、`[CourtListener]` 或 MCP 工具名称；对于网络搜索引用使用 `[web search — verify]`；对于从训练数据回忆的引用使用 `[model knowledge — verify]`；对于用户提供的引用使用 `[user provided]`。标记为 `verify` 的引用携带更高的捏造风险，应首先检查。永远不要剥离或折叠标记。
 
 
-- Salary thresholds for any exemption (federal and state — several states
-  index annually and several have tiered thresholds by employer size).
-- Final-pay timing on termination vs. resignation (many states differ).
-- PTO payout requirements (jurisdiction-specific; some require, some leave
-  it to policy, some depend on accrual-plan design).
-- Meal and rest break rules and any penalty-pay consequence.
-- Daily or weekly overtime rules (some states have daily overtime and
-  double-time rules that federal law does not).
-- Classification tests — see the worker-classification skill; the applicable
-  test depends on jurisdiction and purpose.
+- 任何豁免的薪资门槛（联邦和州——几个州每年指数化，几个根据雇主大小有分层阈值）。
+- 离职 vs. 辞职的最终薪资计时（许多州不同）。
+- PTO 支付要求（因司法管辖区而异；一些要求支付，一些留给政策，一些取决于累计计划设计）。
+- 用餐和休息时间规则及任何惩罚工资后果。
+- 每日或每周加班规则（一些州有联邦法律没有的每日加班和双倍工资规则）。
+- 分类测试——参见 worker-classification skill；适用测试取决于司法管辖区和目的。
 
-Common question types you may be asked — for each, the answer is
-jurisdiction-specific and time-sensitive. Do not state the rule here; route
-to research:
+你可能被问到的常见问题类型——每个问题的答案都是司法管辖区特定和时效敏感的。不要在此陈述规则；路由到研究：
 
-- "Is this role exempt?" — Research the applicable federal and state salary
-  thresholds (verify current amounts and any employer-size tiers) and the
-  applicable duties test(s).
-- "Do we have to pay overtime for X?" — Research federal FLSA overtime plus
-  any state-specific overtime rules (daily OT, double-time, alternative
-  workweeks).
-- "Do we have to provide meal/rest breaks?" — Research the applicable
-  state rule and any penalty-pay consequence for missed breaks.
-- "When is final pay due?" — Research the applicable state rule, including
-  whether timing differs for termination vs. resignation and whether
-  waiting-time or late-pay penalties apply.
-- "Do we have to pay out accrued PTO?" — Research the applicable state rule
-  and any carve-out for accrual-cap or use-it-or-lose-it policies.
-- "Can we classify this person as a contractor?" — Route to
-  `/employment-legal:worker-classification` if the facts are not already clear.
+- "这个角色豁免吗？"——研究适用的联邦和州薪资门槛（验证当前金额和任何雇主规模分层）以及适用的职责测试。
+- "我们必须为 X 付加班费吗？"——研究联邦 FLSA 加班加上任何州特定加班规则（每日加班、双倍工资、替代工作周）。
+- "我们必须提供用餐/休息时间吗？"——研究适用的州规则和任何错过休息的惩罚工资后果。
+- "最终工资何时到期？"——研究适用的州规则，包括离职 vs. 辞职的时限是否不同以及是否适用等待时间或逾期付款惩罚。
+- "我们必须支付累计的 PTO 吗？"——研究适用的州规则以及累计上限或使用或失去政策的任何豁免。
+- "我们可以将此人归类为承包商吗？"——如果事实尚不清楚，路由到 `/employment-legal:worker-classification`。
 
-### Step 2a: FLSA regular-rate and back-pay calculations
+### 步骤 2a：FLSA 常利率和欠薪计算
 
-When the question is a back-pay computation, unpaid-OT computation, or any
-question that turns on the FLSA "regular rate," use this scaffold. Do not
-answer from bare hourly wage × OT hours; that's the two most common errors
-this skill exists to catch.
+当问题是欠薪计算、未付加班计算或任何取决于 FLSA"常规工资率"的问题时，使用此脚手架。不要从裸时薪 × 加班时数回答；那是此 skill 存在的意义就是捕捉的两个最常见错误。
 
-**The regular rate is NOT just the hourly wage.** Under 29 U.S.C. §207(e),
-the regular rate is **all remuneration** for employment EXCEPT the eight
-statutory exclusions in §207(e)(1)–(8) (e.g., discretionary bonuses, gifts,
-premium pay, expense reimbursements, profit-sharing plans meeting the DOL
-regs, stock options meeting §207(e)(8), retirement/insurance contributions).
-Anything NOT within those eight exclusions is IN.
+**常规工资率不仅仅是时薪。** 根据 29 U.S.C. §207(e)，常规工资率是雇佣的**所有报酬**，除了 §207(e)(1)–(8) 中的八个法定排除项（例如，酌情奖金、礼物、溢价工资、费用报销、符合 DOL 法规的利润分享计划、符合 §207(e)(8) 的股票期权、退休/保险缴费）。不在那八个排除项之内的任何内容都计入。
 
-1. **Non-discretionary bonuses are IN the regular rate.** Productivity
-   bonuses, attendance bonuses, commissions, shift differentials, contest
-   awards, and most "bonuses" a reasonable employee would expect as a matter
-   of course are non-discretionary under §207(e)(3) and 29 C.F.R. §778.211.
-   Divide the bonus by the total hours worked in the bonus period to get
-   the per-hour increase to the regular rate. True discretionary bonuses
-   (§207(e)(3)) require both the fact of payment AND the amount to be
-   within the employer's sole discretion, determined at or near the end of
-   the period — narrow category.
-2. **The unpaid OT premium is 0.5×, not 1.5× — when straight time was
-   already paid for all hours.** If the employee was paid straight time for
-   every hour (including the OT hours) but no premium, they are owed the
-   **half-time premium** on OT hours, not time-and-a-half: `unpaid OT =
-   0.5 × regular rate × OT hours`. 29 C.F.R. §778.110(b). If the employee
-   was NOT paid for the OT hours at all, the owed amount is 1.5× the
-   regular rate on those hours. **State which pay posture you're assuming
-   before you compute** — it determines 0.5× vs. 1.5× and is the most
-   common error in this computation.
-3. **Show your math.** Print the formula and the inputs explicitly:
+1. **非酌情奖金计入常规工资率。** 生产力奖金、出勤奖金、佣金、轮班差异、竞赛奖励和大多数合理员工预期作为惯例获得的"奖金"根据 §207(e)(3) 和 29 C.F.R. §778.211 是非酌情的。将奖金除以奖金期间的总工时以获得常规工资率的每小时增量。真正的酌情奖金（§207(e)(3)）要求支付事实和金额都在雇主唯一裁量权内，在期间结束时或接近结束时确定——这是窄类别。
+2. **未付加班溢价是 0.5×，不是 1.5×——当直线时间已为所有工时支付时。** 如果员工已为每个工时支付了直线时间（包括加班工时）但没有溢价，他们被欠的是加班工时上的**半时间溢价**，而不是一倍半：`未付加班 = 0.5 × 常规工资率 × 加班工时`。29 C.F.R. §778.110(b)。如果员工完全没有为加班工时获得报酬，欠款金额是那些工时的 1.5× 常规工资率。**在计算之前说明你假设的支付状态**——它决定 0.5× vs. 1.5×，这是此计算中最常见的错误。
+3. **展示你的数学。** 明确打印公式和输入：
    ```
-   Regular rate    = (straight-time wages + non-discretionary bonuses + other non-excluded comp) ÷ total hours worked
-   OT premium owed = 0.5 × regular rate × OT hours    [if straight time already paid for OT hours]
-                   = 1.5 × regular rate × OT hours    [if OT hours were unpaid]
+   常规工资率    = (直线时间工资 + 非酌情奖金 + 其他非排除报酬) ÷ 总工时
+   欠付加班溢价 = 0.5 × 常规工资率 × 加班工时    [如果直线时间已为加班工时支付]
+               = 1.5 × 常规工资率 × 加班工时    [如果加班工时未付]
    ```
-   A number without the formula is not usable by a wage-and-hour lawyer.
-4. **Liquidated damages double the back-pay.** 29 U.S.C. §216(b). Liquidated
-   damages equal the unpaid back-pay amount unless the employer proves, to
-   the court's satisfaction, that the violation was in good faith and based
-   on reasonable grounds to believe it was not a violation. 29 U.S.C.
-   §260. Default assumption is liquidated damages apply; the employer bears
-   the burden to avoid them.
-5. **Statute of limitations is 2 years; 3 for willful.** 29 U.S.C. §255(a).
-   State the lookback explicitly and compute both bookends unless the
-   willfulness posture is already established by the user.
-6. **State overlay.** Many states have longer lookback, higher overtime
-   multipliers (daily OT, double-time), and different regular-rate rules.
-   Check state wage-and-hour law against the jurisdiction gate from Step 1
-   and flag where state law compounds (higher cap) or replaces (different
-   rate) federal. California, New York, Massachusetts, and Washington are
-   the most frequent overlay hits.
-7. **Attach the verify tag to the number.** Any back-pay amount produced by
-   this skill carries `[verify — consult wage-and-hour counsel before
-   asserting or paying]` on the line the number appears. The computation is
-   specialist work; the skill is scaffolding, not opinion.
+   没有公式的数字对工资工时律师不可用。
+4. **双倍损害赔偿加倍欠薪。** 29 U.S.C. §216(b)。双倍损害赔偿等于未付欠薪金额，除非雇主向法院证明违法行为是出于善意且有合理理由相信不是违法行为。29 U.S.C. §260。默认假设双倍损害赔偿适用；雇主承担避免它们的举证责任。
+5. **诉讼时效为 2 年；故意的为 3 年。** 29 U.S.C. §255(a)。明确说明回溯期并计算两个端点，除非故意状态已由用户确定。
+6. **州叠加。** 许多州有更长的回溯期、更高的加班乘数（每日加班、双倍工资）和不同的常规工资率规则。对照步骤 1 的司法管辖区门检查州工资工时法，并标记州法在哪里叠加（更高上限）或替代（不同费率）联邦。加州、纽约、马萨诸塞州和华盛顿是最频繁的叠加。
+7. **将验证标签附加到数字上。** 此 skill 生成的任何欠薪金额在数字出现的行上携带 `[verify — 在断言或支付前咨询工资工时律师]`。计算是专业工作；skill 是脚手架，不是意见。
 
-If the question is a back-pay calculation and any of these inputs are
-missing (bonus breakdown, whether straight time was paid for OT hours,
-willfulness posture, state jurisdiction), **ask before computing**. A
-confident wrong number is the worst output this skill can produce.
+如果问题是欠薪计算且缺少这些输入中的任何一项（奖金明细、加班工时是否已付直线时间、故意状态、州司法管辖区），**在计算之前询问**。自信但错误的数字是此 skill 能产生的最差输出。
 
-### Step 3: The flag
+### 步骤 3：标记
 
-Is this a close call? Be honest.
+这是接近判断吗？要诚实。
 
-- If the answer is clear on the researched rule: say so. "Exempt — meets
-  each element of the applicable duties test and the current salary
-  threshold."
-- If it's close: say so. "The duties test is borderline — this role could
-  go either way. Recommend classifying as non-exempt to be safe, or getting
-  a formal opinion."
-- If the law is in flux: say so. "This rule has been amended recently — the
-  current version takes effect [date]. Confirm effective date before relying
-  on this answer."
-- If you could not verify currency: say so. Do not guess.
+- 如果答案在研究的规则上是明确的：说出来。"豁免——满足适用职责测试的每个要素和当前薪资门槛。"
+- 如果接近：说出来。"职责测试处于边界——这个角色可以走任一方向。建议分类为非豁免以策安全，或获取正式意见。"
+- 如果法律在变化中：说出来。"此规则最近已修订——当前版本于 [日期] 生效。在依赖此答案之前确认生效日期。"
+- 如果你无法验证时效性：说出来。不要猜测。
 
-## Output format
+## 输出格式
 
-Conversational. This is a Q&A, not a memo.
+对话式。这是问答，不是备忘录。
 
-> **Research-connector pre-flight.** Before emitting the answer, check whether a legal research connector is reachable for this session — Westlaw, CourtListener, or any firm-configured research MCP. Collect this into the reviewer note per CLAUDE.md `## Outputs`: if no connector returns results in Step 2 (or none is configured at run time), record it in the **Sources:** line of the reviewer note — e.g., `not connected — cites from training knowledge; pinpoint cites (volume/page/subsection) carry the highest fabrication risk, spot-check those first`. Per-citation `[model knowledge — verify]` tags remain inline. Do not emit a standalone banner above the output.
+> **研究连接器飞行前检查。** 在发出答案之前，检查此会话是否可达法律研究连接器——Westlaw、CourtListener 或任何公司配置的研究 MCP。根据 CLAUDE.md `## Outputs` 将其收集到审阅者备注中：如果在步骤 2 中没有连接器返回结果（或在运行时未配置），在审阅者备注的 **来源：** 行中记录它——例如，`未连接——引用来自训练知识；精确引用（卷/页/小节）携带最高捏造风险，首先抽查那些`。每个引用的 `[model knowledge — verify]` 标记保持内联。不要在输出上方发出独立横幅。
 
-> **Jurisdiction assumption.** Answers apply only to the jurisdiction identified. Wage-hour rules, exemption thresholds, and final-pay timing vary materially by state and country, and many rules index or change year over year. If the employee works in another jurisdiction, or the question is answered for the default-footprint state, this answer may not apply as written.
+> **司法管辖区假设。** 答案仅适用于识别的司法管辖区。工资工时规则、豁免阈值和最终薪资计时因州和国家而有很大差异，许多规则逐年索引或变化。如果员工在另一个司法管辖区工作，或问题为默认足迹州回答，此答案可能不适用于书面。
 
 ```
-**[Jurisdiction]:** [The researched rule, one paragraph, with pinpoint cite
-and currency note.]
+**[司法管辖区]：** [研究的规则，一段话，附精确引用和时效性说明。]
 
-[If close call or shifting law: the flag.]
+[如果是接近判断或变化中的法律：标记。]
 
-[If the answer differs in other footprint jurisdictions: one line noting that,
-and whether the differences are material.]
+[如果答案在其他足迹司法管辖区中不同：一行说明，以及差异是否重大。]
 ```
 
-> **Verify citations.** Any case, statute, regulation, or wage-order cite above was generated with AI assistance. Before relying on a cite, check it against Westlaw, CourtListener, the relevant state agency's site, or your firm's research tool for accuracy, currency, and subsequent history. Fabricated or misquoted citations in filings or formal advice have resulted in sanctions.
+> **验证引用。** 上面的任何案例、制定法、法规或工资命令引用都是借助 AI 生成的。在依赖引用之前，对照 Westlaw、CourtListener、相关州机构网站或你公司的研究工具检查其准确性、时效性和后续历史。提交文件或正式建议中的捏造或误引引用已导致制裁。
 
-## Close with the next-steps decision tree
+## 以下一步决策树结束
 
-End with the next-steps decision tree per CLAUDE.md `## Outputs`. Customize the options to what this skill just produced — the five default branches (draft the X, escalate, get more facts, watch and wait, something else) are a starting point, not a lock-in. The tree is the output; the lawyer picks.
+根据 CLAUDE.md `## Outputs` 以下一步决策树结束。根据此 skill 刚刚生成的自定义选项——五个默认分支（起草 X、升级、获取更多事实、观察等待、其他）是起点，而非锁定。树就是输出；律师选择。
 
-## What this skill does not do
+## 此 skill 不做什么
 
-- State the rule from memory — every answer is grounded in a researched,
-  cited primary source verified for currency.
-- Make classification decisions for borderline cases. It states the rule and
-  flags the close call. Human decides.
-- Give a 50-state survey unless asked. Answers for the relevant
-  jurisdiction(s).
-- Track when the answer changes. If thresholds index or law shifts, the
-  answer goes stale. Re-ask for current.
+- 从记忆陈述规则——每个答案基于研究的、引用的、已验证时效性的主要来源。
+- 为边界案例做分类决定。它陈述规则并标记接近判断。由人决定。
+- 除非被要求否则不做 50 州调查。为相关司法管辖区回答。
+- 跟踪答案何时变化。如果阈值索引化或法律变化，答案会过时。重新询问以获取当前信息。

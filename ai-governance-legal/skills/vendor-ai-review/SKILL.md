@@ -1,23 +1,29 @@
 ---
 name: vendor-ai-review
 description: >
-  Review vendor AI terms — agreement, addendum, or ToS AI provisions — against your
-  governance positions; flag training-on-data, liability, model changes, and AI policy
-  consistency. Use when user says "review this AI agreement", "check OpenAI terms",
-  "what did we agree to with [vendor]", "vendor sent an AI addendum", "is this AI
-  contract okay", or attaches vendor AI terms.
+  审查供应商 AI 条款——协议、附录或 ToS AI 条款——对照你的治理立场；标记数据训练、责任、模型变更和 AI
+  政策一致性问题。当用户说"review this AI agreement"、"check OpenAI terms"、
+  "what did we agree to with [vendor]"、"vendor sent an AI addendum"、"is this AI
+  contract okay"，或附上供应商 AI 条款时使用。
 argument-hint: "[vendor name, or attach the contract]"
 ---
 
+<!--
+This file is a Chinese translation of the original by Anthropic PBC.
+Original: https://github.com/anthropics/claude-for-legal
+Licensed under Apache License 2.0
+-->
+
+
 # /vendor-ai-review
 
-1. Read `~/.claude/plugins/config/claude-for-legal/ai-governance-legal/CLAUDE.md`. Confirm vendor governance positions are populated — if not, stop and direct to setup.
-2. Use the framework below.
-3. Confirm document type (AI addendum / main agreement AI provisions / ToS). If only an AUP was provided, ask for the full terms.
-4. Term-by-term review: training on data, confidentiality of inputs, model changes, output IP, liability, incident notification, human review rights, use restrictions, audit rights.
-5. AI addendum gap check if DPA exists but no AI addendum.
-6. AI policy consistency diff vs. `~/.claude/plugins/config/claude-for-legal/ai-governance-legal/CLAUDE.md`.
-7. Output: bottom line, term-by-term, recommended redlines, if-they-won't-move routing.
+1. 读取 `~/.claude/plugins/config/claude-for-legal/ai-governance-legal/CLAUDE.md`。确认供应商治理立场已填充——如果没有，停止并指向设置。
+2. 使用以下框架。
+3. 确认文档类型（AI 附录/主协议 AI 条款/ToS）。如果只提供了 AUP，询问完整条款。
+4. 逐条审查：数据训练、输入保密性、模型变更、输出 IP、责任、事件通知、人工审查权、使用限制、审计权。
+5. 如果存在 DPA 但无 AI 附录，进行 AI 附录差距检查。
+6. AI 政策一致性比对 `~/.claude/plugins/config/claude-for-legal/ai-governance-legal/CLAUDE.md`。
+7. 输出：底线、逐条分析、建议红线、若不愿变更的路由。
 
 ```
 /ai-governance-legal:vendor-ai-review openai-enterprise-agreement.pdf
@@ -25,299 +31,263 @@ argument-hint: "[vendor name, or attach the contract]"
 
 ---
 
-## Matter context
+## 事项上下文
 
-**Matter context.** Check `## Matter workspaces` in the practice-level CLAUDE.md. If `Enabled` is `✗` (the default for in-house users), skip the rest of this paragraph — skills use practice-level context and the matter machinery is invisible. If enabled and there is no active matter, ask: "Which matter is this for? Run `/ai-governance-legal:matter-workspace switch <slug>` or say `practice-level`." Load the active matter's `matter.md` for matter-specific context and overrides. Write outputs to the matter folder at `~/.claude/plugins/config/claude-for-legal/ai-governance-legal/matters/<matter-slug>/`. Never read another matter's files unless `Cross-matter context` is `on`.
-
----
-
-## Purpose
-
-Vendor AI terms are where your governance positions actually get tested. The cold-start
-interview captures what you *want*. This skill checks what you *agreed to* — and flags
-the gaps between those two things.
-
-The direction here is always the same: we are the deployer or buyer reviewing the
-vendor's terms. This is the opposite posture from the DPA review controller/processor
-question — there's no flip.
-
-What varies is the *input*:
-- A standalone AI agreement or AI addendum (most structured)
-- A vendor's universal terms of service with AI provisions embedded (often buried)
-- An acceptable use policy (tells you what you can't do; says nothing about what
-  the vendor can do with your data or outputs)
-- A combination — master agreement + DPA + AI addendum (common for serious enterprise
-  AI vendors)
-
-When there's a DPA already in place, this review complements it — it's not a
-substitute. The DPA governs data protection obligations; the AI terms govern
-model-specific rights and risks. Both need to be reviewed.
+**事项上下文。** 检查执业级 CLAUDE.md 中的 `## Matter workspaces`。如果 `Enabled` 为 `✗`（内部用户的默认值），跳过本段的其余部分——skills 使用执业级上下文，事项机制不可见。如果已启用且没有活跃事项，询问："这是哪个事项的？运行 `/ai-governance-legal:matter-workspace switch <slug>` 或说 `practice-level`。"加载活跃事项的 `matter.md` 以获取事项特定上下文和覆盖。将输出写入事项文件夹 `~/.claude/plugins/config/claude-for-legal/ai-governance-legal/matters/<matter-slug>/`。除非 `Cross-matter context` 为 `on`，否则永远不要阅读另一个事项的文件。
 
 ---
 
-## Load the playbook
+## 目的
 
-Read `~/.claude/plugins/config/claude-for-legal/ai-governance-legal/CLAUDE.md` → `## Vendor AI governance`. Also read `## AI policy commitments`
-— vendor terms can't be consistent with a use restriction our own policy imposes if
-we've agreed to something different.
+供应商 AI 条款是你的治理立场实际接受检验的地方。冷启动访谈捕获了你*想要*的内容。此 skill 检查你*同意了*什么——并标记这两者之间的差距。
 
-If `~/.claude/plugins/config/claude-for-legal/ai-governance-legal/CLAUDE.md` contains `[PLACEHOLDER]`, surface this bounce:
+这里的方向始终相同：我们是审查供应商条款的部署者或买方。这与 DPA 审查控制者/处理者问题的立场相反——没有翻转。
 
-> I notice you haven't configured your practice profile yet — that's how I tailor vendor governance positions to your practice.
+变化的是*输入*：
+- 独立的 AI 协议或 AI 附录（最结构化）
+- 嵌入了 AI 条款的供应商通用服务条款（通常被埋藏）
+- 可接受使用政策（告诉你不能做什么；不说明供应商可以用你的数据或输出做什么）
+- 组合——主协议 + DPA + AI 附录（大型企业 AI 供应商的常见形式）
+
+当已有 DPA 时，此审查对其进行补充——不是替代。DPA 管辖数据保护义务；AI 条款管辖特定于模型的权利和风险。两者都需要审查。
+
+---
+
+## 加载剧本
+
+读取 `~/.claude/plugins/config/claude-for-legal/ai-governance-legal/CLAUDE.md` → `## Vendor AI governance`。还要读取 `## AI policy commitments`
+——如果我们同意了与我们自己政策施加的使用限制不同的内容，供应商条款就无法与该使用限制保持一致。
+
+如果 `~/.claude/plugins/config/claude-for-legal/ai-governance-legal/CLAUDE.md` 包含 `[PLACEHOLDER]`，显示此拒绝：
+
+> 我注意到你还没有配置执业档案——这就是我如何将供应商治理立场定制到你的执业的方式。
 >
-> **Two choices:**
-> - Run `/ai-governance-legal:cold-start-interview` (2 minutes) to configure your profile, then I'll review tailored to YOUR positions.
-> - Say **"provisional"** and I'll review against generic defaults — US jurisdiction, middle risk appetite, lawyer role, no playbook — and tag every output `[PROVISIONAL — configure your profile for tailored output]` so you can see what I do before committing.
+> **两个选择：**
+> - 运行 `/ai-governance-legal:cold-start-interview`（2 分钟）配置你的档案，然后我会根据你的立场定制审查。
+> - 说 **"provisional"**，我会针对通用默认值进行审查——美国司法管辖区、中等风险偏好、律师角色、无剧本——并用 `[PROVISIONAL — configure your profile for tailored output]` 标记每个输出，以便你在承诺前可以看到我做什么。
 
-### Provisional mode
+### 临时模式
 
-If the user says "provisional," run the vendor AI review normally using these generic defaults: middle risk appetite, lawyer role, US jurisdiction, no playbook (flag all common vendor-AI risks from first principles rather than matching to configured positions). Tag the reviewer note and every finding block with `[PROVISIONAL]`. At the end of the output, append:
+如果用户说"provisional"，使用这些通用默认值正常运行供应商 AI 审查：中等风险偏好、律师角色、美国司法管辖区、无剧本（从第一原则而不是匹配到配置立场来标记所有常见的供应商 AI 风险）。用 `[PROVISIONAL]` 标记审阅者备注和每个发现块。在输出末尾追加：
 
-> "That was a generic run against default assumptions. Run `/ai-governance-legal:cold-start-interview` to get output calibrated to YOUR practice — your vendor governance positions, your jurisdiction, your risk appetite. 2 minutes."
-
----
-
-## Before reading the document
-
-If the user hasn't shared the actual vendor terms, ask:
-
-> "Can you share the vendor's AI terms? The most useful thing is the actual contract
-> language — the AI addendum if there is one, or the main agreement with AI provisions
-> highlighted. An acceptable use policy alone won't tell us what the vendor can do
-> with our inputs; it only tells us what we're allowed to do."
-
-If they share an acceptable use policy only:
-> "This is the acceptable use policy — it tells us what we can't do with the vendor's
-> AI. That's useful context, but it doesn't address the commercial terms: whether
-> the vendor can train on our data, what their liability is for AI errors, whether
-> they notify us when the model changes. Do you have the service agreement or AI
-> addendum?"
+> "这是针对默认假设的通用运行。运行 `/ai-governance-legal:cold-start-interview` 以获得针对你的执业校准的输出——你的供应商治理立场、你的司法管辖区、你的风险偏好。2 分钟。"
 
 ---
 
-## The term-by-term review
+## 阅读文档之前
 
-### Core AI-specific terms (check every vendor AI agreement)
+如果用户还没有共享实际的供应商条款，询问：
 
-Review each term below. For each, extract what the vendor's contract actually says and compare it against the position in `~/.claude/plugins/config/claude-for-legal/ai-governance-legal/CLAUDE.md` → `## Vendor AI governance` (standard / acceptable fallback / automatic no). The default positions come from the team's playbook, not from this skill.
+> "你能共享供应商的 AI 条款吗？最有用的是实际的合同语言——AI 附录（如果有的话），或带有 AI 条款高亮的主协议。仅凭可接受使用政策无法告诉我们供应商可以用我们的输入做什么；它只告诉我们我们被允许做什么。"
 
-| Term | What to look for |
+如果他们只共享了可接受使用政策：
+> "这是可接受使用政策——它告诉我们我们不能用供应商的 AI 做什么。这是有用的背景，但它不涉及商业条款：供应商是否可以在我们的数据上训练、AI 错误的责任是什么、他们是否在模型变更时通知我们。你有服务协议或 AI 附录吗？"
+
+---
+
+## 逐条审查
+
+### 核心 AI 特定条款（检查每个供应商 AI 协议）
+
+审查以下每个条款。对于每个条款，提取供应商合同实际说的内容，并将其与 `~/.claude/plugins/config/claude-for-legal/ai-governance-legal/CLAUDE.md` → `## Vendor AI governance`（标准/可接受备用/自动否定）中的立场进行比较。默认立场来自团队的剧本，而不是此 skill。
+
+| 条款 | 查找内容 |
 |---|---|
-| **Training on our data** | Does the vendor use our inputs to train, fine-tune, or improve models? Is there an explicit opt-out or prohibition? Is training opt-in or opt-out by default? |
-| **Confidentiality of inputs** | Are our prompts, documents, and data confidential? Any "quality review" or human-review carveouts that would let vendor staff read inputs? |
-| **Model changes** | Any notice obligation for material changes to the model? Version pinning available? |
-| **Output ownership / IP** | Who owns AI-generated content? Any license-back to the vendor on outputs? Any IP indemnity? |
-| **Liability for outputs** | Does the vendor accept any liability if the AI produces harmful, incorrect, or infringing outputs? Cap structure? Carve-outs? |
-| **Incident notification** | How and when are we notified if the AI system fails, is compromised, or produces systematic errors affecting us? |
-| **Human review rights** | Can we require human review of outputs in specific cases? Can we appeal or dispute an AI decision? |
-| **Use restrictions** | What are we prohibited from doing? Does it match what we actually want to use the tool for? Any definitional terms (e.g., "automated decision-making") that could sweep in our intended uses? |
-| **Audit / auditability** | SOC 2, third-party audits, bias testing results — any audit rights? |
-| **Subprocessors / model providers** | Does the vendor use sub-vendors for the model? Are they disclosed? Whose terms govern? |
-| **Data residency** | Where is our data processed? Where does it go for inference? |
-| **Term and termination** | What happens to our data when we terminate? Deletion timelines? |
-| **Stacked-vendor accountability** | Is this vendor the model provider (e.g., Anthropic, OpenAI, Google, Meta), or are they a deployer of someone else's model (e.g., a SaaS wrapper of Claude, ChatGPT, or Gemini) or a reseller of infrastructure-hosted foundation models (Anthropic-on-Bedrock, Claude-on-Vertex, OpenAI-on-Azure)? If the latter: there are TWO vendors' terms in play — the one you're reviewing, plus the upstream model provider's terms. Identify (a) whose terms govern training on inputs, retention, and safety, (b) who is contractually liable for model behavior, and (c) whether each upstream commitment (e.g., "no training on inputs") is flowed down to you, or remains between the vendor and the upstream provider only. Flag any clause where one party disclaims responsibility for the other (e.g., "Anthropic is not responsible for Bedrock or any other services it receives from AWS"; "Azure disclaims responsibility for OpenAI model outputs") and whether the counter-party's contract closes the gap. Do not review the two contracts in isolation. |
+| **在我们数据上训练** | 供应商是否使用我们的输入来训练、微调或改进模型？是否有明确的选择退出或禁止？训练是默认选择加入还是选择退出？ |
+| **输入的保密性** | 我们的提示、文档和数据是否保密？是否有"质量审查"或人工审查的例外，允许供应商员工阅读输入？ |
+| **模型变更** | 对模型重大变更是否有通知义务？版本锁定是否可用？ |
+| **输出所有权/IP** | 谁拥有 AI 生成的内容？供应商对输出是否有回授许可？是否有 IP 赔偿？ |
+| **输出责任** | 供应商是否对 AI 产生有害、不正确或侵权输出承担任何责任？上限结构？例外？ |
+| **事件通知** | AI 系统故障、被攻击或产生系统性错误影响我们时，如何以及何时通知我们？ |
+| **人工审查权** | 我们是否可以在特定情况下要求对输出进行人工审查？我们是否可以对 AI 决定提出异议或投诉？ |
+| **使用限制** | 我们被禁止做什么？它是否与我们实际想用工具做什么相匹配？是否有可能涵盖我们预期用途的定义术语（例如"自动化决策"）？ |
+| **审计/可审计性** | SOC 2、第三方审计、偏见测试结果——是否有任何审计权？ |
+| **子处理器/模型提供者** | 供应商是否使用子供应商提供模型？他们是否被披露？谁的条款适用？ |
+| **数据驻留** | 我们的数据在哪里处理？推理时它去哪里？ |
+| **期限和终止** | 我们终止时我们的数据会怎样？删除时间表？ |
+| **堆叠供应商责任** | 这个供应商是模型提供者（例如，Anthropic、OpenAI、Google、Meta），还是他人模型的部署者（例如，Claude、ChatGPT 或 Gemini 的 SaaS 包装器）或基础设施托管基础模型的经销商（Anthropic-on-Bedrock、Claude-on-Vertex、OpenAI-on-Azure）？如果是后者：有两个供应商的条款在发挥作用——你正在审查的那个，加上上游模型提供者的条款。识别 (a) 谁的条款管理输入训练、保留和安全，(b) 谁对模型行为承担合同责任，以及 (c) 每个上游承诺（例如，"不在输入上训练"）是否向你传递，还是仅在供应商和上游提供者之间。标记任何一方免除对另一方责任的条款（例如，"Anthropic 不对 Bedrock 或其从 AWS 获得的任何其他服务负责"；"Azure 免除对 OpenAI 模型输出的责任"），以及对方合同是否弥补了差距。不要单独审查两份合同。 |
 
-If `~/.claude/plugins/config/claude-for-legal/ai-governance-legal/CLAUDE.md` doesn't define a position for a term on this list, ask: "Your playbook doesn't cover [term]. What's your default position, your acceptable fallback, and your automatic no? I'll add it to `~/.claude/plugins/config/claude-for-legal/ai-governance-legal/CLAUDE.md` so the next review is consistent."
+如果 `~/.claude/plugins/config/claude-for-legal/ai-governance-legal/CLAUDE.md` 没有为此列表上的条款定义立场，询问："你的剧本不涵盖 [条款]。你的默认立场、可接受的备用方案和自动否定是什么？我会将其添加到 `~/.claude/plugins/config/claude-for-legal/ai-governance-legal/CLAUDE.md`，以便下次审查保持一致。"
 
 ---
 
-## Playbook comparison
+## 剧本比较
 
-For each term above, compare what we found to the positions in `~/.claude/plugins/config/claude-for-legal/ai-governance-legal/CLAUDE.md`.
+对于上述每个条款，将我们发现的内容与 `~/.claude/plugins/config/claude-for-legal/ai-governance-legal/CLAUDE.md` 中的立场进行比较。
 
-**Output format for each term:**
+**每个条款的输出格式：**
 
-> **[Term name]**
+> **[条款名称]**
 > 🟢 / 🟡 / 🟠 / 🔴
-> **Vendor says:** [summary of what the contract actually says]
-> **Our position:** [from `~/.claude/plugins/config/claude-for-legal/ai-governance-legal/CLAUDE.md`]
-> **Gap:** [specific delta — or "Aligned"]
-> **Proposed fix:** [specific redline language, or "escalate — outside fallback"]
+> **供应商说：** [合同实际说的内容摘要]
+> **我们的立场：** [来自 `~/.claude/plugins/config/claude-for-legal/ai-governance-legal/CLAUDE.md`]
+> **差距：** [具体差异——或"一致"]
+> **建议修复：** [具体红线语言，或"升级——超出备用方案"]
 
-Use the severity ratings consistently (calibrated against `~/.claude/plugins/config/claude-for-legal/ai-governance-legal/CLAUDE.md` positions):
+一致使用严重性评级（根据 `~/.claude/plugins/config/claude-for-legal/ai-governance-legal/CLAUDE.md` 立场校准）：
 
-- 🟢 **Aligned** — at or better than the standard position in the playbook.
-- 🟡 **Note** — within fallback but worse than standard; flag for awareness, not a blocker.
-- 🟠 **Significant** — outside standard position but within fallback; needs redline before signing.
-- 🔴 **Critical** — outside fallback; deployment should not proceed without resolution. Escalate per `~/.claude/plugins/config/claude-for-legal/ai-governance-legal/CLAUDE.md`.
-
----
-
-## AI addendum gap check
-
-**If the vendor has a DPA but no AI addendum:**
-
-> "There's a DPA in place but no AI-specific addendum. The DPA covers data protection
-> obligations but doesn't address: training on our data, model change notification,
-> liability for AI outputs, or incident notification for AI system failures.
->
-> For a [Standard / Elevated / High] tier use case, this gap is [acceptable at
-> Standard tier / a blocker at Elevated or High tier]. Recommend requesting an
-> AI addendum or at minimum negotiating AI-specific terms into the next renewal."
-
-**If there are no AI terms at all:**
-
-> "There are no AI-specific terms in this agreement. The vendor is providing an
-> AI-powered service under general service terms — which means we have no
-> contractual protection on the highest-risk AI governance items (training, liability,
-> model changes). This is a 🔴 for any Elevated or High tier use case."
+- 🟢 **一致** — 达到或优于剧本中的标准立场。
+- 🟡 **备注** — 在备用方案内但比标准差；标记以供参考，不是阻塞。
+- 🟠 **重大** — 超出标准立场但在备用方案内；签署前需要红线。
+- 🔴 **关键** — 超出备用方案；在解决之前不应继续部署。按 `~/.claude/plugins/config/claude-for-legal/ai-governance-legal/CLAUDE.md` 升级。
 
 ---
 
-## AI policy consistency check
+## AI 附录差距检查
 
-Cross-check the vendor's terms against our AI policy commitments in `~/.claude/plugins/config/claude-for-legal/ai-governance-legal/CLAUDE.md`.
+**如果供应商有 DPA 但没有 AI 附录：**
 
-Common conflicts:
-- Our policy prohibits vendor training on our data — the vendor's terms permit it by
-  default. (Contract needs explicit prohibition or opt-out confirmation.)
-- Our policy requires human review for certain use cases — vendor's terms say AI outputs
-  are final. (Workflow needs to impose the human step, not the vendor terms.)
-- Our approved vendor list doesn't include this vendor — or blocklist does.
-- Our policy requires disclosure to affected parties — vendor's terms impose a
-  confidentiality obligation on AI system capabilities that would prevent disclosure.
+> "有 DPA 但没有 AI 特定附录。DPA 涵盖数据保护义务，但不涉及：在我们数据上训练、模型变更通知、AI 输出责任或 AI 系统故障的事件通知。
+>
+> 对于 [标准/提升/高] 层级用例，此差距 [在标准层级可接受/在提升或高层级是阻塞的]。建议请求 AI 附录，或至少在下次续约时谈判 AI 特定条款。"
 
-Flag every mismatch. One of them has to change.
+**如果根本没有 AI 条款：**
+
+> "此协议中没有 AI 特定条款。供应商在通用服务条款下提供 AI 驱动的服务——这意味着我们在最高风险的 AI 治理项目（训练、责任、模型变更）上没有合同保护。对于任何提升或高层级用例，这是 🔴。"
 
 ---
 
-## Redline granularity
+## AI 政策一致性检查
 
-**Edit at the smallest possible granularity.** A redline is a negotiation artifact, not a rewrite. Wholesale clause replacement signals "we threw out your drafting" — it's aggressive, it forces the counterparty to re-read the whole clause, and it discards the parts of their drafting that were fine. Surgical redlines — strike a word, insert a phrase, restructure a subclause — signal "we have specific asks" and are faster to read, understand, and accept.
+将供应商条款与 `~/.claude/plugins/config/claude-for-legal/ai-governance-legal/CLAUDE.md` 中的 AI 政策承诺进行交叉检查。
 
-Default to the smallest edit that achieves the playbook position:
-- Replace a **word** before a phrase. ("twelve (12)" → "twenty-four (24)")
-- Replace a **phrase** before a sentence. ("paid by the Buyer" → "paid and payable by the Buyer")
-- Restructure a **subclause** before replacing the sentence. (Add "(a)" and "(b)" to split a compound condition.)
-- Replace a **sentence** before replacing the clause.
-- Only replace a **whole clause** when the counterparty's version is so far from your position that surgical edits would be harder to read than a fresh draft — and when you do, say so in the transmittal: "We've replaced §8.2 rather than marking it up because the changes were extensive. Happy to walk you through the delta."
+常见冲突：
+- 我们的政策禁止供应商在我们的数据上训练——供应商条款默认允许。（合同需要明确禁止或选择退出确认。）
+- 我们的政策要求对某些用例进行人工审查——供应商条款说 AI 输出是最终的。（工作流需要强制执行人工步骤，而不是供应商条款。）
+- 我们的批准供应商列表不包括此供应商——或禁止列表包含。
+- 我们的政策要求向受影响方披露——供应商条款对 AI 系统能力施加了保密义务，这将阻止披露。
 
-When in doubt, smaller. A client who receives a surgical redline trusts that you read carefully. A client who receives a wholesale replacement wonders whether you read at all.
+标记每个不匹配。其中一个必须改变。
 
-## Output
+---
 
-**Before recommending signature of a vendor AI agreement (the version the company will execute):** Read `## Who's using this` in `~/.claude/plugins/config/claude-for-legal/ai-governance-legal/CLAUDE.md`. If the Role is Non-lawyer:
+## 红线粒度
 
-> Signing this vendor AI agreement has legal consequences. Have you reviewed this with an attorney? If yes, proceed. If no, here's a brief to bring to them:
+**以尽可能小的粒度编辑。** 红线是谈判工件，而不是重写。整个条款替换表示"我们抛弃了你的起草"——这很激进，它迫使对方重新阅读整个条款，并丢弃他们起草中合理的部分。外科手术式红线——删除一个词、插入一个短语、重构一个子条款——表示"我们有具体要求"，更快速地阅读、理解和接受。
+
+默认为实现剧本立场的最小编辑：
+- 替换**词**优先于短语。（"十二 (12)" → "二十四 (24)"）
+- 替换**短语**优先于句子。（"由买方支付" → "由买方已支付且应付"）
+- 重构**子条款**优先于替换句子。（添加"(a)"和"(b)"以分割复合条件。）
+- 替换**句子**优先于替换条款。
+- 只有当对方版本与你的立场相差甚远，以至于外科手术式编辑比全新草稿更难阅读时，才替换**整个条款**——如果你这样做，在传递函中说明："我们替换了 §8.2 而不是标记它，因为更改很广泛。很乐意带你了解差异。"
+
+有疑问时，选择更小的。收到外科手术式红线的客户相信你仔细阅读了。收到整体替换的客户会怀疑你是否读过。
+
+## 输出
+
+**在建议签署供应商 AI 协议（公司将执行的版本）之前：** 读取 `~/.claude/plugins/config/claude-for-legal/ai-governance-legal/CLAUDE.md` 中的 `## Who's using this`。如果角色是非律师：
+
+> 签署此供应商 AI 协议有法律后果。你是否已与律师审查？如果是，继续。如果否，这是带给他们的简报：
 >
-> [Generate a 1-page summary: the vendor and the use case, the key terms reviewed (data use, liability, auditability, model change, human review), where vendor positions diverge from policy, what's being accepted, what could go wrong, what to ask the attorney.]
+> [生成 1 页摘要：供应商和用例、审查的关键条款（数据使用、责任、可审计性、模型变更、人工审查）、供应商立场偏离政策的地方、正在接受什么、可能出什么问题、要问律师什么。]
 >
-> If you need to find an attorney, solicitor, barrister, or other authorised legal professional: your professional regulator's referral service is the fastest starting point (state bar in the US, SRA/Bar Standards Board in England & Wales, Law Society in Scotland/NI/Ireland/Canada/Australia, or your jurisdiction's equivalent).
+> 如果你需要找到律师、事务律师、大律师或其他授权法律专业人士：你的专业监管机构的推荐服务是最快的起点（美国的州律师协会、英格兰和威尔士的 SRA/Bar Standards Board、苏格兰/NI/爱尔兰/加拿大/澳大利亚的 Law Society，或你司法管辖区的同等机构）。
 
-Do not proceed past this gate without an explicit yes. Review/redline drafts for attorney consideration do not require the gate — signature does.
+在没有明确是的情况下不要越过此关卡。供律师审阅的审查/红线草稿不需要关卡——签署需要。
 
 ```markdown
 [WORK-PRODUCT HEADER — per plugin config ## Outputs — differs by role; see `## Who's using this`]
 
-*This review is derived from vendor contract terms that are typically confidential under NDA, and it may itself be privileged. It inherits the source's confidentiality and privilege status. Distributing it beyond the privilege circle (e.g., forwarding to the vendor, sharing in an open channel) can waive privilege and breach the NDA. Mark, store, and route accordingly.*
+*此审查来自通常受 NDA 保密约束的供应商合同条款，它本身也可能受特权保护。它继承来源的保密性和特权状态。将其分发到特权圈之外（例如，转发给供应商、在开放频道共享）可能会放弃特权并违反 NDA。相应地标记、存储和路由。*
 
-# Vendor AI Review: [Vendor Name]
+# 供应商 AI 审查：[供应商名称]
 
-**Document reviewed:** [AI addendum / main agreement AI provisions / ToS]
-**Reviewed:** [date]
-**Use case(s):** [what we're deploying this vendor's AI for]
-**Governance tier:** [Standard / Elevated / High]
-
----
-
-## Bottom line
-
-[Two sentences. Can we deploy under these terms? What has to change first?]
-
-**Issues:** [N]🔴 [N]🟠 [N]🟡 [N]🟢
+**审查的文档：** [AI 附录/主协议 AI 条款/ToS]
+**审查时间：** [date]
+**用例：** [我们为此供应商的 AI 部署什么]
+**治理层级：** [标准/提升/高]
 
 ---
 
-## Term-by-term
+## 底线
 
-[For each term above — vendor position, our position, gap, severity, proposed fix]
+[两句话。我们是否可以在这些条款下部署？首先需要更改什么？]
 
----
-
-## AI addendum status
-
-[Present / Absent — and what that means for this deployment]
+**问题：** [N]🔴 [N]🟠 [N]🟡 [N]🟢
 
 ---
 
-## AI policy consistency
+## 逐条分析
 
-[🟢 Consistent | 🟡 Flags: list]
-
----
-
-## Recommended redlines
-
-[Consolidated draft redlines. Review with counsel before sending externally. For critical
-issues where no fallback exists, flag for escalation rather than proposing language.]
+[对于上述每个条款——供应商立场、我们的立场、差距、严重性、建议修复]
 
 ---
 
-## If they won't move
+## AI 附录状态
 
-[For each 🔴 and 🟠: the fallback from `~/.claude/plugins/config/claude-for-legal/ai-governance-legal/CLAUDE.md`, or "escalate — outside fallback"
-and routing per escalation table]
+[存在/缺失——以及这对部署意味着什么]
+
+---
+
+## AI 政策一致性
+
+[🟢 一致 | 🟡 标记：列表]
+
+---
+
+## 建议红线
+
+[整合的红线草稿。在外部发送之前与律师一起审查。对于没有备用方案存在的关键问题，标记以供升级，而不是提议语言。]
+
+---
+
+## 如果他们不愿变更
+
+[对于每个 🔴 和 🟠：来自 `~/.claude/plugins/config/claude-for-legal/ai-governance-legal/CLAUDE.md` 的备用方案，或"升级——超出备用方案"
+并按升级表路由]
 ```
 
 ---
 
-## Practical notes
+## 实践说明
 
-**The training-on-data clause is the one most people miss.**
-Vendor AI terms have historically varied widely on whether API inputs can be used
-to train or improve models — some vendors permit it by default, others prohibit it,
-and many have changed their position over time. Do not assume any particular vendor's
-current stance without reading the specific agreement in front of you. This is almost
-always the most important term for any company with confidential or sensitive data,
-and it must be confirmed in writing, not assumed from reputation or prior experience.
+**数据训练条款是大多数人忽略的那个。**
+供应商 AI 条款在 API 输入是否可用于训练或改进模型方面历史上存在很大差异——一些供应商默认允许、另一些禁止，许多随时间改变了立场。不要假设任何特定供应商的当前立场，而不阅读面前的特定协议。对于任何拥有机密或敏感数据的公司，这几乎总是最重要的条款，并且必须以书面形式确认，而不是基于声誉或以往经验假设。
 
-**Map the AI stack.** Modern AI deployments are layered. Before reviewing terms, map the layers:
-1. **End-user SaaS application** (e.g., a legal tech tool, a CRM with AI scoring, a document assistant) — the tool your org signs up for
-2. **API gateway / orchestration layer** (e.g., Azure OpenAI Service, AWS Bedrock, Google Vertex, LangChain-hosted) — often invisible, always has its own terms
-3. **Model provider** (e.g., Anthropic, OpenAI, Google, Meta) — the LLM
-4. **Hosted knowledge base / RAG source** (e.g., a vector database, a third-party data corpus, a retrieval service) — the data Claude reads from
-5. **Additional subprocessors** — analytics, logging, fine-tuning partners
+**映射 AI 堆栈。** 现代 AI 部署是分层的。在审查条款之前，映射层：
+1. **终端用户 SaaS 应用程序**（例如，法律科技工具、带 AI 评分的 CRM、文档助手）——你的组织注册的工具
+2. **API 网关/编排层**（例如，Azure OpenAI Service、AWS Bedrock、Google Vertex、LangChain 托管）——通常不可见，始终有自己的条款
+3. **模型提供者**（例如，Anthropic、OpenAI、Google、Meta）——LLM
+4. **托管知识库/RAG 来源**（例如，向量数据库、第三方数据语料库、检索服务）——Claude 从中读取的数据
+5. **额外子处理器**——分析、日志记录、微调合作伙伴
 
-Ask: "Walk me through the stack — what does [SaaS tool] use under the hood? Is it built on a cloud AI service? Does it call a model provider directly or through a gateway? Does it use a hosted knowledge base?" Then review terms at EACH layer, not just the top.
+询问："带我了解堆栈——[SaaS 工具] 在底层使用什么？它是否基于云 AI 服务构建？它是直接还是通过网关调用模型提供者？它是否使用托管知识库？"然后审查每一层的条款，而不仅仅是顶层。
 
-Each handoff between layers is a flow-down risk. A commitment at layer 1 ("we won't train on your data") means nothing if layer 3's terms say otherwise and layer 1 never flowed the commitment down.
+每层之间的每次切换都是一个传递风险。第 1 层的承诺（"我们不会在你的数据上训练"）如果第 3 层的条款另有规定且第 1 层从未传递承诺，则毫无意义。
 
-**Flow-down test.** For each flagged stacked-vendor term — especially training-on-data, data retention, subprocessor changes, and liability — don't just flag "check upstream terms." DO THE CHECK:
+**传递测试。** 对于每个标记的堆叠供应商条款——特别是数据训练、数据保留、子处理器变更和责任——不要只是标记"检查上游条款"。**做检查：**
 
-1. **Search the contract for flow-down language.** Look for: "subprocessor obligations no less protective than," "flow-down of data commitments," "back-to-back terms," "Provider shall ensure that its subprocessors are bound by," "equivalent obligations."
-2. **If present:** Quote it, verify it covers the specific flagged term, and flag whether it's enforceable (who can enforce it — you, or only the intermediate vendor?).
-3. **If absent:** Produce a specific redline requiring it:
-   > "Add to §[X]: Provider shall ensure that any third-party model providers, infrastructure providers, or subprocessors used in delivering the Services are bound by obligations with respect to [Customer Data / AI training / data retention / confidentiality] no less protective than those set forth in this Agreement, and shall be responsible for any breach of this Agreement caused by such third parties."
-4. **Flag the gap with a severity:** 🔴 if the term is training-on-data or liability and there's no flow-down; 🟡 if the term is less sensitive or there's partial flow-down.
+1. **在合同中搜索传递语言。** 查找："子处理器义务不低于"、"数据承诺的传递"、"背靠背条款"、"提供者应确保其子处理者受以下约束"、"等效义务"。
+2. **如果存在：** 引用它，验证它涵盖特定的标记条款，并标记它是否可执行（谁可以执行它——你，还是只有中间供应商？）。
+3. **如果缺失：** 生成要求它的具体红线：
+   > "在 §[X] 中添加：提供者应确保在提供服务中使用的任何第三方模型提供者、基础设施提供者或子处理者在 [客户数据/AI 训练/数据保留/保密性] 方面受到不低于本协议规定的义务约束，并对此类第三方导致的本协议违反负责。"
+4. **用严重性标记差距：** 如果条款是数据训练或责任且没有传递，则为 🔴；如果条款不那么敏感或有部分传递，则为 🟡。
 
-"Escalate and check upstream" is where compliance dies. Produce the test and the redline.
+"升级并检查上游"是合规消亡的地方。生成测试和红线。
 
-**Acceptable use policies flip the frame.**
-AUPs tell you what you can't do; they don't tell you what the vendor can do.
-Don't let a clean AUP review substitute for reading the data use and liability terms.
+**可接受使用政策会翻转框架。**
+AUP 告诉你不能做什么；它们不告诉你供应商可以做什么。
+不要让干净的 AUP 审查替代阅读数据使用和责任条款。
 
-**Renewals are leverage points.**
-If the current agreement is unfavorable and the vendor won't renegotiate mid-term,
-document the gaps now and flag them for the renewal. Flag to procurement:
-"This renewal should not close without AI addendum addressing [list]."
+**续约是杠杆点。**
+如果当前协议不利，而供应商不愿意在期中重新谈判，
+现在记录差距并将其标记以供续约。向采购标记：
+"此续约不应在解决 [列表] 的 AI 附录之前完成。"
 
-**Builder context adds a layer.**
-If the company is a builder using a vendor's model as a foundation, the vendor's terms
-also govern what the company can offer its own customers. Some terms prohibit certain
-downstream uses. Check use restrictions against the product roadmap, not just current
-internal workflows.
+**构建者背景增加一层。**
+如果公司是使用供应商模型作为基础的构建者，供应商条款
+还管辖公司可以向其自己的客户提供什么。有些条款禁止某些
+下游用途。根据产品路线图检查使用限制，而不仅仅是当前内部工作流。
 
 ---
 
-## Close with the next-steps decision tree
+## 以下一步决策树结束
 
-End with the next-steps decision tree per CLAUDE.md `## Outputs`. Customize the options to what this skill just produced — the five default branches (draft the X, escalate, get more facts, watch and wait, something else) are a starting point, not a lock-in. The tree is the output; the lawyer picks.
+根据 CLAUDE.md `## Outputs` 的下一步决策树结束。根据此 skill 刚刚生成的内容自定义选项——五个默认分支（起草 X、升级、获取更多事实、观察等待、其他）是起点，而不是锁定。树就是输出；律师选择。
 
-## What this skill does not do
+## 此 skill 不做什么
 
-- It doesn't review the DPA provisions of the same agreement — run
-  `/privacy-legal:dpa-review`, if the plugin is installed, for that.
-- It doesn't decide whether to accept terms outside the fallbacks. It routes those
-  per the escalation table in `~/.claude/plugins/config/claude-for-legal/ai-governance-legal/CLAUDE.md`.
-- It doesn't evaluate vendor security posture beyond what's in the agreement —
-  that's a security team function.
+- 它不审查同一协议的 DPA 条款——如果安装了该 plugin，运行 `/privacy-legal:dpa-review`。
+- 它不决定是否接受备用方案之外的条款。它按 `~/.claude/plugins/config/claude-for-legal/ai-governance-legal/CLAUDE.md` 中的升级表路由这些。
+- 它不评估协议之外的供应商安全态势——那是安全团队的职能。

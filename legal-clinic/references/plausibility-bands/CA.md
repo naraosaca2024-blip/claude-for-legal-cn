@@ -1,46 +1,42 @@
-# Plausibility bands — California (and federal, always loaded)
+<!--
+This file is a Chinese translation of the original by Anthropic PBC.
+Original: https://github.com/anthropics/claude-for-legal
+Licensed under Apache License 2.0
+-->
 
-These are rough plausibility ranges, not computations. If a student-entered due date falls outside the range, the `/legal-clinic:deadlines --add` flow flags it for re-check. The skill does **not** compute — it catches gross arithmetic errors in the student's own work. Every citation here is `[model knowledge — verify]` unless the supervisor has replaced it with a connector-retrieved or user-provided source.
+# 合理性区间 — 加利福尼亚州（以及联邦，始终加载）
 
-## How to use
+以下是粗略的合理性区间，而非精确计算结果。如果学生输入的截止日期超出区间，`/legal-clinic:deadlines --add` 流程会将其标记为需要重新检查。该 skill **不进行计算**——它捕获学生自己工作中的严重算术错误。此处所有引用均为 `[model knowledge — verify]`，除非督导律师已将其替换为通过连接器检索或用户提供的来源。
 
-- One row per deadline type the clinic sees regularly.
-- Typical range is a plausibility window, not a holding.
-- Cite the governing rule in the Notes column so the student has somewhere to recompute against.
-- Computation-of-time rules (e.g., CCP § 12, § 12a for CA; FRCP 6 for federal) apply to every entry; re-state them in Notes when relevant.
+## 使用方法
 
-## California
+- 每行对应诊所常见的一种截止日期类型。
+- 典型区间是合理性窗口，而非法律裁决。
+- 在"备注"列中引用控制规则，以便学生有地方重新计算核验。
+- 时间计算规则（加州：CCP § 12、§ 12a；联邦：FRCP 6）适用于每个条目；在相关时在备注中重申。
 
-| Deadline type | Typical range from triggering event | Notes |
+## 加利福尼亚州
+
+| 截止日期类型 | 从触发事件起的典型区间 | 备注 |
 |---|---|---|
-| CA UD response (post-AB 2347) | ~10-14 calendar days after service | Computed in court days per CCP § 1167 + § 12a; confirm against the current rule |
-| CA answer to complaint (non-UD) | ~30 days after service | CCP § 412.20 / § 430.40; confirm |
-| CA demurrer / MTD | ~30 days after service | Filed in lieu of answer; CCP § 430.40 |
-| Notice of appeal (CA civil) | ~60 days after notice of entry | CRC 8.104; confirm triggering event (notice served vs. mailed) |
-| CA statute of limitations — personal injury | ~2 years from injury | CCP § 335.1; discovery rule complications |
-| CA statute of limitations — written contract | ~4 years from breach | CCP § 337 |
-| CA statute of limitations — oral contract | ~2 years from breach | CCP § 339 |
-| CA statute of limitations — fraud | ~3 years from discovery | CCP § 338(d) |
-| CA small claims appeal | ~30 days after clerk mails notice of entry | CCP § 116.710; limited de novo scope |
-| CA FEHA right-to-sue lawsuit | ~1 year from RTS notice (CRD) | Gov. Code § 12965; older accrual rules may apply pre-amendment |
-| CA unlawful-detainer post-judgment — motion to stay | ~5 calendar days | CCP § 918, local rules; emergency timelines |
+| CA UD 答辩（AB 2347 修正后） | 送达后约 10-14 个日历日 | 按 CCP § 1167 + § 12a 以法庭天数计算；请核对当前规则 |
+| CA 答复诉状（非 UD） | 送达后约 30 天 | CCP § 412.20 / § 430.40；请确认 |
+| CA 异议状/驳回动议 | 送达后约 30 天 | 代替答辩提交；CCP § 430.40 |
+| 上诉通知（CA 民事） | 判决通知进入后约 60 天 | CRC 8.104；确认触发事件（送达通知 vs. 邮寄通知） |
+| CA 诉讼时效 — 人身伤害 | 受伤后约 2 年 | CCP § 335.1；发现规则的复杂情况 |
+| CA 诉讼时效 — 书面合同 | 违约后约 4 年 | CCP § 337 |
+| CA 诉讼时效 — 口头合同 | 违约后约 2 年 | CCP § 339 |
+| CA 法院聆讯（UD，小型索赔） | 文件提交后约 20-70 天 | UD：CCP § 1170；小型索赔：CCP § 116.330；实际日期因法院而异 |
+| DFEH/CRD 投诉 — 雇佣 | 歧视行为后 3 年内（加州） | Gov. Code § 12960（2020 年修正案延长至 3 年）；确认 |
+| EEOC 投诉（联邦，CA） | 歧视行为后 300 天内 | 42 U.S.C. § 2000e-5(e)(1)（双重申报州 300 天规则）；确认 |
+| 遭驱逐记录封存（加州） | 裁决后 60 天，无上诉且案件结案 | CCP § 1161.2；条件复杂；请研究 |
 
-## Federal (always loaded alongside any state)
+## 联邦（始终加载，适用于联邦法庭案件）
 
-| Deadline type | Typical range from triggering event | Notes |
+| 截止日期类型 | 从触发事件起的典型区间 | 备注 |
 |---|---|---|
-| Federal civil answer (Rule 12(a)) | ~21 days after service (60 / 90 if waived) | FRCP 12(a); confirm by service method |
-| Federal MTD / Rule 12 motion | Same as answer window | Filed in lieu of answer; FRCP 12(b) |
-| Notice of appeal (federal civil) | ~30 days after judgment entry | FRAP 4(a)(1)(A); 60 days if US is a party (FRAP 4(a)(1)(B)) |
-| Rule 4 service of process | 90 days after complaint filed | FRCP 4(m); court may extend |
-| Rule 26(f) conference | Before scheduling order, typically ~21 days before Rule 16 | FRCP 26(f); local rules vary |
-| Asylum one-year filing rule | ~1 year from most recent entry | 8 USC § 1158(a)(2)(B); exceptions exist |
-| EOIR / immigration court — typical response/motion | Per NTA or order — no universal default | Read the order; do not assume |
-| Motion for reconsideration (EOIR) | ~30 days after final order | 8 CFR § 1003.23(b)(1); confirm |
-| Habeas petition — § 2254 1-year SOL | ~1 year from final state judgment or new fact/law | 28 USC § 2244(d); tolling rules |
-
-## Computation-of-time reminder
-
-- **California courts:** CCP § 12 (excludes first day, includes last), § 12a (extends to next court day if deadline falls on weekend/holiday), § 1010.6 / § 1013 (service-method extensions for mail, fax, electronic).
-- **Federal courts:** FRCP 6(a) (calendar day counting, weekend/holiday extension), FRCP 6(d) (3-day mail extension where applicable).
-- **Local rules:** Always confirm. This band file is a plausibility check, not a substitute for the court's own rule.
+| 联邦民事答辩 | 送达后 21 天（美国政府 60 天） | FRCP 12(a)(1)-(2) |
+| FRCP 12(b) 动议 | 送达后 21 天（与答辩期限相同） | FRCP 12(b) |
+| 民事上诉通知 | 判决后 30 天（政府 60 天） | FRAP 4(a)(1)；确认触发事件 |
+| 中级法院上诉 — 联邦 | 地方法院命令后约 30 天 | 取决于上诉类型；参见 FRAP 4 和 28 U.S.C. § 2107 |
+| 联邦法院诉讼时效（基于联邦问题） | 因制度而异 | 无通用联邦诉讼时效；引用具体制度 |

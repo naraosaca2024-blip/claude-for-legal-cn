@@ -1,21 +1,27 @@
 ---
 name: memo
 description: >
-  IRAC-scaffolded case analysis memo with research gaps flagged — the
-  scaffold, not the analysis. Rule blocks are RESEARCH NEEDED, Application
-  is STUDENT ANALYSIS prompts, Conclusion is blank. Use when a student needs
-  to scaffold a case analysis memo, write up their analysis, or build an
-  IRAC memo for a case.
-argument-hint: "[optional: specific issue to focus]"
+  IRAC 脚手架案件分析备忘录，带有研究差距标记——脚手架，不是分析。
+  规则块是 RESEARCH NEEDED，应用是 STUDENT ANALYSIS 提示，结论留空。
+  当学生需要为案件分析备忘录构建脚手架、撰写他们的分析或构建
+  IRAC 备忘录时使用。
+argument-hint: "[可选：要聚焦的具体问题]"
 ---
+
+<!--
+This file is a Chinese translation of the original by Anthropic PBC.
+Original: https://github.com/anthropics/claude-for-legal
+Licensed under Apache License 2.0
+-->
+
 
 # /memo
 
-1. Load `~/.claude/plugins/config/claude-for-legal/legal-clinic/CLAUDE.md` → practice areas, jurisdiction.
-2. Use the workflow below. Read intake summary / case notes.
-3. Frame issues as questions. Scaffold IRAC for each — Rule blocks are RESEARCH NEEDED, Application is STUDENT ANALYSIS prompts, Conclusion is blank.
-4. Strengths/weaknesses/open questions. Research gaps summary.
-5. Output with prominent "the analysis is yours" label.
+1. 加载 `~/.claude/plugins/config/claude-for-legal/legal-clinic/CLAUDE.md` → 执业领域、司法管辖区。
+2. 使用以下工作流。阅读接案摘要/案件笔记。
+3. 将问题构建为问题。为每个问题搭建 IRAC 脚手架——规则块是 RESEARCH NEEDED，应用是 STUDENT ANALYSIS 提示，结论留空。
+4. 优势/弱点/开放问题。研究差距摘要。
+5. 输出带有醒目的"分析是您的"标签。
 
 ```
 /legal-clinic:memo
@@ -23,188 +29,178 @@ argument-hint: "[optional: specific issue to focus]"
 
 ---
 
-# Memo: Internal Case Analysis
+# 备忘录：内部案件分析
 
-## Purpose
+## 目的
 
-The case analysis memo is where the student's thinking lives. This skill provides the IRAC scaffolding and flags the research gaps — the student fills in the analysis.
+案件分析备忘录是学生思考存在的地方。此 skill 提供 IRAC 脚手架并标记研究差距——学生填充分析。
 
-**The analysis is the student's.** This skill structures; it doesn't conclude.
+**分析是学生的。** 此 skill 构建结构；它不下结论。
 
-## Load context
+## 加载上下文
 
-`~/.claude/plugins/config/claude-for-legal/legal-clinic/CLAUDE.md` → practice areas, jurisdiction, supervision style.
-Intake summary and case notes for facts.
+`~/.claude/plugins/config/claude-for-legal/legal-clinic/CLAUDE.md` → 执业领域、司法管辖区、督导方式。
+接案摘要和案件笔记用于事实。
 
-## Pedagogy check
+## 教育学检查
 
-Read the supervisor guide for this practice area at `~/.claude/plugins/config/claude-for-legal/legal-clinic/guides/<practice-area>.md`. Check the `pedagogy_posture` setting:
+阅读 `~/.claude/plugins/config/claude-for-legal/legal-clinic/guides/<practice-area>.md` 中此执业领域的督导指南。检查 `pedagogy_posture` 设置：
 
-- **`guide` (default):** Produce the IRAC structure and the research-gap list. Ask the student to draft each rule statement themselves from research, rather than giving them a framework. Give feedback on what they wrote. Offer to fill the framework rule for a section only when the student has tried once.
-- **`assist`:** Produce the memo scaffold and fill what can be filled. Flag items for student review. The student edits and learns by reviewing. (Note: this memo skill always leaves the `[STUDENT ANALYSIS]` and `[STUDENT CONCLUSION]` blocks blank by design — `assist` means the skill produces the IRAC scaffold and framework rule statement; it does not produce the application or the conclusion.)
-- **`teach`:** Don't produce the framework or the scaffold content. Ask the student to frame the issues, state the rules from their research, and do the application. Give feedback. Ask leading questions when they're stuck. Only show a model rule statement or a model application paragraph after two attempts, and only for the section they're stuck on. Track what they got right and wrong so the supervisor can see progress.
+- **`guide`（默认）：** 产生 IRAC 结构和研究差距列表。要求学生从研究中自己起草每个规则陈述，而不是给他们框架。对他们写的内容给出反馈。只有当学生尝试过一次时才提供填充框架规则的选项。
+- **`assist`：** 产生备忘录脚手架并填充可以填充的内容。标记需要学生审查的项目。学生通过审查进行编辑和学习。（注意：此备忘录 skill 始终按设计将 `[STUDENT ANALYSIS]` 和 `[STUDENT CONCLUSION]` 块留空——`assist` 意味着 skill 产生 IRAC 脚手架和框架规则陈述；它不产生应用或结论。）
+- **`teach`：** 不产生框架或脚手架内容。要求学生构建问题、从研究中陈述规则并进行应用。给出反馈。当他们卡住时提出引导性问题。仅在两次尝试后展示模型规则陈述或模型应用段落，并且仅展示他们卡住的部分。跟踪他们做对和做错的内容，以便督导可以看到进展。
 
-If no guide exists, use `guide`. If the guide exists but doesn't set a posture, use `guide`.
+如果不存在指南，使用 `guide`。如果指南存在但没有设置姿态，使用 `guide`。
 
-Whatever the posture, the output always includes: "**Pedagogy mode: [assist/guide/teach]** — set by your supervisor's guide. This means I [description of what the student did vs what the skill did]."
+无论姿态如何，输出始终包括："**教育学模式：[assist/guide/teach]** — 由您督导的指南设置。这意味着我 [学生做什么与 skill 做什么的描述]。"
 
-## Workflow
+## 工作流
 
-### Step 1: Frame the issues
+### 步骤 1：构建问题
 
-From the intake summary and case notes: what are the legal questions this case presents?
+从接案摘要和案件笔记：这个案件提出了什么法律问题？
 
-State each as a question. Not "habitability" — "Can the client assert a habitability defense to the eviction based on the broken heater, and if so, does it offset the rent owed?"
+将每个陈述为问题。不是"可居住性"——"客户是否可以基于坏掉的暖器对驱逐提出可居住性辩护，如果可以，它是否抵消所欠租金？"
 
-If there are multiple issues, each gets its own IRAC block.
+如果有多个问题，每个获得自己的 IRAC 块。
 
-### Step 2: Scaffold the IRAC
+### 步骤 2：搭建 IRAC 脚手架
 
-For each issue:
+对于每个问题：
 
-**Issue:** Stated as a question (from Step 1).
+**问题：** 陈述为问题（来自步骤 1）。
 
-**Rule:** This is a research gap, not a conclusion. State what the student needs to find:
+**规则：** 这是研究差距，不是结论。陈述学生需要找到什么：
 
-> `[RESEARCH NEEDED: [State] habitability doctrine — warranty of habitability
-> elements, what conditions qualify, remedies available including rent offset.
-> Start with: [State] landlord-tenant statute, then case law on heater/heat
-> specifically. See /research-start for a roadmap.]`
+> `[RESEARCH NEEDED: [州] 可居住性学说——适住性保证要素、什么条件合格、可用的救济包括租金抵扣。从以下开始：[州] 房东-租客法规，然后是关于暖器/供热的案例法。参见 /research-start 获取路线图。]`
 
-If the skill has high confidence in the general rule framework (e.g., "most states recognize an implied warranty of habitability"), state that as a framework starting point — **but explicitly mark it as unverified**:
+如果 skill 对一般规则框架有高置信度（例如，"大多数州承认隐含的可居住性保证"），将其陈述为框架起点——**但明确标记为未验证**：
 
-> *Framework (unverified — confirm for [State]):* Most jurisdictions recognize
-> an implied warranty of habitability requiring landlords to maintain
-> conditions fit for human occupation. Breach may give rise to rent withholding,
-> repair-and-deduct, or rent abatement.
-> `[VERIFY: [State]'s specific elements and remedies]`
+> *框架（未验证——为 [州] 确认）：* 大多数司法管辖区承认要求房东维护适合人类居住条件的隐含可居住性保证。违反可能导致扣租、修理和扣减或租金减免。
+> `[VERIFY: [州] 的具体要素和救济]`
 
-**Application:** This is where the student's analysis goes. Scaffold the structure, don't fill it:
+**应用：** 这是学生分析的地方。搭建结构，不填充：
 
-> `[STUDENT ANALYSIS: Apply the rule to the facts. Key facts to address:
-> - Heater broken since November — how long is "unreasonable"?
-> - Client notified landlord [when? how? documented?]
-> - Landlord's response or lack thereof
-> - [State]-specific: does client need to have given written notice?
->   deposited rent in escrow? other procedural prerequisites?]`
+> `[STUDENT ANALYSIS: 将规则应用于事实。要处理的关键事实：
+> - 暖器自 11 月以来坏了——"不合理"有多长？
+> - 客户何时通知房东 [通知方式？有记录吗？]
+> - 房东的响应或缺乏响应
+> - [州] 特定：客户是否需要发出书面通知？
+>   将租金存入托管？其他程序先决条件？]`
 
-List the facts that matter. Let the student do the applying.
+列出重要的事实。让学生做应用。
 
-**Conclusion:** Explicitly blank:
+**结论：** 明确留空：
 
-> `[STUDENT CONCLUSION: Based on your research and analysis above, what's the
-> likely outcome? How strong is this defense? What are the weaknesses?]`
+> `[STUDENT CONCLUSION: 根据您上面的研究和分析，可能的结果是什么？这个辩护有多强？弱点是什么？]`
 
-### Step 3: Identify strengths, weaknesses, open questions
+### 步骤 3：识别优势、弱点、开放问题
 
-Separate section, after the IRAC blocks:
+独立部分，在 IRAC 块之后：
 
-**Strengths (apparent from facts — student should test these):**
-- [Fact that seems helpful and why]
+**优势（从事实看出的——学生应测试这些）：**
+- [看起来有帮助的事实以及为什么]
 
-**Weaknesses (apparent from facts — student should assess how serious):**
-- [Fact that seems harmful and why]
-- `[UNCERTAIN: whether [X] is actually a weakness — depends on [State] rule on [Y]]`
+**弱点（从事实看出的——学生应评估严重程度）：**
+- [看起来有害的事实以及为什么]
+- `[不确定：[X] 是否真的是弱点——取决于 [州] 对 [Y] 的规则]`
 
-**Open questions (things the memo can't answer without more info):**
-- Factual: [what we don't know from the client]
-- Legal: [what needs research]
-- Strategic: [judgment calls for the student/professor]
+**开放问题（备忘录在更多信息下无法回答的事情）：**
+- 事实方面：[我们从客户那里不知道的]
+- 法律方面：[需要研究的]
+- 策略方面：[学生/教授的判断调用]
 
-## Output
+## 输出
 
 ```markdown
 ═══════════════════════════════════════════════════════════════════════
-  AI-ASSISTED SCAFFOLD — THE ANALYSIS IS YOURS TO WRITE
-  Every [RESEARCH NEEDED] and [STUDENT ANALYSIS] block is a prompt, not
-  a placeholder to delete. The thinking happens when you fill them in.
+  AI 辅助脚手架——分析由您来写
+  每个 [RESEARCH NEEDED] 和 [STUDENT ANALYSIS] 块都是提示，不是
+  要删除的占位符。思考发生在您填充它们的时候。
 ═══════════════════════════════════════════════════════════════════════
 
-# Case Analysis Memo: [Client] — [Matter]
+# 案件分析备忘录：[客户] — [事项]
 
-**Date:** [date] | **By:** [student] | **For:** [Professor]
-
----
-
-## Bottom line
-
-[Take the case / Decline because X / Need more info on Y — next step is Z]
+**日期：** [日期] | **撰写：** [学生] | **致：** [教授]
 
 ---
 
-## Issues Presented
+## 要点
 
-1. [Issue as question]
-2. [Issue as question]
-
----
-
-## Issue 1: [Issue]
-
-### Rule
-
-[Framework starting point with VERIFY flags, and RESEARCH NEEDED blocks]
-
-### Application
-
-[STUDENT ANALYSIS scaffold with the facts that matter]
-
-### Conclusion
-
-[STUDENT CONCLUSION — blank]
+[接受案件 / 因 X 拒绝 / 需要更多关于 Y 的信息——下一步是 Z]
 
 ---
 
-[repeat for each issue]
+## 呈现的问题
+
+1. [问题陈述]
+2. [问题陈述]
 
 ---
 
-## Strengths
+## 问题 1：[问题]
 
-[list with caveats]
+### 规则
 
-## Weaknesses
+[带有 VERIFY 标记的框架起点，以及 RESEARCH NEEDED 块]
 
-[list with UNCERTAIN flags where applicable]
+### 应用
 
-## Open Questions
+[带有重要事实的 STUDENT ANALYSIS 脚手架]
 
-**Factual:** [list]
-**Legal:** [list — these feed /research-start]
-**Strategic:** [list — these are for discussion with Professor]
+### 结论
+
+[STUDENT CONCLUSION — 留空]
 
 ---
 
-## Research gaps summary
+[每个问题重复]
 
-[Every RESEARCH NEEDED block pulled out into one list, so the student can
-work through them systematically — and can run /research-start on each]
+---
+
+## 优势
+
+[带有注意事项的列表]
+
+## 弱点
+
+[带有适用 UNCERTAIN 标记的列表]
+
+## 开放问题
+
+**事实方面：** [列表]
+**法律方面：** [列表——这些供给 /research-start]
+**策略方面：** [列表——这些用于与教授讨论]
+
+---
+
+## 研究差距摘要
+
+[将每个 RESEARCH NEEDED 块拉出到一个列表中，以便学生可以
+系统性地处理——并可以在每个上运行 /research-start]
 
 ═══════════════════════════════════════════════════════════════════════
 
-## What this memo is NOT
+## 此备忘录不是什么
 
-This is a scaffold, not an analysis. The [STUDENT ANALYSIS] blocks are where
-the educational value lives — filling them in is the work. A memo where those
-blocks are still empty is a memo that hasn't been written yet.
+这是脚手架，不是分析。[STUDENT ANALYSIS] 块是教育价值所在的地方——填充它们就是工作。这些块仍然为空的备忘录是还没有被写过的备忘录。
 
 ---
 
-**Cite verification — required before use.** Any framework rules, cases, or statutes suggested above were generated by an AI model and have not been verified. Before relying on any citation — or including it in client work — run it through Westlaw, Fastcase, CourtListener, or your clinic's research platform for accuracy and current good-law status. Flag unverified citations to your supervisor.
+**引用验证——使用前必需。** 上面建议的任何框架规则、案例或法规都由 AI 模型生成，尚未验证。在依赖任何引用之前——或将其包含在客户工作中——通过 Westlaw、Fastcase、CourtListener 或您诊所的研究平台验证其准确性和当前良好法律状态。向您的督导标记未验证的引用。
 
-**Source attribution.** Tag every suggested citation in the scaffold with where it came from: `[Westlaw]`, `[CourtListener]`, `[Fastcase]`, or the MCP tool name for citations retrieved from a legal research connector; `[web search — verify]` for web-search citations; `[model knowledge — verify]` for citations recalled from training data; `[user provided]` for citations the supervising attorney or case file supplied. Citations tagged `verify` carry higher fabrication risk than tool-retrieved citations and should be checked first. Never strip or collapse the tags — they are the supervisor's fastest signal about which citations to verify.
+**来源归属。** 为脚手架中建议的每个引用标记其来源：`[Westlaw]`、`[CourtListener]`、`[Fastcase]` 或从法律研究连接器检索的引用的 MCP 工具名称；`[web search — verify]` 用于网络搜索引用；`[model knowledge — verify]` 用于从训练数据中回忆的引用；`[user provided]` 用于督导律师或案件文件提供的引用。标记为 `verify` 的引用比工具检索的引用具有更高的编造风险，应首先检查。永不要剥离或折叠标记——它们是督导关于哪些引用需要验证的最快信号。
 
-**No silent supplement.** If a query to a configured research tool returns few or no results for a rule the memo needs, say so and stop. Do NOT fill the gap from web search or model knowledge without asking. Say: "The search returned [N] results from [tool]. Coverage appears thin for [rule / issue]. Options: (1) broaden the search query, (2) try a different research tool, (3) search the web — results will be tagged `[web search — verify]` and should be checked against a primary source before relying, or (4) leave `[RULE TO VERIFY]` and stop. Which would you like?" The supervising attorney decides whether to accept lower-confidence sources.
+**没有静默补充。** 如果对配置的研究工具的查询为备忘录需要的规则返回很少或没有结果，说出来并停止。不要在没有询问的情况下从网络搜索或模型知识中填充差距。说："搜索从 [tool] 返回了 [N] 个结果。对于 [规则/问题]，覆盖率看起来很薄。选项：(1) 扩大搜索查询，(2) 尝试不同的研究工具，(3) 搜索网络——结果将标记为 `[web search — verify]`，应在依赖之前根据主要来源检查，或 (4) 保留 `[RULE TO VERIFY]` 并停止。您想要哪个？" 督导律师决定是否接受较低置信度的来源。
 ```
 
-## What this skill does NOT do
+## 此 skill 不做什么
 
-- **Write the analysis.** It scaffolds the IRAC and flags the gaps. The student reasons through the application.
-- **Provide verified rules.** Every rule statement is explicitly unverified until the student researches it.
-- **Reach conclusions.** The C in IRAC is blank on purpose.
-- **Replace the conversation with the professor.** The Open Questions / Strategic section is the agenda for that conversation, not a substitute.
+- **撰写分析。** 它搭建 IRAC 脚手架并标记差距。学生推理应用。
+- **提供验证过的规则。** 每个规则陈述都明确未验证，直到学生研究它。
+- **得出结论。** IRAC 中的 C 是故意留空的。
+- **替代与教授的对话。** 开放问题/策略部分是那场对话的议程，不是替代。
 
-## Close with the next-steps decision tree
+## 以下一步决策树关闭
 
-End with the next-steps decision tree per CLAUDE.md `## Outputs`. Customize the options to what this skill just produced — the five default branches (draft the X, escalate, get more facts, watch and wait, something else) are a starting point, not a lock-in. The tree is the output; the lawyer picks.
-
+按照 CLAUDE.md `## 输出` 以下一步决策树结束。根据此 skill 刚刚生成的内容自定义选项——五个默认分支（起草 X、升级、获取更多事实、观察等待、其他事情）是起点，而不是锁定。树就是输出；律师选择。

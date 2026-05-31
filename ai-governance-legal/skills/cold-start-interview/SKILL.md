@@ -1,30 +1,35 @@
 ---
 name: cold-start-interview
 description: >
-  Run the cold-start interview — learns your AI governance practice and writes
-  `~/.claude/plugins/config/claude-for-legal/ai-governance-legal/CLAUDE.md` from
-  your AI policy, a reference impact assessment, and key vendor AI agreements.
-  Use when the practice profile is missing or contains `[PLACEHOLDER]` markers,
-  or when user says "set up ai governance plugin", "onboard me", "configure ai
-  governance".
+  运行冷启动访谈——了解你的 AI 治理执业情况，并根据你的 AI 政策、参考影响评估和主要供应商 AI 协议，
+  写入 `~/.claude/plugins/config/claude-for-legal/ai-governance-legal/CLAUDE.md`。
+  当执业档案缺失或包含 `[PLACEHOLDER]` 标记，或用户说"set up ai governance plugin"、"onboard me"、
+  "configure ai governance"时使用。
 argument-hint: "[--redo | --check-integrations]"
 ---
 
+<!--
+This file is a Chinese translation of the original by Anthropic PBC.
+Original: https://github.com/anthropics/claude-for-legal
+Licensed under Apache License 2.0
+-->
+
+
 # /cold-start-interview
 
-1. Check `~/.claude/plugins/config/claude-for-legal/ai-governance-legal/CLAUDE.md` — if populated and no `--redo`, confirm before overwriting.
-2. Run the interview using the workflow below (includes Part 0 role + integration check).
-3. Seed docs: AI/acceptable use policy (URL or file), a prior impact assessment, key vendor AI agreements, model inventory or allowlist/blocklist if they exist. Read all provided.
-4. Extract: policy commitments and prohibitions, vendor positions (note gaps vs. stated), impact assessment structure, approved/prohibited tool lists.
-5. Migration: if a populated CLAUDE.md (no `[PLACEHOLDER]` markers) exists at `~/.claude/plugins/cache/claude-for-legal/ai-governance-legal/*/CLAUDE.md` but not at the config path, copy it to the config path and tell the user what was migrated.
-6. Write `~/.claude/plugins/config/claude-for-legal/ai-governance-legal/CLAUDE.md` (create parent directories as needed). Show summary. Offer first task.
+1. 检查 `~/.claude/plugins/config/claude-for-legal/ai-governance-legal/CLAUDE.md`——如已填充且无 `--redo`，在覆盖前确认。
+2. 使用以下工作流运行访谈（包括第 0 部分角色 + 集成检查）。
+3. 种子文档：AI/可接受使用政策（URL 或文件）、先前影响评估、主要供应商 AI 协议、模型清单或允许/禁止列表（如存在）。读取所有提供的文档。
+4. 提取：政策承诺和禁止、供应商立场（注意与声明的差距）、影响评估结构、已批准/禁止工具列表。
+5. 迁移：如果在 `~/.claude/plugins/cache/claude-for-legal/ai-governance-legal/*/CLAUDE.md` 存在已填充的 CLAUDE.md（无 `[PLACEHOLDER]` 标记）但不在配置路径，将其复制到配置路径并告知用户迁移了什么。
+6. 写入 `~/.claude/plugins/config/claude-for-legal/ai-governance-legal/CLAUDE.md`（根据需要创建父目录）。显示摘要。提供第一个任务。
 
-## Flags
+## 标志
 
-- `--redo` — re-run the full interview and overwrite `~/.claude/plugins/config/claude-for-legal/ai-governance-legal/CLAUDE.md`.
-- `--check-integrations` — re-scan available MCP connectors and refresh the `## Available integrations` table in `~/.claude/plugins/config/claude-for-legal/ai-governance-legal/CLAUDE.md` without re-running the full interview. Use after setting up a new connector (Slack, document storage, scheduled-tasks).
+- `--redo` — 重新运行完整访谈并覆盖 `~/.claude/plugins/config/claude-for-legal/ai-governance-legal/CLAUDE.md`。
+- `--check-integrations` — 重新扫描可用的 MCP 连接器，并刷新 `~/.claude/plugins/config/claude-for-legal/ai-governance-legal/CLAUDE.md` 中的 `## Available integrations` 表，无需重新运行完整访谈。在设置新连接器（Slack、文档存储、定时任务）后使用。
 
-When probing: only report ✓ if an MCP tool call actually succeeded. Configured-but-untested connectors should be marked ⚪ with a one-line how-to for confirming. Never report ✓ based on `.mcp.json` declarations alone — that misleads users into thinking something is wired up when it isn't.
+探测时：只有在 MCP 工具调用实际成功时才报告 ✓。已配置但未测试的连接器应标记为 ⚪，并附一行确认方法。永远不要仅基于 `.mcp.json` 声明报告 ✓——这会误导用户以为某些东西已连接，而实际上并没有。
 
 ```
 /ai-governance-legal:cold-start-interview
@@ -33,656 +38,547 @@ When probing: only report ✓ if an MCP tool call actually succeeded. Configured
 
 ---
 
-## Purpose
+## 目的
 
-Learn how *this* AI governance team works — what role the company plays in the AI
-supply chain, which regulations actually apply to them, what their red lines are for
-AI use cases, and what good impact assessment looks like here. Write it into the plugin config
-so every other skill reads from the same understanding.
+了解*这个* AI 治理团队的工作方式——公司在 AI 供应链中扮演什么角色、哪些法规实际适用于他们、AI 用例的红线是什么，以及这里的良好影响评估是什么样的。将其写入 plugin 配置，使所有其他 skill 都从相同的理解中读取。
 
-AI governance postures vary enormously. A company that builds AI products for enterprise
-customers has almost nothing in common with a company that deploys off-the-shelf AI
-tools internally. The interview figures out which one this is before anything else —
-because builder obligations and deployer obligations are nearly opposite exercises.
+AI 治理立场差异极大。为企业客户构建 AI 产品的公司与在内部部署现成 AI 工具的公司几乎没有共同点。访谈首先弄清楚这是哪一种——因为构建者义务和部署者义务几乎是完全相反的工作。
 
-## Cold-start check
+## 冷启动检查
 
-Read `~/.claude/plugins/config/claude-for-legal/ai-governance-legal/CLAUDE.md`:
-- **Does not exist** → start the interview.
-- **Contains `<!-- SETUP PAUSED AT: -->`** → greet the user and offer to resume from that section.
-- **Contains `[PLACEHOLDER]` markers but no pause comment** → the template was never completed; offer to start fresh or resume from wherever the placeholders begin.
-- **Populated (no placeholders, no pause comment)** → already configured; skip unless `--redo`.
+读取 `~/.claude/plugins/config/claude-for-legal/ai-governance-legal/CLAUDE.md`：
+- **不存在** → 开始访谈。
+- **包含 `<!-- SETUP PAUSED AT: -->`** → 问候用户并提供从该部分恢复的选项。
+- **包含 `[PLACEHOLDER]` 标记但无暂停注释** → 模板从未完成；提供重新开始或从占位符开始的地方恢复。
+- **已填充（无占位符，无暂停注释）** → 已配置；跳过，除非使用 `--redo`。
 
-The template structure lives at `${CLAUDE_PLUGIN_ROOT}/CLAUDE.md` — use it as the section scaffold. Write the completed practice profile to the config path, creating parent directories as needed.
+模板结构位于 `${CLAUDE_PLUGIN_ROOT}/CLAUDE.md`——将其用作章节脚手架。将完成的执业档案写入配置路径，根据需要创建父目录。
 
-If a CLAUDE.md exists at the old cache path `~/.claude/plugins/cache/claude-for-legal/ai-governance-legal/*/CLAUDE.md` but not at the config path, copy it forward to the config path before proceeding.
+如果在旧缓存路径 `~/.claude/plugins/cache/claude-for-legal/ai-governance-legal/*/CLAUDE.md` 存在 CLAUDE.md 但不在配置路径，在继续之前将其复制到配置路径。
 
-## Check for the shared company profile
+## 检查共享公司档案
 
-Look for `~/.claude/plugins/config/claude-for-legal/company-profile.md`.
+查找 `~/.claude/plugins/config/claude-for-legal/company-profile.md`。
 
-- **If it exists:** Read it. Show a one-line confirmation: "You're [name], [practice setting], at [company], [industry], operating in [jurisdictions]. Right? (Or say 'update' to change the shared profile.)" If confirmed, skip the company questions — go straight to the plugin-specific ones.
-- **If it doesn't exist:** You'll be the first plugin this user set up. After the orientation and fork, ask the company questions and write them to the shared profile (per the template at `references/company-profile-template.md` in the plugin root), then continue with the plugin-specific questions. Tell the user: "I've saved your company profile — the other legal plugins will read it and skip these questions."
+- **如果存在：** 读取它。显示一行确认："你是 [name]，[practice setting]，在 [company]，[industry]，在 [jurisdictions] 运营。对吗？（或说 'update' 来更改共享档案。）"如果确认，跳过公司问题——直接进入 plugin 特定问题。
+- **如果不存在：** 你将是该用户设置的第一个 plugin。完成定向和分叉后，询问公司问题并将其写入共享档案（根据 plugin 根目录中 `references/company-profile-template.md` 的模板），然后继续进行 plugin 特定问题。告诉用户："我已保存你的公司档案——其他法律 plugin 将读取它并跳过这些问题。"
 
-The company questions that belong in the shared profile (and should NOT be re-asked if it exists): practice setting, company name, industry, what-you-sell, size, jurisdictions, regulators, risk appetite, escalation names. The plugin-specific questions (playbook positions, review framework, house style, supervision model, etc.) stay per-plugin.
+属于共享档案的公司问题（如果档案存在则不应重复询问）：执业设置、公司名称、行业、销售内容、规模、司法管辖区、监管机构、风险偏好、升级联系人。Plugin 特定问题（剧本立场、审查框架、内部风格、监督模型等）保留在每个 plugin 中。
 
-## Install scope check
+## 安装范围检查
 
-Before the orientation, if you notice the working directory is inside a project (not the user's home directory), flag it. Say once:
+在定向之前，如果你注意到工作目录在项目内部（不是用户的主目录），标记一次：
 
-> **Heads up — it looks like this plugin may be project-scoped, which means I can only read files in [current directory]. If you'll want me to read documents from elsewhere (Downloads, Documents, Dropbox), install user-scoped instead — see QUICKSTART.md. You can continue with project scope, but you'll need to move files into this folder.**
+> **注意——看起来这个 plugin 可能是项目范围的，这意味着我只能读取 [current directory] 中的文件。如果你希望我从其他地方（Downloads、Documents、Dropbox）读取文档，请改为安装用户范围——参见 QUICKSTART.md。你可以继续使用项目范围，但需要将文件移动到此文件夹中。**
 
-Ask the user to confirm before proceeding: continue with project scope, or pause to reinstall user-scoped. If the working directory *is* the user's home directory, skip this check silently.
+在继续前询问用户确认：继续使用项目范围，还是暂停重新安装用户范围。如果工作目录*是*用户的主目录，静默跳过此检查。
 
-## Before the interview starts
+## 访谈开始前
 
-Open with the fork-first preamble. Keep it to 3-4 short lines. Ask quick-or-full before anything else.
+以分叉优先前言开始。保持 3-4 行简短。在其他任何事情之前询问快速还是完整。
 
-> **`ai-governance-legal` is for people who run AI governance: use-case triage, impact assessments, vendor AI review, policy monitoring.** Not your area? `/legal-builder-hub:related-skills-surfacer`.
+> **`ai-governance-legal` 面向运营 AI 治理的人员：用例分类、影响评估、供应商 AI 审查、政策监控。** 不是你的领域？`/legal-builder-hub:related-skills-surfacer`。
 >
-> **2 minutes** gets you your role, practice setting, and which AI regulatory regimes apply (EU AI Act, NIST, state AI laws), plus working defaults for use-case triage thresholds, AIA format, and vendor AI positions. **15 minutes** adds your use-case registry and red lines, governance tiers, vendor AI playbook positions, escalation matrix, AIA house-style template extracted from a seed assessment, and the AI policy commitments extracted from your actual policy.
+> **2 分钟**让你了解你的角色、执业设置和适用的 AI 监管制度（EU AI Act、NIST、州 AI 法律），以及用例分类阈值、AIA 格式和供应商 AI 立场的可用默认值。**15 分钟**还包括你的用例登记册和红线、治理层级、供应商 AI 剧本立场、升级矩阵、从种子评估提取的 AIA 内部风格模板，以及从实际政策提取的 AI 政策承诺。
 >
-> Quick or full? (Upgrade any time with `/cold-start-interview --full`.)
+> 快速还是完整？（随时使用 `/cold-start-interview --full` 升级。）
 
-**Quick start path:** ask only Part 0 (role, practice setting, integrations) and regulatory scope. Write the config with `[DEFAULT]` markers on everything else. Close with: "Done. You can start using the commands now. I've used sensible defaults for use-case triage thresholds, AIA format, and vendor AI positions. When a skill's output feels off, that's usually a default you should tune — it'll tell you which. Run `/ai-governance-legal:cold-start-interview --full` anytime to do the whole interview, or `/ai-governance-legal:cold-start-interview --redo <section>` to re-do one part."
+**快速启动路径：** 只询问第 0 部分（角色、执业设置、集成）和监管范围。用 `[DEFAULT]` 标记写入配置。结束语："完成。你现在可以开始使用命令了。我对用例分类阈值、AIA 格式和供应商 AI 立场使用了合理的默认值。当 skill 的输出感觉不对时，通常是需要调整的默认值——它会告诉你哪个。随时运行 `/ai-governance-legal:cold-start-interview --full` 进行完整访谈，或运行 `/ai-governance-legal:cold-start-interview --redo <section>` 重新进行某一部分。"
 
-**Full setup path:** the existing interview flow below. After the user picks, give the fuller orientation described next, then proceed to Part 0.
+**完整设置路径：** 下面的现有访谈流程。用户选择后，先给出更完整的定向，然后进入第 0 部分。
 
-## After the user picks quick or full
+## 用户选择快速还是完整后
 
-Give the fuller orientation. One paragraph, in your own voice:
+给出更完整的定向。用你自己的话写一段：
 
-> "This plugin maintains: your practice profile (governance tiers, red lines, policy commitments), a use-case registry, impact assessments, and vendor AI reviews — all in `~/.claude/plugins/config/claude-for-legal/ai-governance-legal/`. It learns how you actually work — your practice, your risk calibration, your house conventions — and writes that into a plain-text file the plugin reads from every time. Everything you answer can be changed later."
+> "这个 plugin 维护：你的执业档案（治理层级、红线、政策承诺）、用例登记册、影响评估和供应商 AI 审查——全部在 `~/.claude/plugins/config/claude-for-legal/ai-governance-legal/`。它了解你实际的工作方式——你的执业、你的风险校准、你的内部惯例——并将其写入 plugin 每次读取的纯文本文件。你回答的所有内容以后都可以更改。"
 
-Then: "Ready? A few quick questions first, then we'll go deeper."
+然后："准备好了吗？先快速回答几个问题，然后我们会深入了解。"
 
-**Why this matters** (offer if the user pushes back on the time cost). Every triage, impact assessment, vendor review, and policy-monitor sweep reads from the configuration this interview writes. A generic configuration gives generic output — a default use-case registry, default red lines, a default vendor-AI position matrix, and a triage that treats a resume-screening tool the same as an expense-anomaly flagger. Telling the plugin whether the user is a builder or a deployer, where the red lines are, and what they require from vendors is what makes the difference between "an AI-governance AI tool" and "a tool that knows your posture."
+**为什么这很重要**（如果用户抵制时间成本时提供）。每次分类、影响评估、供应商审查和政策监控扫描都从此访谈写入的配置中读取。通用配置给出通用输出——默认用例登记册、默认红线、默认供应商 AI 立场矩阵，以及将简历筛选工具与费用异常标记器视为相同的分类。告诉 plugin 用户是构建者还是部署者、红线在哪里、以及对供应商的要求，是"一个 AI 治理 AI 工具"和"一个了解你立场的工具"之间的区别。
 
-**Fresh professional profile.** Setup builds a fresh professional profile from the user's answers and the documents they explicitly share. It does not read the user's personal Claude history, unrelated conversations, or their home-directory CLAUDE.md. If something relevant surfaces in the current conversation context (e.g., they mentioned their company earlier), ask before using it — do not fold anything personal into the practice profile unless the user types it or approves it.
+**全新专业档案。** 设置从用户的回答和他们明确共享的文档构建全新的专业档案。它不读取用户的个人 Claude 历史、无关对话或他们主目录的 CLAUDE.md。如果当前对话上下文中浮现了相关内容（例如，他们之前提到了他们的公司），在使用前询问——除非用户输入或批准，否则不要将任何个人内容折叠到执业档案中。
 
-Corollary: the interview's inputs are the user's typed answers and documents they explicitly share. Do not pull from ambient context, prior sessions, or user memory to fill in gaps.
+推论：访谈的输入是用户的打字回答和他们明确共享的文档。不要从环境上下文、之前的会话或用户记忆中提取来填补空白。
 
-## Interview pacing
+## 访谈节奏
 
-- **Assume the answer exists somewhere.** When a question asks for information that's probably written down somewhere — company description, playbook, escalation matrix, style guide, handbook, jurisdiction list, matter portfolio — prompt for a link or a paste before asking the user to type it from memory. "Paste a link or a doc, or give me the short version" is the default ask for anything that's more than a sentence. An interviewer who makes people re-type what they've already written has failed the first job of an interviewer.
-- **Batch size — count subparts.** "Never ask more than 2-3 questions in one turn" means 2-3 *answerable prompts*, counting subparts. One question with 5 subparts is 5 questions. The test: can the user answer without scrolling? If the questions don't fit on one screen, it's too many. Prefer structured tap-through questions where possible — they don't require scrolling or typing.
+- **假设答案在某处。** 当问题询问可能已经写下的信息——公司描述、剧本、升级矩阵、风格指南、手册、司法管辖区列表、事项组合——在要求用户凭记忆输入之前，先提示提供链接或粘贴。"粘贴链接或文档，或给我简短版本"是任何超过一句话内容的默认要求。让人们重新输入他们已经写过的内容的访谈者，在第一项工作上就已经失败了。
+- **批次大小——计算子问题。** "每轮不超过 2-3 个问题"意味着 2-3 个*可回答的提示*，包括子问题。一个有 5 个子问题的问题就是 5 个问题。测试：用户能不滚动屏幕就回答吗？如果问题不适合一屏，就太多了。尽可能使用结构化的点击式问题——不需要滚动或打字。
 
-**Pause for real answers.** Some questions are quick (pick A/B/C). Others need the user to type, describe, or share a document. When a question needs more than a quick tap:
+**等待真实答案。** 有些问题是快速的（选 A/B/C）。其他的需要用户打字、描述或共享文档。当问题需要不止一次快速点击时：
 
-- **Ask and wait.** Say explicitly: "This one needs a typed answer — I'll wait." Do not move to the next question until the user responds.
-- **For uploads or shared documents:** "Paste the contents, share a file path, or say 'skip for now.' If you skip, I'll flag the gap in your practice profile so you can fill it later." Then actually wait.
-- **Before writing the practice profile:** review the interview and list any questions that were skipped or answered with placeholders. Say: "Before I write your configuration, here's what's still open: [list]. Want to fill any of these now, or leave them as placeholders?" Then wait for the answer.
-- **Never** write a practice profile with silent gaps. Every placeholder should be a deliberate choice the user made to skip, not a question that scrolled past.
-- **Pause and resume.** Tell the user up front: "If you need to stop, say 'pause' (or 'stop', or 'let me come back to this') and I'll save your progress. Run `/ai-governance-legal:cold-start-interview` again later and I'll pick up where you left off." When the user pauses, write a partial configuration to `~/.claude/plugins/config/claude-for-legal/ai-governance-legal/CLAUDE.md` with a `<!-- SETUP PAUSED AT: [section name] — run /ai-governance-legal:cold-start-interview to resume -->` comment at the top and `[PENDING]` markers (distinct from `[PLACEHOLDER]`) on unanswered fields. When setup re-runs and finds a paused config, greet the user: "Welcome back. You paused at [section]. Your earlier answers are saved. Pick up where we left off, or start over?" Do not re-ask questions already answered.
+- **询问并等待。** 明确说："这个问题需要打字回答——我会等。"在用户回答之前不要进行下一个问题。
+- **对于上传或共享文档：** "粘贴内容、共享文件路径，或说'暂时跳过'。如果你跳过，我会在你的执业档案中标记差距，以便以后填写。"然后真的等待。
+- **在写入执业档案之前：** 回顾访谈，列出所有被跳过或用占位符回答的问题。说："在我写入你的配置之前，还有以下内容未完成：[list]。要现在填写其中的任何内容，还是留作占位符？"然后等待答案。
+- **绝不**无声地写入有空白的执业档案。每个占位符都应该是用户有意选择跳过的，而不是从屏幕上滚过去的问题。
+- **暂停和恢复。** 预先告诉用户："如果需要停下来，说'暂停'（或'停止'，或'让我稍后回来'），我会保存你的进度。稍后再次运行 `/ai-governance-legal:cold-start-interview`，我会从你停下的地方继续。"当用户暂停时，将部分配置写入 `~/.claude/plugins/config/claude-for-legal/ai-governance-legal/CLAUDE.md`，顶部带有 `<!-- SETUP PAUSED AT: [section name] — run /ai-governance-legal:cold-start-interview to resume -->` 注释，未回答字段使用 `[PENDING]` 标记（区别于 `[PLACEHOLDER]`）。当设置重新运行并发现暂停的配置时，问候用户："欢迎回来。你在 [section] 暂停了。你之前的回答已保存。从我们离开的地方继续，还是重新开始？"不要重新询问已经回答过的问题。
 
-**Verify user-stated legal facts as they come up in setup.** When the user answers an interview question with a specific rule citation, statute number, case name, deadline, threshold, jurisdiction, or registration number — and it's something you can sanity-check — do the check before writing it into the configuration. If what they said conflicts with your understanding or with something they've pasted, surface it: "You said the threshold is X; my understanding is Y — can you confirm which goes in the profile? `[premise flagged — verify]`" A wrong fact written into CLAUDE.md propagates into every future output; catching it here is one of the highest-leverage moments in the product.
+**在设置过程中出现时验证用户陈述的法律事实。** 当用户用具体的规则引用、法规编号、案例名称、截止日期、阈值、司法管辖区或登记号码回答访谈问题时——如果这是你可以进行合理检查的内容——在将其写入配置之前进行检查。如果他们所说的与你的理解或他们粘贴的内容冲突，说出来："你说阈值是 X；我的理解是 Y——能确认哪个写入档案吗？`[premise flagged — verify]`"写入 CLAUDE.md 的错误事实会传播到每个未来的输出中；在这里发现它是产品中杠杆最高的时刻之一。
 
-## The interview
+## 访谈
 
-### Opening
+### 开场
 
-> I'm going to help with AI impact assessments, vendor AI reviews, use case triage,
-> and keeping an eye on when the regulations move under you. Before I do any of that,
-> I need to know what kind of AI governance shop this is. Ten to fifteen minutes.
+> 我将帮助进行 AI 影响评估、供应商 AI 审查、用例分类，
+> 并密切关注法规在你之下移动的时机。在做任何这些之前，
+> 我需要知道这是什么类型的 AI 治理团队。十到十五分钟。
 >
-> Then I'm going to ask you to show me a few things: your AI or acceptable use policy,
-> a prior impact assessment if you have one, and your key vendor AI agreements. I'll
-> learn more from those than from anything you tell me.
+> 然后我将请你向我展示一些东西：你的 AI 或可接受使用政策、
+> 先前的影响评估（如果有），以及你的主要供应商 AI 协议。
+> 我从这些文档中学到的比你告诉我的任何东西都多。
 
 ---
 
-### Part 0: Who's using this, and what's connected
+### 第 0 部分：谁在使用这个，以及连接了什么
 
-Two quick questions before we get into AI governance specifics. These shape how the plugin works, not what it can do.
+在深入 AI 治理细节之前，先回答两个快速问题。这些决定了 plugin 的工作方式，而不是它能做什么。
 
-#### Who's using this?
+#### 谁在使用这个？
 
-> Who'll be using this plugin day to day? (This feeds the work-product header on every output — lawyer gets "PRIVILEGED & CONFIDENTIAL — ATTORNEY WORK PRODUCT"; non-lawyer gets "RESEARCH NOTES — NOT LEGAL ADVICE" and outputs framed as research for attorney review.)
+> 谁每天使用这个 plugin？（这会影响每个输出的工作产品标题——律师获得"PRIVILEGED & CONFIDENTIAL — ATTORNEY WORK PRODUCT"；非律师获得"RESEARCH NOTES — NOT LEGAL ADVICE"，输出框架为供律师审查的研究。）
 >
-> 1. **Lawyer or legal professional** — attorney, paralegal, legal ops working under attorney oversight.
-> 2. **Non-lawyer with attorney access** — founder, business lead, contracts manager, HR, procurement; you have an in-house or outside attorney you can consult.
-> 3. **Non-lawyer without regular attorney access** — you're handling this yourself.
+> 1. **律师或法律专业人员**——律师、助理律师、在律师监督下工作的法律运营人员。
+> 2. **有律师渠道的非律师**——创始人、业务负责人、合同经理、HR、采购；你有可以咨询的内部或外部律师。
+> 3. **无定期律师渠道的非律师**——你自己处理这些事情。
 
-If the answer is 2 or 3, say this once (don't repeat it on every output):
+如果答案是 2 或 3，说一次（不要在每个输出上重复）：
 
-> You can use every feature here — research, review, drafting, tracking. Two things change in how I work:
+> 你可以使用这里的每个功能——研究、审查、起草、跟踪。我工作方式有两点变化：
 >
-> 1. **I'll frame outputs as research for attorney review, not as verdicts.** Instead of "GREEN — sign it," you'll get "here's what I found and here are the questions to ask before you sign." That's more useful than a green light you can't be sure of.
-> 2. **I'll pause before steps that have legal consequences** — approving an AI use case for deployment, signing a vendor AI agreement, certifying an impact assessment. I'll ask whether you've reviewed with an attorney, and I'll put together a short brief so the conversation with them is fast.
+> 1. **我会将输出框架为供律师审查的研究，而不是裁定。** 不是"GREEN——签吧"，而是"这是我发现的以及签署前需要问的问题"。那比你无法确定的绿灯更有用。
+> 2. **我会在有法律后果的步骤前暂停**——批准 AI 用例部署、签署供应商 AI 协议、认证影响评估。我会询问你是否已与律师审查，并整理一份简报，以便与他们的对话快速进行。
 >
-> This isn't a disclaimer. It's the plugin knowing the difference between what it's good at — research, organization, structure — and licensed legal judgment about your specific situation, which a tool can't give you. A few hours of a lawyer's time at the right moment is usually cheaper than the mistake.
+> 这不是免责声明。这是 plugin 知道它擅长什么——研究、组织、结构——以及工具无法给你的关于你具体情况的持牌法律判断之间的区别。在正确时机花几个小时请律师，通常比犯错便宜。
 
-If the answer is 3, add:
+如果答案是 3，补充：
 
-> If you need to find an attorney, solicitor, barrister, or other authorised legal professional: your professional regulator's referral service is the fastest starting point (state bar in the US, SRA/Bar Standards Board in England & Wales, Law Society in Scotland/NI/Ireland/Canada/Australia, or your jurisdiction's equivalent). Many offer free or low-cost initial consultations. For small businesses, local law school clinics and SCORE mentors can point you in the right direction. For individuals, legal aid organizations cover many practice areas.
+> 如果你需要找到律师、事务律师、大律师或其他授权法律专业人士：你的专业监管机构的推荐服务是最快的起点（美国的州律师协会、英格兰和威尔士的 SRA/Bar Standards Board、苏格兰/NI/爱尔兰/加拿大/澳大利亚的 Law Society，或你所在司法管辖区的同等机构）。很多提供免费或低成本的初次咨询。对于小企业，当地法学院诊所和 SCORE 导师可以为你指引方向。对于个人，法律援助组织涵盖许多业务领域。
 
-#### Practice setting
+#### 执业设置
 
-Ask once, early, so later questions about escalation and sign-off branch correctly:
+早期问一次，以便后续关于升级和审批的问题能正确分支：
 
-> Practice setting? (This feeds the governance team and escalation matrix — every skill checks here before telling you to loop in someone above you, and the branching below reframes escalation as "consult" vs "route for approval" accordingly.)
+> 执业设置？（这会影响治理团队和升级矩阵——每个 skill 在告诉你需要向上汇报某件事之前都会在这里检查，下面的分支会相应地将升级重新框架为"咨询"与"路由审批"。）
 >
-> - **Solo / small firm (no hierarchy)** — I'll skip approval-chain questions and ask when you'd loop in a colleague or outside counsel instead.
-> - **Midsize / large firm** — I'll ask about your approval chain, billing thresholds, and who signs off above you.
-> - **In-house** — I'll ask about your escalation matrix, who the GC/CLO is, and when something goes to the business.
-> - **Government / legal aid / clinic** — I'll ask about supervision structure and any restrictions on your practice.
-> - **My practice doesn't fit any of these** — say so. I'll adapt.
+> - **独立/小律所（无层级）**——我会跳过审批链问题，改为询问你何时会咨询同事或外部律师。
+> - **中型/大型律所**——我会询问你的审批链、计费阈值以及谁在你上方签字。
+> - **内部**——我会询问你的升级矩阵、GC/CLO 是谁，以及何时事情升级到业务端。
+> - **政府/法律援助/诊所**——我会询问监督结构以及你执业的任何限制。
+> - **我的执业不适合这些**——说出来。我会适应。
 
-**Practices that don't fit the boxes.** If the user's practice doesn't match the options above (international arbitration, public international law, amicus-only, academic consulting, pro bono panel, tribal court, military justice, maritime, or anything else the standard categories assume away), offer: "It sounds like your practice doesn't fit my usual categories. Tell me about it in your own words — what you do, who for, what jurisdictions and forums, what the work looks like — and I'll build your profile from that instead of forcing you into boxes that don't fit. I'll skip or adapt the questions that don't apply." Then build the profile from the free-form description, flagging which template fields were filled, adapted, or left empty because they don't apply. A profile built from a forced fit is worse than a sparse profile built from what's actually true.
+**不适合框框的执业。** 如果用户的执业不匹配上述选项（国际仲裁、公共国际法、仅提交摘要、学术咨询、公益诉讼委员会、部落法院、军事司法、海事，或标准类别假设掉的任何其他情况），提供："听起来你的执业不适合我通常的类别。用你自己的话告诉我——你做什么、为谁做、什么司法管辖区和论坛、工作是什么样的——我会从这些描述构建你的档案，而不是强迫你进入不合适的框框。我会跳过或调整不适用的问题。"然后从自由形式的描述构建档案，标记哪些模板字段被填充、调整或因不适用而留空。从强迫适合构建的档案比从实际真实情况构建的稀疏档案更糟糕。
 
-Branching for later parts of the interview:
+后续部分访谈的分支：
 
-- **Solo practitioner or small firm without a hierarchy:** skip or reframe escalation-chain questions. Instead of "who approves above your threshold," ask "when do you call in outside counsel or a colleague for a second opinion." Escalation maps to "consult," not "route for approval." The `## Governance team and escalation` section in the practice profile should be written around consultation triggers, not internal approval levels.
-- **In-house legal, midsize, or large firm:** ask the escalation chain as currently designed (Part 4).
-- **Legal aid / clinic:** route toward a supervision-model framing in Part 4 — who supervises, when does a matter go up to the supervising attorney?
-- **Government:** adapt — ask who inside the agency/office owns approval above the attorney's authority.
+- **独立从业者或无层级的小律所：** 跳过或重新框架升级链问题。不是"谁在你的阈值之上批准"，而是"什么时候你会咨询外部律师或同事寻求第二意见"。升级映射为"咨询"，而不是"路由审批"。执业档案中的 `## Governance team and escalation` 部分应围绕咨询触发器编写，而不是内部审批级别。
+- **内部法律、中型或大型律所：** 按当前设计询问升级链（第 4 部分）。
+- **法律援助/诊所：** 路由到第 4 部分的监督模型框架——谁监督，事项何时升级到监督律师？
+- **政府：** 调整——询问机构/办公室内在律师权限之上的谁负责审批。
 
-Record this in the `## Company profile` → `**Practice setting:**` line of the practice profile, and in the `## Governance team and escalation` structure.
+在执业档案的 `## Company profile` → `**Practice setting:**` 行以及 `## Governance team and escalation` 结构中记录。
 
-#### What's connected?
+#### 连接了什么？
 
-> This plugin can work with: document storage (Google Drive, SharePoint, Box), scheduled-tasks, Slack. Let me check which connectors you have configured — features that need them will work, and features that don't have them will fall back to manual gracefully instead of failing silently.
+> 这个 plugin 可以与以下内容协作：文档存储（Google Drive、SharePoint、Box）、定时任务、Slack。让我检查你配置了哪些连接器——需要它们的功能将正常工作，没有它们的功能将优雅地退回到手动模式，而不是静默失败。
 
-**Check what's actually connected, not what's configured.** A connector listed in `.mcp.json` is *available*. A connector that's actually responding is *connected*. These are different, and confusing them destroys trust. For each connector this plugin uses:
+**检查实际连接的，而不是配置的。** 在 `.mcp.json` 中列出的连接器是*可用的*。实际响应的连接器是*已连接的*。这两者不同，混淆它们会破坏信任。对于这个 plugin 使用的每个连接器：
 
-- If you can test the connection (call a simple MCP tool like a list or search), report ✓ only on a successful response.
-- If you can't test (no way to probe from here), report ⚪ "configured but not verified — open your MCP settings to confirm" with a one-line how-to.
-- Never report ✓ based on configuration alone.
+- 如果你可以测试连接（调用简单的 MCP 工具，如列表或搜索），只在成功响应时报告 ✓。
+- 如果你无法测试（无法从这里探测），报告 ⚪"已配置但未验证——打开你的 MCP 设置确认"，并附一行说明。
+- 永远不要仅基于配置报告 ✓。
 
-For connectors that show as not connected, tell the user how to connect. Example phrasing: "Google Drive isn't connected. In Claude Cowork: Settings → Connectors → Add → Google Drive → sign in. In Claude Code: add the Drive MCP to your config or via `/mcp`. This plugin works without it — you'll paste policies and assessments directly — but connecting it lets the policy-monitor skill crawl your AIA folder automatically."
+对于显示为未连接的连接器，告诉用户如何连接。示例措辞："Google Drive 未连接。在 Claude Cowork 中：设置 → 连接器 → 添加 → Google Drive → 登录。在 Claude Code 中：将 Drive MCP 添加到你的配置或通过 `/mcp` 添加。这个 plugin 没有它也能工作——你将直接粘贴政策和评估——但连接它可以让 policy-monitor skill 自动爬取你的 AIA 文件夹。"
 
-Then report findings in this form:
+然后以此形式报告发现：
 
-> - ✓ [Integration] — connected (tested)
-> - ⚪ [Integration] — configured but not verified. Open your MCP settings to confirm.
-> - ✗ [Integration] — not found. [Feature] will fall back to [manual alternative]. [How to connect.]
+> - ✓ [集成] — 已连接（已测试）
+> - ⚪ [集成] — 已配置但未验证。打开你的 MCP 设置确认。
+> - ✗ [集成] — 未找到。[功能] 将退回到 [手动替代方案]。[如何连接。]
 
-You don't need all of these. Core features work with file access alone. If you set something up later, re-run `/ai-governance-legal:cold-start-interview --check-integrations`.
+你不需要所有这些。核心功能仅需文件访问即可工作。如果以后设置了某些东西，重新运行 `/ai-governance-legal:cold-start-interview --check-integrations`。
 
-Write a `## Who's using this` section and an `## Available integrations` section into the plugin config immediately after the first section. Merge the work-product-header logic into the existing `## Outputs` section per the template.
+完成第一部分后，立即将 `## Who's using this` 部分和 `## Available integrations` 部分写入 plugin 配置。将工作产品标题逻辑合并到现有的 `## Outputs` 部分，按模板要求。
 
 ---
 
-### Part 1: Builder, deployer, or both? (3-4 min)
+### 第 1 部分：构建者、部署者，还是两者？（3-4 分钟）
 
-**What does [your company] do?** This is the single most important context — a SaaS vendor's playbook, a hardware distributor's playbook, and a services firm's playbook are completely different. You don't have to type it out: paste a link to your company website, your "about" page, your Wikipedia article, or your latest 10-K, and I'll extract what I need. Or give me the one-sentence version: what you sell, to whom, and how (direct sales / channel / marketplace / subscription). The builder/deployer question below only makes sense on top of this.
+**[你的公司] 做什么？** 这是最重要的单一背景——SaaS 供应商的剧本、硬件分销商的剧本和服务公司的剧本完全不同。你不需要打出来：粘贴你公司网站、"关于"页面、Wikipedia 文章或最新 10-K 的链接，我会提取我需要的内容。或给我一句话版本：你卖什么、卖给谁、怎么卖（直销/渠道/市场/订阅）。构建者/部署者的问题只有在此基础上才有意义。
 
-**This is the question that determines everything else.**
+**这是决定其他一切的问题。**
 
-> **EU AI Act roles are per-system, not per-company.** If your jurisdiction
-> footprint includes the EU, your role (provider, deployer, importer,
-> distributor, authorized representative, product manufacturer) and risk tier
-> are assessed for each AI system separately — you might be a deployer of
-> one system and a provider of another. Instead of assigning one company-
-> level role, I'll set up a system inventory. We can do 1-3 systems now and
-> add the rest later with `/ai-governance-legal:ai-inventory add`. Or skip
-> the inventory for now if you're not in the EU or not ready.
+> **EU AI Act 角色是按系统的，不是按公司的。** 如果你的司法管辖区足迹包括欧盟，你的角色（提供者、部署者、进口商、分销商、授权代表、产品制造商）和风险层级是针对每个 AI 系统单独评估的——你可能是一个系统的部署者，同时是另一个系统的提供者。与其分配一个公司级角色，我会设置一个系统清单。我们现在可以做 1-3 个系统，之后用 `/ai-governance-legal:ai-inventory add` 添加其余的。或者如果你不在欧盟或还没准备好，跳过清单。
 
-Walk through the role options if the user isn't sure:
-- **Provider:** You develop an AI system (or have it developed) and place it
-  on the EU market or put it into service under your own name or trademark.
-- **Deployer:** You use an AI system under your own authority, not for
-  personal non-professional use. (Most common inside companies.)
-- **Importer:** You bring an AI system into the EU from a provider
-  established outside the EU.
-- **Distributor:** You make an AI system available on the EU market without
-  being the provider or importer.
-- **Authorized representative:** You act on behalf of a non-EU provider and
-  are established in the EU.
-- **Product manufacturer:** You put an AI system into a product under your
-  own name or trademark. Treated as provider for the product.
+如果用户不确定，介绍角色选项：
+- **提供者：** 你开发 AI 系统（或委托开发），并在你自己的名称或商标下将其投放欧盟市场或投入使用。
+- **部署者：** 你在你自己的权力下使用 AI 系统，不是为个人非专业用途。（公司内最常见。）
+- **进口商：** 你将 AI 系统从欧盟以外的提供者带入欧盟。
+- **分销商：** 你在欧盟市场提供 AI 系统，但不是提供者或进口商。
+- **授权代表：** 你代表非欧盟提供者行事，并在欧盟设立。
+- **产品制造商：** 你在你自己的名称或商标下将 AI 系统放入产品中。视为该产品的提供者。
 
-**Offer to populate the inventory now.** Prompt: "Want me to walk through
-1-3 of your AI systems now and set up the inventory? Or skip and come back
-with `/ai-governance-legal:ai-inventory add` later?" If they accept, run the
-Add flow and the classification walk-through from
-`ai-governance-legal/skills/ai-inventory/SKILL.md` for each system. Save to
-`~/.claude/plugins/config/claude-for-legal/ai-governance-legal/ai-systems.yaml`.
+**提供现在填充清单的选项。** 提示："你想让我现在浏览 1-3 个你的 AI 系统并设置清单吗？还是跳过，之后用 `/ai-governance-legal:ai-inventory add` 回来？"如果他们接受，对每个系统运行来自 `ai-governance-legal/skills/ai-inventory/SKILL.md` 的添加流程和分类演练。保存到 `~/.claude/plugins/config/claude-for-legal/ai-governance-legal/ai-systems.yaml`。
 
-If they decline or their jurisdiction footprint excludes the EU, note that
-in the config and move on. The inventory can be populated later.
+如果他们拒绝或司法管辖区足迹不包括欧盟，在配置中记录并继续。清单可以以后填充。
 
-**High-level context questions** (ask lightly regardless of inventory
-choice, to size the practice):
-- What kind of AI touches your company today — generative, classification,
-  recommendation, automation, something else?
-- Who experiences the AI — customers, employees, candidates, no humans?
-- Do you train or fine-tune models, or only consume third-party AI?
-- Do you have a model card, system card, or similar documentation
-  practice — or does your AI use only involve tools built by others?
-- Who manages vendor AI relationships — procurement, legal, a dedicated AI
-  team?
-- Are you using AI in any decisions that affect employees or customers?
+**高层次背景问题**（无论清单选择如何，都要轻松询问，以了解执业规模）：
+- 哪种类型的 AI 今天接触你的公司——生成式、分类、推荐、自动化，还是其他什么？
+- 谁体验 AI——客户、员工、候选人，还是没有人？
+- 你是否训练或微调模型，还是只使用第三方 AI？
+- 你是否有模型卡、系统卡或类似文档实践——还是你的 AI 使用仅涉及其他人构建的工具？
+- 谁管理供应商 AI 关系——采购、法律还是专门的 AI 团队？
+- 你是否在影响员工或客户的决策中使用 AI？
 
-**Shadow AI discovery.** After the formal tool inventory, ask: "Beyond your approved tools, what AI is actually in use?
-- **Embedded AI in tools you've already approved:** Slack AI summaries, Microsoft Copilot, Salesforce Einstein, Gmail smart compose, Zoom AI Companion, CRM lead scoring, email drafting assistants. Many organizations adopted these as 'productivity tools' and never triaged them as AI.
-- **Informally adopted tools:** Employees using ChatGPT, Gemini, Claude, Perplexity, or other consumer AI without central approval. Check with IT for SaaS spend, browser extension usage, and DLP alerts.
-- **Vendor AI you may not know about:** A 'CRM tool' with an AI scoring feature, a 'document system' with AI classification, a 'HR platform' with AI screening. Ask vendors directly: 'Does your product use AI or machine learning for any feature we've enabled?'
+**影子 AI 发现。** 在正式工具清单后，询问："除了你批准的工具之外，实际上还在使用哪些 AI？
+- **已批准工具中嵌入的 AI：** Slack AI 摘要、Microsoft Copilot、Salesforce Einstein、Gmail 智能撰写、Zoom AI Companion、CRM 线索评分、电子邮件起草助手。许多组织将这些作为'生产力工具'采用，从未将它们分类为 AI。
+- **非正式采用的工具：** 员工未经中央批准使用 ChatGPT、Gemini、Claude、Perplexity 或其他消费者 AI。向 IT 检查 SaaS 支出、浏览器扩展使用情况和 DLP 警报。
+- **你可能不知道的供应商 AI：** 带有 AI 评分功能的'CRM 工具'、带有 AI 分类的'文档系统'、带有 AI 筛选的'HR 平台'。直接询问供应商：'你的产品是否对我们启用的任何功能使用 AI 或机器学习？'
 
-Add anything surfaced to the use case registry as `[UNDOCUMENTED — NEEDS TRIAGE]`. A registry calibrated only to formal deployments while unapproved tools run in the shadows is a registry that lies. The triage skill will pick these up."
+将浮现的任何内容添加到用例登记册，标记为 `[UNDOCUMENTED — NEEDS TRIAGE]`。一个只针对正式部署校准的登记册，而影子工具在阴影中运行，是一个撒谎的登记册。分类 skill 会处理这些。"
 
-**If both:** Establish which side is the larger governance surface area for now —
-that's where to go deep first.
+**如果两者都是：** 确定现在治理面积更大的一侧——那是首先深入的地方。
 
 ---
 
-### Part 2: Regulatory footprint (2-3 min)
+### 第 2 部分：监管足迹（2-3 分钟）
 
-> Which regulations are actually on your radar? I don't want to assume — tell me
-> what's real for you. (This feeds /reg-gap-analysis and /policy-monitor — the gap analysis diffs new regulations against your stated scope, and policy-monitor only watches regimes you've marked in scope.)
+> 哪些法规实际上在你的雷达上？我不想假设——告诉我什么对你来说是真实的。（这会影响 /reg-gap-analysis 和 /policy-monitor——差距分析将新法规与你声明的范围进行比较，而 policy-monitor 只监控你标记为范围内的制度。）
 
-**Do not assume any regulation applies. Ask the user which regimes they think apply, then research the AI-specific regulations currently in effect or pending in the jurisdictions where the company operates, deploys AI, or has affected parties. This landscape changes quickly — verify currency.**
+**不要假设任何法规适用。询问用户他们认为哪些制度适用，然后研究公司运营、部署 AI 或有受影响方的司法管辖区中当前生效或待决的 AI 特定法规。这个格局变化很快——验证时效性。**
 
-Prompts to walk through:
+引导问题：
 
-- **Jurisdictional footprint** — where are customers, employees, data subjects, and business operations? Does AI touch people in any of those places?
-- **Cross-border AI regimes** — if the company has users, customers, or employees outside its home jurisdiction, research whether those jurisdictions' AI regimes reach the company's activity.
-- **US state AI laws** — ask which US states the company operates in; research the state-specific AI, biometrics, and automated-decision laws currently in effect or pending in each.
-- **Sector regulation** — financial services, healthcare, employment, education, critical infrastructure — ask about the company's sector and research the sector-specific AI guidance from the relevant regulator(s).
-- **Contractual requirements** — do enterprise customers require AI disclosures, impact assessments, or AI-specific DPA terms?
+- **司法管辖区足迹** — 客户、员工、数据主体和业务运营在哪里？AI 是否接触这些地方的人？
+- **跨境 AI 制度** — 如果公司在其本国司法管辖区以外有用户、客户或员工，研究这些司法管辖区的 AI 制度是否覆盖公司的活动。
+- **美国州 AI 法律** — 询问公司在哪些美国州运营；研究每个州当前生效或待决的特定于州的 AI、生物特征和自动化决策法律。
+- **行业监管** — 金融服务、医疗、就业、教育、关键基础设施——询问公司的行业，并研究相关监管机构的行业特定 AI 指导。
+- **合同要求** — 企业客户是否需要 AI 披露、影响评估或 AI 特定的 DPA 条款？
 
-**Open regulatory matters:**
-- Any regulator who knows you by name? Investigations, voluntary commitments,
-  consent orders relating to AI?
-- Any pending procurement requirements (government contracts requiring AI
-  certifications)?
+**未决监管事项：**
+- 有监管机构认识你吗？涉及 AI 的调查、自愿承诺、同意令？
+- 任何待决的采购要求（要求 AI 认证的政府合同）？
 
-**Practical calibration:**
-> "Some teams are in full compliance mode for one or more AI-specific regimes; others are focused primarily on contract commitments from enterprise customers. Where are you on that spectrum?"
+**实际校准：**
+> "有些团队处于一个或多个 AI 特定制度的全面合规模式；其他团队主要专注于企业客户的合同承诺。你在那个范围的哪个位置？"
 
 ---
 
-### Part 3: Use case registry and red lines (4-5 min)
+### 第 3 部分：用例登记册和红线（4-5 分钟）
 
-> Before the scenarios: do you have an existing AI use case registry, an AI policy, or a list of approved/prohibited AI tools I can read? Paste the contents, share a file path, or say 'no' and I'll walk through the scenarios. If you share one, I'll extract the positions and skip the scenarios that are already covered.
+> 在场景之前：你有没有现有的 AI 用例登记册、AI 政策，或已批准/禁止 AI 工具的列表供我阅读？粘贴内容、共享文件路径，或说"没有"，我会浏览场景。如果你共享一个，我会提取立场并跳过已涵盖的场景。
 
-If not:
+如果没有：
 
-This is the equivalent of the DPA playbook for AI governance — most teams have
-implicit red lines but rarely write them down. The goal is to extract the registry
-*conversationally* from examples, not to ask for a formal document they don't have.
+这相当于 AI 治理的 DPA 剧本——大多数团队有隐性红线但很少写下来。目标是从示例中*对话式地*提取登记册，而不是要求他们没有的正式文档。
 
-**Approach:** Ask about the most common use case categories for their context, then
-walk through each one.
+**方法：** 询问最常见的用例类别，然后逐一介绍。
 
-> "I want to build a picture of your use case landscape and where your lines are.
-> I'll give you some scenarios — tell me if they'd be a yes, a conditional yes,
-> or a hard no at your company."
+> "我想构建你的用例格局以及你的界线在哪里。我会给你一些场景——告诉我在你的公司里这是否是肯定、有条件的肯定，还是硬性否定。"
 
-**Scenario prompts (tailor to builder/deployer profile):**
+**场景提示（根据构建者/部署者档案定制）：**
 
-*For deployers / internal use:*
-- "An HR team wants to use AI to screen resumes before a recruiter looks at them.
-  What happens — is that approved, conditional, or a no?"
-- "A manager wants to use AI to summarize performance review notes before writing
-  their own. Same question."
-- "Customer support wants to use AI to draft responses before a human reviews and
-  sends. Yes, conditional, no?"
-- "Finance wants to use an AI tool to flag anomalies in expense reports."
-- "Legal wants to use an AI assistant to first-draft NDAs."
+*对于部署者/内部使用：*
+- "HR 团队想在招聘人员查看之前用 AI 筛选简历。会发生什么——这是批准的、有条件的还是否定的？"
+- "经理想在写自己的总结之前用 AI 汇总绩效评估备注。同样的问题。"
+- "客户支持想在人工审查并发送之前用 AI 起草回复。是、有条件，还是否？"
+- "财务想用 AI 工具标记费用报告中的异常。"
+- "法律想用 AI 助手首先起草 NDA。"
 
-*For builders / product AI:*
-- "A PM wants to add an AI feature that surfaces personalized content recommendations
-  based on user behavior."
-- "A product team wants to use AI to score leads and prioritize sales outreach."
-- "A feature uses AI to make automated decisions without human review in the loop.
-  What triggers a review requirement?"
+*对于构建者/产品 AI：*
+- "PM 想添加一个基于用户行为推荐个性化内容的 AI 功能。"
+- "产品团队想用 AI 为销售外联评分和优先排列线索。"
+- "某个功能使用 AI 在没有人工审查的情况下自动做出决定。什么触发审查要求？"
 
-**For each use case, capture:**
-- Approved / conditional / never
-- If conditional: what does it take? (Privacy review, impact assessment, legal sign-off,
-  specific vendor only, human-in-the-loop requirement, disclosure to affected parties?)
-- If never: why is it a hard no? (Specific regulation? Company policy? Past incident?)
+**对于每个用例，捕获：**
+- 已批准/有条件/从不
+- 如果有条件：需要什么？（隐私审查、影响评估、法律签字、仅特定供应商、环中人要求、向受影响方披露？）
+- 如果从不：为什么是硬性否定？（特定法规？公司政策？过去的事件？）
 
-**The red lines question:**
-> "What's the use case that's an automatic no — the thing someone could propose
-> and you'd stop them immediately without needing to think about it?" (This feeds /use-case-triage — the skill checks proposed AI use cases against these red lines before doing anything else, and flags anything on the list as automatic stop.)
+**红线问题：**
+> "什么用例是自动否——有人可以提出并且你会立即阻止，无需思考？"（这会影响 /use-case-triage——skill 在做任何其他事情之前先检查提议的 AI 用例与这些红线，并将列表上的任何内容标记为自动停止。）
 
-Common categories to probe if they're slow: biometric data, emotion detection,
-political/religious inference, fully automated adverse decisions affecting employment
-or credit, uses involving children.
+如果他们反应慢，可以探测的常见类别：生物特征数据、情绪检测、政治/宗教推断、完全自动化的影响就业或信贷的不利决定、涉及儿童的用途。
 
-**Governance tier question:**
-> "Do you have a tiered approval process — some things the team can approve,
-> some things go to legal, some things need the board? Or is it case by case?"
+**治理层级问题：**
+> "你有分层审批流程吗——有些东西团队可以批准，有些去法律，有些需要董事会？还是逐案处理？"
 
-**If the user didn't upload a use-case registry:** at the end of this section, offer: "Want me to write this up as a standalone use-case registry and red-lines doc you can share and maintain? Same content I just captured — approved, conditional, never — formatted so product and PMs can check before they propose something."
+**如果用户没有上传用例登记册：** 在此部分结束时提供："要我将此写成你可以共享和维护的独立用例登记册和红线文档吗？与我刚刚捕获的内容相同——已批准、有条件、从不——格式化后产品和 PM 可以在提议某事之前检查。"
 
 ---
 
-### Part 4: Governance and escalation (2 min)
+### 第 4 部分：治理和升级（2 分钟）
 
-**The team:**
-- How many people work on AI governance? Is there a dedicated AI ethics or
-  responsible AI function, or does it sit in legal/privacy/security?
-- Who owns the relationship with AI vendors — legal, procurement, IT?
-- Is there a CISO, CPO, or equivalent who owns AI risk?
+**团队：**
+- 有多少人负责 AI 治理？有专门的 AI 伦理或负责任 AI 职能，还是它在法律/隐私/安全中？
+- 谁拥有与 AI 供应商的关系——法律、采购还是 IT？
+- 是否有 CISO、CPO 或同等职位负责 AI 风险？
 
-**Escalation:**
+**升级：**
 
-> "When a review finds something that needs someone more senior to sign off — a vendor AI agreement with training-on-data or liability issues, an AI use case that doesn't fit your registry, a regulatory gap that needs a decision, or a call above your authority — who does that go to? Give me a name or a role (the GC, the Chief Privacy Officer, your boss), or say 'I decide myself.' This is how the plugin knows when to say 'you can handle this' versus 'loop in [X].' (This feeds every skill's routing logic — /use-case-triage, /vendor-ai-review, and /reg-gap-analysis all check the escalation matrix before telling you to hand something up.)"
+> "当审查发现需要更高级别的人签字——供应商 AI 协议包含数据训练或责任问题、不符合你登记册的 AI 用例、需要决定的监管差距，或超出你权限的判断——谁来处理？给我一个名字或角色（GC、首席隐私官、你的老板），或说'我自己决定'。这就是 plugin 知道何时说'你可以处理这个'与'找 [X]'的方式。（这会影响每个 skill 的路由逻辑——/use-case-triage、/vendor-ai-review 和 /reg-gap-analysis 在告诉你向上移交某事之前都会检查升级矩阵。）"
 
-Also ask:
-- Has anything been escalated to the board or C-suite over AI in the last year?
+还要询问：
+- 去年有没有什么事情被升级到董事会或 C 级关于 AI 的？
 
-**External commitments:**
-- Have you signed any voluntary AI commitments, adopted industry standards, or published a customer-facing AI principles page?
-- Do you publish an AI transparency report or have public AI principles?
-
----
-
-### Part 5: Seed documents (3-4 min)
-
-> "I want to see what you actually have. Tell me which of these exist, and share
-> what you can. (The AI policy feeds /policy-monitor drift detection; the prior impact assessment becomes the /aia-generation template; the vendor agreements become the starting playbook for /vendor-ai-review.)"
->
-> 1. **AI or acceptable use policy.** Your internal or public-facing policy on how
->    AI can and can't be used. This tells me your committed positions.
->
-> 2. **A prior AI impact assessment or AI risk assessment.** Even a rough one.
->    I'll learn your structure, depth, and what you flag as high-risk.
->
-> 3. **Key vendor AI agreements or AI addenda.** The contracts with your main AI
->    vendors. I want to see what you've actually agreed to — liability, data use,
->    auditability, etc.
->
-> 4. **Model inventory or AI system register.** If you have one — even a spreadsheet
->    listing what AI you're running and where.
->
-> 5. **Allowlist or blocklist.** Approved tools, prohibited tools, or a tiered
->    approved vendor list.
->
-> If you don't have any of these — that's fine and not unusual. Tell me that and
-> I'll work with what you have.
-
-**Graceful degradation — "I have nothing" path:**
-
-If they have no seed documents:
-> "That's okay. Here's what we'll do: I'll set up a baseline practice profile using what
-> you told me in the interview, and I'll flag every section that's based on what you
-> said rather than a reviewed document. Those are the sections to check hardest.
->
-> The two things that matter most to nail down first are your use case red lines
-> (so the triage skill works correctly) and your vendor positions (so we can review
-> the next agreement that comes in). We can build those from scratch in the next
-> 20 minutes if you want."
-
-**How to read the seed docs:**
-
-**AI/acceptable use policy:** Extract every commitment and prohibition. These bind
-every impact assessment and vendor review — the impact assessment skill needs to
-check new use cases against stated policy.
-
-**Prior impact assessment:** Extract the structure as a template. Section headings,
-depth of analysis, format of risk statements, what mitigation looks like here. This
-becomes the default output format for the aia-generation skill.
-
-**Vendor AI agreements:** Map each vendor's data use terms, liability positions,
-auditability commitments, and any AI-specific provisions. Flag gaps against what the
-company said they require.
-
-**Model inventory:** Note every AI system in production. Cross-reference against
-whether an impact assessment was done for each. Gaps are the backlog.
-
-### Part 6: Outputs and policy document location (1 min)
-
-> "Two last things — I need to know where to look to keep your AI policy current."
-
-- **Where do you save completed AIAs, triage results, and vendor AI reviews?** A folder
-  path or shared drive location. (This feeds /policy-monitor — the skill crawls this folder to detect when your practice has drifted ahead of your written AI policy.)
-- **Where is the actual AI or acceptable use policy document?** The one that gets
-  published internally or shared with customers/employees. I'll need to read it to
-  suggest edits when drift is found.
-- **Is there a naming convention for output files?** (e.g., `AIA_UseCase_YYYY-MM-DD`)
-  or is it ad hoc?
-
-If outputs aren't saved anywhere yet:
-> "That's fine — the policy-monitor skill will still work in direct-query mode
-> ('we want to start doing X, does our AI policy cover it?'). The crawl sweep just
-> won't have anything to scan until you start saving outputs."
+**外部承诺：**
+- 你签署了任何自愿 AI 承诺、采用了行业标准，或发布了面向客户的 AI 原则页面吗？
+- 你发布 AI 透明度报告或有公开的 AI 原则吗？
 
 ---
 
-## Writing the practice profile
+### 第 5 部分：种子文档（3-4 分钟）
+
+> "我想看看你实际拥有的内容。告诉我这些是否存在，并共享你能共享的。（AI 政策影响 /policy-monitor 漂移检测；先前的影响评估成为 /aia-generation 模板；供应商协议成为 /vendor-ai-review 的起始剧本。）"
+>
+> 1. **AI 或可接受使用政策。** 你关于 AI 可以和不可以如何使用的内部或面向公众的政策。这告诉我你承诺的立场。
+>
+> 2. **先前的 AI 影响评估或 AI 风险评估。** 即使是粗略的也行。我将了解你的结构、深度和你标记为高风险的内容。
+>
+> 3. **主要供应商 AI 协议或 AI 附录。** 你与主要 AI 供应商的合同。我想看看你实际同意了什么——责任、数据使用、可审计性等。
+>
+> 4. **模型清单或 AI 系统注册表。** 如果有——即使是列出你运行什么 AI 以及在哪里的电子表格。
+>
+> 5. **允许/禁止列表。** 批准的工具、禁止的工具，或分层批准的供应商列表。
+>
+> 如果你没有这些——这没问题，也不罕见。告诉我这一点，我会与你拥有的内容合作。
+
+**优雅降级——"我什么都没有"路径：**
+
+如果他们没有种子文档：
+> "没关系。这是我们要做的：我将使用你在访谈中告诉我的内容设置一个基础执业档案，并标记每个基于你所说而不是审查过的文档的部分。这些是最需要仔细检查的部分。
+>
+> 最重要的两件事首先需要确定的是你的用例红线（以便分类 skill 正确工作）和你的供应商立场（以便我们可以审查下一份进来的协议）。如果你愿意，我们可以在接下来 20 分钟内从头构建这些。"
+
+**如何阅读种子文档：**
+
+**AI/可接受使用政策：** 提取每个承诺和禁止。这些约束每个影响评估和供应商审查——影响评估 skill 需要对照声明政策检查新用例。
+
+**先前影响评估：** 将结构提取为模板。章节标题、分析深度、风险陈述格式、这里的缓解是什么样的。这成为 aia-generation skill 的默认输出格式。
+
+**供应商 AI 协议：** 映射每个供应商的数据使用条款、责任立场、可审计性承诺，以及任何 AI 特定条款。标记与公司声称要求的差距。
+
+**模型清单：** 注意生产中的每个 AI 系统。交叉参考是否对每个系统进行了影响评估。差距就是待办事项。
+
+### 第 6 部分：输出和政策文档位置（1 分钟）
+
+> "最后两件事——我需要知道在哪里查看以保持你的 AI 政策最新。"
+
+- **你在哪里保存已完成的 AIA、分类结果和供应商 AI 审查？** 文件夹路径或共享驱动器位置。（这会影响 /policy-monitor——skill 爬取此文件夹以检测你的执业是否已超前于你的书面 AI 政策。）
+- **实际的 AI 或可接受使用政策文档在哪里？** 内部发布或与客户/员工共享的那个。当发现漂移时，我需要读取它以建议编辑。
+- **输出文件是否有命名规范？**（例如，`AIA_UseCase_YYYY-MM-DD`）还是临时的？
+
+如果输出还没有保存在任何地方：
+> "没关系——policy-monitor skill 在直接查询模式下仍然有效（'我们想开始做 X，我们的 AI 政策涵盖它吗？'）。在你开始保存输出之前，爬取扫描将没有任何内容可扫描。"
+
+---
+
+## 写入执业档案
 
 ```markdown
-# AI Governance Practice Profile
+# AI 治理执业档案
 
-*Written by the cold-start interview on [DATE]. Edit this file directly.*
-
----
-
-## Company profile
-
-[Company] is a [description — what the company does and who its customers are].
-
-**AI role:** [Builder / Deployer / Both — and what that means for this company
-specifically]
-
-**Builder profile (if applicable):** [Type of AI built, customer segments, whether
-models are trained or fine-tuned, whether AI makes consequential decisions]
-
-**Deployer profile (if applicable):** [AI tools in use, where AI touches the product
-or operations, vendor relationship owner]
-
-**Regulatory footprint:** [Only list what actually applies — EU AI Act / Colorado /
-BIPA / sector-specific / contractual requirements only]
-
-**Open regulatory matters:** [none / list]
-
-**External commitments:** [voluntary commitments, public AI principles, transparency
-reports — or none]
+*由冷启动访谈于 [DATE] 编写。直接编辑此文件。*
 
 ---
 
-## Use case registry
+## 公司档案
 
-*Extracted from interview on [DATE]. Add new use cases as they arise.*
+[Company] 是一个 [description — 公司做什么以及其客户是谁]。
 
-| Use case | Approved | Conditions / Requirements | Never — reason |
+**AI 角色：** [构建者/部署者/两者——以及这对该公司具体意味着什么]
+
+**构建者档案（如适用）：** [构建的 AI 类型、客户群、模型是否经过训练或微调、AI 是否做出重大决策]
+
+**部署者档案（如适用）：** [使用的 AI 工具、AI 接触产品或运营的地方、供应商关系负责人]
+
+**监管足迹：** [只列出实际适用的内容——EU AI Act/科罗拉多州/BIPA/行业特定/仅合同要求]
+
+**未决监管事项：** [无/列表]
+
+**外部承诺：** [自愿承诺、公开 AI 原则、透明度报告——或无]
+
+---
+
+## 用例登记册
+
+*从访谈于 [DATE] 提取。随时添加新用例。*
+
+| 用例 | 已批准 | 条件/要求 | 从不——原因 |
 |---|---|---|---|
-| [e.g., Resume screening AI] | Conditional | Impact assessment required; human reviews every decision; disclosure to candidates | Fully automated adverse decision |
-| [e.g., AI-drafted legal documents] | Conditional | Attorney reviews before use; no privileged matter input | — |
-| [e.g., Emotion/sentiment detection for HR] | Never | — | Company policy; high litigation risk |
-| [add rows from interview] | | | |
+| [例如，简历筛选 AI] | 有条件 | 需要影响评估；人工审查每个决定；向候选人披露 | 完全自动化的不利决定 |
+| [例如，AI 起草的法律文档] | 有条件 | 使用前律师审查；不输入特权事项 | — |
+| [例如，HR 的情绪/情感检测] | 从不 | — | 公司政策；高诉讼风险 |
+| [从访谈添加行] | | | |
 
-### Red lines
+### 红线
 
-The following are automatic nos, regardless of framing:
+无论如何表述，以下是自动否定项：
 
-- [Red line 1 — reason]
-- [Red line 2 — reason]
-- [Add from interview]
+- [红线 1——原因]
+- [红线 2——原因]
+- [从访谈添加]
 
-### Governance tiers
+### 治理层级
 
-| Risk tier | Approval path | Example use cases |
+| 风险层级 | 审批路径 | 示例用例 |
 |---|---|---|
-| Standard | [team approval / department head] | Internal productivity tools, assistive drafting |
-| Elevated | [Legal / privacy review required] | Customer-facing AI, HR use cases, data-heavy tools |
-| High | [C-suite / board-level] | Consequential automated decisions, biometric, new AI product launch |
+| 标准 | [团队批准/部门负责人] | 内部生产力工具、辅助起草 |
+| 提升 | [需要法律/隐私审查] | 面向客户的 AI、HR 用例、数据密集型工具 |
+| 高 | [C 级/董事会级别] | 重大自动化决策、生物特征、新 AI 产品发布 |
 
 ---
 
-## Impact assessment house style
+## 影响评估内部风格
 
-**Trigger:** [What requires an impact assessment — new AI feature, new vendor, new
-use case, specific risk categories]
+**触发条件：** [什么需要影响评估——新 AI 功能、新供应商、新用例、特定风险类别]
 
-**Format:** [Structure extracted from seed impact assessment — or baseline if none
-provided]
+**格式：** [从种子影响评估提取的结构——或如果未提供则为基线]
 
-**Depth:** [Typical length / detail level — or "to be established"]
+**深度：** [典型长度/详细程度——或"待建立"]
 
-**Sign-off:** [Who approves — just legal, or a review committee]
+**签字人：** [谁批准——只有法律，还是审查委员会]
 
-**Template structure (from seed assessment or baseline):**
+**模板结构（来自种子评估或基线）：**
 
-1. [Section 1 heading and rough content]
-2. [Section 2]
-3. [etc.]
+1. [第 1 节标题和大致内容]
+2. [第 2 节]
+3. [等等]
 
-*Note: [If no seed doc — "Baseline structure. Update after completing first
-assessment."]*
+*注：[如果没有种子文档——"基线结构。完成第一次评估后更新。"]*
 
 ---
 
-## Vendor AI governance
+## 供应商 AI 治理
 
-### What we require from AI vendors
+### 我们对 AI 供应商的要求
 
-| Term | Our standard | Acceptable fallback | Never |
+| 条款 | 我们的标准 | 可接受的备用方案 | 从不 |
 |---|---|---|---|
-| Data use | [e.g., No training on our data without opt-in] | [Limited retention for safety only] | [Unrestricted training on our inputs] |
-| Auditability | [e.g., SOC 2 + annual third-party audit] | [Documented internal audit process] | [No audit rights] |
-| Liability for AI outputs | [e.g., within the MSA cap] | [Separate capped carveout] | [Zero vendor liability for AI errors] |
-| Incident notification | [e.g., 72 hours for AI system failures affecting us] | | |
-| Human review rights | [e.g., can demand human review of consequential outputs] | | |
-| Model change notification | [e.g., 30 days notice for material model changes] | | |
+| 数据使用 | [例如，未经选择加入不得在我们的数据上训练] | [仅用于安全目的的有限保留] | [对我们输入的无限制训练] |
+| 可审计性 | [例如，SOC 2 + 年度第三方审计] | [有记录的内部审计流程] | [无审计权] |
+| AI 输出的责任 | [例如，在 MSA 上限范围内] | [单独的有上限的附加条款] | [供应商对 AI 错误零责任] |
+| 事件通知 | [例如，影响我们的 AI 系统故障 72 小时内] | | |
+| 人工审查权 | [例如，可以要求对重大输出进行人工审查] | | |
+| 模型变更通知 | [例如，重大模型变更提前 30 天通知] | | |
 
-### The one thing
+### 那件事
 
-[Vendor AI term that's an automatic no]
-
----
-
-## AI policy commitments
-
-*Extracted from [policy name / URL] on [date]. If the policy changes, re-run setup
-or edit this section.*
-
-**Prohibited uses stated:** [list]
-**Required safeguards stated:** [list]
-**Disclosure obligations stated:** [what the policy says about disclosing AI use
-to customers, employees, or affected parties]
-**Approved vendors / tools:** [list or "maintained in allowlist"]
-**Prohibited vendors / tools:** [list or "maintained in blocklist"]
+[供应商 AI 条款中的自动否定项]
 
 ---
 
-## Governance team and escalation
+## AI 政策承诺
 
-**Team:** [N people / function — where AI governance sits in the org]
-**Vendor relationship owner:** [who manages AI vendor contracts]
-**AI risk owner:** [CISO / CPO / GC / dedicated role]
+*从 [政策名称/URL] 于 [date] 提取。如果政策发生变化，重新运行设置或编辑此部分。*
 
-| Issue | Handle at | Escalate to | When |
+**已声明的禁止用途：** [列表]
+**已声明的必要保障措施：** [列表]
+**已声明的披露义务：** [政策关于向客户、员工或受影响方披露 AI 使用情况的内容]
+**已批准的供应商/工具：** [列表或"在允许列表中维护"]
+**已禁止的供应商/工具：** [列表或"在禁止列表中维护"]
+
+---
+
+## 治理团队和升级
+
+**团队：** [N 人/职能——AI 治理在组织中的位置]
+**供应商关系负责人：** [谁管理 AI 供应商合同]
+**AI 风险负责人：** [CISO/CPO/GC/专职角色]
+
+| 问题 | 在此处理 | 升级到 | 何时 |
 |---|---|---|---|
-| New use case — standard tier | [team / department] | [you] | Ambiguous risk tier |
-| New use case — elevated tier | [you + legal review] | [GC] | Outside approved categories |
-| New use case — high tier | [you + GC] | [C-suite / board] | New consequential AI product, biometric, automated adverse decision |
-| Vendor AI incident | [you + security] | [GC + C-suite] | Data exposure, model failure affecting customers |
-| Regulator inquiry | — | [GC + you immediately] | Always |
-| Employee AI misuse | [HR + you] | [GC] | Policy violation with legal exposure |
+| 新用例——标准层级 | [团队/部门] | [你] | 风险层级不明确 |
+| 新用例——提升层级 | [你 + 法律审查] | [GC] | 超出批准类别 |
+| 新用例——高层级 | [你 + GC] | [C 级/董事会] | 新重大 AI 产品、生物特征、自动化不利决定 |
+| 供应商 AI 事件 | [你 + 安全] | [GC + C 级] | 数据泄露、影响客户的模型故障 |
+| 监管机构询问 | — | [GC + 立即联系你] | 始终 |
+| 员工 AI 滥用 | [HR + 你] | [GC] | 涉及法律敞口的政策违规 |
 
 ---
 
-## Seed documents
+## 种子文档
 
-| Doc | Location | Date reviewed | Notes |
+| 文档 | 位置 | 审查日期 | 备注 |
 |---|---|---|---|
-| AI / acceptable use policy | [path/URL] | [date] | [version or "none — baseline used"] |
-| Reference impact assessment | [path/link] | [date] | "[feature/use case it was for]" |
-| Key vendor AI agreement | [path/link] | [date] | "[vendor name]" |
-| Model inventory | [path/link] | [date] | "[N systems as of date — or none]" |
-| Allowlist / blocklist | [path/link] | [date] | |
+| AI / 可接受使用政策 | [路径/URL] | [date] | [版本或"无——使用基线"] |
+| 参考影响评估 | [路径/链接] | [date] | "[它所针对的功能/用例]" |
+| 主要供应商 AI 协议 | [路径/链接] | [date] | "[供应商名称]" |
+| 模型清单 | [路径/链接] | [date] | "[截至日期的 N 个系统——或无]" |
+| 允许/禁止列表 | [路径/链接] | [date] | |
 
 ---
 
-*Re-run: `/ai-governance-legal:cold-start-interview --redo`*
+*重新运行：`/ai-governance-legal:cold-start-interview --redo`*
 ```
 
-## After writing
+## 写入后
 
-**Show what this plugin can do.** Before closing, offer:
+**展示这个 plugin 能做什么。** 结束前提供：
 
-> **Want to see what I can help with?**
+> **想看看我能帮什么吗？**
 
-If yes, show this tailored list (not a generic template — these are the concrete things this plugin does best):
+如果是，显示此定制列表（不是通用模板——这些是该 plugin 最擅长的具体事项）：
 
-> **Here's what I'm good at in AI governance:**
+> **以下是我在 AI 治理方面擅长的：**
 >
-> - **Review vendor AI terms** — e.g., "A vendor sent AI provisions in their SaaS agreement — check them against your training-on-data, liability, and model-change positions." Try: `/ai-governance-legal:vendor-ai-review`
-> - **Triage a proposed AI use case** — e.g., "A PM wants to add an AI feature — run it against your registry for approved / conditional / not approved." Try: `/ai-governance-legal:use-case-triage`
-> - **Run an AI impact assessment** — e.g., "A high-risk use case needs a structured AIA with regulatory classification and recommended conditions." Try: `/ai-governance-legal:aia-generation`
-> - **Diff a new AI regulation against your posture** — e.g., "A new AI rule dropped — see what gaps it opens and what remediation it forces." Try: `/ai-governance-legal:reg-gap-analysis`
-> - **Sweep for policy drift** — e.g., "Look across saved AIAs, triage results, and vendor reviews to find where your AI policy no longer matches practice." Try: `/ai-governance-legal:policy-monitor`
+> - **审查供应商 AI 条款** — 例如，"供应商在其 SaaS 协议中发送了 AI 条款——对照你的数据训练、责任和模型变更立场检查它们。"尝试：`/ai-governance-legal:vendor-ai-review`
+> - **分类提议的 AI 用例** — 例如，"PM 想添加 AI 功能——对照你的登记册检查是已批准/有条件/未批准。"尝试：`/ai-governance-legal:use-case-triage`
+> - **运行 AI 影响评估** — 例如，"高风险用例需要带有监管分类和建议条件的结构化 AIA。"尝试：`/ai-governance-legal:aia-generation`
+> - **对照你的立场比较新 AI 法规** — 例如，"新 AI 规则发布——查看它开了哪些差距以及强制的补救措施。"尝试：`/ai-governance-legal:reg-gap-analysis`
+> - **扫描政策漂移** — 例如，"查看保存的 AIA、分类结果和供应商审查，找出你的 AI 政策不再与实践匹配的地方。"尝试：`/ai-governance-legal:policy-monitor`
 >
-> **My suggestion for your first one:** Triage one real use case from your backlog — it's the fastest way to feel what the registry gives you. Or tell me what's on your plate and I'll pick.
+> **我对你第一件事的建议：** 对积压中的一个真实用例进行分类——这是感受登记册给你带来什么的最快方式。或告诉我你目前的情况，我来选择。
 
-This solves the cold-start problem (the supervisor doesn't know what to do first) and the value-prop problem (they don't know what the plugin can do) in one offer. Make the list specific. Skip this step if the supervisor already named a concrete first task during the interview.
+这一步解决了冷启动问题（监督者不知道先做什么）和价值主张问题（他们不知道 plugin 能做什么）。使列表具体。如果监督者在访谈中已经说明了具体的第一个任务，跳过此步骤。
 
 
-1. **Show the summary.** "Here's what I heard. The use case registry is the part to
-   check hardest — did I capture your red lines correctly? Those drive the triage
-   skill."
+1. **显示摘要。** "这是我听到的。用例登记册是最需要仔细检查的部分——我正确捕获了你的红线吗？这些驱动分类 skill。"
 
-2. **Propose first tasks:**
-   - "Want me to run a triage on the use cases you mentioned and give you a risk
-     tier and impact assessment checklist for each?"
-   - "Got a vendor AI agreement in the queue I can review against your positions?"
-   - If no impact assessment template: "Want to build your impact assessment template
-     from scratch now? Fifteen minutes."
-   - If no policy: "You're running without a written AI policy — if something goes
-     wrong, you'll be explaining your governance verbally. Want to draft one?"
+2. **提议第一个任务：**
+   - "你想让我对你提到的用例进行分类，并为每个用例提供风险层级和影响评估检查清单吗？"
+   - "你的队列里有要我对照你的立场审查的供应商 AI 协议吗？"
+   - 如果没有影响评估模板："想现在从头构建你的影响评估模板吗？十五分钟。"
+   - 如果没有政策："你在没有书面 AI 政策的情况下运营——如果出了什么问题，你将口头解释你的治理。想起草一个吗？"
 
-3. **Flag gaps:** Call out explicitly what's missing and what risk that creates.
-   Don't soften it.
-   - No model inventory: "You don't have a register of what AI you're running. That
-     means you can't do a systematic impact assessment review and you can't respond
-     quickly to an incident. That's the first thing to fix."
-   - No vendor AI terms: "Your vendor agreements may have no AI-specific provisions —
-     which means your vendors can train on your data, change their models without
-     notice, and disclaim all liability for AI errors. Worth reviewing the next
-     renewal."
+3. **标记差距：** 明确指出缺少什么以及这带来什么风险。不要软化它。
+   - 没有模型清单："你没有正在运行什么 AI 的注册表。这意味着你无法进行系统性影响评估审查，并且无法快速响应事件。这是首先要修复的。"
+   - 没有供应商 AI 条款："你的供应商协议可能没有 AI 特定条款——这意味着你的供应商可以在你的数据上训练、在不通知的情况下更改他们的模型，并免除对 AI 错误的所有责任。值得在下次续约时审查。"
 
-4. **Connect to privacy:** If the company has a privacy plugin configured, note:
-   "Some of this overlaps with your privacy practice — PIAs and AI impact assessments
-   often cover the same ground. Once both plugins are calibrated, I can flag when a
-   use case needs both."
+4. **连接到隐私：** 如果公司已配置隐私 plugin，注意："其中一些与你的隐私执业重叠——PIA 和 AI 影响评估通常涵盖相同的范围。一旦两个 plugin 都校准好了，我可以标记用例什么时候需要两者。"
 
-5. **Close with a note on changeability.** End with something like:
+5. **以关于可更改性的备注结束。** 以类似以下内容结束：
 
-   > "Done. Your configuration is at `~/.claude/plugins/config/claude-for-legal/ai-governance-legal/CLAUDE.md` — it's a plain text file you can read and edit directly. Anything you answered can be changed:
+   > "完成。你的配置在 `~/.claude/plugins/config/claude-for-legal/ai-governance-legal/CLAUDE.md`——它是一个你可以直接读取和编辑的纯文本文件。你回答的任何内容都可以更改：
    >
-   > - Edit the file directly for a quick change
-   > - Run `/ai-governance-legal:cold-start-interview --redo` for a full re-interview
-   > - Run `/ai-governance-legal:cold-start-interview --check-integrations` to re-check what's connected
+   > - 直接编辑文件以进行快速更改
+   > - 运行 `/ai-governance-legal:cold-start-interview --redo` 进行完整重新访谈
+   > - 运行 `/ai-governance-legal:cold-start-interview --check-integrations` 重新检查连接的内容
    >
-   > The sections most often adjusted after first setup are the use case registry and red lines, vendor AI review red lines, and the regulatory regimes in scope. Your configuration will improve as you use the plugin — when a skill's output feels off, the fix is usually here."
+   > 首次设置后最常调整的部分是用例登记册和红线、供应商 AI 审查红线，以及范围内的监管制度。你的配置会随着你使用 plugin 而改进——当 skill 的输出感觉不对时，修复通常在这里。"
 
-6. **Before your first triage**: connect a research tool. Without one, I'll flag every citation as unverified — with one, I verify them against a current database. In Cowork: Settings → Connectors. In Claude Code: authorize when a skill prompts you.
+6. **第一次分类之前**：连接研究工具。没有研究工具，我会将每个引用标记为未验证——有了研究工具，我会根据当前数据库验证它们。在 Cowork 中：设置 → 连接器。在 Claude Code 中：当 skill 提示时授权。
 
-<!-- COLLATERAL LINKS: when onboarding collateral exists, add here:
-     "Want a walkthrough? [Watch the 3-minute intro](URL) or [read the getting-started guide](URL)." -->
+<!-- COLLATERAL LINKS: 当入职资料存在时，在此处添加：
+     "想要演示？[观看 3 分钟介绍](URL)或[阅读入门指南](URL)。" -->
 
-## Your practice profile learns
+## 你的执业档案会学习
 
-After writing the practice profile, close with this note:
+写入执业档案后，以此备注结束：
 
-> **Your practice profile learns.** It gets better as you use the plugins:
+> **你的执业档案会学习。** 随着你使用 plugin，它会变得更好：
 >
-> - When a skill's output feels off, that's usually a position to tune. The output will tell you which one.
-> - The `policy-monitor` agent watches for drift between your AI governance policy and your practice, and proposes updates.
-> - You can always say "update my playbook to prefer X" or "change my escalation threshold to Y" and the relevant skill will write the change.
-> - Run `/cold-start-interview --redo <section>` to re-interview one part, or edit the config file directly.
+> - 当 skill 的输出感觉不对时，通常是需要调整的立场。输出会告诉你是哪个。
+> - `policy-monitor` agent 监控你的 AI 治理政策与实践之间的漂移，并提议更新。
+> - 你随时可以说"更新我的剧本以优先 X"或"将我的升级阈值更改为 Y"，相关 skill 将写入更改。
+> - 运行 `/cold-start-interview --redo <section>` 重新访谈某一部分，或直接编辑配置文件。
 >
-> Ten minutes of setup gets you a working profile. A month of use gets you one that reads like you wrote it yourself.
+> 十分钟的设置让你得到一个可用的档案。一个月的使用让你得到一个读起来像你自己写的档案。
 
-## Failure modes
+## 失败模式
 
-- **Don't let them skip the builder/deployer question.** If they say "both," get
-  specific about which side creates the larger governance obligation right now. The
-  skills work differently depending on the answer.
-- **Don't assume any specific regime applies.** Companies often get told they "should probably care" about a given AI regime — research whether the regime actually reaches them (jurisdictional nexus, threshold, system category) before treating it as in scope.
-- **Don't write a use case registry from generic positions.** If they've never
-  formally approved or rejected a use case, say so in the plugin config: `[POSITIONS FROM
-  INTERVIEW — these reflect stated preferences, not formally reviewed policy. Treat
-  as starting points.]`
-- **Don't skip the "I have nothing" path.** Some of the best-run teams haven't
-  documented anything yet. The interview still has value; just make clear in the
-  practice profile which sections are from stated positions vs. reviewed documents.
-- **Don't merge this with the privacy interview.** The overlap is real — PIAs,
-  vendor assessments, policy frameworks — but the orientation is different enough
-  that running them together loses sharpness. If both plugins are being set up, run
-  them sequentially.
+- **不要让他们跳过构建者/部署者问题。** 如果他们说"两者都是"，具体说明哪一侧现在创造更大的治理义务。skills 根据答案以不同方式工作。
+- **不要假设任何特定制度适用。** 公司通常被告知他们"可能应该关心"某个特定 AI 制度——在将其视为范围内之前，研究该制度是否实际上覆盖他们（管辖权连接、阈值、系统类别）。
+- **不要从通用立场写用例登记册。** 如果他们从未正式批准或拒绝用例，在 plugin 配置中说明：`[POSITIONS FROM INTERVIEW — 这些反映声明的偏好，而不是正式审查的政策。视为起点。]`
+- **不要跳过"我什么都没有"路径。** 最佳管理的一些团队还没有记录任何内容。访谈仍然有价值；只是在执业档案中明确指出哪些部分来自声明立场与审查过的文档。
+- **不要将此与隐私访谈合并。** 重叠是真实的——PIA、供应商评估、政策框架——但方向足够不同，使得一起运行会失去清晰度。如果两个 plugin 都在设置，依次运行。

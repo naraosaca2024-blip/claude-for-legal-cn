@@ -1,161 +1,167 @@
+<!--
+This file is a Chinese translation of the original by Anthropic PBC.
+Original: https://github.com/anthropics/claude-for-legal
+Licensed under Apache License 2.0
+-->
+
 # Claude for Law School Clinics
 
-*Supercharging access to justice through AI-enabled clinical legal education.*
+*通过 AI 赋能的法律临床教育增强诉诸司法的机会。*
 
-A plugin for law school clinics — the institutions where law students, supervised by clinical professors, provide free legal services to people who can't afford representation. Immigration, housing, family law, consumer protection, criminal defense, civil rights.
+法学院诊所的 plugin——在临床教授监督下，法律学生为无力负担代理的人提供免费法律服务的机构。移民、住房、家庭法、消费者保护、刑事辩护、民权。
 
-**Every output is a draft for student analysis and attorney review — marked, gated, and logged. The plugin scaffolds the work; a student reasons through it; a supervising attorney reviews. Nothing leaves the clinic without going through the supervision model the professor set at setup.**
+**每个输出都是供学生分析和律师审查的草稿——已标记、已把关、已记录。Plugin 为工作搭建支架；学生对其进行推理；监督律师审查。没有教授在设置时建立的监督模型，任何东西都不会离开诊所。**
 
-## The problem this solves
+## 这解决的问题
 
-Clinics are structurally capacity-constrained. A supervising professor manages 5–10 students. Each student carries a handful of cases while juggling classes. Students turn over every semester. Administrative tasks — intake write-up, first drafts, research starting points, status updates — consume hours that could go to advising clients. The result: long waitlists, limited caseloads, people who give up waiting.
+诊所在结构上受到容量限制。一名监督教授管理 5-10 名学生。每个学生在处理课程的同时处理少数案件。学生每学期轮换。行政任务——intake 撰写、初稿、研究起点、状态更新——消耗了本可以用于为客户提供建议的时间。结果：长长的等待名单、有限的案件量、放弃等待的人。
 
-This plugin cuts the time cost of everything *around* the lawyering, so the same students and professor serve meaningfully more clients — and students spend more time on the analysis and strategy that make clinical education worthwhile.
+这个 plugin 削减了*围绕*法律工作的一切的时间成本，因此相同的学生和教授可以服务有意义更多的客户——并且学生将更多时间花在使临床教育有价值的分析和策略上。
 
-**It accelerates the non-educational parts. It preserves the analytical work.** That's the design principle.
+**它加速了非教育部分。它保留了分析工作。** 这是设计原则。
 
-## Who uses it
+## 谁使用它
 
-| Role | Runs | Gets |
+| 角色 | 运行 | 获取 |
 |---|---|---|
-| **Supervising professor** | `/cold-start-interview` (once), `/supervisor-review-queue` (if formal review enabled) | Clinic context configured, student work reviewed |
-| **Students** | `/ramp` (start of semester), then `/client-intake`, `/draft`, `/memo`, `/research-start`, `/status`, `/client-letter` | Starting points — never final work product |
+| **监督教授** | `/cold-start-interview`（一次）、`/supervisor-review-queue`（如果启用正式审查） | 诊所上下文已配置、学生工作已审查 |
+| **学生** | `/ramp`（学期开始），然后是 `/client-intake`、`/draft`、`/memo`、`/research-start`、`/status`、`/client-letter` | 起点——永远不是最终工作产品 |
 
 ## Commands
 
-| Command | What it does | What it doesn't do |
+| Command | 做什么 | 不做什么 |
 |---|---|---|
-| `/cold-start-interview` | **Professor.** One-time clinic config: practice areas, jurisdiction, supervision style, handbook/rules upload | — |
-| `/build-guide` | **Professor.** Author a per-practice-area guide: intake questions, pedagogy posture (assist / guide / teach), review gates, cross-plugin checks | Doesn't replace `/cold-start-interview` — this tunes skills for one practice area |
-| `/ramp` | **Students.** Semester onboarding: clinic procedures, tool walkthrough, practice exercises | Doesn't replace the professor's orientation |
-| `/client-intake` | Structured intake: practice-area templates, cross-area issue spotting, conflict flags, triage | Doesn't decide whether to take the case |
-| `/draft [doc]` | First draft: asylum apps, eviction answers, protective orders, demand letters — jurisdiction-aware | Doesn't produce final work product |
-| `/memo` | IRAC-scaffolded case analysis with research gaps flagged | Doesn't write the analysis — scaffolds it |
-| `/research-start [issue]` | Research roadmap: statutes, case law areas, Westlaw search terms | **Leads, not authoritative citations** — students verify everything |
-| `/status [audience]` | Case status summary: client-facing, internal, or court-ready | Doesn't file anything |
-| `/client-letter [type]` | Routine correspondence: appointment confirms, doc requests, brief updates | Doesn't do substantive advice — that's `/status client` or a conversation |
-| `/deadlines` | Track case deadlines — add, cross-case rollup with warnings at 14/7/3/1 days, overdue flags | Doesn't calculate deadlines from triggering events; student does the math per local rules |
-| `/client-comms-log [case]` | Append-only per-case communication log — calls, emails, letters, in-person | Doesn't store substantive legal analysis; comm record only |
-| `/semester-handoff` | End-of-semester offboarding — per-case handoff memos for the next cohort | Doesn't close cases; cases closing at semester end get a final `/status internal` memo and are marked closed in the handoff document |
-| `/supervisor-review-queue` | **Professor, if formal review enabled.** What's waiting, approve/edit/return | Optional — one of three supervision models |
+| `/cold-start-interview` | **教授。** 一次性诊所配置：执业领域、司法管辖区、监督风格、手册/规则上传 | — |
+| `/build-guide` | **教授。** 编写每个执业领域的指南：intake 问题、教学姿态（辅助/引导/教导）、审查把关、跨 plugin 检查 | 不替代 `/cold-start-interview`——这为一个执业领域调整技能 |
+| `/ramp` | **学生。** 学期入职：诊所程序、工具演练、练习 | 不替代教授的 orientation |
+| `/client-intake` | 结构化 intake：执业领域模板、跨领域问题发现、冲突标记、分类 | 不决定是否接受案件 |
+| `/draft [doc]` | 初稿：庇护申请、驱逐答辩、保护令、要求信——司法管辖区感知 | 不产生最终工作产品 |
+| `/memo` | IRAC 支架式案件分析，研究缺口已标记 | 不撰写分析——为其搭建支架 |
+| `/research-start [issue]` | 研究路线图：法规、判例法领域、Westlaw 搜索词 | **线索，不是权威引用**——学生验证所有内容 |
+| `/status [audience]` | 案件状态摘要：面向客户、内部或法院就绪 | 不提交任何内容 |
+| `/client-letter [type]` | 例行通信：预约确认、文档请求、简短更新 | 不做实质性建议——那是 `/status client` 或对话 |
+| `/deadlines` | 追踪案件截止日期——添加、跨案件汇总并在 14/7/3/1 天发出警告、逾期标记 | 不从触发事件计算截止日期；学生根据当地规则计算 |
+| `/client-comms-log [case]` | 仅追加的每个案件通信日志——电话、电子邮件、信件、亲自 | 不存储实质性法律分析；仅通信记录 |
+| `/semester-handoff` | 学期结束离职——下一批的每个案件交接备忘录 | 不结案；学期结束时结案的案件获得最终 `/status internal` 备忘录并在交接文档中标记为已关闭 |
+| `/supervisor-review-queue` | **教授，如果启用正式审查。** 什么在等待，批准/编辑/返回 | 可选——三种监督模型之一 |
 
-## Ethical and confidentiality preconditions
+## 伦理和保密前提
 
-Before using this plugin with real client matters, confirm with your clinic's supervising attorney and your school's IT / ethics office:
+在将此 plugin 用于真实客户案件之前，请与你诊所的监督律师和学校的 IT/伦理办公室确认：
 
-1. **Your Claude account tier and its data retention and training policies.** Team, Enterprise, Work, Education, and individual accounts have different guarantees about retention, training use, and subprocessor handling. Confirm what applies to the clinic's account.
-2. **Your client consent and disclosure practices for AI-assisted work** per ABA Formal Opinion 512 (2024), your state bar's AI guidance (if any), and Model Rules 1.1, 1.4, 1.6, and 5.3. Decide whether and how the clinic discloses AI use to clients; document it.
-3. **How privileged and confidential material will be handled** — what gets pasted into sessions, where outputs are stored, who has access, how long material is retained, how student turnover affects access.
-4. **Whether any of your clinic's practice areas involve heightened confidentiality** (immigration, criminal defense, domestic violence, some family and civil rights matters) that require additional safeguards — and decide whether the plugin is appropriate for those case types at all.
+1. **你的 Claude 帐户层级及其数据保留和训练策略。** Team、Enterprise、Work、Education 和个人帐户对保留、训练使用和子处理器处理有不同的保证。确认什么适用于诊所的帐户。
+2. **你对 AI 辅助工作的客户同意和披露做法**，根据 ABA 正式意见 512（2024）、你州律师协会的 AI 指南（如果有）以及示范规则 1.1、1.4、1.6 和 5.3。决定诊所是否以及如何向客户披露 AI 使用；记录下来。
+3. **特权和机密材料将如何处理**——什么被粘贴到会话中、输出存储在哪里、谁有权访问、材料保留多长时间、学生流动如何影响访问。
+4. **你诊所的任何执业领域是否涉及更高的保密性**（移民、刑事辩护、家庭暴力、一些家庭和民权事项）需要额外的保障——并决定该 plugin 对于这些案件类型是否完全合适。
 
-Do not skip this step. The cold-start interview (`/legal-clinic:cold-start-interview`) captures these decisions as Part 0 before any other configuration.
+不要跳过这一步。冷启动访谈（`/legal-clinic:cold-start-interview`）在任何其他配置之前将这些决定捕获为第 0 部分。
 
-## Confidence markers
+## 置信度标记
 
-Skills across this plugin flag confidence inline so students and supervising attorneys can see where the scaffold is uncertain vs. where it's asserting. Every marker is a prompt to verify — nothing marked is trusted.
+此 plugin 中的技能内联标记置信度，因此学生和监督律师可以看到支架不确定的地方与它断言的地方。每个标记都是验证的提示——没有标记的内容是可信的。
 
-- `[AI-ASSISTED DRAFT — requires student analysis and attorney review]` — baseline label applied to every output. Review label, not part of client-facing content; strip before anything goes out.
-- `[UNCERTAIN: specific reason]` — the skill is genuinely unsure on this call (minority rule, debatable issue, jurisdiction the skill doesn't know well). Used in memo, intake, status, draft.
-- `[VERIFY: claim — check source]` — a claim stated as likely but unverified. Student must confirm before relying — citations, local rule formats, rule statements. Used heavily in research-start, draft, status, memo.
-- `[RESEARCH NEEDED: ...]` — memo scaffold marker where a rule statement is a research gap, not a conclusion. The student runs `/research-start` and fills it in.
-- `[STUDENT ANALYSIS: ...]` — memo scaffold marker where the application is blank by design. The student's reasoning fills it.
-- `[STUDENT CONCLUSION: ...]` — memo scaffold marker where the conclusion is blank by design.
-- `[FACT NEEDED: ...]` — draft scaffold marker where a required fact is missing from case notes. Student gets the fact; no guessing.
-- `CHECK WITH [PROFESSOR] BEFORE SENDING` / `BEFORE FILING` — supervision-flag label applied in "configurable flags" supervision mode to outputs on flagged topics.
+- `[AI-ASSISTED DRAFT — requires student analysis and attorney review]`——应用于每个输出的基线标签。审查标签，不是面向客户内容的一部分；在任何内容出去之前剥离。
+- `[UNCERTAIN: specific reason]`——skill 对此调用确实不确定（少数规则、有争议的问题、skill 不熟悉的司法管辖区）。用于 memo、intake、status、draft。
+- `[VERIFY: claim — check source]`——陈述为可能但未验证的主张。学生在依赖之前必须确认——引用、当地规则格式、规则陈述。大量用于 research-start、draft、status、memo。
+- `[RESEARCH NEEDED: ...]`——memo 支架标记，规则陈述是研究缺口，不是结论。学生运行 `/research-start` 并填充它。
+- `[STUDENT ANALYSIS: ...]`——memo 支架标记，应用按设计为空。学生的推理填充它。
+- `[STUDENT CONCLUSION: ...]`——memo 支架标记，结论按设计为空。
+- `[FACT NEEDED: ...]`——draft 支架标记，案件笔记中缺少所需事实。学生获取事实；不猜测。
+- `CHECK WITH [PROFESSOR] BEFORE SENDING` / `BEFORE FILING`——在"可配置标记"监督模式下应用于标记主题输出的监督标记标签。
 
-Trust the flags more than the absence of flags. An unflagged statement means the skill is confident — it does not mean the student or attorney skips verification. ABA Formal Opinion 512 requires verification regardless.
+信任标记多于没有标记。没有标记的陈述意味着 skill 是置信的——这并不意味着学生或律师跳过验证。ABA 正式意见 512 无论如何都要求验证。
 
-## Built-in safeguards
+## 内置保障
 
-Every output from every skill includes:
+每个 skill 的每个输出都包括：
 
-- **AI-assisted label** — requires student analysis and attorney review
-- **Confidence indicators** — `[UNCERTAIN: ...]` where genuinely unsure, rather than guessing
-- **Verification prompts** — specific things to fact-check before relying on output
-- **Ethical reminders** calibrated to the task
+- **AI 辅助标签**——需要学生分析和律师审查
+- **置信度指标**——`[UNCERTAIN: ...]` 在确实不确定的地方，而不是猜测
+- **验证提示**——在依赖输出之前要事实检查的具体事情
+- **根据任务调整的伦理提醒**
 
-These are designed to reinforce the clinical education model: the student does the thinking, the plugin does the heavy lifting around it.
+这些旨在强化临床教育模型：学生进行思考，plugin 做围绕它的繁重工作。
 
-**Research outputs specifically:** `/research-start` gives leads and frameworks for the student to verify and develop. It explicitly does **not** provide legal citations as authoritative. This is both an ethical safeguard and a pedagogical feature — students still learn to research and use judgment; they just start from a better place.
+**特别是研究输出：** `/research-start` 为学生提供线索和框架以验证和开发。它明确**不**提供法律引用作为权威。这既是伦理保障也是教学功能——学生仍然学习研究和使用判断；他们只是从更好的地方开始。
 
-## Supervision workflow (configurable)
+## 监督工作流（可配置）
 
-Whether the plugin includes a formal review workflow — student draft → professor review → approved — is a genuine open question. Some clinics want a hard gate; others find it overly prescriptive for their supervision structure.
+plugin 是否包括正式审查工作流——学生 draft → 教授审查 → 已批准——是一个真正的开放问题。一些诊所想要硬把关；其他诊所发现它对他们的监督结构过于规范。
 
-The cold-start interview asks the professor to choose:
+冷启动访谈要求教授选择：
 
-1. **Formal review queue** — client/court-bound output queues, professor approves, all logged
-2. **Configurable flags, informal review** — certain triggers label output "CHECK WITH PROFESSOR," no queue mechanism
-3. **Lighter-touch** — standard safeguard labels on everything, professor supervises through existing clinic structure (case rounds, one-on-ones)
+1. **正式审查队列**——面向客户/法院的输出排队，教授批准，全部记录
+2. **可配置标记，非正式审查**——某些触发条件将输出标记为"CHECK WITH PROFESSOR"，无队列机制
+3. **轻触**——所有内容上的标准保障标签，教授通过现有诊所结构监督（案件 rounds，一对一会面）
 
-Changeable later by editing `~/.claude/plugins/config/claude-for-legal/legal-clinic/CLAUDE.md`. Your configuration is stored at that version-independent path and survives plugin updates.
+稍后可通过编辑 `~/.claude/plugins/config/claude-for-legal/legal-clinic/CLAUDE.md` 更改。你的配置存储在该版本无关的路径中，并在 plugin 更新后保留。
 
-## Semester turnover: the `/ramp` solution
+## 学期轮换：`/ramp` 解决方案
 
-Every semester, clinics rebuild from scratch. New students need weeks to learn procedures, tools, practice-area basics. `/ramp` is the interactive onboarding — it reads the clinic handbook the professor uploaded at setup and teaches it, with low-stakes practice exercises (fake intake, practice draft, research roadmap) before the student touches a real case.
+每个学期，诊所从头重建。新生需要数周来学习程序、工具、执业领域基础。`/ramp` 是交互式入职——它读取教授在设置时上传的诊所手册并教授它，在学生接触真实案件之前进行低风险练习（假 intake、练习 draft、研究路线图）。
 
-`/ramp --card` generates the one-page student reference card: commands, what Claude can and can't help with, verification habits. Hand it out on day one.
+`/ramp --card` 生成一页学生参考卡：命令、Claude 可以和不可以帮助什么、验证习惯。第一天分发它。
 
-## Framework: ABA Formal Opinion 512 (2024)
+## 框架：ABA 正式意见 512（2024）
 
-The ethical framework this plugin operates within. Lawyers may use generative AI but must ensure competence in the technology, maintain confidentiality, supervise outputs, communicate with clients about AI use where appropriate, and verify before relying. The safeguards above — labels, confidence indicators, verification prompts, the explicit non-authority of research outputs — are built for this model.
+此 plugin 运行所在的伦理框架。律师可以使用生成式 AI，但必须确保技术的能力、保密、监督输出、在适当的地方与客户沟通 AI 使用以及在依赖之前验证。上面的保障——标签、置信度指标、验证提示、研究输出的明确非权威性——都是为此模型构建的。
 
-Clinical professors are among the most thoughtful people in legal education about professional responsibility. The plugin is designed to operate the way they'd want it to.
+临床教授是法律教育中关于职业责任最深思熟虑的人之一。该 plugin 旨在按照他们想要的方式运行。
 
 ## Skills
 
-| Skill | Purpose |
+| Skill | 目的 |
 |---|---|
-| **cold-start-interview** | Professor's one-time setup — practice areas, jurisdiction, supervision style, seed docs |
-| **build-guide** | Professor's per-practice-area guide — intake, pedagogy posture (assist/guide/teach), review gates, cross-plugin checks |
-| **ramp** | Student semester onboarding — procedures, tools, practice exercises |
-| **client-intake** | Practice-area-specific intake with cross-area issue spotting, conflict flags, triage |
-| **draft** | First-draft generation — practice-area templates, jurisdiction-aware, explicitly starting point |
-| **memo** | IRAC scaffolding with research gaps flagged — the analysis is the student's |
-| **research-start** | Research roadmap — leads not authorities, students verify and develop |
-| **status** | Audience-aware case summaries — client / internal / court |
-| **client-letter** | Routine correspondence from templates |
-| **supervisor-review-queue** | Optional formal review workflow — only active if professor chose it |
-| **deadlines** | Per-case deadline tracking, cross-case rollup, warning cadence, overdue flags |
-| **client-comms-log** | Append-only per-case communication record — calls, emails, letters, in-person |
-| **semester-handoff** | End-of-semester offboarding memos; mirror of `/ramp` |
+| **cold-start-interview** | 教授的一次性设置——执业领域、司法管辖区、监督风格、种子文档 |
+| **build-guide** | 教授的每个执业领域指南——intake、教学姿态（辅助/引导/教导）、审查把关、跨 plugin 检查 |
+| **ramp** | 学生学期入职——程序、工具、练习 |
+| **client-intake** | 具有跨领域问题发现、冲突标记、分类的特定执业领域 intake |
+| **draft** | 初稿生成——执业领域模板、司法管辖区感知、明确起点 |
+| **memo** | IRAC 支架，研究缺口已标记——分析是学生的 |
+| **research-start** | 研究路线图——线索不是权威，学生验证和开发 |
+| **status** | 受众感知的案件摘要——客户 / 内部 / 法院 |
+| **client-letter** | 来自模板的例行通信 |
+| **supervisor-review-queue** | 可选的正式审查工作流——仅在教授选择时激活 |
+| **deadlines** | 每个案件截止日期追踪、跨案件汇总、警告节奏、逾期标记 |
+| **client-comms-log** | 仅追加的每个案件通信记录——电话、电子邮件、信件、亲自 |
+| **semester-handoff** | 学期结束离职备忘录；`/ramp` 的镜像 |
 
-*(Two deprecated skills — `form-generation`, `plain-language-letters` — redirect to `/draft` and `/client-letter` + `/status client` respectively.)*
+*(两个已弃用的 skill——`form-generation`、`plain-language-letters`——分别重定向到 `/draft` 和 `/client-letter` + `/status client`。)*
 
-## Connectors and citation verification
+## 连接器和引用验证
 
-**Connect a research tool first — the citation guardrails depend on it.** Without one, every cite is tagged `[verify]` and the reviewer note above each deliverable records that sources weren't verified. The plugin works either way; it just does more of the verification for you when a research tool is connected.
+**首先连接研究工具——引用护栏依赖它。** 没有它，每个引用都被标记为 `[verify]`，每个交付物上方的审稿人注释记录来源未验证。该 plugin 两种方式都工作；当研究工具连接时，它只是为你做更多验证。
 
-The legal research connectors in this plugin aren't just data sources — they're the difference between a verified citation and a citation you have to check. A citation retrieved through **CourtListener** (Free Law Project's U.S. court opinions and PACER dockets) or **Descrybe** (primary-law search, citation lookup, quoted-language verification) is tagged with its source and can be traced back. A citation from the model's knowledge or from web search is tagged `[verify]` or `[verify-pinpoint]` and should be checked against a primary source before anyone relies on it. The plugin tiers its citations so your verification time goes where it matters.
+此 plugin 中的法律研究连接器不仅仅是数据源——它们是经验证引用和你必须检查的引用之间的区别。通过 **CourtListener**（自由法律项目的美国法院意见和 PACER 案件记录）或 **Descrybe**（基本法律搜索、引用查找、引述语言验证）检索的引用标记有其来源，可以追溯。来自模型知识或网络搜索的引用标记为 `[verify]` 或 `[verify-pinpoint]`，应在任何人依赖之前对照主要来源检查。该 plugin 对引用进行分层，因此你的验证时间用于重要的地方。
 
-## Integrations (open questions)
+## 集成（开放问题）
 
-Ships with the general bucket of connectors in `.mcp.json`:
+随附 `.mcp.json` 中的通用连接器桶：
 
-- **Slack** — search messages, read channels, find discussions
-- **Google Drive** — search, read, and fetch documents
+- **Slack**——搜索消息、读取频道、查找讨论
+- **Google Drive**——搜索、读取和获取文档
 
-Clio is noted as an optional future integration — 120+ law schools use Clio for case management. Starting with file upload; Clio connector would let `/client-intake` and `/status` pull case data directly.
+Clio 被标记为可选的未来集成——120 多所法学院使用 Clio 进行案件管理。从文件上传开始；Clio 连接器将让 `/client-intake` 和 `/status` 直接提取案件数据。
 
-Account tier (Team vs. Enterprise) for client confidentiality is an open question for each clinic's IT and ethics review. Cowork's desktop architecture processes data locally.
+用于客户保密的帐户层级（Team 与 Enterprise）是每个诊所 IT 和伦理审查的开放问题。Cowork 的桌面架构在本地处理数据。
 
-## How it learns
+## 它如何学习
 
-Your practice profile at `~/.claude/plugins/config/claude-for-legal/legal-clinic/CLAUDE.md` isn't static — it improves as you use the plugin. Skills tell you when an output used a default you should tune. You can re-run setup, edit the file directly, or tell a skill to record a new position.
+你在 `~/.claude/plugins/config/claude-for-legal/legal-clinic/CLAUDE.md` 的执业档案不是静态的——它会随着你使用 plugin 而改进。Skill 会告诉你何时输出使用了你应该调整的默认值。你可以重新运行设置，直接编辑文件，或告诉 skill 记录新立场。
 
-## File structure
+## 文件结构
 
 ```
 legal-clinic/
 ├── .claude-plugin/plugin.json
-├── .mcp.json                          # Clio noted as optional
-├── CLAUDE.md                          # Professor's clinic config — written by cold-start
+├── .mcp.json                          # Clio 标记为可选
+├── CLAUDE.md                          # 教授的诊所配置——由 cold-start 编写
 ├── README.md
-├── deadlines.yaml                     # operational deadline ledger
-├── skills/                            # each skill is also the slash command /legal-clinic:<skill>
-│   ├── cold-start-interview/          # Professor — one-time setup
-│   ├── build-guide/                   # Professor — per-practice-area guide
-│   ├── ramp/                          # Students — semester onboarding
+├── deadlines.yaml                     # 操作截止日期分类账
+├── skills/                            # 每个 skill 也是斜杠命令 /legal-clinic:<skill>
+│   ├── cold-start-interview/          # 教授——一次性设置
+│   ├── build-guide/                   # 教授——每个执业领域指南
+│   ├── ramp/                          # 学生——学期入职
 │   ├── client-intake/
 │   │   └── references/intake-templates/
 │   ├── draft/
@@ -163,26 +169,25 @@ legal-clinic/
 │   ├── research-start/
 │   ├── status/
 │   ├── client-letter/
-│   ├── supervisor-review-queue/       # Professor, if formal review enabled
+│   ├── supervisor-review-queue/       # 教授，如果启用正式审查
 │   │   └── references/review-queue.yaml
 │   ├── deadlines/
 │   ├── client-comms-log/
 │   ├── semester-handoff/
-│   ├── form-generation/               # deprecated → /draft (reference-only)
-│   └── plain-language-letters/        # deprecated → /client-letter, /status client (reference-only)
-├── handoffs/                          # NEW — per-semester handoff memos
+│   ├── form-generation/               # 已弃用→/draft（仅参考）
+│   └── plain-language-letters/        # 已弃用→/client-letter、/status client（仅参考）
+├── handoffs/                          # 新——每学期交接备忘录
 │   └── [YYYY-term]/
 │       ├── _summary.md
 │       └── [case-id].md
-├── client-comms/                      # NEW — per-case communication logs
+├── client-comms/                      # 新——每个案件通信日志
 │   └── [case-id]/
 │       └── log.md
 └── hooks/hooks.json
 ```
 
-## Testing & QA
+## 测试和 QA
 
+## 先决条件
 
-## Prerequisites
-
-Some features reference external integrations (document management, launch trackers, eDiscovery, case management, regulatory feeds). These are not bundled — if you have an MCP server for one of these in your environment, the relevant features will use it. Without one, the plugin falls back to file upload and manual workflows. Run `/legal-clinicgrations` to see what's available in your environment.
+一些功能引用外部集成（文档管理、发布追踪器、电子发现、案件管理、监管提要）。这些不被捆绑——如果你在你的环境中为其中之一拥有 MCP 服务器，相关功能将使用它。没有它，plugin 回退到文件上传和手动工作流。运行 `/legal-clinic:integrations` 以查看你环境中有什么可用。

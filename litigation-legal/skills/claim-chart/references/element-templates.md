@@ -1,447 +1,453 @@
-# Cause-of-Action Element Templates
+<!--
+This file is a Chinese translation of the original by Anthropic PBC.
+Original: https://github.com/anthropics/claude-for-legal
+Licensed under Apache License 2.0
+-->
 
-Baseline element lists for common civil causes of action and affirmative defenses. **These are a baseline, not the controlling law.** The elements in the user's jurisdiction — as stated in the pattern jury instruction (CACI in California, NYPJI in New York, the federal circuit's pattern charge, or a state-specific pattern) or the governing statute — control. Always confirm before mapping.
+# 诉因要素模板
 
-Every template here says which source the baseline came from. The `_elements` sheet in the chart should record which template was used and the jurisdiction-specific source the user confirmed.
+常见民事诉因和积极抗辩的基准要素列表。**这些是基准，不是控制性法律。** 用户司法管辖区中的要素——如模式陪审员指令（加州 CACI、纽约 NYPJI、联邦巡回法院模式指令，或各州特定模式）或适用法规中所述——才是控制性规定。映射前务必确认。
 
----
-
-## How to use
-
-1. Pick the template that matches the pleaded count.
-2. Confirm with the user: "Does your jurisdiction's pattern instruction add, drop, or reword any of these?"
-3. If yes, edit the list before mapping.
-4. Record on the `_elements` sheet: template used, pattern instruction or statute consulted, any jurisdiction-specific modifications.
-
-A count that isn't in this library — map from the jury instruction, statute, or complaint allegations directly. This library is not exhaustive; it covers the recurring ones.
+此处每个模板均说明基准的来源依据。图表中的 `_elements` 表应记录所使用的模板以及用户确认的司法管辖区特定来源。
 
 ---
 
-## Contract
+## 使用方法
 
-### Breach of contract
+1. 选择与已诉诉因匹配的模板。
+2. 与用户确认："您司法管辖区的模式指令是否有增减或改写其中任何一项？"
+3. 如有，在映射前编辑列表。
+4. 在 `_elements` 表中记录：所使用的模板、参阅的模式指令或法规、任何司法管辖区特定的修改。
 
-**Elements (baseline — Restatement (Second) of Contracts; CACI 303):**
-1. Existence of a contract
-2. Plaintiff's performance or excuse for nonperformance
-3. Defendant's breach
-4. Causation (the breach caused harm)
-5. Damages
-
-*Jurisdiction caveat: Some jurisdictions separate contract formation into sub-elements (offer, acceptance, consideration, mutual assent) and require them to be pleaded separately. Statute of frauds may add a writing requirement for certain contract types — not an element of the prima facie case but a defense.*
-
-### Breach of the implied covenant of good faith and fair dealing
-
-**Elements (baseline — Restatement (Second) of Contracts § 205; CACI 325):**
-1. Existence of a contract
-2. Plaintiff did all or substantially all of the things the contract required
-3. All conditions required for defendant's performance occurred
-4. Defendant unfairly interfered with plaintiff's right to receive the benefits of the contract
-5. Plaintiff was harmed by defendant's conduct
-
-*Jurisdiction caveat: Recognized in most states but not an independent tort in New York (limited to insurance context); in California requires a contract and is a separate cause of action distinct from breach of contract itself.*
-
-### Promissory estoppel
-
-**Elements (baseline — Restatement (Second) of Contracts § 90):**
-1. A clear and unambiguous promise
-2. Reasonable and foreseeable reliance by the promisee
-3. Actual reliance to the promisee's detriment
-4. Injustice avoidable only by enforcement of the promise
-
-### Unjust enrichment / quantum meruit
-
-**Elements (baseline — Restatement (Third) of Restitution and Unjust Enrichment):**
-1. A benefit conferred upon the defendant by the plaintiff
-2. Defendant's knowledge of the benefit (some jurisdictions)
-3. Defendant's acceptance and retention of the benefit under circumstances making it inequitable to retain without payment
-
-*Jurisdiction caveat: The elements and availability vary significantly — some jurisdictions require the absence of an adequate legal remedy; some do not recognize unjust enrichment as a standalone claim when a valid contract governs the same subject matter.*
+如果某诉因不在本库中——直接依据陪审员指令、法规或诉状主张进行映射。本库并不穷举；仅涵盖反复出现的常见诉因。
 
 ---
 
-## Tort — negligence and related
+## 合同
 
-### Negligence
+### 合同违约
 
-**Elements (baseline — Restatement (Second) of Torts §§ 281, 328A; CACI 400):**
-1. Duty of care
-2. Breach of duty
-3. Actual cause (cause in fact)
-4. Proximate cause (legal cause)
-5. Damages
+**要素（基准——《合同法重述（第二）》；CACI 303）：**
+1. 合同的存在
+2. 原告的履行或不履行的合理理由
+3. 被告的违约
+4. 因果关系（违约行为造成损害）
+5. 损害赔偿
 
-*Jurisdiction caveat: Contributory vs. comparative negligence regimes affect how the chart works as a defense. Some jurisdictions require physical injury for recovery of emotional distress damages.*
+*司法管辖区注意事项：部分司法管辖区将合同成立细分为子要素（要约、承诺、对价、合意），并要求分别陈述。欺诈条款可能对某些合同类型增加书面形式要求——这不是初步证明案件的要素，而是一种抗辩。*
 
-### Negligence per se
+### 违反诚信与公平交易默示契约
 
-**Elements (baseline):**
-1. Defendant violated a statute, ordinance, or regulation
-2. The violation proximately caused the plaintiff's injury
-3. The plaintiff is in the class of persons the statute was designed to protect
-4. The harm is of the type the statute was designed to prevent
+**要素（基准——《合同法重述（第二）》第 205 条；CACI 325）：**
+1. 合同的存在
+2. 原告完成了合同要求的全部或绝大部分事项
+3. 被告履行所需的全部条件已成就
+4. 被告不公平地妨碍原告获得合同利益的权利
+5. 原告因被告的行为受到损害
 
-### Gross negligence / recklessness
+*司法管辖区注意事项：大多数州均予以认可，但在纽约州不构成独立侵权（仅限保险合同语境）；在加州，以合同存在为前提，是独立于合同违约的单独诉因。*
 
-**Elements (baseline):**
-1. Duty of care
-2. An extreme departure from the standard of care
-3. Actual and proximate cause
-4. Damages
+### 允诺禁反言
 
-*Jurisdiction caveat: Often relevant to defeat contractual limitations of liability and to support punitive damages. Definitions vary meaningfully by jurisdiction.*
+**要素（基准——《合同法重述（第二）》第 90 条）：**
+1. 明确且无歧义的承诺
+2. 受允诺人合理且可预见的信赖
+3. 受允诺人基于信赖实际遭受不利后果
+4. 仅有强制执行该承诺方可避免不公正
 
----
+### 不当得利 / 准合同
 
-## Tort — intentional
+**要素（基准——《恢复原状与不当得利重述（第三）》）：**
+1. 原告向被告给予利益
+2. 被告知晓该利益（部分司法管辖区要求）
+3. 被告在使其保留该利益而不付款显失公平的情形下接受并保留了该利益
 
-### Fraud / intentional misrepresentation
-
-**Elements (baseline — Restatement (Second) of Torts § 525; CACI 1900):**
-1. Misrepresentation of material fact (or actionable omission)
-2. Knowledge of falsity (scienter)
-3. Intent to induce reliance
-4. Justifiable (or reasonable) reliance
-5. Damages proximately caused by the reliance
-
-*Jurisdiction caveat: Must be pleaded with particularity under Fed. R. Civ. P. 9(b) and most state equivalents. Some jurisdictions distinguish affirmative misrepresentation from omission (actionable only with a duty to disclose).*
-
-### Negligent misrepresentation
-
-**Elements (baseline — Restatement (Second) of Torts § 552):**
-1. Misrepresentation of material fact
-2. No reasonable grounds for believing it to be true
-3. Intent to induce reliance (or made in the course of business for guidance of others)
-4. Justifiable reliance
-5. Damages proximately caused
-
-*Jurisdiction caveat: Some jurisdictions require a fiduciary or special relationship; others do not. Economic loss rule may bar recovery where loss is purely economic.*
-
-### Fraudulent concealment
-
-**Elements (baseline):**
-1. Concealment or suppression of a material fact
-2. Defendant had a duty to disclose
-3. Intent to defraud (concealing with purpose of inducing reliance)
-4. Plaintiff was unaware and would not have acted as it did with knowledge
-5. Damages
-
-### Tortious interference with contract
-
-**Elements (baseline — Restatement (Second) of Torts § 766; CACI 2201):**
-1. Existence of a valid contract between plaintiff and a third party
-2. Defendant's knowledge of the contract
-3. Defendant's intentional acts designed to induce breach or disruption
-4. Actual breach or disruption
-5. Damages
-
-### Tortious interference with prospective economic advantage
-
-**Elements (baseline — Restatement (Second) of Torts § 766B):**
-1. Existence of an economic relationship with probability of future economic benefit
-2. Defendant's knowledge of the relationship
-3. Intentional, wrongful (independently tortious or unlawful) acts designed to disrupt
-4. Actual disruption
-5. Damages
-
-*Jurisdiction caveat: California and several other states require that the interfering conduct be "independently wrongful" — a separate wrongful act beyond the interference itself.*
-
-### Defamation (libel / slander)
-
-**Elements (baseline — Restatement (Second) of Torts § 558; CACI 1700 series):**
-1. False statement of fact (not opinion)
-2. Publication to a third party
-3. Fault — negligence (private plaintiff, matter of public concern) or actual malice (public figure / public official — *New York Times Co. v. Sullivan*, 376 U.S. 254 (1964))
-4. Damages (per se categories may obviate special damages)
-
-*Jurisdiction caveat: Per se / per quod distinctions vary. Some states require retraction demand as a precondition. Anti-SLAPP statutes in many states change the burden at an early stage.*
-
-### Conversion
-
-**Elements (baseline — Restatement (Second) of Torts § 222A):**
-1. Plaintiff's ownership or right to possession of the property at the time of conversion
-2. Defendant's wrongful act (exercise of dominion inconsistent with plaintiff's rights)
-3. Damages
-
-### Trespass to chattels
-
-**Elements (baseline — Restatement (Second) of Torts §§ 217, 218):**
-1. Plaintiff's possessory interest in the chattel
-2. Defendant's intentional interference with plaintiff's use or possession
-3. Actual damage (dispossession, impairment of condition, deprivation of use)
-
-### Intentional infliction of emotional distress
-
-**Elements (baseline — Restatement (Second) of Torts § 46):**
-1. Extreme and outrageous conduct
-2. Intent to cause, or reckless disregard of the probability of causing, severe emotional distress
-3. Severe emotional distress
-4. Actual and proximate causation
+*司法管辖区注意事项：各要素及可适用性差异较大——部分司法管辖区要求不存在充分的法律救济；部分司法管辖区在有效合同支配同一标的时不承认不当得利作为独立诉因。*
 
 ---
 
-## Fiduciary / corporate
+## 侵权——过失及相关
 
-### Breach of fiduciary duty
+### 过失
 
-**Elements (baseline):**
-1. Existence of a fiduciary relationship
-2. Breach of a fiduciary duty (duty of care, duty of loyalty, or duty of good faith)
-3. Causation
-4. Damages (or, in equity, unjust enrichment / disgorgement)
+**要素（基准——《侵权行为重述（第二）》第 281、328A 条；CACI 400）：**
+1. 注意义务
+2. 违反注意义务
+3. 事实上的因果关系
+4. 法律上的近因
+5. 损害赔偿
 
-*Jurisdiction caveat: Delaware's framework distinguishes duty of care, duty of loyalty (including good faith), and applies the business judgment rule as a presumption. Entire fairness review applies in conflict transactions. Demand futility / derivative standing rules add significant procedural elements for derivative claims.*
+*司法管辖区注意事项：比较过失与分担过失制度影响图表作为抗辩的使用方式。部分司法管辖区要求以身体伤害为前提方可就精神损害赔偿主张赔偿。*
 
-### Aiding and abetting breach of fiduciary duty
+### 法定过失
 
-**Elements (baseline):**
-1. Existence of a fiduciary duty
-2. Breach of that duty by the fiduciary
-3. Knowing participation in the breach by the defendant
-4. Damages proximately caused
+**要素（基准）：**
+1. 被告违反法规、条例或规章
+2. 该违规行为是原告损害的近因
+3. 原告属于该法规旨在保护的人员范围
+4. 损害属于该法规旨在防止的类型
 
----
+### 重大过失 / 鲁莽行为
 
-## Securities
+**要素（基准）：**
+1. 注意义务
+2. 严重偏离注意标准
+3. 事实上的因果关系及近因
+4. 损害赔偿
 
-### §10(b) / Rule 10b-5 securities fraud
-
-**Elements (baseline — *Dura Pharmaceuticals, Inc. v. Broudo*, 544 U.S. 336 (2005); *Stoneridge Inv. Partners v. Scientific-Atlanta*, 552 U.S. 148 (2008)):**
-1. Material misrepresentation or omission (omission actionable when there is a duty to disclose)
-2. Scienter (intent to deceive, manipulate, or defraud — or at minimum recklessness)
-3. Connection with the purchase or sale of a security
-4. Reliance (presumed under fraud-on-the-market per *Basic Inc. v. Levinson*, 485 U.S. 224 (1988))
-5. Economic loss
-6. Loss causation (the misrepresentation caused the loss)
-
-*Jurisdiction caveat: PSLRA heightened pleading standards apply in federal court — scienter must be pleaded with particularity giving rise to a strong inference. Class certification requires additional *Halliburton* / *Amgen* analysis.*
-
-### §11 Securities Act
-
-**Elements (baseline):**
-1. Acquisition of a security issued pursuant to a registration statement
-2. Material misrepresentation or omission in the registration statement
-3. Tracing (plaintiff's shares traceable to the allegedly defective registration statement)
-
-*Jurisdiction caveat: Strict liability on the issuer; due diligence defenses for underwriters and directors. Damages are statutorily defined.*
+*司法管辖区注意事项：通常用于推翻合同责任限制条款，以及支持惩罚性赔偿主张。各司法管辖区的定义存在实质性差异。*
 
 ---
 
-## Antitrust
+## 侵权——故意侵权
 
-### Sherman Act § 1 (agreement in restraint of trade)
+### 欺诈 / 故意虚假陈述
 
-**Elements (baseline):**
-1. Existence of a contract, combination, or conspiracy (concerted action between two or more independent economic actors)
-2. Unreasonable restraint of trade (per se illegal categories or rule-of-reason analysis)
-3. Effect on interstate commerce
-4. Antitrust injury
-5. Damages
+**要素（基准——《侵权行为重述（第二）》第 525 条；CACI 1900）：**
+1. 对重要事实的虚假陈述（或可诉的不作为披露）
+2. 明知虚假（故意）
+3. 诱导他人信赖的意图
+4. 合理（或正当）信赖
+5. 基于信赖而直接导致的损害赔偿
 
-### Sherman Act § 2 (monopolization)
+*司法管辖区注意事项：依据《联邦民事诉讼规则》第 9(b) 条及大多数州的对应规则须特别陈述。部分司法管辖区区分积极虚假陈述与不作为（仅在负有披露义务时方可诉诸）。*
 
-**Elements (baseline):**
-1. Possession of monopoly power in the relevant market
-2. Willful acquisition or maintenance of that power (as distinct from growth or development as a consequence of a superior product, business acumen, or historic accident)
-3. Antitrust injury
-4. Damages
+### 过失虚假陈述
 
----
+**要素（基准——《侵权行为重述（第二）》第 552 条）：**
+1. 对重要事实的虚假陈述
+2. 无合理理由相信其为真
+3. 诱导信赖的意图（或在为他人提供指引的商业活动过程中作出）
+4. 正当信赖
+5. 直接导致的损害赔偿
 
-## Employment
+*司法管辖区注意事项：部分司法管辖区要求存在信义关系或特殊关系；部分则不要求。损失纯属经济损失时，经济损失规则可能阻止索赔。*
 
-### Title VII disparate treatment (McDonnell Douglas burden-shifting)
+### 欺诈性隐瞒
 
-**Prima facie elements (baseline — *McDonnell Douglas Corp. v. Green*, 411 U.S. 792 (1973)):**
-1. Membership in a protected class
-2. Qualification for the position
-3. Adverse employment action
-4. Circumstances giving rise to an inference of discrimination (often: similarly situated employees outside the protected class treated more favorably, or the position filled by someone outside the class)
+**要素（基准）：**
+1. 对重要事实的隐瞒或压制
+2. 被告负有披露义务
+3. 欺诈意图（以诱导信赖为目的的隐瞒）
+4. 原告不知情，且若知情则不会如此行事
+5. 损害赔偿
 
-*Then: burden shifts to defendant to articulate a legitimate nondiscriminatory reason, then back to plaintiff to show pretext. The chart should separate prima facie evidence from pretext evidence.*
+### 以侵权行为干涉合同
 
-### Title VII hostile work environment
+**要素（基准——《侵权行为重述（第二）》第 766 条；CACI 2201）：**
+1. 原告与第三方之间存在有效合同
+2. 被告知晓该合同
+3. 被告意图诱使违约或破坏合同履行的故意行为
+4. 合同实际被违反或履行被破坏
+5. 损害赔偿
 
-**Elements (baseline — *Harris v. Forklift Systems, Inc.*, 510 U.S. 17 (1993)):**
-1. Membership in a protected class
-2. Unwelcome harassment
-3. Harassment based on a protected characteristic
-4. Harassment sufficiently severe or pervasive to alter the conditions of employment and create an abusive working environment
-5. Employer liability (depending on who the harasser was — supervisor under *Faragher/Ellerth*; coworker under *Vance v. Ball State University*, 570 U.S. 421 (2013))
+### 以侵权行为干涉预期经济利益
 
-### Title VII retaliation
+**要素（基准——《侵权行为重述（第二）》第 766B 条）：**
+1. 存在具有未来经济利益合理可能性的经济关系
+2. 被告知晓该关系
+3. 以破坏该关系为目的的故意、不当（独立构成侵权或违法）行为
+4. 实际破坏
+5. 损害赔偿
 
-**Prima facie elements (baseline — *Burlington N. & S. F. R. Co. v. White*, 548 U.S. 53 (2006); *University of Texas Southwestern Med. Ctr. v. Nassar*, 570 U.S. 338 (2013)):**
-1. Protected activity (opposing discrimination or participating in a proceeding)
-2. Materially adverse action (one that would dissuade a reasonable employee from engaging in protected activity)
-3. But-for causal connection between the protected activity and the adverse action
+*司法管辖区注意事项：加州及其他若干州要求干涉行为须"独立构成违法"——即除干涉行为本身外的另一项违法行为。*
 
-### ADEA disparate treatment
+### 诽谤（书面诽谤 / 口头诽谤）
 
-**Elements (baseline — *Gross v. FBL Fin. Servs., Inc.*, 557 U.S. 167 (2009)):**
-1. Plaintiff is 40 or older
-2. Qualified for the position
-3. Adverse employment action
-4. But-for causation — age was the but-for cause of the adverse action (not merely a motivating factor)
+**要素（基准——《侵权行为重述（第二）》第 558 条；CACI 1700 系列）：**
+1. 虚假的事实陈述（非意见）
+2. 向第三方发布
+3. 过错——过失（私人当事人，涉及公共关切事项）或实际恶意（公众人物 / 公职人员——参见 *New York Times Co. v. Sullivan*，376 U.S. 254 (1964)）
+4. 损害赔偿（本身即违法的类别可免除特别损害赔偿的要求）
 
-### FLSA overtime claim
+*司法管辖区注意事项：本身违法与基于特定后果的诽谤区分因州而异。部分州要求以更正要求作为前置条件。许多州的反恶意诉讼（anti-SLAPP）法规在早期阶段改变了举证责任。*
 
-**Elements (baseline):**
-1. Employer-employee relationship covered by the FLSA (enterprise or individual coverage)
-2. Employee worked more than 40 hours in a workweek
-3. Employer failed to pay time-and-a-half for overtime hours
-4. The employee is non-exempt (exemptions are affirmative defenses)
+### 侵占
 
-### Wrongful termination in violation of public policy
+**要素（基准——《侵权行为重述（第二）》第 222A 条）：**
+1. 侵占发生时原告对财产的所有权或占有权
+2. 被告的违法行为（行使与原告权利不相符的支配权）
+3. 损害赔偿
 
-**Elements (baseline — varies by state; California *Tameny* formulation representative):**
-1. Employer-employee relationship
-2. Termination (or constructive discharge)
-3. Violation of a fundamental public policy tethered to a statute or constitutional provision
-4. Damages
+### 侵害动产
 
----
+**要素（基准——《侵权行为重述（第二）》第 217、218 条）：**
+1. 原告对动产的占有利益
+2. 被告故意干涉原告对动产的使用或占有
+3. 实际损害（剥夺占有、损害动产状态、剥夺使用）
 
-## Trade secret / IP (civil)
+### 故意造成精神损害
 
-### Trade secret misappropriation (DTSA / UTSA)
-
-**Elements (baseline — 18 U.S.C. § 1836; UTSA § 1):**
-1. The information qualifies as a trade secret (not generally known; derives economic value from not being generally known)
-2. The owner took reasonable measures to maintain secrecy
-3. Misappropriation — acquisition by improper means, or disclosure / use in breach of a duty to maintain secrecy
-
-*Jurisdiction caveat: DTSA requires interstate nexus. UTSA adopted in most states but not New York (which follows common-law Restatement of Torts § 757 approach) or Massachusetts (MUTSA). Preemption of related common-law tort claims varies.*
-
-### Copyright infringement
-
-**Elements (baseline — 17 U.S.C. § 501):**
-1. Ownership of a valid copyright
-2. Copying of constituent elements of the work that are original
-
-*Jurisdiction caveat: Registration (or preregistration) required before filing infringement suit — *Fourth Estate Public Benefit Corp. v. Wall-Street.com, LLC*, 586 U.S. 296 (2019). Substantial similarity analysis varies by circuit.*
-
-### Trademark infringement (Lanham Act § 32 / § 43(a))
-
-**Elements (baseline — 15 U.S.C. §§ 1114, 1125(a)):**
-1. Plaintiff owns a valid, protectable mark (registration aids; not required for § 43(a))
-2. Defendant's use in commerce of a similar mark
-3. Likelihood of confusion among relevant consumers
-
-*Jurisdiction caveat: Multi-factor likelihood-of-confusion test varies by circuit (Sleekcraft, Polaroid, du Pont, etc.). For patent infringement, route to the patent mode of this skill.*
+**要素（基准——《侵权行为重述（第二）》第 46 条）：**
+1. 极端且令人发指的行为
+2. 意图造成严重精神损害，或对造成严重精神损害的可能性漠然置之
+3. 严重精神损害
+4. 事实上的因果关系及近因
 
 ---
 
-## Property
+## 信义关系 / 公司
 
-### Trespass to land
+### 违反信义义务
 
-**Elements (baseline — Restatement (Second) of Torts § 158):**
-1. Plaintiff's possession of the land
-2. Defendant's intentional entry (or causing entry of a thing)
-3. Without consent or privilege
+**要素（基准）：**
+1. 信义关系的存在
+2. 违反信义义务（注意义务、忠实义务或善意义务）
+3. 因果关系
+4. 损害赔偿（或在衡平法上的不当得利 / 追缴利得）
 
-### Nuisance (private)
+*司法管辖区注意事项：特拉华州的框架区分注意义务、忠实义务（含善意），并将商业判断规则作为推定适用。关联交易适用完全公平审查。衍生诉讼中的股东提请要求 / 衍生诉讼资格增加了大量程序要素。*
 
-**Elements (baseline — Restatement (Second) of Torts § 821D):**
-1. Plaintiff's interest in the use and enjoyment of land
-2. Substantial and unreasonable interference with that use and enjoyment
-3. Caused by the defendant's conduct (intentional or negligent)
-4. Damages
+### 协助违反信义义务
 
----
-
-## Affirmative defenses (selected)
-
-Defenses have their own elements that the party raising the defense generally must prove. Map them the same way as causes of action — elements, evidence, gap list.
-
-### Statute of limitations
-
-**Elements (baseline):**
-1. The applicable limitations period for the claim
-2. The claim accrued on a specific date (with any discovery-rule or tolling analysis)
-3. The complaint was filed after the period ran
-
-### Laches (equitable defense)
-
-**Elements (baseline):**
-1. Unreasonable delay by the plaintiff in asserting the claim
-2. Prejudice to the defendant caused by the delay
-
-### Equitable estoppel
-
-**Elements (baseline):**
-1. Defendant's conduct or representation
-2. Plaintiff's reliance on it
-3. Detrimental change in plaintiff's position
-4. Injustice if estoppel is not applied
-
-### Waiver
-
-**Elements (baseline):**
-1. Existence of a known right
-2. Voluntary relinquishment of that right (intentional and with knowledge)
-
-### Unclean hands (equitable defense)
-
-**Elements (baseline):**
-1. Inequitable or wrongful conduct by the plaintiff
-2. Conduct directly related to the subject of the claim
-3. Prejudice to the defendant
-
-### Release
-
-**Elements (baseline):**
-1. A valid release agreement
-2. Covering the claims at issue
-3. Supported by consideration (generally)
-4. Executed by a party with authority
-
-### Accord and satisfaction
-
-**Elements (baseline — UCC § 3-311 for negotiable instruments; common law otherwise):**
-1. A bona fide dispute over an unliquidated or disputed claim
-2. Agreement to settle the dispute
-3. Tender of performance in full satisfaction
-4. Acceptance of the tender
-
-### Failure to mitigate damages
-
-**Elements (baseline):**
-1. The plaintiff could have reduced damages by reasonable effort
-2. The plaintiff failed to make that effort
-3. The amount by which damages could have been reduced
-
-### Comparative fault / contributory negligence
-
-**Elements (baseline — jurisdiction-dependent):**
-1. Plaintiff's own negligent conduct
-2. Proximate cause of plaintiff's own injury
-3. (Comparative regimes) apportionment of fault
-
-*Jurisdiction caveat: Pure comparative vs. modified comparative (50% or 51% bar) vs. pure contributory (Alabama, Maryland, North Carolina, Virginia, D.C. — complete bar) — the jurisdiction's regime determines the effect.*
-
-### Assumption of risk
-
-**Elements (baseline):**
-1. Plaintiff's actual knowledge of the risk
-2. Plaintiff's voluntary acceptance of the risk
-3. The injury resulted from that risk
-
-### Failure to exhaust administrative remedies
-
-**Elements (baseline):**
-1. Statute or regulation requires administrative exhaustion
-2. Plaintiff did not complete the required administrative process
-3. No recognized exception (futility, irreparable harm, etc.) applies
+**要素（基准）：**
+1. 信义义务的存在
+2. 信义人违反该义务
+3. 被告明知并参与违反行为
+4. 直接导致的损害赔偿
 
 ---
 
-## Adding a template
+## 证券
 
-This library is not exhaustive. When a new cause of action or defense comes up:
-1. Map the elements from the controlling pattern instruction, statute, or Restatement.
-2. If the template is likely to recur across matters, add it here with a citation.
-3. Note the jurisdiction caveat — where the elements vary, say so and give one representative alternative formulation.
+### 第 10(b) 条 / 规则 10b-5 证券欺诈
 
-Templates are a baseline, not an authority. The controlling pattern instruction or statute always controls.
+**要素（基准——*Dura Pharmaceuticals, Inc. v. Broudo*，544 U.S. 336 (2005)；*Stoneridge Inv. Partners v. Scientific-Atlanta*，552 U.S. 148 (2008)）：**
+1. 重要虚假陈述或遗漏（在负有披露义务时，不作为披露方可诉诸）
+2. 故意（欺骗、操纵或欺诈的意图——或至少是鲁莽行为）
+3. 与证券买卖的关联
+4. 信赖（依据 *Basic Inc. v. Levinson*，485 U.S. 224 (1988) 按市场欺诈理论推定）
+5. 经济损失
+6. 损失因果关系（虚假陈述导致损失）
+
+*司法管辖区注意事项：《私人证券诉讼改革法》的强化陈述标准在联邦法院适用——故意须以特别方式陈述，产生强烈推断。集体诉讼认证须进行额外的 *Halliburton* / *Amgen* 分析。*
+
+### 《证券法》第 11 条
+
+**要素（基准）：**
+1. 依据注册声明购买发行的证券
+2. 注册声明中存在重要虚假陈述或遗漏
+3. 溯源（原告持有的股份可溯源至涉嫌有缺陷的注册声明）
+
+*司法管辖区注意事项：发行人承担严格责任；承销商及董事享有尽职调查抗辩。损害赔偿依据法定标准计算。*
+
+---
+
+## 反垄断
+
+### 《谢尔曼法》第 1 条（限制贸易的协议）
+
+**要素（基准）：**
+1. 合同、联合或共谋的存在（两个或两个以上独立经济主体之间的协调行为）
+2. 对贸易的不合理限制（本身违法类别或合理原则分析）
+3. 对州际商业的影响
+4. 反垄断损害
+5. 损害赔偿
+
+### 《谢尔曼法》第 2 条（垄断）
+
+**要素（基准）：**
+1. 在相关市场拥有垄断力量
+2. 故意取得或维持该力量（区别于凭借优越产品、商业智慧或历史偶然因素成长或发展）
+3. 反垄断损害
+4. 损害赔偿
+
+---
+
+## 劳动就业
+
+### Title VII 差别对待（*McDonnell Douglas* 举证责任转移）
+
+**初步证明案件要素（基准——*McDonnell Douglas Corp. v. Green*，411 U.S. 792 (1973)）：**
+1. 属于受保护群体的成员
+2. 具备担任该职位的资格
+3. 遭受不利就业行为
+4. 引起歧视推断的情形（通常为：受保护群体之外的类似情况员工受到更有利的对待，或该职位由受保护群体之外的人填补）
+
+*其后：举证责任转移至被告，须说明合法的非歧视性理由，再转回原告证明该理由系借口。图表应将初步证明证据与借口证据分开。*
+
+### Title VII 敌对工作环境
+
+**要素（基准——*Harris v. Forklift Systems, Inc.*，510 U.S. 17 (1993)）：**
+1. 属于受保护群体的成员
+2. 不受欢迎的骚扰
+3. 基于受保护特征的骚扰
+4. 骚扰严重或普遍到足以改变就业条件并形成充满敌意的工作环境
+5. 雇主责任（取决于骚扰者身份——监督者依据 *Faragher/Ellerth*；同事依据 *Vance v. Ball State University*，570 U.S. 421 (2013)）
+
+### Title VII 报复
+
+**初步证明案件要素（基准——*Burlington N. & S. F. R. Co. v. White*，548 U.S. 53 (2006)；*University of Texas Southwestern Med. Ctr. v. Nassar*，570 U.S. 338 (2013)）：**
+1. 受保护活动（反对歧视或参与诉讼程序）
+2. 实质性不利行为（足以使合理员工不再从事受保护活动的行为）
+3. 受保护活动与不利行为之间的但为因果关系
+
+### ADEA 差别对待
+
+**要素（基准——*Gross v. FBL Fin. Servs., Inc.*，557 U.S. 167 (2009)）：**
+1. 原告年满 40 岁或以上
+2. 具备担任该职位的资格
+3. 遭受不利就业行为
+4. 但为因果关系——年龄是不利行为的但为原因（而非仅为促成因素）
+
+### FLSA 加班费索赔
+
+**要素（基准）：**
+1. FLSA 覆盖范围内的雇主-雇员关系（企业覆盖或个人覆盖）
+2. 员工在某工作周内工作超过 40 小时
+3. 雇主未按加班小时数支付时薪一点五倍的加班费
+4. 该员工不属于豁免类别（豁免事由为积极抗辩）
+
+### 违反公共政策的不当解雇
+
+**要素（基准——因州而异；以加州 *Tameny* 表述为代表）：**
+1. 雇主-雇员关系
+2. 解雇（或推定辞职）
+3. 违反与法规或宪法条款相挂钩的基本公共政策
+4. 损害赔偿
+
+---
+
+## 商业秘密 / 知识产权（民事）
+
+### 商业秘密盗用（DTSA / UTSA）
+
+**要素（基准——18 U.S.C. § 1836；UTSA § 1）：**
+1. 相关信息符合商业秘密资格（不为公众普遍知晓；因不为公众普遍知晓而具有经济价值）
+2. 权利人采取了合理措施维护保密性
+3. 盗用——以不正当手段获取，或违反保密义务予以披露 / 使用
+
+*司法管辖区注意事项：DTSA 要求跨州联系。UTSA 已被大多数州采纳，但纽约州（适用普通法《侵权行为重述》第 757 条方法）和马萨诸塞州（MUTSA）除外。对相关普通法侵权诉因的排除效力因州而异。*
+
+### 版权侵权
+
+**要素（基准——17 U.S.C. § 501）：**
+1. 拥有有效版权
+2. 复制了作品中受原创性保护的组成要素
+
+*司法管辖区注意事项：提起侵权诉讼前须完成注册（或预先注册）——参见 *Fourth Estate Public Benefit Corp. v. Wall-Street.com, LLC*，586 U.S. 296 (2019)。实质相似性分析因巡回法院而异。*
+
+### 商标侵权（《兰汉法》第 32 条 / 第 43(a) 条）
+
+**要素（基准——15 U.S.C. §§ 1114, 1125(a)）：**
+1. 原告拥有有效且可保护的商标（注册有利但第 43(a) 条不要求注册）
+2. 被告在商业中使用近似标志
+3. 相关消费者存在混淆可能性
+
+*司法管辖区注意事项：混淆可能性的多因素检验因巡回法院而异（Sleekcraft、Polaroid、du Pont 等）。专利侵权请路由至本 skill 的专利模式。*
+
+---
+
+## 财产
+
+### 侵入土地
+
+**要素（基准——《侵权行为重述（第二）》第 158 条）：**
+1. 原告对土地的占有
+2. 被告的故意进入（或导致他物进入）
+3. 无同意或特权
+
+### 妨扰（私人妨扰）
+
+**要素（基准——《侵权行为重述（第二）》第 821D 条）：**
+1. 原告对土地使用和享有的利益
+2. 对该使用和享有造成实质性且不合理的干涉
+3. 由被告的行为（故意或过失）引起
+4. 损害赔偿
+
+---
+
+## 积极抗辩（精选）
+
+抗辩有其自身要素，提出抗辩的一方通常须予以证明。映射方式与诉因相同——要素、证据、差距列表。
+
+### 诉讼时效
+
+**要素（基准）：**
+1. 适用于该诉因的时效期间
+2. 诉因于特定日期产生（含任何发现规则或中止分析）
+3. 诉状在期间届满后提起
+
+### 失效（衡平抗辩）
+
+**要素（基准）：**
+1. 原告在主张权利时存在不合理的迟延
+2. 被告因该迟延遭受不利影响
+
+### 衡平禁反言
+
+**要素（基准）：**
+1. 被告的行为或陈述
+2. 原告基于此的信赖
+3. 原告处境的不利改变
+4. 若不适用禁反言则有失公正
+
+### 弃权
+
+**要素（基准）：**
+1. 已知权利的存在
+2. 自愿放弃该权利（出于意愿且知情）
+
+### 不洁之手（衡平抗辩）
+
+**要素（基准）：**
+1. 原告存在不公正或违法的行为
+2. 该行为与诉因所涉事项直接相关
+3. 被告遭受不利影响
+
+### 免责
+
+**要素（基准）：**
+1. 有效的免责协议
+2. 覆盖争议中的诉因
+3. 有对价支撑（通常）
+4. 由有权限的当事人签署
+
+### 和解与清偿
+
+**要素（基准——有价证券适用 UCC § 3-311；其余适用普通法）：**
+1. 对未清算或有争议债权存在善意争议
+2. 就解决争议达成合意
+3. 以完全清偿的方式提供履行
+4. 接受该履行
+
+### 未减损损害赔偿
+
+**要素（基准）：**
+1. 原告本可通过合理努力减少损害
+2. 原告未作出该努力
+3. 损害赔偿本可减少的数额
+
+### 比较过失 / 共同过失
+
+**要素（基准——因司法管辖区而异）：**
+1. 原告自身的过失行为
+2. 原告自身损害的近因
+3. （比较过失制度）过失的分担
+
+*司法管辖区注意事项：纯比较过失 vs. 修正比较过失（50% 或 51% 障碍）vs. 纯共同过失（阿拉巴马州、马里兰州、北卡罗来纳州、弗吉尼亚州、哥伦比亚特区——完全阻断）——该司法管辖区的制度决定其效果。*
+
+### 承担风险
+
+**要素（基准）：**
+1. 原告实际知晓该风险
+2. 原告自愿接受该风险
+3. 损害由该风险引起
+
+### 未穷尽行政救济
+
+**要素（基准）：**
+1. 法规或规章要求穷尽行政救济
+2. 原告未完成所要求的行政程序
+3. 无公认的例外情形适用（徒劳无益、不可弥补的损害等）
+
+---
+
+## 添加模板
+
+本库并不穷举。当新的诉因或抗辩出现时：
+1. 依据控制性模式指令、法规或《重述》映射要素。
+2. 如果该模板可能在多个案件中反复出现，将其添加至此并附上引用。
+3. 注明司法管辖区注意事项——在要素存在差异的地方予以说明，并给出一个有代表性的替代表述。
+
+模板是基准，不是权威依据。控制性模式指令或法规始终优先控制。

@@ -1,37 +1,43 @@
-# Product Legal Currency Watch
+<!--
+This file is a Chinese translation of the original by Anthropic PBC.
+Original: https://github.com/anthropics/claude-for-legal
+Licensed under Apache License 2.0
+-->
 
-**Last verified: 2026-05-10.**
+# 产品法律时效性监控
 
-> **⚠️ Staleness check.** If the last-verified date above is more than 90 days old, treat this file as stale and verify each entry before relying on it. A stale watch list is worse than no watch list — it looks current while being wrong. When a skill reads this file, check the last-verified date first. If stale, say: "The currency watch was last verified [date] — [N] months ago. I'm using it as a checklist of areas to search, not as a source of current status." When you update any entry, also update the last-verified date at the top.
+**最后验证：2026-05-10。**
 
-Product/consumer protection law moves. These are the areas most likely to have changed since model training:
+> **⚠️ 时效性检查。** 如果上方的最后验证日期超过 90 天，请将此文件视为过时，并在依赖任何条目前进行验证。过时的监控列表比没有监控列表更糟糕——它看起来是最新的，实际上却是错误的。当 skill 读取此文件时，应先检查最后验证日期。如果过时，请说："时效性监控最后验证于 [日期]——[N] 个月前。我将其用作需要搜索的领域清单，而非当前状态的来源。"当你更新任何条目时，也要更新顶部的最后验证日期。
 
-## Children's online safety
+产品/消费者保护法在不断变动。以下是自模型训练以来最可能已发生变化的领域：
 
-- **COPPA 2025 amendments — compliance deadline April 22, 2026.** Biometric identifiers and government IDs now "personal information"; separate consent for third-party disclosure tied to targeted advertising; information security program mandatory; indefinite retention prohibited.
-- **State AADCs:** UK AADC in force. California AADC (AB 2273) enjoined — verify current status of *NetChoice v. Bonta*. Multiple other state AADC-style laws pending or in force.
-- **KOSA / federal children's online safety bills:** check status — changes frequently.
+## 儿童网络安全
 
-## Platform and intermediary liability
+- **COPPA 2025 年修正案——合规截止日期 2026 年 4 月 22 日。** 生物特征标识符和政府颁发的身份证件现在是"个人信息"；针对定向广告的第三方披露需要单独同意；强制要求信息安全计划；禁止无限期保留。
+- **州级 AADC：** 英国 AADC 已生效。加利福尼亚 AADC（AB 2273）已被禁止执行——请验证 *NetChoice 诉 Bonta* 的当前状态。其他多个类似 AADC 的州法律处于待决或已生效状态。
+- **KOSA / 联邦儿童网络安全法案：** 请检查状态——变化频繁。
 
-- **DSA enforcement ramping:** €120M X fine (Dec 2025); TikTok and adult-platform preliminary findings (April 2026); formal Snapchat investigation (March 2026). If the product serves EU users, DSA obligations are actively enforced.
-- **Section 230 status:** SCOTUS has taken cases; check the latest. Any reliance on §230 for AI-generated content is contested.
+## 平台和中介责任
 
-## FTC §5 and dark patterns
+- **DSA 执法力度加大：** X 被罚款 1.2 亿欧元（2025 年 12 月）；TikTok 和成人平台初步认定（2026 年 4 月）；Snapchat 正式调查（2026 年 3 月）。如果产品面向欧盟用户，DSA 义务正在被积极执行。
+- **Section 230 状态：** 最高法院已受理相关案件；请查看最新进展。任何依赖 § 230 保护 AI 生成内容的做法均存在争议。
 
-- **FTC v. Humor Rainbow/OkCupid (March 2026):** undisclosed training-data sharing as a §5 violation.
-- Dark patterns / negative option: FTC "click to cancel" rule — verify current status.
-- Endorsement guides updated 2023. Influencer disclosure, fake reviews, testimonials.
-- **AMG Capital (2021):** §13(b) does NOT authorize monetary relief — FTC must use §19 or administrative process. Changes the settlement calculus.
+## FTC § 5 与暗模式
 
-## AI transparency and synthetic content
+- **FTC 诉 Humor Rainbow/OkCupid（2026 年 3 月）：** 未披露的训练数据共享属于 § 5 违规。
+- 暗模式 / 负向期权：FTC "点击取消"规则——请验证当前状态。
+- 推荐指南于 2023 年更新。网红披露、虚假评论、用户评价。
+- **AMG Capital（2021 年）：** § 13(b) 不授权金钱救济——FTC 须使用 § 19 或行政程序。改变了和解的利弊计算。
 
-- EU AI Act transparency obligations: now on a shortened timeline (grace period → 3 months per Digital Omnibus, deadline Dec 2, 2026).
-- US state AI disclosure laws: NE LB 525 (chatbot disclosure to minors), CA AB 2013 (training data disclosure), and others.
-- FTC guidance on AI-generated content and deceptive claims. Verify current.
+## AI 透明度与合成内容
 
-## How to use this file
+- 欧盟 AI 法案透明度义务：现在采用压缩时间表（宽限期 → 根据数字综合法令缩短为 3 个月，截止日期 2026 年 12 月 2 日）。
+- 美国州级 AI 披露法：NE LB 525（向未成年人披露聊天机器人身份）、CA AB 2013（训练数据披露）等。
+- FTC 关于 AI 生成内容和欺骗性声明的指导意见。请验证当前状态。
 
-When a launch review cites a rule, effective date, or enforcement posture, it should note: "This area moves — verify at [source]. See `references/currency-watch.md`."
+## 如何使用此文件
 
-**This file goes stale.** Current as of May 2026. Update when you notice drift.
+当发布审查引用规则、生效日期或执法立场时，应注明："此领域在不断变动——请在 [来源] 处验证。参见 `references/currency-watch.md`。"
+
+**此文件会过时。** 截至 2026 年 5 月当前有效。发现偏差时请更新。

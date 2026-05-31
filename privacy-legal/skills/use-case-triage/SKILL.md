@@ -1,295 +1,265 @@
 ---
 name: use-case-triage
 description: >
-  Quickly determine whether a processing activity needs a PIA, a mandatory GDPR
-  DPIA, or can proceed — surfaces privacy policy conflicts and routes to the right
-  next step. Use when the user asks "does this need a PIA", "triage this feature",
-  "privacy check on X", "is this okay from a privacy perspective", or describes a
-  new data processing activity, product feature, or vendor relationship.
-argument-hint: "[describe the data processing activity or feature]"
+  快速判断某处理活动是否需要 PIA、强制性 GDPR DPIA 或可以直接推进——surfaced
+  隐私政策冲突并路由到正确的下一步。当用户问"这需要 PIA 吗"、"分类这个功能"、
+  "对 X 进行隐私检查"、"从隐私角度来看这可以吗"，或描述新的数据处理活动、
+  产品功能或供应商关系时使用。
+argument-hint: "[描述数据处理活动或功能]"
 ---
+
+<!--
+This file is a Chinese translation of the original by Anthropic PBC.
+Original: https://github.com/anthropics/claude-for-legal
+Licensed under Apache License 2.0
+-->
+
 
 # /use-case-triage
 
-1. Read `~/.claude/plugins/config/claude-for-legal/privacy-legal/CLAUDE.md`. Confirm privacy practice is configured — if not, stop and direct to setup.
-2. Run the workflow below. Clarify the activity if vague.
-3. House trigger check → mandatory DPIA check (if GDPR in footprint) → privacy policy conflict check.
-4. Output: classification (PROCEED / PIA REQUIRED / DPIA MANDATORY / STOP), reasoning, conditions table if required, cross-plugin handoffs.
-5. Offer to continue into PIA generation if assessment is required.
+1. 阅读 `~/.claude/plugins/config/claude-for-legal/privacy-legal/CLAUDE.md`。确认隐私执业已配置——如未配置，停止并引导至设置。
+2. 运行以下工作流。如不清楚，澄清活动。
+3. 内部触发检查 → 强制 DPIA 检查（如 GDPR 在范围内） → 隐私政策冲突检查。
+4. 输出：分类（PROCEED / PIA REQUIRED / DPIA MANDATORY / STOP）、推理、条件表（如需要）、跨 plugin 移交。
+5. 如需要评估，提议继续进入 PIA 生成。
 
 ```
-/privacy-legal:use-case-triage "New feature that uses behavioral data to personalize content recommendations"
+/privacy-legal:use-case-triage "使用行为数据个性化内容推荐的新功能"
 ```
 
 ---
 
-# Privacy Use Case Triage
+# 隐私用例分类
 
-## Matter context
+## 事项上下文
 
-**Matter context.** Check `## Matter workspaces` in the practice-level CLAUDE.md. If `Enabled` is `✗` (the default for in-house users), skip the rest of this paragraph — skills use practice-level context and the matter machinery is invisible. If enabled and there is no active matter, ask: "Which matter is this for? Run `/privacy-legal:matter-workspace switch <slug>` or say `practice-level`." Load the active matter's `matter.md` for matter-specific context and overrides. Write outputs to the matter folder at `~/.claude/plugins/config/claude-for-legal/privacy-legal/matters/<matter-slug>/`. Never read another matter's files unless `Cross-matter context` is `on`.
+**事项上下文。** 检查执业级 CLAUDE.md 中的 `## Matter workspaces`。如果 `Enabled` 为 `✗`（内部用户的默认值），跳过本段的其余部分——skills 使用执业级上下文，事项机制不可见。如果已启用且没有活跃事项，询问："这是哪个事项的? Run `/privacy-legal:matter-workspace switch <slug>` 或说 `practice-level`。"加载活跃事项的 `matter.md` 以获取事项特定上下文和覆盖。将输出写入事项文件夹 `~/.claude/plugins/config/claude-for-legal/privacy-legal/matters/<matter-slug>/`。除非 `Cross-matter context` 为 `on`，否则永远不要阅读另一个事项的文件。
 
 ---
 
-## Destination check
+## 目的地检查
 
-Before producing output, check where it's going. If the user has named a destination (a channel, a distribution list, a counterparty, "everyone"), ask whether it's inside the privilege circle. Public channels, company-wide lists, counterparty/opposing counsel, vendors, and clients (for work product) waive the protection. When the destination looks outside the circle, flag it and offer (a) the privileged version for legal only, (b) a sanitized version for the broader channel, or (c) both — don't silently apply a privileged header and then help paste it somewhere the header won't protect it. See the canonical `## Shared guardrails → Destination check` in this plugin's CLAUDE.md.
+在生成输出之前，检查它要去哪里。如果用户命名了目的地（频道、分发列表、对手方、"每个人"），询问它是否在特权圈内。公共频道、公司范围列表、对手方/对方律师、供应商和客户（对于工作产品）放弃保护。当目的地看起来在圈外时，标记它并提供（a）仅限律师使用的特权版本，（b）更广泛渠道的清理版本，或两者——不要默默应用特权标题然后帮助将其粘贴到标题不保护它的地方。请参阅此 plugin 的 CLAUDE.md 中的规范 `## Shared guardrails → Destination check`。
 
-## Purpose
+## 目的
 
-Answer the question that comes up before anyone runs a PIA: "does this thing even
-need one?" And if it does, what kind, and what's blocking the way?
+回答任何人在运行 PIA 之前出现的问题："这东西真的需要一个吗？"如果需要，是什么类型，什么阻碍了它？
 
-Privacy triage is faster than PIA generation but upstream of it. It doesn't write
-the assessment — it determines whether one is needed and on what terms. The PIA
-generation skill does the deep work.
+隐私分类比 PIA 生成快但在其上游。它不编写评估——它确定是否需要以及在什么条件下需要。PIA 生成 skill 做深度工作。
 
-The output is one of four classifications:
-- **PROCEED** — No PIA needed. Standard safeguards apply.
-- **PIA REQUIRED** — Assessment needed before or alongside deployment.
-- **DPIA MANDATORY** — A regime-mandated data protection impact assessment is
-  required (research the applicable regime's trigger and cite primary sources).
-  Harder bar, DPO/GC involvement likely.
-- **STOP** — Processing activity conflicts with the privacy policy or has no
-  lawful basis as described. Needs redesign before proceeding.
+输出是四种分类之一：
+- **PROCEED** — 不需要 PIA。应用标准保障措施。
+- **PIA REQUIRED** — 部署前或部署时需要评估。
+- **DPIA MANDATORY** — 制度强制的数据保护影响评估是必需的（研究适用制度的触发并引用主要来源）。更难的门槛，可能需要 DPO/GC 参与。
+- **STOP** — 处理活动与隐私政策冲突或如所述没有合法依据。在继续之前需要重新设计。
 
-## Jurisdiction assumption
+## 司法管辖区假设
 
-This triage assumes the jurisdictional scope specified in your configuration. Privacy rules, assessment triggers, and lawful bases vary materially by jurisdiction (GDPR vs. state consumer privacy laws vs. sectoral). If the processing activity, controller, or affected data subjects fall under a different jurisdiction, this classification may not apply as written.
+此分类假设你的配置中指定的司法管辖区范围。隐私规则、评估触发器和合法依据因司法管辖区（GDPR 与州消费者隐私法与部门法）而实质性不同。如果处理活动、控制者或受影响的数据主体受不同司法管辖区管辖，此分类可能不按书面适用。
 
-## Read the config first
+## 首先阅读配置
 
-Before triaging, always read `~/.claude/plugins/config/claude-for-legal/privacy-legal/CLAUDE.md`. The PIA trigger criteria, regulatory
-footprint, and privacy policy commitments there are authoritative. Generic privacy
-law reasoning is not a substitute for what this company has actually committed to.
+在分类之前，始终阅读 `~/.claude/plugins/config/claude-for-legal/privacy-legal/CLAUDE.md`。那里的 PIA 触发标准、监管范围和隐私政策承诺是权威的。通用隐私法律推理不能替代公司实际承诺的内容。
 
-If the file is missing or contains `[PLACEHOLDER]`, surface this bounce:
+如果文件缺失或包含 `[PLACEHOLDER]`，surfaced 此反弹：
 
-> I notice you haven't configured your practice profile yet — that's how I tailor the PIA trigger criteria, regulatory footprint, and privacy policy commitments to your practice.
+> 我注意到你尚未配置你的执业档案——这就是我如何为你的执业定制 PIA 触发标准、监管范围和隐私政策承诺。
 >
-> **Two choices:**
-> - Run `/privacy-legal:cold-start-interview` (2 minutes) to configure your profile, then I'll triage tailored to YOUR practice.
-> - Say **"provisional"** and I'll triage against generic defaults — US jurisdiction, middle risk appetite, lawyer role, no playbook — and tag every output `[PROVISIONAL — configure your profile for tailored output]` so you can see what I do before committing.
+> **两个选择：**
+> - 运行 `/privacy-legal:cold-start-interview`（2 分钟）配置你的档案，然后我会针对你的执业进行分类。
+> - 说 **"provisional"**，我会根据通用默认值进行分类——美国司法管辖区、中等风险偏好、律师角色、无剧本——并标记每个输出 `[PROVISIONAL — configure your profile for tailored output]`，以便你在承诺之前看到我做什么。
 
-### Provisional mode
+### 临时模式
 
-If the user says "provisional," run triage normally using these generic defaults: middle risk appetite, lawyer role, US jurisdiction (CCPA + common federal sectoral baselines), no playbook (classify from general privacy-law principles rather than matching to configured commitments). Tag the reviewer note and every finding block with `[PROVISIONAL]`. At the end of the output, append:
+如果用户说"provisional"，使用这些通用默认值正常运行分类：中等风险偏好、律师角色、美国司法管辖区（CCPA + 通用联邦部门基线）、无剧本（根据通用隐私法原则分类，而不是匹配配置的承诺）。用 `[PROVISIONAL]` 标记审阅者备注和每个发现块。在输出末尾，追加：
 
-> "That was a generic run against default assumptions. Run `/privacy-legal:cold-start-interview` to get output calibrated to YOUR practice — your regulatory footprint, your privacy policy commitments, your risk appetite. 2 minutes."
-
----
-
-## Triage process
-
-### Step 1: Understand the activity
-
-If the description is vague, ask before classifying. Get specific on:
-
-- What data is being collected or processed? Which categories?
-- Who are the data subjects — customers, employees, third parties?
-- What's the purpose? What problem is this solving?
-- Is this new data collection, or repurposing data you already have?
-- Is a third-party vendor involved? New vendor or existing?
-- Is any automated decision-making involved — does the output affect anyone?
-- What's the deployment context — internal only, customer-facing, public?
-
-"New feature" and "data processing activity" are not enough to triage accurately.
+> "这是针对默认假设的通用运行。运行 `/privacy-legal:cold-start-interview` 以获得针对你的执业校准的输出——你的监管范围、你的隐私政策承诺、你的风险偏好。2 分钟。"
 
 ---
 
-### Step 2: Check house triggers
+## 分类过程
 
-Read `~/.claude/plugins/config/claude-for-legal/privacy-legal/CLAUDE.md` → `## PIA house style` → Trigger criteria. Apply them.
+### 步骤 1：理解活动
 
-If the house trigger is met → at minimum **PIA REQUIRED**.
+如果描述不清楚，在分类之前询问。具体说明：
+- 正在收集或处理什么数据？哪些类别？
+- 数据主体是谁——客户、员工、第三方？
+- 目的是什么？这解决了什么问题？
+- 这是新的数据收集，还是重新利用你已有的数据？
+- 是否涉及第三方供应商？新供应商还是现有供应商？
+- 是否涉及任何自动化决策——输出是否影响任何人？
+- 部署上下文是什么——仅内部、面向客户、公共？
 
-If house trigger is not met, continue to Step 3 before concluding PROCEED. Some
-activities need a PIA regardless of internal policy.
+"新功能"和"数据处理活动"不足以准确分类。
 
 ---
 
-### Step 3: Mandatory assessment check
+### 步骤 2：检查内部触发器
 
-**Before researching regime-specific triggers, ask the activity-based federal overlay question first.** If the processing touches a federally-regulated data category, the federal overlay is usually the controlling framework, not state privacy law, and the triage needs to surface that early rather than as an afterthought.
+阅读 `~/.claude/plugins/config/claude-for-legal/privacy-legal/CLAUDE.md` → `## PIA house style` → Trigger criteria。应用它们。
 
-> **Activity-based federal overlays — ask first:**
+如果满足内部触发器 → 至少 **PIA REQUIRED**。
+
+如果不满足内部触发器，在得出 PROCEED 结论之前继续到步骤 3。某些活动无论内部政策如何都需要 PIA。
+
+---
+
+### 步骤 3：强制评估检查
+
+**在研究制度特定触发器之前，首先询问基于活动的联邦覆盖问题。**如果处理涉及联邦监管的数据类别，联邦覆盖通常是控制框架，而非州隐私法，分类需要尽早 surfaced 而不是事后考虑。
+
+> **基于活动的联邦覆盖——首先询问：**
 >
-> Does this processing touch:
-> - **Financial account data or "nonpublic personal information" about consumers** (GLBA / Reg P — applies to financial institutions and their non-affiliated third parties; imposes substantive restrictions on sharing NPI for marketing, separate from and on top of any state privacy-law exemption)?
-> - **Protected health information held by a covered entity or business associate** (HIPAA Privacy / Security Rules — substantive restrictions on use and disclosure, breach notification at 500+ records, BAA required for any vendor)?
-> - **Education records held by a school or a service provider acting for a school** (FERPA — consent requirements for disclosure, directory-information carve-outs)?
-> - **Data from children under 13 collected by an operator of an online service directed to children or with actual knowledge** (COPPA — parental consent, notice, deletion rights, strict limits on retention and sharing)?
-> - **Another sectoral federal regime** (e.g., VPPA for video-viewing records, CPNI for carrier data, DPPA for DMV records, TCPA for SMS/call consent)?
+> 此处理是否涉及：
+> - **金融账户数据或关于消费者的"非公开个人信息"**（GLBA / Reg P —— 适用于金融机构及其非关联第三方；对为营销共享 NPI 施加实质性限制，与任何州隐私法豁免分开并在此基础上叠加）？
+> - **覆盖实体或业务关联方持有的受保护健康信息**（HIPAA Privacy / Security Rules —— 对使用和披露的实质性限制、500+ 记录的违约通知、任何供应商需要 BAA）？
+> - **学校或代表学校的服务提供商持有的教育记录**（FERPA —— 披露的同意要求、目录信息例外）？
+> - **针对儿童的在线服务运营商收集或实际知道的 13 岁以下儿童的数据**（COPPA —— 父母同意、通知、删除权、对保留和共享的严格限制）？
+> - **其他部门联邦制度**（例如，VPPA 用于视频观看记录、CPNI 用于运营商数据、DPPA 用于 DMV 记录、TCPA 用于 SMS/呼叫同意）？
 >
-> If yes to any: the federal overlay usually supplies the controlling substantive restriction, not just an exemption from a state consumer privacy law. Research and cite the specific provision before continuing. An activity that is "exempt" from CCPA under § 1798.145(e) because it is GLBA-covered is still subject to the GLBA restrictions (e.g., § 6802(a)-(c) on NPI sharing) — the CCPA exemption does not make the activity lawful; it just moves the governing framework to GLBA.
+> 如果任何回答为是：联邦覆盖通常提供控制性实质性限制，而不仅仅是对州消费者隐私法的豁免。在继续之前研究并引用具体条款。根据 § 1798.145(e) 因 GLBA 覆盖而"免除" CCPA 的活动仍受 GLBA 限制（例如，关于 NPI 共享的 § 6802(a)-(c)）——CCPA 豁免不会使活动合法；它只是将控制框架移至 GLBA。
 
-For each regime in `~/.claude/plugins/config/claude-for-legal/privacy-legal/CLAUDE.md` → `## Regulatory footprint`, **research the currently operative mandatory privacy/data-protection assessment triggers**. Cite controlling statute, regulation, or regulator guidance with pinpoint references. Note effective dates — national and state regulators publish and update trigger lists regularly; do not rely on a static checklist. Flag uncertainty for attorney verification rather than guess.
+对于 `~/.claude/plugins/config/claude-for-legal/privacy-legal/CLAUDE.md` → `## Regulatory footprint` 中的每个制度，**研究当前运作的强制隐私/数据保护评估触发器**。引用控制法规、法规或监管机构指导，并附带精确定位。注意生效日期——国家和州监管机构定期发布和更新触发器列表；不要依赖静态检查清单。标记不确定性以供律师验证，而不是猜测。
 
-If **any** applicable regime's mandatory trigger is met → **DPIA MANDATORY** (or the equivalent regime-specific mandate), regardless of house trigger.
+如果满足**任何**适用制度的强制触发器 → **DPIA MANDATORY**（或等效的制度特定强制），无论内部触发器如何。
 
-**Strong indicators (not necessarily mandatory but do one anyway):**
-- New technology or novel use of existing technology
-- Children's data
-- Combining datasets that weren't collected together
-- Data that could enable discrimination
-- Processing users would not expect
-- Lookalike audiences, cross-context behavioral advertising, or other tracking-based ad-tech activity (recurring question for consumer-facing companies; surfaces policy-commitment conflicts and federal sectoral overlays reliably)
+**强指标（不一定强制但无论如何做一个）：**
+- 新技术或现有技术的新颖使用
+- 儿童数据
+- 合并未一起收集的数据集
+- 可能导致歧视的数据
+- 用户不会预期的处理
+- 相似受众、跨语境行为广告或其他基于跟踪的广告技术活动（面向消费者的公司的经常性问题；可靠地 surfaced 政策承诺冲突和联邦部门覆盖）
 
-One or more strong indicators with no researched mandatory trigger → escalate to **PIA REQUIRED**
-(not DPIA mandatory, but flag in the output).
-
----
-
-### Step 4: Privacy policy conflict check
-
-Read `~/.claude/plugins/config/claude-for-legal/privacy-legal/CLAUDE.md` → `## Privacy policy commitments`. Check the proposed activity
-against every stated commitment.
-
-**Common conflicts to catch:**
-- Policy says "we collect X, Y, Z" — this activity collects W. Policy update
-  needed before launch, or stop collecting W.
-- Policy says "we don't sell or share data with third parties" — this activity
-  passes data to a vendor for their own purposes. Research whether the flow falls
-  within a regulated "sale," "share," or other disclosure category under each
-  applicable regime.
-- Policy states retention limits — this activity retains data longer.
-- Policy says "we use data only for [purpose]" — this activity uses it for a new
-  purpose without fresh consent or legitimate interest assessment.
-- Policy specifies user rights offered — this activity creates a new data category
-  the rights process wasn't built for.
-
-If a direct conflict exists → **STOP**. Not "proceed with caution" — the policy
-conflict has to be resolved (policy update or activity redesign) before this
-proceeds.
+一个或多个强指标且没有研究过的强制触发器 → 升级到 **PIA REQUIRED**
+（不是 DPIA 强制，但在输出中标记）。
 
 ---
 
-### Step 5: Classification and output
+### 步骤 4：隐私政策冲突检查
+
+阅读 `~/.claude/plugins/config/claude-for-legal/privacy-legal/CLAUDE.md` → `## Privacy policy commitments`。根据每个陈述的承诺检查提议的活动。
+
+**要捕获的常见冲突：**
+- 政策说"我们收集 X、Y、Z"——此活动收集 W。需要在启动前更新政策，或停止收集 W。
+- 政策说"我们不会向第三方出售或共享数据"——此活动将数据传递给供应商用于其自己的目的。研究该流是否在每个适用制度下属于受监管的"出售"、"共享"或其他披露类别。
+- 政策规定保留限制——此活动保留数据的时间更长。
+- 政策说"我们仅将数据用于 [目的]"——此活动将其用于新目的，未获得新的同意或进行合法利益评估。
+- 政策指定了提供的用户权利——此活动创建了一个权利流程原本未涵盖的新数据类别。
+
+如果存在直接冲突 → **STOP**。不是"谨慎进行"——政策冲突必须在继续之前解决（政策更新或活动重新设计）。
 
 ---
 
-### Bottom line
-[PIA required / Mandatory DPIA required / Proceed — one-sentence why]
+### 步骤 5：分类和输出
 
 ---
 
-**ACTIVITY:** [State the processing activity as you understand it]
-
-**CLASSIFICATION:** [PROCEED / PIA REQUIRED / DPIA MANDATORY / STOP]
-
-**House trigger met?** [Yes / No]
-**GDPR mandatory DPIA trigger?** [Yes — [trigger] / No / N/A (GDPR not in footprint)]
-**Privacy policy conflict?** [None / Yes — [specific conflict]]
-
-**Reasoning:**
-[1-3 sentences. For PROCEED: what makes it safe under current policy. For PIA/DPIA:
-what creates the obligation. For STOP: which specific policy commitment or principle
-is in conflict.]
+### 结论
+[需要 PIA / 需要强制 DPIA / 继续——一句话原因]
 
 ---
 
-*If PIA REQUIRED or DPIA MANDATORY — conditions before proceeding:*
+**活动：** [陈述你理解的处理活动]
 
-| Requirement | Owner | Done? |
+**分类：** [PROCEED / PIA REQUIRED / DPIA MANDATORY / STOP]
+
+**是否满足内部触发器？** [是 / 否]
+**GDPR 强制 DPIA 触发器？** [是 — [trigger] / 否 / N/A（GDPR 不在范围内）]
+**隐私政策冲突？** [无 / 有 — [具体冲突]]
+
+**推理：**
+[1-3 句话。对于 PROCEED：什么使它在当前政策下安全。对于 PIA/DPIA：什么创造义务。对于 STOP：哪个具体政策承诺或原则冲突。]
+
+---
+
+*如果 PIA REQUIRED 或 DPIA MANDATORY——继续前的条件：*
+
+| 要求 | 负责人 | 完成？ |
 |---|---|---|
-| [e.g., Privacy Impact Assessment — full DPIA format] | [Privacy counsel] | ☐ |
-| [e.g., Legitimate interest assessment (if LI basis)] | [Privacy counsel] | ☐ |
-| [e.g., DPO consultation (DPIA mandatory track)] | [DPO] | ☐ |
-| [e.g., Vendor DPA in place] | [Privacy / Legal] | ☐ |
-| [e.g., Privacy policy update before launch] | [Privacy counsel] | ☐ |
-| [e.g., Consent mechanism built and tested] | [Product] | ☐ |
-| [e.g., Data subject rights process covers new data category] | [Privacy / Product] | ☐ |
+| [例如，隐私影响评估——完整 DPIA 格式] | [隐私律师] | ☐ |
+| [例如，合法利益评估（如果使用 LI 基础）] | [隐私律师] | ☐ |
+| [例如，DPO 咨询（DPIA 强制轨道）] | [DPO] | ☐ |
+| [例如，供应商 DPA 已到位] | [隐私 / 法律] | ☐ |
+| [例如，发布前更新隐私政策] | [隐私律师] | ☐ |
+| [例如，同意机制已构建并测试] | [产品] | ☐ |
+| [例如，数据主体权利流程涵盖新数据类别] | [隐私 / 产品] | ☐ |
 
-**Lawful basis (if GDPR in footprint):** [Consent / Contract / Legitimate Interest /
-Legal Obligation — or "unclear — needs determination in PIA"]
+**合法依据（如果 GDPR 在范围内）：** [同意 / 合同 / 合法利益 /
+法律义务——或"不明确——需要在 PIA 中确定"]
 
-**Next step — offer to continue:**
+**下一步——提议继续：**
 
-After presenting a PIA REQUIRED or DPIA MANDATORY result, always end with:
+在展示 PIA REQUIRED 或 DPIA MANDATORY 结果后，总是以以下内容结束：
 
-> "Want me to start the PIA now? I can run the intake questions and produce the
-> assessment document without you needing to run a separate command."
+> "要我立即开始 PIA 吗？我可以运行访谈问题并生成评估文档，而无需你运行单独的命令。"
 
-If they say yes, load the `pia-generation` skill and continue in the same
-conversation — pass the activity description and any triggers already identified.
+如果他们说是，加载 `pia-generation` skill 并在同一对话中继续——传递活动描述和任何已识别的触发器。
 
-If they say no, the triage result stands. The PIA can be run any time with:
+如果他们说否，分类结果成立。PIA 可以随时运行：
 `/privacy-legal:pia-generation [activity]`
 
 ---
 
-*If STOP:*
+*如果 STOP：*
 
-**Conflict:** [Specific privacy policy commitment or principle in conflict]
+**冲突：** [冲突的具体隐私政策承诺或原则]
 
-**To proceed, one of these has to change:**
-- [Option A — redesign the activity so it doesn't create the conflict]
-- [Option B — update the privacy policy to cover this processing (requires review
-  of whether the update is itself consistent with lawful basis)]
+**要继续，必须更改以下之一：**
+- [选项 A——重新设计活动以避免冲突]
+- [选项 B——更新隐私政策以涵盖此处理（需要审查更新本身是否与合法基础一致）]
 
-Don't offer a path forward if there isn't one. If the processing simply can't be
-reconciled with stated commitments or lawful basis, say so.
+如果没有前进路径，则不要提供。如果处理根本无法与所述承诺或合法基础协调，请直说。
 
 ---
 
-### Step 6: Cross-plugin handoffs
+### 步骤 6：跨 plugin 移交
 
-**AI governance handoff:** If the activity involves an AI system making or
-influencing decisions about individuals:
+**AI 治理移交：** 如果活动涉及 AI 系统做出或影响关于个人的决策：
 
-> "This activity involves AI decision-making. An AI impact assessment is likely
-> required in addition to a PIA. Use `/ai-governance-legal:aia-generation [activity]`
-> to run that in parallel — they're not substitutes."
+> "此活动涉及 AI 决策。除了 PIA 之外，可能还需要 AI 影响评估。使用 `/ai-governance-legal:aia-generation [activity]`
+> 并行运行——它们不是替代品。"
 
-**Product counsel handoff:** If this is a new product feature or launch:
+**产品顾问移交：** 如果这是新产品功能或发布：
 
-> "If this is part of a product launch, loop in product counsel.
-> Use `/product-legal:launch-review` — it will detect the privacy component
-> and route to this plugin."
+> "如果这是产品发布的一部分，请联系产品顾问。
+> 使用 `/product-legal:launch-review`——它会检测隐私组件
+> 并路由到此 plugin。"
 
-Only flag handoffs that are actually relevant. Don't append both as boilerplate.
+仅标记实际相关的移交。不要将两者作为样板附加。
 
 ---
 
-## Batch triage
+## 批量分类
 
-If the user presents a feature list, roadmap, or backlog — summary table first,
-then expand each non-PROCEED entry:
+如果用户提供功能列表、路线图或待办事项——首先生成摘要表，然后展开每个非 PROCEED 条目：
 
-| # | Activity | Classification | Key condition / blocker |
+| # | 活动 | 分类 | 关键条件/阻塞器 |
 |---|---|---|---|
-| 1 | [activity] | 🟢 Proceed | — |
-| 2 | [activity] | 🟡 PIA required | Lawful-basis assessment needed; vendor DPA not in place |
-| 3 | [activity] | 🟠 DPIA mandatory | Large-scale special category data |
-| 4 | [activity] | 🔴 Stop | Privacy policy conflict — purpose limitation |
+| 1 | [活动] | 🟢 Continue | — |
+| 2 | [活动] | 🟡 需要 PIA | 需要合法基础评估；供应商 DPA 未到位 |
+| 3 | [活动] | 🟠 强制 DPIA | 大规模特殊类别数据 |
+| 4 | [活动] | 🔴 停止 | 隐私政策冲突——目的限制 |
 
 ---
 
-## Edge cases and failure modes
+## 边缘情况和失败模式
 
-**"It's anonymized" doesn't automatically mean PROCEED.**
-Ask how it's anonymized and whether re-identification is realistically possible
-given the data set. Pseudonymized data is still personal data under GDPR.
+**"它已匿名"并不意味着自动 PROCEED。**
+询问它如何匿名化，以及考虑到数据集，重新识别是否现实可行。假名化数据在 GDPR 下仍然是个人数据。
 
-**"We already do something similar" isn't a triage.**
-Existing processing that was never assessed doesn't grandfather new processing.
-If the new activity is materially different in scale, purpose, or data category,
-triage it fresh.
+**"我们已经做了类似的事情"不是分类。**
+从未经过评估的现有处理不会使新处理获得祖父地位。如果新活动在规模、目的或数据类别方面有实质性差异，重新分类。
 
-**"Just a pilot" doesn't skip triage.**
-A pilot that touches real user or employee data is subject to the same triggers.
-Apply the same classification; if a PIA is required, the pilot should have one.
+**"只是试点"不能跳过分类。**
+接触真实用户或员工数据的试点受相同触发器约束。应用相同分类；如果需要 PIA，试点应该有一个。
 
-**"The vendor handles all the privacy."**
-Vendor handles the infrastructure. You're still the controller determining the
-purposes. If personal data flows to the vendor, a DPA is required and triage still
-applies to the purpose.
+**"供应商处理所有隐私。"**
+供应商处理基础设施。你仍然是决定目的的控制者。如果个人数据流向供应商，需要 DPA，分类仍适用于目的。
 
-**Inferred data and derived attributes count.**
-If the activity generates inferred data about individuals (e.g., a behavioral score,
-a predicted preference), treat the inferred attribute as personal data for triage
-purposes. Don't let "we're just computing a score" obscure what the score represents.
+**推断数据和派生属性计数。**
+如果活动生成关于个人的推断数据（例如，行为评分、预测偏好），将推断属性视为分类目的的个人数据。不要让"我们只是在计算分数"掩盖分数代表什么。
 
-## Close with the next-steps decision tree
+## 以下一步决策树结束
 
-End with the next-steps decision tree per CLAUDE.md `## Outputs`. Customize the options to what this skill just produced — the five default branches (draft the X, escalate, get more facts, watch and wait, something else) are a starting point, not a lock-in. The tree is the output; the lawyer picks.
+根据 CLAUDE.md `## Outputs` 以下一步决策树结束。根据此 skill 刚刚生成的内容自定义选项——五个默认分支（起草 X、升级、获取更多事实、观察等待、其他）是起点，而非锁定。树就是输出；律师选择。

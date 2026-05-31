@@ -1,39 +1,45 @@
 ---
 name: review-proposals
 description: >
-  Review and approve (or reject) pending playbook update proposals from the
-  playbook-monitor agent and apply approved changes to the practice profile. Use
-  when the playbook-monitor agent has surfaced proposals, when the user says
-  "review playbook proposals", "what playbook updates are pending", or wants to
-  step through deviation-driven playbook changes.
-argument-hint: "[no arguments needed — works from the pending proposals file]"
+  审查并批准（或拒绝）playbook-monitor agent 的待定剧本更新提案，
+  并将批准的变更应用到执业档案。当 playbook-monitor agent 已提出提案，
+  或用户说"审查剧本提案"、"有什么剧本更新待处理"，或希望逐步处理
+  偏差驱动的剧本变更时使用。
+argument-hint: "[无需参数——从待处理提案文件工作]"
 ---
+
+<!--
+This file is a Chinese translation of the original by Anthropic PBC.
+Original: https://github.com/anthropics/claude-for-legal
+Licensed under Apache License 2.0
+-->
+
 
 # /review-proposals
 
-Steps through pending playbook update proposals from the monitor agent and applies approved changes to `~/.claude/plugins/config/claude-for-legal/commercial-legal/CLAUDE.md`.
+逐步处理 monitor agent 的待定剧本更新提案，并将批准的变更应用到 `~/.claude/plugins/config/claude-for-legal/commercial-legal/CLAUDE.md`。
 
-## Instructions
+## 说明
 
-1. **Load the playbook-monitor agent** and run Step 5 (review and approval flow).
+1. **加载 playbook-monitor agent** 并运行步骤 5（审查和批准流程）。
 
-2. **If no proposals file exists** or it is empty: respond *"No pending proposals. Playbook is up to date."* Do not proceed further.
+2. **如果没有提案文件存在**或为空：回复 *"没有待处理提案。剧本已是最新。"* 不要继续。
 
-3. **Present proposals one at a time.** For each, show the full proposal block and offer four options: Accept, Reject, Edit, Defer.
+3. **逐一展示提案。** 对每个提案，显示完整的提案块并提供四个选项：接受、拒绝、编辑、推迟。
 
-4. **For Accept or Edit:** show the exact diff to `~/.claude/plugins/config/claude-for-legal/commercial-legal/CLAUDE.md` before writing. Only apply after the attorney explicitly confirms.
+4. **对于接受或编辑：** 在写入之前显示对 `~/.claude/plugins/config/claude-for-legal/commercial-legal/CLAUDE.md` 的精确差异。仅在律师明确确认后应用。
 
-5. **For Reject or Defer:** log the decision. Do not modify `~/.claude/plugins/config/claude-for-legal/commercial-legal/CLAUDE.md`.
+5. **对于拒绝或推迟：** 记录决定。不要修改 `~/.claude/plugins/config/claude-for-legal/commercial-legal/CLAUDE.md`。
 
-6. **After all proposals are resolved:** show a summary of what changed, then archive the proposals file.
+6. **所有提案解决后：** 显示变更摘要，然后归档提案文件。
 
-## Examples
-
-```
-/commercial-legal:review-proposals
-```
+## 示例
 
 ```
 /commercial-legal:review-proposals
-(runs automatically after playbook-monitor notifies you)
+```
+
+```
+/commercial-legal:review-proposals
+（在 playbook-monitor 通知你后自动运行）
 ```

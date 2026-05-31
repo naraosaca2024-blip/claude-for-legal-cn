@@ -1,102 +1,67 @@
 ---
 name: customize
 description: >
-  Guided customization of your litigation practice profile — change one thing
-  without re-running the whole cold-start interview. Adjust practice role,
-  side (plaintiff / defense / mixed), risk calibration, landscape, house
-  style, escalation contacts, severity vocabulary, or matter workspace
-  paths. Use when the user says "change my [thing]", "update my profile",
-  "edit my config", or "customize".
-argument-hint: "[section name, or describe what you want to change]"
+  引导式自定义您的诉讼执业档案——无需重新运行整个冷启动访谈即可更改一项。调整执业角色、方（原告/被告/混合）、风险校准、环境、内部风格、升级联系人、严重性词汇或事项工作区路径。当用户说"change my [thing]"、"update my profile"、"edit my config"或"customize"时使用。
+argument-hint: "[章节名称，或描述您想要更改的内容]"
 ---
+
+<!--
+This file is a Chinese translation of the original by Anthropic PBC.
+Original: https://github.com/anthropics/claude-for-legal
+Licensed under Apache License 2.0
+-->
+
 
 # /customize
 
-## When this runs
+## 何时运行
 
-The user typed `/litigation-legal:customize`. They want to change something
-in their litigation profile — a risk calibration, a house style rule, an
-escalation contact, a landscape note — without re-running the whole
-cold-start interview and without hand-editing YAML.
+用户输入了 `/litigation-legal:customize`。他们想要更改其诉讼档案中的某些内容——风险校准、内部风格规则、升级联系人、环境注释——而无需重新运行整个冷启动访谈，也无需手动编辑 YAML。
 
-## What to do
+## 要做什么
 
-1. **Read the config.** Read
+1. **阅读配置。**阅读
    `~/.claude/plugins/config/claude-for-legal/litigation-legal/CLAUDE.md`
-   (and `~/.claude/plugins/config/claude-for-legal/company-profile.md` one
-   level up). If the plugin config does not exist or still contains
-   `[PLACEHOLDER]` values, say:
+  （以及上一层的 `~/.claude/plugins/config/claude-for-legal/company-profile.md`）。如果插件配置不存在或仍包含 `[PLACEHOLDER]` 值，请说：
 
-   > You haven't run setup yet. Run `/litigation-legal:cold-start-interview`
-   > first — customize is for adjusting a profile you already have.
+   > 您尚未运行设置。首先运行 `/litigation-legal:cold-start-interview`——customize 用于调整您已经拥有的档案。
 
-2. **Show the customizable map.** List what's in the profile, grouped, with a
-   one-line summary of the current value:
+2. **显示可自定义地图。**列出档案中的内容，分组显示，并附带当前值的一行摘要：
 
-   - **Company / who you are** — name, industry, jurisdictions, stage, practice
-     setting *(shared across all 12 plugins — changes flow through
-     `company-profile.md`)*
-   - **Practice role** — in-house counsel / outside counsel / solo / clinic
-   - **Side** — plaintiff / defense / mixed, and any posture nuances (class
-     action defense, regulatory enforcement defense, commercial
-     plaintiff, etc.)
-   - **Risk calibration** — what counts as high / medium / low risk on an
-     inbound demand, subpoena, or new matter; escalation triggers
-   - **Landscape** — regular adversaries, friendly and unfriendly venues,
-     judges to know, standing OC relationships
-   - **House style** — brief style, declaration format, demand letter
-     template, deposition outline structure, legal hold template
-   - **Severity vocabulary map** — how you translate severity labels across
-     client / internal / court-facing outputs
-   - **People** — matter leads, in-house team, outside counsel by matter
-     type, escalation chain
-   - **Workflow** — matter workspaces, portfolio log, OC status cadence,
-     legal hold refresh cadence
-   - **Integrations** — document storage / e-filing / calendar / Slack
-     status, fallbacks
+   - **公司/你是谁**——名称、行业、司法管辖区、阶段、执业设置 *(在所有 12 个插件中共享——更改通过 `company-profile.md` 传递)*
+   - **Practice role**——内部法律顾问 / 外部法律顾问 / 独立 / 诊所
+   - **立场**——原告 / 被告 / 混合，以及任何姿态细微差别（集体诉讼被告、监管执法被告、商业原告等）
+   - **风险校准**——什么算作传入需求、传票或新事项的高/中/低风险；升级触发器
+   - **业务格局**——经常对手、友好和不友好场所、需要了解的法官、现有的外部律师关系
+   - **内部风格**——简报风格、声明格式、要求信模板、证词大纲结构、法律保留模板
+   - **严重性词汇映射**——您如何在客户/内部/面向法院的输出中转换严重性标签
+   - **人员**——事项负责人、内部团队、按事项类型的外部法律顾问、升级链
+   - **工作流**——事项工作区、投资组合日志、外部律师状态节奏、法律保留刷新节奏
+   - **集成**——文档存储 / 电子归档 / 日历 / Slack 状态、备用方案
 
-3. **Ask what they want to change.**
+3. **询问他们想要更改什么。**
 
-   > What would you like to adjust? Pick a section, or describe the change in
-   > your own words.
+   > 您想要调整什么？选择一个章节，或用自己的话描述更改。
 
-4. **Make the change.** Show the current value, ask for the new value, explain
-   what changes downstream, confirm, write it to the config.
+4. **进行更改。** 显示当前值，询问新值，解释下游的变化，确认，写入配置。
 
-   Examples:
-   - *Side mixed → defense-only:* "`/matter-intake` will stop asking the
-     plaintiff-side questions. `/demand-draft` will still work for
-     defense-side pre-suit demands but the starting frame will be different."
-   - *Risk calibration tightening high-risk threshold:* "More inbound
-     demands and subpoenas will route through `/matter-briefing` and
-     `/oc-status`."
-   - *New standing OC for IP matters:* "`/oc-status` will include this firm
-     in weekly sweeps for IP-tagged matters."
+   示例：
+   - *立场从混合变为仅被告：* "`/matter-intake` 将停止询问原告方问题。`/demand-draft` 仍可适用于被告方诉讼前要求，但起始框架将不同。"
+   - *风险校准收紧高风险阈值：* "更多传入需求和传票将通过 `/matter-briefing` 和 `/oc-status` 路由。"
+   - *新增知识产权事项的常设外部律师：* "`/oc-status` 将在 IP 标记事项的每周扫描中包括此律所。"
 
-5. **For shared-profile changes** (company name, industry, jurisdictions,
-   practice setting, stage): write to
-   `~/.claude/plugins/config/claude-for-legal/company-profile.md` and note:
+5. **对于共享档案更改**（公司名称、行业、司法管辖区、执业设置、阶段）：写入
+   `~/.claude/plugins/config/claude-for-legal/company-profile.md` 并注意：
 
-   > This change affects all 12 plugins — any plugin that reads your
-   > jurisdiction footprint now sees [new value].
+   > 此更改影响所有 12 个插件——任何读取您司法管辖范围的插件现在都会看到 [新值]。
 
-6. **Close.**
+6. **关闭。**
 
-   > Done. Your next output will reflect the change. Anything else? You can
-   > run `/litigation-legal:customize` anytime.
+   > 完成。您的下一个输出将反映此更改。还有其他吗？您可以随时运行 `/litigation-legal:customize`。
 
-## Guardrails
+## 护栏
 
-- **Never delete a section.** If the user wants to "remove" a matter type
-  from scope, offer to mark it `[Not currently handled]` and explain what
-  intake routing changes.
-- **Flag internal inconsistency.** If the change would make the profile
-  inconsistent (e.g., plaintiff-only side + defense-only OC roster; or
-  "high volume" portfolio + no matter workspaces configured), flag the
-  tension.
-- **Flag guardrail degradation.** The FRE 408 / privilege gate on
-  `/demand-draft`, the privilege header on matter outputs, source
-  attribution tags, and `[verify]` tags on cited authorities are load-
-  bearing — do not remove. The `[review]` flag and the "do not file
-  without attorney review" framing are load-bearing.
-- **One change at a time.** Don't re-ask the whole interview.
+- **永不删除章节。**如果用户想要从范围中"删除"事项类型，提供将其标记为 `[Not currently handled]` 并说明摄入路由的变化。
+- **标记内部不一致。** 如果更改会使档案不一致（例如，仅原告方 + 仅被告方外部律师名单；或"大量"投资组合 + 未配置事项工作区），请标记紧张关系。
+- **标记护栏降级。** `/demand-draft` 上的 FRE 408 / 特权关卡、事项输出的特权标题、来源归因标签以及引用权限上的 `[verify]` 标签是承重的——不要删除。`[review]` 标记和"未经律师审查不得提交"框架是承重的。
+- **一次更改一项。** 不要重新询问整个访谈。
